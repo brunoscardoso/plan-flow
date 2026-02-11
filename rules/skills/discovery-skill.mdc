@@ -1,0 +1,295 @@
+---
+description: "Include when /discovery-plan is invoked or requirements gathering before implementation is needed"
+alwaysApply: false
+---
+
+# Discovery Skill
+
+## Purpose
+
+Perform a comprehensive **requirements gathering and documentation** process that reads referenced documents, asks clarifying questions, and produces a structured discovery document.
+
+This skill **only produces a markdown file** in `flow/discovery/`. It does NOT:
+
+- Write any code
+- Modify any source files
+- Create implementation plans
+- Execute any implementation
+
+---
+
+## Restrictions - DISCOVERY ONLY
+
+This skill is **strictly for gathering and documenting requirements**. The process:
+
+1. **Reads** all referenced documents and contracts
+2. **Asks** clarifying questions via Interactive Questions Tool
+3. **Documents** requirements (FR, NFR, Constraints)
+4. **Identifies** technical considerations (high-level only)
+5. **Proposes** approach (conceptual, no code)
+6. **Generates** a discovery markdown file
+
+**No code, no implementation, no source file modifications.**
+
+### NEVER Do These Actions
+
+| Forbidden Action                       | Reason                                    |
+| -------------------------------------- | ----------------------------------------- |
+| Create/edit source code files          | Discovery is requirements gathering only  |
+| Write implementation code in responses | No code during discovery                  |
+| Create implementation plans            | Plans come after discovery                |
+| Modify configuration files             | No codebase changes                       |
+| Run build or test commands             | No execution commands                     |
+| Create files outside `flow/discovery/` | Only write discovery documents            |
+
+### Allowed Actions
+
+| Allowed Action                         | Purpose                              |
+| -------------------------------------- | ------------------------------------ |
+| Read any project file                  | Understand existing implementation   |
+| Read referenced documents              | Extract requirements and constraints |
+| Search codebase (grep, glob, semantic) | Find existing patterns               |
+| Use Interactive Questions Tool         | Gather requirements from user        |
+| Write to `flow/discovery/`             | Save discovery document              |
+| Read project rule files                | Understand patterns to follow        |
+
+> **Important**: The ONLY writable location is `flow/discovery/`. No source code, configuration files, or any other project files should be modified.
+
+---
+
+## Inputs
+
+| Input                | Required | Description                                           |
+| -------------------- | -------- | ----------------------------------------------------- |
+| `feature_name`       | Yes      | Name of the feature or topic to explore               |
+| `context`            | Optional | Why this discovery is needed                          |
+| `referenced_docs`    | Optional | List of documents to review (@mentions, file paths)   |
+| `known_requirements` | Optional | Any requirements already known                        |
+
+---
+
+## Workflow
+
+### Step 1: Read All Referenced Documents
+
+**BEFORE asking detailed questions**, read every referenced document.
+
+**Actions**:
+
+1. Identify references (look for @mentions, file paths, URLs)
+2. Read each file using the Read tool
+3. Extract key information (requirements, constraints, contracts)
+4. Summarize findings for each source
+
+**Document Analysis Format**:
+
+```markdown
+## Referenced Documents Analysis
+
+### `flow/contracts/api-contract.md`
+
+**Key Findings**:
+- [Key point 1]
+- [Key point 2]
+
+**Questions Raised**:
+- [Gap or unclear aspect]
+```
+
+**Important**: NEVER read or reference files in `flow/archive/` - these are outdated documents.
+
+---
+
+### Step 2: Ask Clarifying Questions
+
+Ask questions about gaps identified in documents and unclear requirements.
+
+**Question Categories**:
+
+| Category   | Focus                              |
+| ---------- | ---------------------------------- |
+| Functional | What the feature must do           |
+| NFR        | Performance, security, scalability |
+| Technical  | Architecture, dependencies         |
+| UI/UX      | User interface and experience      |
+
+**Use Interactive Questions Tool**:
+
+Follow `.cursor/rules/tools/interactive-questions-tool.mdc`:
+
+1. Call `SwitchMode` tool to enter Plan mode
+2. Call `AskQuestion` tool for each question (2-6 options, A/B/C/D format)
+3. Wait for responses
+4. Call `SwitchMode` tool to return to Agent mode
+
+**Skip Interactive Questions If**:
+
+- All questions answered in chat already
+- User confirmed all assumptions
+- No blocked or open questions remain
+
+---
+
+### Step 3: Track Question Status
+
+Maintain a question tracking table:
+
+```markdown
+## Open Questions
+
+| #   | Category   | Question                   | Status   | Answer            |
+| --- | ---------- | -------------------------- | -------- | ----------------- |
+| 1   | Functional | Max steps per workflow?    | Answered | 20 steps maximum  |
+| 2   | Technical  | Use existing store or new? | Open     | -                 |
+| 3   | NFR        | Required response time?    | Assumed  | <500ms (validate) |
+```
+
+**Status Legend**:
+
+- **Open**: Awaiting answer
+- **Answered**: Response received
+- **Assumed**: Made assumption (needs validation)
+- **Blocked**: Cannot proceed without answer
+
+---
+
+### Step 4: Document Requirements
+
+Categorize requirements as they are gathered:
+
+```markdown
+## Requirements Gathered
+
+### Functional Requirements
+- [FR-1]: [Description] (Source: [document or user])
+
+### Non-Functional Requirements
+- [NFR-1]: [Description]
+
+### Constraints
+- [C-1]: [Description]
+```
+
+---
+
+### Step 5: Identify Technical Considerations
+
+Document high-level technical insights (NO implementation code):
+
+```markdown
+## Technical Considerations
+
+### Architecture Fit
+- [How this fits into existing system]
+
+### Dependencies
+- [What this relies on]
+
+### Patterns to Apply
+- [Relevant patterns from cursor rules]
+
+### Challenges Identified
+- [Potential difficulties]
+```
+
+---
+
+### Step 6: Propose High-Level Approach
+
+Suggest an approach based on findings (NO implementation code):
+
+```markdown
+## Proposed Approach
+
+Based on the requirements gathered, I recommend:
+
+1. [High-level approach point 1]
+2. [High-level approach point 2]
+
+### Alternative Approaches Considered
+
+| Approach | Pros | Cons | Recommendation |
+| -------- | ---- | ---- | -------------- |
+| [A]      | ...  | ...  | Yes/No         |
+```
+
+---
+
+### Step 7: Document Risks and Unknowns
+
+Capture risks discovered:
+
+```markdown
+## Risks and Unknowns
+
+### Risks
+
+| Risk | Impact | Likelihood | Mitigation |
+| ---- | ------ | ---------- | ---------- |
+| ...  | ...    | ...        | ...        |
+
+### Unknowns (Require Further Investigation)
+- [ ] [Unknown item]
+```
+
+---
+
+### Step 8: Generate Discovery Document
+
+Create the discovery markdown file:
+
+**Location**: `flow/discovery/discovery_<feature_name>_v<version>.md`
+
+**Use Template**: See `.cursor/rules/patterns/discovery-templates.mdc`
+
+**Required Sections**:
+
+1. Context
+2. Referenced Documents
+3. Requirements Gathered (FR, NFR, Constraints)
+4. Open Questions (all answered)
+5. Technical Considerations
+6. Proposed Approach
+7. Risks and Unknowns
+8. Next Steps
+
+---
+
+## Output Format
+
+The discovery document should follow the template in `.cursor/rules/patterns/discovery-templates.mdc`.
+
+**Naming Convention**: `discovery_<feature_name>_v<version>.md`
+
+**Examples**:
+- `discovery_workflow_editor_v1.md`
+- `discovery_user_authentication_v1.md`
+
+---
+
+## Validation Checklist
+
+Before completing discovery, verify:
+
+- [ ] All referenced documents have been read
+- [ ] Document is saved in `flow/discovery/` folder
+- [ ] File uses correct naming convention
+- [ ] Open questions table has no "Blocked" status
+- [ ] Requirements are categorized (FR, NFR, Constraints)
+- [ ] Technical considerations are documented
+- [ ] Risks and unknowns are identified
+- [ ] Proposed approach is documented (high-level only)
+- [ ] Next steps are defined (pointing to `/create-plan`)
+- [ ] **NO implementation code is included**
+- [ ] **NO source files were created or modified**
+
+---
+
+## Related Files
+
+| File                                              | Purpose                           |
+| ------------------------------------------------- | --------------------------------- |
+| `.cursor/rules/patterns/discovery-patterns.mdc`   | Rules and patterns for discovery  |
+| `.cursor/rules/patterns/discovery-templates.mdc`  | Document templates                |
+| `.cursor/rules/tools/interactive-questions-tool.mdc` | Interactive Questions UI workflow |
+| `flow/discovery/`                                 | Output folder for discovery docs  |

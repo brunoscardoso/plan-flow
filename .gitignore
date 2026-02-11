@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.plan.flow.env
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Plan-Flow development flow artifacts
+flow/archive/
+flow/contracts/
+flow/discovery/
+flow/plans/
+flow/references/
+flow/reviewed-code/
+flow/reviewed-pr/
+
+# Local settings (keep template)
+.claude/settings.local.json

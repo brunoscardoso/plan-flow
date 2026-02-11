@@ -1,0 +1,99 @@
+---
+description: "Summary index for core rules - load this to see available references"
+alwaysApply: false
+---
+
+# Core Rules Index
+
+## Overview
+
+Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
+
+**Total Files**: 4 files, ~833 lines
+**Reference Codes**: COR-AP-1 through COR-LDG-2
+
+---
+
+## Reference Codes
+
+### Allowed Patterns (`allowed-patterns.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AP-1 | Example patterns (Naming, SRP, Errors, Types, Organization) | allowed-patterns.mdc | 45-152 |
+| COR-AP-2 | Template for adding new patterns | allowed-patterns.mdc | 167-186 |
+
+### Forbidden Patterns (`forbidden-patterns.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-FP-1 | Example anti-patterns (Magic Numbers, Silent Errors, Ternaries, Mutation, Async) | forbidden-patterns.mdc | 41-230 |
+| COR-FP-2 | Template for adding new anti-patterns | forbidden-patterns.mdc | 245-264 |
+
+### Complexity Scoring (`complexity-scoring.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-CS-1 | Complexity scale table (0-10 levels) | complexity-scoring.mdc | 12-21 |
+| COR-CS-2 | Scoring criteria modifiers (+/- points) | complexity-scoring.mdc | 23-51 |
+| COR-CS-3 | Execution strategy and aggregation rules | complexity-scoring.mdc | 53-70 |
+| COR-CS-4 | Common complexity patterns table | complexity-scoring.mdc | 168-185 |
+| COR-CS-5 | Real-world scoring examples | complexity-scoring.mdc | 187-236 |
+
+### Project Ledger (`project-ledger.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-LDG-1 | Ledger behavior, entry format, and sections | project-ledger.mdc | 10-110 |
+| COR-LDG-2 | Maintenance rules and plan-flow integration | project-ledger.mdc | 112-155 |
+
+---
+
+## When to Expand
+
+| Code | Expand When |
+|------|-------------|
+| COR-AP-1 | Need to see example good patterns for code generation |
+| COR-AP-2 | Adding a new allowed pattern to the project |
+| COR-FP-1 | Need to see anti-patterns to avoid |
+| COR-FP-2 | Adding a new forbidden pattern to the project |
+| COR-CS-1 | Need complexity level definitions |
+| COR-CS-2 | Calculating complexity score for a phase |
+| COR-CS-3 | Determining execution strategy for plan phases |
+| COR-CS-4 | Quick lookup of typical complexity scores |
+| COR-CS-5 | Need detailed scoring examples |
+| COR-LDG-1 | Need ledger behavior and entry guidelines |
+| COR-LDG-2 | Need ledger maintenance and integration rules |
+
+---
+
+## Quick Reference
+
+### Allowed Patterns Summary
+- **Descriptive Naming**: Clear, self-documenting names
+- **Single Responsibility**: One function = one purpose
+- **Error Handling**: Explicit errors with logging
+- **Type Safety**: Leverage TypeScript types
+- **Code Organization**: Consistent folder structure
+
+### Forbidden Patterns Summary
+- **No Magic Numbers**: Use named constants
+- **No Silent Errors**: Always log and handle
+- **No Nested Ternaries**: Use if/else or switch
+- **No Parameter Mutation**: Return new objects/arrays
+- **No Mixed Async**: Use async/await consistently
+
+### Complexity Levels
+- **0-2 Trivial**: Simple, mechanical changes
+- **3-4 Low**: Straightforward implementation
+- **5-6 Medium**: Moderate complexity, some decisions
+- **7-8 High**: Complex, multiple concerns
+- **9-10 Very High**: Requires careful attention
+
+---
+
+## Notes
+
+- `allowed-patterns.mdc` and `forbidden-patterns.mdc` have `alwaysApply: true` - they are loaded automatically by Cursor
+- `project-ledger.mdc` has `alwaysApply: true` - maintains persistent project memory
+- `complexity-scoring.mdc` is loaded on-demand when needed for planning

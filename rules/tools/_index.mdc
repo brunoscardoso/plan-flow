@@ -1,0 +1,114 @@
+---
+description: "Index of tool documentation with reference codes for on-demand expansion"
+alwaysApply: false
+---
+
+# Tools Index
+
+This index provides reference codes for all tool documentation. Load specific sections on-demand using the line ranges.
+
+---
+
+## Overview
+
+| File | Lines | Description |
+|------|-------|-------------|
+| auth-pr-tool.mdc | 363 | PR authentication for GitHub/Azure DevOps |
+| interactive-questions-tool.mdc | 338 | Interactive questions via Plan mode |
+| jest-testing-tool.mdc | 97 | Jest test commands for JS/TS |
+| plan-mode-tool.mdc | 230 | Plan mode switching for collaborative execution |
+| pytest-testing-tool.mdc | 145 | Pytest commands for Python |
+| reference-expansion-tool.mdc | 219 | Reference code expansion system |
+
+---
+
+## Reference Codes
+
+### TLS-AUTH: PR Authentication Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-AUTH-1 | 1-41 | Purpose, usage, and environment configuration |
+| TLS-AUTH-2 | 42-142 | Authentication workflow (detect, load, auth, verify, handle errors) |
+| TLS-AUTH-3 | 144-198 | Authentication methods (GitHub CLI, Azure CLI, curl) |
+| TLS-AUTH-4 | 199-224 | Allowed commands for GitHub and Azure DevOps |
+| TLS-AUTH-5 | 225-250 | Security notes and required scopes |
+| TLS-AUTH-6 | 251-363 | Usage examples and error handling |
+
+### TLS-IQ: Interactive Questions Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-IQ-1 | 1-38 | Purpose, usage, and critical instructions |
+| TLS-IQ-2 | 40-82 | Step 1: Switch to Plan Mode |
+| TLS-IQ-3 | 84-146 | Step 2: Ask Questions using AskQuestion tool |
+| TLS-IQ-4 | 148-195 | Steps 3-5: Wait, Process, Return to Agent mode |
+| TLS-IQ-5 | 197-228 | Complete workflow example |
+| TLS-IQ-6 | 230-288 | When to use and question format guidelines |
+| TLS-IQ-7 | 290-338 | Error handling and related tools |
+
+### TLS-JEST: Jest Testing Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-JEST-1 | 1-48 | Purpose, usage, and running tests |
+| TLS-JEST-2 | 50-67 | Coverage commands |
+| TLS-JEST-3 | 69-82 | Debugging tests |
+| TLS-JEST-4 | 84-97 | CI/CD commands |
+
+### TLS-PLN: Plan Mode Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-PLN-1 | 1-68 | Purpose, usage, and how to switch |
+| TLS-PLN-2 | 70-127 | Plan mode workflow (steps 1-5) |
+| TLS-PLN-3 | 129-145 | When to use Plan mode |
+| TLS-PLN-4 | 147-157 | Integration with Execute Plan command |
+| TLS-PLN-5 | 159-192 | Benefits and error handling |
+| TLS-PLN-6 | 194-230 | Complete workflow example |
+
+### TLS-PYTEST: Pytest Testing Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-PYTEST-1 | 1-55 | Purpose, usage, and running tests |
+| TLS-PYTEST-2 | 57-76 | Coverage commands |
+| TLS-PYTEST-3 | 78-99 | Debugging tests |
+| TLS-PYTEST-4 | 101-124 | CI/CD commands |
+| TLS-PYTEST-5 | 126-145 | Test selection |
+
+### TLS-REF: Reference Expansion Tool
+
+| Code | Lines | Description |
+|------|-------|-------------|
+| TLS-REF-1 | 1-38 | Purpose and reference code system |
+| TLS-REF-2 | 40-74 | Expansion workflow (load, identify, expand, use) |
+| TLS-REF-3 | 76-97 | When to expand vs when to skip |
+| TLS-REF-4 | 99-140 | Examples (discovery and execute plan) |
+| TLS-REF-5 | 142-170 | Maintenance guidelines |
+| TLS-REF-6 | 172-219 | Index locations and troubleshooting |
+
+---
+
+## When to Expand
+
+| Task | Codes to Expand |
+|------|-----------------|
+| Authenticating for PR review | TLS-AUTH-2, TLS-AUTH-3 |
+| Asking interactive questions | TLS-IQ-1, TLS-IQ-2, TLS-IQ-3 |
+| Running Jest tests | TLS-JEST-1, TLS-JEST-2 |
+| Running pytest tests | TLS-PYTEST-1, TLS-PYTEST-2 |
+| Switching to Plan mode | TLS-PLN-1, TLS-PLN-2 |
+| Understanding reference system | TLS-REF-1, TLS-REF-2 |
+| Maintaining index files | TLS-REF-5 |
+
+---
+
+## Quick Reference
+
+- **Need to authenticate?** Use TLS-AUTH-* codes
+- **Need to ask questions?** Use TLS-IQ-* codes
+- **Need to run JS/TS tests?** Use TLS-JEST-* codes
+- **Need to run Python tests?** Use TLS-PYTEST-* codes
+- **Need to switch modes?** Use TLS-PLN-* codes
+- **Need to understand this system?** Use TLS-REF-* codes

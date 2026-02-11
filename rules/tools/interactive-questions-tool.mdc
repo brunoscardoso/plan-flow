@@ -1,0 +1,337 @@
+---
+description: "Include when multiple-choice questions need to be asked via Plan mode's Questions UI"
+alwaysApply: false
+---
+
+# Interactive Questions Tool
+
+## Purpose
+
+Provides a standardized way to ask interactive questions using Plan mode's Questions UI. This tool automatically switches to Plan mode, presents questions via the Questions UI, waits for user responses, and switches back to Agent mode.
+
+## Usage
+
+This tool is used by:
+- Commands that need to gather information from users (e.g., `discovery-plan`, `create-plan`)
+- Skills that require user input before proceeding
+- Any process that needs interactive question-answer sessions
+
+**Example**: Used by the `discovery-plan` command to ask clarifying questions about requirements.
+
+---
+
+## How to Use Interactive Questions
+
+**⚠️ CRITICAL INSTRUCTION**: You must **ACTUALLY CALL** the tools using the tool calling mechanism. Do NOT write text describing what you would do. Do NOT say "Switching to Plan mode" or "I will switch". **ACTUALLY INVOKE** the `SwitchMode` and `AskQuestion` tools. If you cannot call the tools, use the fallback instructions provided.
+
+**MANDATORY WORKFLOW**:
+
+1. **IMMEDIATELY CALL** `SwitchMode` tool to enter Plan mode (auto-switch, no asking) - **ACTUALLY CALL THE TOOL, DO NOT DESCRIBE IT**
+2. **IMMEDIATELY CALL** `AskQuestion` tool for each question - **ACTUALLY CALL THE TOOL, DO NOT DESCRIBE IT**
+3. Wait for responses
+4. **IMMEDIATELY CALL** `SwitchMode` tool to return to Agent mode (auto-switch, no asking) - **ACTUALLY CALL THE TOOL, DO NOT DESCRIBE IT**
+
+**CRITICAL**: You must use the tool calling mechanism to invoke these tools. Do not write text describing what you would do. Actually make the tool calls.
+
+**DO NOT check if tools are available. DO NOT ask permission. DO NOT describe the action. Just call the tools directly.**
+
+---
+
+### Step 1: Automatically Switch to Plan Mode
+
+**MANDATORY - AUTO-SWITCH**: Before asking questions, **IMMEDIATELY CALL** the `SwitchMode` tool to switch to Plan mode. Do not describe switching. Do not say "Switching to Plan mode". **ACTUALLY CALL THE TOOL**. Do not ask the user if they want to switch - just call the tool:
+
+**YOU MUST ACTUALLY CALL THIS TOOL - DO NOT JUST DESCRIBE IT**:
+
+```
+SwitchMode(target_mode_id: "plan", explanation: "Discovery phase: Gathering requirements via interactive questions")
+```
+
+**CRITICAL**: You must use the tool calling mechanism to invoke `SwitchMode`. Do not write text saying you're switching. Actually make the tool call.
+
+**Parameters**:
+- `target_mode_id`: Always `"plan"` for Plan mode
+- `explanation`: Brief description of why switching (include context about what questions will be asked)
+
+**Example Usage**:
+
+```
+// For discovery questions
+SwitchMode(target_mode_id: "plan", explanation: "Discovery phase: Gathering requirements via interactive questions")
+
+// For contract creation questions
+SwitchMode(target_mode_id: "plan", explanation: "Contract creation: Asking clarifying questions about integration scope")
+```
+
+**Fallback (if SwitchMode tool not available)**:
+If the `SwitchMode` tool is not available or the tool call fails, provide clear instructions to the user:
+
+```markdown
+## Switching to Plan Mode
+
+**Action Required**: Please switch to Plan mode to proceed with questions.
+
+**Context**: [Context description]
+
+Once in Plan mode, I will present questions via the Questions UI.
+```
+
+**After switching to Plan mode (or providing instructions), proceed immediately to Step 2.**
+
+---
+
+### Step 2: Ask Questions Using AskQuestion Tool
+
+**MANDATORY**: After entering Plan mode, **IMMEDIATELY CALL** the `AskQuestion` tool for each question. Do NOT check if it's available. Do NOT use text format if the tool is available. **ACTUALLY CALL THE TOOL** - do not just describe asking questions. Just call the tool directly.
+
+**Question Topics**:
+- **Functional Requirements**: What the feature must do
+- **Non-Functional Requirements**: Performance, security, scalability
+- **Technical Questions**: Architecture, dependencies, patterns
+- **UI/UX Questions**: User experience, design considerations
+
+**Question Format**:
+
+```
+AskQuestion({
+  question: "What is the primary user action for this feature?",
+  options: [
+    "A. Create new items",
+    "B. View existing items",
+    "C. Edit existing items",
+    "D. Delete items",
+    "E. All of the above"
+  ],
+  explanation: "Understanding the core functionality helps scope the implementation"
+})
+```
+
+**Parameters**:
+- `question`: The question text (clear and specific)
+- `options`: Array of multiple-choice options (2-6 options recommended)
+- `explanation`: Optional context for why this question is being asked
+
+**Best Practices**:
+- Use 2-6 options per question
+- Make options mutually exclusive when possible
+- Use clear labels (A, B, C, etc.)
+- Keep questions focused on one topic
+- Provide context in the explanation
+
+**Important**:
+- Ask all questions in one Plan mode session
+- Wait for each response before asking the next question
+- Use 2-6 options per question
+- Label options with A, B, C, D, E, F
+
+**Fallback (if AskQuestion tool not available)**:
+If the `AskQuestion` tool is not available, use this text format:
+
+```markdown
+## Questions
+
+1. What is the primary user action for this feature?
+   A. Create new items
+   B. View existing items
+   C. Edit existing items
+   D. Delete items
+   E. All of the above
+
+2. Should this feature support real-time updates?
+   A. Yes, real-time updates required
+   B. No, periodic refresh is sufficient
+```
+
+**Wait for user responses before proceeding to the next question.**
+
+---
+
+### Step 3: Wait for All Responses
+
+**DO NOT** continue until the user has answered all questions via the Questions UI (or text responses if using fallback).
+
+**If user doesn't respond**:
+1. Wait a reasonable amount of time
+2. Gently remind about pending questions
+3. Offer to continue with assumptions (clearly marked)
+4. Only proceed if user explicitly agrees to assumptions
+
+---
+
+### Step 4: Process Responses
+
+After receiving all responses:
+
+1. **Extract the selected options** (A, B, C, etc.) from each question
+2. **Map them to corresponding answers** (e.g., "A" → "Create new items")
+3. **Document the answers** appropriately
+4. **Use the answers** to inform next steps
+
+---
+
+### Step 5: Automatically Switch Back to Agent Mode
+
+**MANDATORY - AUTO-SWITCH**: After all questions are answered, **IMMEDIATELY CALL** the `SwitchMode` tool to switch back to Agent mode. Do not describe switching. Do not say "Switching back to Agent mode". **ACTUALLY CALL THE TOOL**. Do not ask the user if they want to switch - just call the tool:
+
+**YOU MUST ACTUALLY CALL THIS TOOL - DO NOT JUST DESCRIBE IT**:
+
+```
+SwitchMode(target_mode_id: "agent", explanation: "Discovery questions complete, returning to Agent mode")
+```
+
+**CRITICAL**: You must use the tool calling mechanism to invoke `SwitchMode`. Do not write text saying you're switching. Actually make the tool call.
+
+**Fallback (if SwitchMode tool not available)**:
+If the `SwitchMode` tool is not available or the tool call fails, provide clear instructions:
+
+```markdown
+## Returning to Agent Mode
+
+**Action Required**: Please switch back to Agent mode to continue.
+
+All questions have been answered. I will now proceed with the next steps.
+```
+
+---
+
+## Complete Workflow Example
+
+```markdown
+## Gathering Requirements via Interactive Questions
+
+**Step 1**: [SwitchMode tool called - actually invoked, not described]
+
+**Step 2**: [AskQuestion tool called for Question 1 - actually invoked]
+**Question 1**: What is the primary user action?
+- A. Create new items
+- B. View existing items
+- C. Edit existing items
+- D. Delete items
+
+[User selects: B]
+
+[AskQuestion tool called for Question 2 - actually invoked]
+**Question 2**: Should this feature support real-time updates?
+- A. Yes, real-time updates required
+- B. No, periodic refresh is sufficient
+
+[User selects: A]
+
+**Step 3**: All questions answered. [SwitchMode tool called to return to Agent mode - actually invoked]
+
+**Step 4**: Processing responses...
+- Primary action: View existing items
+- Real-time updates: Required
+
+**Step 5**: Continuing with next steps based on answers...
+```
+
+---
+
+## When to Use Interactive Questions
+
+### Use For:
+
+1. **Discovery Phase**: Gathering requirements and clarifying unknowns
+2. **Planning Phase**: Understanding scope, priorities, and constraints
+3. **Critical Decisions**: When user input is required before proceeding
+4. **Multiple Related Questions**: When you need to ask several questions in sequence
+5. **Complex Choices**: When options need to be clearly presented
+
+### Don't Use For:
+
+1. **Simple Yes/No Questions**: Use regular chat for these
+2. **Single Simple Questions**: Regular chat is faster
+3. **Information Already Available**: Don't ask if you can find the answer
+4. **Read-Only Operations**: No questions needed for reading/searching
+
+---
+
+## Question Format Guidelines
+
+### Good Question Format
+
+```
+AskQuestion({
+  question: "Where should the new button be placed?",
+  options: [
+    "A. Before 'Library' (per Figma order)",
+    "B. After 'Library'",
+    "C. In a separate toolbar",
+    "D. As a dropdown option"
+  ],
+  explanation: "Button placement affects user workflow and visual hierarchy"
+})
+```
+
+### Bad Question Format
+
+```
+// ❌ Too vague
+AskQuestion({
+  question: "What do you want?",
+  options: ["A. Yes", "B. No"]
+})
+
+// ❌ Too many options (hard to choose)
+AskQuestion({
+  question: "Choose an option",
+  options: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+})
+
+// ❌ No context
+AskQuestion({
+  question: "Option A or B?",
+  options: ["A", "B"]
+})
+```
+
+---
+
+## Error Handling
+
+### If SwitchMode Tool Fails
+
+If the `SwitchMode` tool is not available or fails:
+
+1. **Inform the user** that manual mode switch is required
+2. **Provide clear instructions** on how to switch
+3. **Wait for confirmation** before proceeding
+4. **Continue with the workflow** once in Plan mode
+
+### If AskQuestion Tool Not Available
+
+If the `AskQuestion` tool is not available:
+
+1. **Fall back to regular chat questions**
+2. **Present questions in a clear format**
+3. **Wait for text responses**
+4. **Process responses as usual**
+
+### If User Doesn't Respond
+
+If the user doesn't respond to questions:
+
+1. Wait a reasonable amount of time
+2. Gently remind about pending questions
+3. Offer to continue with assumptions (clearly marked)
+4. Only proceed if user explicitly agrees to assumptions
+
+---
+
+## Benefits of Interactive Questions
+
+1. **Better UX**: Visual multiple-choice options are easier to answer
+2. **Faster Responses**: Users can click instead of typing
+3. **Clearer Options**: Structured choices reduce ambiguity
+4. **Batch Processing**: Ask multiple questions in one session
+5. **Consistent Format**: Standardized question presentation
+6. **Reduced Errors**: Multiple-choice reduces typos and misunderstandings
+
+---
+
+## Related Tools
+
+- [Plan Mode Tool](.cursor/rules/tools/plan-mode-tool.mdc) - For switching to Plan mode
+- Discovery patterns: `.cursor/rules/patterns/discovery-patterns.mdc`
+- Discovery command: `.cursor/commands/discovery-plan.md`
