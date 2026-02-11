@@ -36,7 +36,7 @@ export function getPackageRoot(): string {
     if (existsSync(pkgPath)) {
       try {
         const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-        if (pkg.name === 'plan-flow-skill' || pkg.name === 'plan-flow') {
+        if (pkg.name === 'planflow-ai') {
           return dir;
         }
       } catch {

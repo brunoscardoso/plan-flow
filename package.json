@@ -1,6 +1,6 @@
 {
-  "name": "plan-flow-skill",
-  "version": "1.0.5",
+  "name": "planflow-ai",
+  "version": "1.0.0",
   "description": "Structured AI-assisted development workflows for discovery, planning, execution, code reviews, and testing",
   "type": "module",
   "main": "dist/cli/index.js",
