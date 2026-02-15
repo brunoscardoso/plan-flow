@@ -61,7 +61,7 @@ SUPPORTED FRAMEWORKS:
   - Pytest (Python)
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /execute-plan   Tests are the last phase of plan execution

@@ -43,14 +43,15 @@ OUTPUT:
 
 WORKFLOW:
   1. Reads all referenced documents
-  2. Asks clarifying questions (via Plan mode Questions UI)
-  3. Documents requirements (FR, NFR, Constraints)
-  4. Proposes high-level approach (no code)
-  5. Creates discovery document for review
-  6. User reviews and refines before /create-plan
+  2. Finds all related code references in codebase
+  3. Asks clarifying questions (via Plan mode Questions UI)
+  4. Documents requirements (FR, NFR, Constraints)
+  5. Proposes high-level approach (no code)
+  6. Creates discovery document for review
+  7. User reviews and refines before /create-plan
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /create-contract   Create contract from API docs first
@@ -125,13 +126,14 @@ Check `flow/discovery/` for existing discovery documents for this feature:
 The skill will:
 
 1. Read all referenced documents
-2. Ask clarifying questions via Interactive Questions Tool
-3. Track question status
-4. Document requirements (FR, NFR, Constraints)
-5. Identify technical considerations
-6. Propose high-level approach
-7. Document risks and unknowns
-8. Generate discovery document
+2. Find all related code references in the codebase
+3. Ask clarifying questions via Interactive Questions Tool
+4. Track question status
+5. Document requirements (FR, NFR, Constraints)
+6. Identify technical considerations
+7. Propose high-level approach
+8. Document risks and unknowns
+9. Generate discovery document
 
 See: `.claude/rules/skills/discovery-skill.md`
 
@@ -366,7 +368,79 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 
 ---
 
-### Step 2: Ask Clarifying Questions
+### Step 2: Find All Related Code References
+
+**BEFORE asking questions**, search the codebase to find **all code locations** related to the feature.
+
+**Why**: Understanding where a feature is currently used prevents incomplete implementations and reveals hidden dependencies.
+
+**Actions**:
+
+1. **Identify key terms** from the user's request (e.g., "user profile", "workflow editor")
+2. **Search for components** using Grep:
+   ```bash
+   Grep: "UserProfile|userProfile|user-profile"
+         --output_mode content --type ts --type tsx
+   ```
+3. **Search for types** using Grep:
+   ```bash
+   Grep: "interface.*User|type.*User"
+         --output_mode content --type ts
+   ```
+4. **Search for API routes** using Glob:
+   ```bash
+   Glob: "**/api/**/user*/**"
+   Glob: "**/api/**/profile*/**"
+   ```
+5. **Search for stores** using Grep:
+   ```bash
+   Grep: "userStore|profileStore|useUser"
+         --output_mode content --type ts
+   ```
+6. **Search for tests** using Glob:
+   ```bash
+   Glob: "**/*user*.test.ts*"
+   Glob: "**/*profile*.test.ts*"
+   ```
+
+**Document Format**:
+
+```markdown
+## Code Context Analysis
+
+### Components Found
+| File | Usage | Line(s) |
+|------|-------|---------|
+| `src/components/UserProfile.tsx` | Main profile component | - |
+| `src/components/Settings/ProfileSettings.tsx` | Settings integration | - |
+
+### API Endpoints Found
+| File | Endpoint | Method |
+|------|----------|--------|
+| `src/app/api/user/profile/route.ts` | `/api/user/profile` | GET, PUT |
+
+### State Management Found
+| File | Purpose |
+|------|---------|
+| `src/stores/userStore.ts` | User profile state |
+
+### Type Definitions Found
+| File | Types |
+|------|-------|
+| `src/types/user.ts` | `User`, `UserProfile` |
+
+**Total References**: X files across Y categories
+
+### Key Patterns Observed
+- [Pattern 1 from existing code]
+- [Pattern 2 from existing code]
+```
+
+**Read Key Files**: After finding references, read 2-3 key files to understand current implementation patterns.
+
+---
+
+### Step 3: Ask Clarifying Questions
 
 Ask questions about gaps identified in documents and unclear requirements.
 
@@ -396,7 +470,7 @@ Follow `.claude/rules/tools/interactive-questions-tool.md`:
 
 ---
 
-### Step 3: Track Question Status
+### Step 4: Track Question Status
 
 Maintain a question tracking table:
 
@@ -419,7 +493,7 @@ Maintain a question tracking table:
 
 ---
 
-### Step 4: Document Requirements
+### Step 5: Document Requirements
 
 Categorize requirements as they are gathered:
 
@@ -438,7 +512,7 @@ Categorize requirements as they are gathered:
 
 ---
 
-### Step 5: Identify Technical Considerations
+### Step 6: Identify Technical Considerations
 
 Document high-level technical insights (NO implementation code):
 
@@ -460,7 +534,7 @@ Document high-level technical insights (NO implementation code):
 
 ---
 
-### Step 6: Propose High-Level Approach
+### Step 7: Propose High-Level Approach
 
 Suggest an approach based on findings (NO implementation code):
 
@@ -481,7 +555,7 @@ Based on the requirements gathered, I recommend:
 
 ---
 
-### Step 7: Document Risks and Unknowns
+### Step 8: Document Risks and Unknowns
 
 Capture risks discovered:
 
@@ -500,7 +574,7 @@ Capture risks discovered:
 
 ---
 
-### Step 8: Generate Discovery Document
+### Step 9: Generate Discovery Document
 
 Create the discovery markdown file:
 
@@ -512,12 +586,13 @@ Create the discovery markdown file:
 
 1. Context
 2. Referenced Documents
-3. Requirements Gathered (FR, NFR, Constraints)
-4. Open Questions (all answered)
-5. Technical Considerations
-6. Proposed Approach
-7. Risks and Unknowns
-8. Next Steps
+3. Code Context Analysis
+4. Requirements Gathered (FR, NFR, Constraints)
+5. Open Questions (all answered)
+6. Technical Considerations
+7. Proposed Approach
+8. Risks and Unknowns
+9. Next Steps
 
 ---
 
@@ -538,6 +613,8 @@ The discovery document should follow the template in `.claude/rules/patterns/dis
 Before completing discovery, verify:
 
 - [ ] All referenced documents have been read
+- [ ] Code context analysis completed (all related files found)
+- [ ] Key patterns observed and documented
 - [ ] Document is saved in `flow/discovery/` folder
 - [ ] File uses correct naming convention
 - [ ] Open questions table has no "Blocked" status

@@ -54,7 +54,7 @@ REVIEW CATEGORIES:
   - Security considerations
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /review-pr    Review a Pull Request instead

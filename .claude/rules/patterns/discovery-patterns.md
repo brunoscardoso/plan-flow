@@ -4,10 +4,11 @@
 Discovery is a **pre-planning phase** where we:
 
 1. **Gather Information**: Read referenced files, contracts, and documentation
-2. **Ask Questions**: Clarify every unclear aspect with the user
-3. **Explore Unknowns**: Investigate technical feasibility and constraints
-4. **Document Findings**: Create a comprehensive discovery document
-5. **Prepare for Planning**: Provide all context needed to create an implementation plan
+2. **Find Code Context**: Search codebase for all related implementations and dependencies
+3. **Ask Questions**: Clarify every unclear aspect with the user
+4. **Explore Unknowns**: Investigate technical feasibility and constraints
+5. **Document Findings**: Create a comprehensive discovery document
+6. **Prepare for Planning**: Provide all context needed to create an implementation plan
 
 **Workflow**: Discovery Output → Implementation Plan → Execution
 
@@ -113,7 +114,96 @@ Categorize all gathered requirements:
 
 ---
 
-### 2. Ask Questions Using Interactive Questions Tool
+### 2. Find All Related Code References
+
+**Before proceeding with discovery**, search the codebase to find **all code locations** related to the feature being discovered.
+
+**Why**: Understanding where a feature is currently used prevents incomplete implementations and reveals hidden dependencies.
+
+**Process**:
+
+1. **Identify key terms** from the user's request (e.g., "user profile", "workflow editor", "authentication")
+2. **Search for code references** using Grep:
+   - Component names
+   - Function names
+   - Type definitions
+   - API endpoints
+   - Database models
+   - Store actions/selectors
+3. **Search for file patterns** using Glob:
+   - Related component directories
+   - Test files for the feature
+   - API route files
+4. **Document all findings** in the "Code Context Analysis" section of the discovery document
+5. **Read key files** to understand current implementation patterns
+
+**Example Search Strategy**:
+
+For a request like "edit user profile":
+
+```bash
+# Search for components/functions
+Grep: "UserProfile|userProfile|user-profile"
+      --output_mode content --type ts --type tsx
+
+# Search for types
+Grep: "interface.*User|type.*User"
+      --output_mode content --type ts
+
+# Search for API routes
+Glob: "**/api/**/user*/**" or "**/api/**/profile*/**"
+
+# Search for stores
+Grep: "userStore|profileStore|useUser"
+      --output_mode content --type ts
+
+# Search for tests
+Glob: "**/*user*.test.ts*" or "**/*profile*.test.ts*"
+```
+
+**Document Format in Discovery**:
+
+```markdown
+## Code Context Analysis
+
+### Components Found
+| File | Usage | Line(s) |
+|------|-------|---------|
+| `src/components/UserProfile.tsx` | Main profile component | - |
+| `src/components/Settings/ProfileSettings.tsx` | Settings page usage | - |
+| `src/components/Dashboard/UserCard.tsx` | Dashboard card | - |
+
+### API Endpoints Found
+| File | Endpoint | Method |
+|------|----------|--------|
+| `src/app/api/user/profile/route.ts` | `/api/user/profile` | GET, PUT |
+| `src/app/api/user/avatar/route.ts` | `/api/user/avatar` | POST |
+
+### State Management Found
+| File | Purpose |
+|------|---------|
+| `src/stores/userStore.ts` | User profile state |
+| `src/stores/authStore.ts` | Authentication state (includes profile data) |
+
+### Type Definitions Found
+| File | Types |
+|------|-------|
+| `src/types/user.ts` | `User`, `UserProfile`, `UpdateProfileInput` |
+
+### Total References: 12 files across 5 categories
+```
+
+**Benefits**:
+
+- **Complete Context**: Know all places where changes will have impact
+- **Prevent Breaking Changes**: Identify all consumers before making modifications
+- **Better Estimates**: Understand full scope for complexity scoring
+- **Pattern Discovery**: Learn existing patterns from actual usage
+- **Test Coverage**: Find existing tests that need updates
+
+---
+
+### 3. Ask Questions Using Interactive Questions Tool
 
 **Use Plan mode's Questions UI** for a better user experience.
 
@@ -135,7 +225,7 @@ See `.claude/rules/tools/interactive-questions-tool.md` for detailed instruction
 
 ---
 
-### 3. Structure Discovery Documents Consistently
+### 4. Structure Discovery Documents Consistently
 
 Every discovery document must include these sections:
 
@@ -154,7 +244,7 @@ See `.claude/rules/patterns/discovery-templates.md` for the full template.
 
 ---
 
-### 4. Mark Assumptions Explicitly
+### 5. Mark Assumptions Explicitly
 
 When making assumptions, always mark them clearly:
 
@@ -171,7 +261,7 @@ When making assumptions, always mark them clearly:
 
 ---
 
-### 5. Keep Discovery High-Level
+### 6. Keep Discovery High-Level
 
 Focus on "what" not "how". Discovery captures:
 
@@ -184,7 +274,7 @@ Implementation details belong in the plan, not discovery.
 
 ---
 
-### 6. Link Discovery to Plan
+### 7. Link Discovery to Plan
 
 When discovery is complete:
 
@@ -333,6 +423,7 @@ The discovery document is the **ONLY** deliverable. It must be:
 | Pattern                        | Description                                    |
 | ------------------------------ | ---------------------------------------------- |
 | Read documents first           | Always review referenced files before asking   |
+| Find all code references       | Search codebase for all related implementations|
 | Use interactive questions      | Plan mode Questions UI for better UX           |
 | Structure consistently         | Follow the standard discovery template         |
 | Mark assumptions               | Always label and validate assumptions          |

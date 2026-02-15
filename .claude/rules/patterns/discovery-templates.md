@@ -19,6 +19,47 @@ Use this template when creating discovery documents:
 | `flow/references/api-contracts.md` | [Summary of relevant content] |
 | `flow/references/sse-events.md`    | [Summary of relevant content] |
 
+## Code Context Analysis
+
+[Analysis of all code locations related to this feature]
+
+### Components Found
+
+| File | Usage | Line(s) |
+|------|-------|---------|
+| `[file_path]` | [How it's used] | [line references] |
+
+### API Endpoints Found
+
+| File | Endpoint | Method |
+|------|----------|--------|
+| `[file_path]` | `[endpoint]` | [GET/POST/PUT/DELETE] |
+
+### State Management Found
+
+| File | Purpose |
+|------|---------|
+| `[file_path]` | [Store/state description] |
+
+### Type Definitions Found
+
+| File | Types |
+|------|-------|
+| `[file_path]` | [Type names] |
+
+### Other Related Files
+
+| File | Purpose |
+|------|---------|
+| `[file_path]` | [Description] |
+
+**Total References**: [count] files across [count] categories
+
+### Key Patterns Observed
+
+- [Pattern 1 observed in existing code]
+- [Pattern 2 observed in existing code]
+
 ## Requirements Gathered
 
 ### Functional Requirements
@@ -293,6 +334,65 @@ I've reviewed the following documents:
 - [ ] Backend pagination support for large workflows
 - [ ] Mobile responsiveness requirements
 - [ ] Accessibility requirements for drag-and-drop
+```
+
+---
+
+## Code Context Analysis Example
+
+```markdown
+## Code Context Analysis
+
+I performed a comprehensive search for all code related to "user profile" functionality:
+
+### Components Found
+
+| File | Usage | Line(s) |
+|------|-------|---------|
+| `src/components/UserProfile/index.tsx` | Main profile display component | - |
+| `src/components/UserProfile/EditForm.tsx` | Profile editing form | - |
+| `src/components/Settings/ProfileSettings.tsx` | Settings page integration | - |
+| `src/components/Dashboard/UserCard.tsx` | Dashboard summary card | 45-78 |
+| `src/components/Navigation/UserMenu.tsx` | Navigation menu with profile link | 23-35 |
+
+### API Endpoints Found
+
+| File | Endpoint | Method |
+|------|----------|--------|
+| `src/app/api/user/profile/route.ts` | `/api/user/profile` | GET, PUT |
+| `src/app/api/user/avatar/route.ts` | `/api/user/avatar` | POST |
+| `src/app/api/user/settings/route.ts` | `/api/user/settings` | GET, PATCH |
+
+### State Management Found
+
+| File | Purpose |
+|------|---------|
+| `src/stores/userStore.ts` | User profile state with actions |
+| `src/stores/authStore.ts` | Includes user profile data from auth |
+
+### Type Definitions Found
+
+| File | Types |
+|------|-------|
+| `src/types/user.ts` | `User`, `UserProfile`, `UpdateProfileInput` |
+| `src/types/rest-inputs.ts` | `UpdateProfileRequestSchema` (Zod) |
+
+### Other Related Files
+
+| File | Purpose |
+|------|---------|
+| `src/utils/userValidation.ts` | Profile data validation utilities |
+| `src/hooks/useUserProfile.ts` | Custom hook for profile management |
+
+**Total References**: 12 files across 5 categories
+
+### Key Patterns Observed
+
+- **View/Logic Separation**: Components use separate logic hooks (e.g., `useUserProfileLogic.internal.ts`)
+- **Zod Validation**: All API inputs validated with Zod schemas in `types/rest-inputs.ts`
+- **State Management**: Using Zustand stores with immer for immutable updates
+- **Error Handling**: Consistent use of custom error types (`BadRequestError`, `UnauthorizedError`)
+- **Testing**: Each component has co-located `*.client.test.ts` file
 ```
 
 ---

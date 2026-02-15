@@ -49,7 +49,7 @@ WORKFLOW:
   5. Tests phase is always last
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /discovery-plan    Run discovery first (recommended)

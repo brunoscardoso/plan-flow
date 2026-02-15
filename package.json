@@ -5,7 +5,15 @@
   "type": "module",
   "main": "dist/cli/index.js",
   "bin": {
-    "plan-flow": "./dist/cli/index.js"
+    "planflow-ai": "./dist/cli/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brunoscardoso/plan-flow.git"
+  },
+  "homepage": "https://github.com/brunoscardoso/plan-flow#readme",
+  "bugs": {
+    "url": "https://github.com/brunoscardoso/plan-flow/issues"
   },
   "scripts": {
     "build": "tsc",
@@ -43,7 +51,7 @@
     "workflow",
     "ai-assisted"
   ],
-  "author": "",
+  "author": "Bruno Cardoso",
   "license": "MIT",
   "dependencies": {
     "commander": "^14.0.3"

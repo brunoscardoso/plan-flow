@@ -74,7 +74,7 @@ DETECTS:
   Libraries:    Zod, Prisma, Zustand, Redux, TailwindCSS, React Query, and 50+
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /discovery-plan    Start discovery after setup

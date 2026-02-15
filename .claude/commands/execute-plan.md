@@ -64,7 +64,7 @@ SAFETY:
   - Prevents accidental data loss
 
 RECOMMENDED MODEL:
-  Claude Opus 4.5 or Sonnet 4.5 for best results
+  Claude Opus 4.6 or Sonnet 4.5 for best results
 
 RELATED COMMANDS:
   /create-plan       Create a plan first
