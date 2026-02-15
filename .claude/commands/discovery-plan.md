@@ -12,6 +12,18 @@ This command creates a discovery document for gathering and clarifying requireme
 
 ---
 
+> ⚠️ **IMPORTANT - DISCOVERY ONLY**
+>
+> This command ONLY creates a discovery document. It does NOT:
+> - Create implementation plans (use `/create-plan` for that)
+> - Execute code or implementation steps (use `/execute-plan` for that)
+> - Write any source code files
+> - Auto-chain to the next command
+>
+> After creating the discovery document, the command STOPS and waits for user review.
+
+---
+
 
 ## Help
 
@@ -48,7 +60,8 @@ WORKFLOW:
   4. Documents requirements (FR, NFR, Constraints)
   5. Proposes high-level approach (no code)
   6. Creates discovery document for review
-  7. User reviews and refines before /create-plan
+  7. Asks user if they want to proceed to /create-plan
+  8. Waits for user confirmation before proceeding
 
 RECOMMENDED MODEL:
   Claude Opus 4.6 or Sonnet 4.5 for best results
@@ -72,8 +85,10 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/ru
 | **Read First**           | Read all referenced documents before asking questions    |
 | **High-Level Only**      | Technical considerations are conceptual, not code        |
 | **Allow Refinement**     | User reviews and refines discovery before plan creation  |
-| **No Auto-Chaining**     | NEVER auto-invoke /create-plan - user must invoke it     |
-| **Complete and Stop**    | After presenting results, STOP and wait for user         |
+| **Ask Before Proceeding**| ASK user if they want to proceed to /create-plan         |
+| **No Auto-Execution**    | Do NOT auto-invoke commands without user confirmation    |
+| **NO PLANNING**          | Do NOT create implementation plans during discovery      |
+| **NO EXECUTION**         | Do NOT execute any implementation steps                  |
 
 ---
 
@@ -134,6 +149,8 @@ The skill will:
 7. Propose high-level approach
 8. Document risks and unknowns
 9. Generate discovery document
+10. Ask user if they want to proceed to /create-plan
+11. Wait for user confirmation before proceeding
 
 See: `.claude/rules/skills/discovery-skill.md`
 
@@ -154,13 +171,25 @@ Discovery Complete!
 
 **Deliverable Created**: `flow/discovery/discovery_<feature>_v1.md`
 
-**Next Steps** (user must invoke manually):
+**Next Steps**:
 1. Review the discovery document above
-2. Request any refinements or additions
-3. When ready, invoke `/create-plan @flow/discovery/discovery_<feature>_v1.md`
+2. Request any refinements or additions (if needed)
+3. Proceed to planning when ready
 ```
 
-**CRITICAL**: This command is now complete. Do NOT auto-invoke `/create-plan`. Wait for the user to explicitly invoke it.
+**Now ask the user**:
+
+```markdown
+Would you like me to proceed with creating the implementation plan?
+
+- **Yes**: I'll invoke `/create-plan @flow/discovery/discovery_<feature>_v1.md`
+- **No**: You can review the discovery and invoke `/create-plan` when ready
+- **Refine first**: Let me know what needs to be adjusted in the discovery
+```
+
+⚠️ **WAIT for user response before proceeding**
+
+Do NOT auto-invoke `/create-plan` without user confirmation.
 
 ---
 
@@ -305,10 +334,14 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 | -------------------------------------- | ----------------------------------------- |
 | Create/edit source code files          | Discovery is requirements gathering only  |
 | Write implementation code in responses | No code during discovery                  |
-| Create implementation plans            | Plans come after discovery                |
+| Create implementation plans            | Plans come after discovery via /create-plan |
+| Create files in `flow/plans/`          | Planning is a separate command            |
+| Auto-invoke /create-plan without asking| Must ASK user before proceeding           |
+| Execute implementation steps           | Discovery does not execute anything       |
 | Modify configuration files             | No codebase changes                       |
 | Run build or test commands             | No execution commands                     |
 | Create files outside `flow/discovery/` | Only write discovery documents            |
+| Proceed without user confirmation      | Must wait for user response               |
 
 ### Allowed Actions
 
@@ -625,6 +658,11 @@ Before completing discovery, verify:
 - [ ] Next steps are defined (pointing to `/create-plan`)
 - [ ] **NO implementation code is included**
 - [ ] **NO source files were created or modified**
+- [ ] **NO implementation plans were created**
+- [ ] **NO files created in flow/plans/ directory**
+- [ ] **ASKED user if they want to proceed to /create-plan**
+- [ ] **WAITING for user confirmation before proceeding**
+- [ ] **Did NOT auto-invoke /create-plan without asking**
 
 ---
 
