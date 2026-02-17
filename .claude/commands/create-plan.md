@@ -147,16 +147,37 @@ Plan Created!
 - X phases created
 - Total complexity: XX/XX
 - Highest complexity: Phase X at Y/10
+```
 
-**Next Steps** (user must invoke manually):
+**CRITICAL — Check autopilot mode BEFORE presenting next steps:**
+
+1. **Check if `flow/.autopilot` exists**
+2. **If autopilot is ON**: Do NOT show "Next Steps" or "invoke manually". Instead, use `AskUserQuestion` to ask for plan approval, then **immediately auto-proceed** to `/execute-plan` with the plan file. Do NOT stop. Do NOT wait for the user to manually invoke `/execute-plan`.
+
+```typescript
+// When autopilot is ON, ask for approval then auto-proceed:
+AskUserQuestion({
+  questions: [{
+    question: "Plan is ready. Approve to proceed with execution?",
+    header: "Plan",
+    options: [
+      { label: "Approve and execute", description: "Start executing the plan now" },
+      { label: "Refine first", description: "Let me suggest changes to the plan before executing" }
+    ],
+    multiSelect: false
+  }]
+})
+// If approved → immediately invoke /execute-plan (do NOT stop)
+```
+
+3. **If autopilot is OFF**: Show next steps and stop:
+
+```markdown
+**Next Steps**:
 1. Review the plan above
 2. Request any refinements
 3. When ready, invoke `/execute-plan @flow/plans/plan_<feature>_v<version>.md`
 ```
-
-**CRITICAL**: If autopilot mode is OFF (`flow/.autopilot` does not exist), this command is now complete. Do NOT auto-invoke `/execute-plan`. Wait for the user to explicitly invoke it.
-
-**If autopilot mode is ON** (`flow/.autopilot` exists): Auto-proceed to `/execute-plan` with the plan file after the user approves the plan.
 
 ---
 
