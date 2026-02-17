@@ -71,7 +71,7 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 
 ### Step 2: Discovery
 
-1. **Read** the discovery command to load discovery context
+1. **Read** the file `.cursor/commands/discovery-plan.md` to load discovery context
 2. Execute the discovery skill following that command's instructions
 3. **PAUSE**: Ask user discovery questions as needed (mandatory checkpoint)
 4. Produce the discovery document in `flow/discovery/`
@@ -83,7 +83,7 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 **GATE CHECK**: Before proceeding, verify that Step 2 produced a discovery document in `flow/discovery/`. If no discovery document exists, **DO NOT proceed** — go back to Step 2. A plan cannot be created without a discovery document. This is a hard requirement with no exceptions.
 
 1. **Verify** discovery document exists in `flow/discovery/` (created in Step 2)
-2. **Read** the create-plan command to load planning context
+2. **Read** the file `.cursor/commands/create-plan.md` to load planning context
 3. Execute the create-plan skill with the discovery document as input
 4. **PAUSE**: Present the plan for user approval (mandatory checkpoint)
 5. Wait for user to approve the plan before proceeding
@@ -93,7 +93,7 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 
 ### Step 4: Execute Plan
 
-1. **Read** the execute-plan command to load execution context
+1. **Read** the file `.cursor/commands/execute-plan.md` to load execution context
 2. Execute the plan following complexity-based grouping strategy
 3. Update the plan file with progress
 4. Run build + test verification at the end
@@ -102,7 +102,7 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 
 ### Step 5: Review Code
 
-1. **Read** the review-code command to load review context
+1. **Read** the file `.cursor/commands/review-code.md` to load review context
 2. Review all uncommitted changes
 3. Present the review summary
 
@@ -174,10 +174,10 @@ All other transitions happen automatically.
 
 When autopilot is ON, the following rules in individual commands are **suspended**:
 
-- Discovery command: "Ask Before Proceeding" and "No Auto-Execution" rules
-- Create-plan command: "No Auto-Chaining" and "Complete and Stop" rules
-- Execute-plan command: "Complete and Stop" rule
-- Review-code command: completion stop behavior
+- `.cursor/commands/discovery-plan.md`: "Ask Before Proceeding" and "No Auto-Execution" rules
+- `.cursor/commands/create-plan.md`: "No Auto-Chaining" and "Complete and Stop" rules
+- `.cursor/commands/execute-plan.md`: "Complete and Stop" rule
+- `.cursor/commands/review-code.md`: completion stop behavior
 
 These rules remain fully active when autopilot is OFF.
 
