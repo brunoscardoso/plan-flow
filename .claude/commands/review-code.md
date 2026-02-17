@@ -62,12 +62,18 @@ RELATED COMMANDS:
 
 ---
 
+> ⚠️ **AUTOPILOT MODE CHECK**
+>
+> Before proceeding, check if `flow/.autopilot` exists.
+> - **If YES**: Autopilot is ON. After completing the review, **auto-archive** the discovery and plan documents to `flow/archive/`, present the completion summary, and prompt for context cleanup (`/clear`).
+> - **If NO**: Follow the standard rules below (stop and wait for user).
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
 | **Read-Only Analysis**   | This command ONLY produces a review document             |
-| **Complete and Stop**    | After presenting results, STOP and wait for user         |
+| **Complete and Stop**    | After presenting results, STOP and wait for user (unless autopilot ON) |
 
 ---
 

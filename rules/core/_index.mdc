@@ -9,8 +9,8 @@ alwaysApply: false
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 4 files, ~833 lines
-**Reference Codes**: COR-AP-1 through COR-LDG-2
+**Total Files**: 5 files, ~1011 lines
+**Reference Codes**: COR-AP-1 through COR-AM-3
 
 ---
 
@@ -40,6 +40,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-CS-4 | Common complexity patterns table | complexity-scoring.mdc | 168-185 |
 | COR-CS-5 | Real-world scoring examples | complexity-scoring.mdc | 187-236 |
 
+### Autopilot Mode (`autopilot-mode.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AM-1 | Input classification (slash commands, questions, trivial, feature requests) | autopilot-mode.mdc | 18-50 |
+| COR-AM-2 | Flow execution steps (contracts, discovery, plan, execute, review, archive) | autopilot-mode.mdc | 52-110 |
+| COR-AM-3 | Mandatory checkpoints and overriding rules | autopilot-mode.mdc | 140-178 |
+
 ### Project Ledger (`project-ledger.mdc`)
 
 | Code | Description | Source | Lines |
@@ -64,6 +72,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-CS-5 | Need detailed scoring examples |
 | COR-LDG-1 | Need ledger behavior and entry guidelines |
 | COR-LDG-2 | Need ledger maintenance and integration rules |
+| COR-AM-1 | Need to understand input classification for autopilot |
+| COR-AM-2 | Need autopilot flow execution steps |
+| COR-AM-3 | Need mandatory checkpoint and override rules |
 
 ---
 
@@ -97,3 +108,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `allowed-patterns.mdc` and `forbidden-patterns.mdc` have `alwaysApply: true` - they are loaded automatically by Cursor
 - `project-ledger.mdc` has `alwaysApply: true` - maintains persistent project memory
 - `complexity-scoring.mdc` is loaded on-demand when needed for planning
+- `autopilot-mode.mdc` has `alwaysApply: true` - detects and orchestrates autopilot flow mode

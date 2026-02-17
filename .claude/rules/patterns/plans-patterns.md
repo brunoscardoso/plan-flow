@@ -34,9 +34,9 @@ All implementation plans must be created inside `flow/plans/` using snake_case n
 
 ---
 
-### 2. Use Discovery Folder for Research
+### 2. Discovery is Required Before Planning
 
-Before creating a plan for complex features, create discovery documents in `flow/discovery/`. See `.claude/rules/patterns/discovery-patterns.md` for details.
+A discovery document in `flow/discovery/` is **required** before creating any plan. Plans cannot be created without a completed discovery document. If no discovery exists, run `/discovery-plan` first. No exceptions. See `.claude/rules/patterns/discovery-patterns.md` for details.
 
 ---
 

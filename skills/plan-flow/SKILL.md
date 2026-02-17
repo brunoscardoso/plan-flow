@@ -22,6 +22,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/flow` | Toggle autopilot mode (auto-chains the full workflow) |
 
 ## Always-Active Features
 
@@ -83,7 +84,7 @@ flow/
 ## Critical Rules
 
 1. **Automated Workflow**: Run discovery → plan → execute automatically. Only stop to ask when you need information from the user.
-2. **Discovery First**: Always run `/discovery` before `/create-plan` for new features or bugs.
+2. **Discovery First (Hard Block)**: `/discovery` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions. If no discovery exists, run discovery first.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run build verification only after ALL phases complete.
 5. **Archive When Done**: Move completed discovery and plans to `flow/archive/`.

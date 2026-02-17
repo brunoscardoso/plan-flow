@@ -73,13 +73,19 @@ RELATED COMMANDS:
 
 ---
 
+> ⚠️ **AUTOPILOT MODE CHECK**
+>
+> Before proceeding, check if `flow/.autopilot` exists.
+> - **If YES**: Autopilot is ON. After completing execution (build + test pass), **auto-proceed** to `/review-code`. Do NOT stop and wait.
+> - **If NO**: Follow the standard rules below (stop and wait for user).
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
 | **Build ONLY at End**    | Do NOT run build after each phase - only at the very end |
 | **No Direct DB/ORM**     | NEVER run ORM or database commands directly              |
-| **Complete and Stop**    | After execution, STOP and wait for user                  |
+| **Complete and Stop**    | After execution, STOP and wait for user (unless autopilot ON) |
 
 ---
 
@@ -182,7 +188,7 @@ After the skill completes:
 
 1. Present summary of all changes made
 2. Confirm all tests pass
-3. Ask if the plan should be archived:
+3. Ask if the plan should be archived using the `AskUserQuestion` tool:
 
 ```markdown
 Execution Complete!
@@ -191,14 +197,20 @@ Execution Complete!
 - X phases completed
 - All tests passing
 - Build successful
-
-**Archive the plan?**
-This will move the plan to `flow/archive/`:
-```bash
-mv flow/plans/plan_<feature>_v1.md flow/archive/
 ```
 
-Would you like to archive this plan?
+```typescript
+AskUserQuestion({
+  questions: [{
+    question: "Would you like to archive this completed plan?",
+    header: "Archive",
+    options: [
+      { label: "Yes, archive it", description: "Move the plan to flow/archive/ - recommended for completed plans" },
+      { label: "No, keep it", description: "Keep the plan in flow/plans/ for reference" }
+    ],
+    multiSelect: false
+  }]
+})
 ```
 
 ---
@@ -566,10 +578,20 @@ npm run build && npm run test
 
 4. **List all key changes** made
 
-5. **Ask if the plan should be archived**:
+5. **Ask if the plan should be archived** using the `AskUserQuestion` tool:
 
-```bash
-mv flow/plans/plan_feature_name_v1.md flow/archive/
+```typescript
+AskUserQuestion({
+  questions: [{
+    question: "Would you like to archive this completed plan?",
+    header: "Archive",
+    options: [
+      { label: "Yes, archive it", description: "Move the plan to flow/archive/" },
+      { label: "No, keep it", description: "Keep the plan in flow/plans/" }
+    ],
+    multiSelect: false
+  }]
+})
 ```
 
 ---

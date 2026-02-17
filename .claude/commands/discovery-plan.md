@@ -12,15 +12,21 @@ This command creates a discovery document for gathering and clarifying requireme
 
 ---
 
+> ⚠️ **AUTOPILOT MODE CHECK**
+>
+> Before proceeding, check if `flow/.autopilot` exists.
+> - **If YES**: Autopilot is ON. After completing discovery and user Q&A, **auto-proceed** to `/create-plan` with the discovery output. Do NOT ask "Would you like to proceed?" - just continue.
+> - **If NO**: Follow the standard rules below (stop and wait for user).
+
 > ⚠️ **IMPORTANT - DISCOVERY ONLY**
 >
 > This command ONLY creates a discovery document. It does NOT:
 > - Create implementation plans (use `/create-plan` for that)
 > - Execute code or implementation steps (use `/execute-plan` for that)
 > - Write any source code files
-> - Auto-chain to the next command
+> - Auto-chain to the next command (unless autopilot mode is ON)
 >
-> After creating the discovery document, the command STOPS and waits for user review.
+> After creating the discovery document, the command STOPS and waits for user review (unless autopilot mode is ON).
 
 ---
 
@@ -85,8 +91,8 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/ru
 | **Read First**           | Read all referenced documents before asking questions    |
 | **High-Level Only**      | Technical considerations are conceptual, not code        |
 | **Allow Refinement**     | User reviews and refines discovery before plan creation  |
-| **Ask Before Proceeding**| ASK user if they want to proceed to /create-plan         |
-| **No Auto-Execution**    | Do NOT auto-invoke commands without user confirmation    |
+| **Ask Before Proceeding**| ASK user if they want to proceed to /create-plan (unless autopilot ON) |
+| **No Auto-Execution**    | Do NOT auto-invoke commands without user confirmation (unless autopilot ON) |
 | **NO PLANNING**          | Do NOT create implementation plans during discovery      |
 | **NO EXECUTION**         | Do NOT execute any implementation steps                  |
 
@@ -177,14 +183,21 @@ Discovery Complete!
 3. Proceed to planning when ready
 ```
 
-**Now ask the user**:
+**Now ask the user using the `AskUserQuestion` tool**:
 
-```markdown
-Would you like me to proceed with creating the implementation plan?
-
-- **Yes**: I'll invoke `/create-plan @flow/discovery/discovery_<feature>_v1.md`
-- **No**: You can review the discovery and invoke `/create-plan` when ready
-- **Refine first**: Let me know what needs to be adjusted in the discovery
+```typescript
+AskUserQuestion({
+  questions: [{
+    question: "Would you like me to proceed with creating the implementation plan?",
+    header: "Next step",
+    options: [
+      { label: "Yes, create plan", description: "I'll invoke /create-plan with the discovery document" },
+      { label: "No, review first", description: "You can review the discovery and invoke /create-plan when ready" },
+      { label: "Refine discovery", description: "Let me know what needs to be adjusted in the discovery" }
+    ],
+    multiSelect: false
+  }]
+})
 ```
 
 ⚠️ **WAIT for user response before proceeding**

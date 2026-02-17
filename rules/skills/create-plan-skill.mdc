@@ -57,7 +57,7 @@ This skill is **strictly for creating plan documents**. The process:
 
 | Input                | Required | Description                                        |
 | -------------------- | -------- | -------------------------------------------------- |
-| `discovery_document` | Optional | Path to discovery document (recommended)           |
+| `discovery_document` | **Required** | Path to discovery document. Plans cannot be created without one. |
 | `feature_name`       | Yes      | Name of the feature to plan                        |
 | `requirements`       | Optional | Direct requirements if no discovery document       |
 | `version`            | Optional | Version number (auto-incremented if not provided)  |
@@ -66,19 +66,16 @@ This skill is **strictly for creating plan documents**. The process:
 
 ## Workflow
 
-### Step 1: Extract Requirements
+### Step 1: Validate Discovery Document (HARD BLOCK)
 
-**If discovery document was provided**:
+**A discovery document is REQUIRED. No exceptions.**
 
-1. Read the discovery document
-2. Extract feature name, description, goals from the document
-3. Extract FR, NFR, Constraints
-4. Note any risks identified
-
-**If no discovery document**:
-
-1. Use requirements provided directly
-2. Note that discovery was skipped
+1. Check if a discovery document was provided or exists in `flow/discovery/`
+2. **If NO discovery document exists**: **STOP immediately.** Do NOT create a plan. Inform the user that discovery is required and run `/discovery-plan` first.
+3. **If discovery document exists**: Read it and extract:
+   - Feature name, description, goals
+   - FR, NFR, Constraints
+   - Risks identified
 
 ---
 
@@ -254,7 +251,7 @@ Before completing the plan, verify:
 - [ ] All phases have complexity scores (X/10)
 - [ ] Tests are the LAST phase
 - [ ] Key Changes section is populated
-- [ ] Discovery document is referenced (or noted as skipped)
+- [ ] Discovery document is referenced (discovery is required, never skipped)
 - [ ] **NO implementation code is included**
 - [ ] **NO source files were created or modified**
 

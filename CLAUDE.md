@@ -16,6 +16,7 @@ Use slash commands to invoke skills:
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Workflow
 
@@ -72,9 +73,9 @@ Core patterns and rules are in `.claude/rules/`:
 
 ## Critical Rules
 
-1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user.
+1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/rules/core/autopilot-mode.md`.
 2. **Complete and Stop**: After completing a skill, stop and wait for user input.
-3. **Discovery First**: Recommend `/discovery-plan` before `/create-plan` for new features.
+3. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 4. **Tests Last**: Tests are always the last phase of any implementation plan.
 5. **Build at End Only**: Run `npm run build` only after ALL phases complete.
 6. **No Direct DB Commands**: Never run database migrations directly - ask user to execute.

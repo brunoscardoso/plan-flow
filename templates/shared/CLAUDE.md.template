@@ -12,6 +12,7 @@
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow
 
@@ -27,8 +28,8 @@ The Project Ledger (`flow/ledger.md`) is always active. It silently captures pro
 
 ## Critical Rules
 
-1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user.
-2. **Discovery First**: Recommend `/discovery-plan` before `/create-plan` for new features.
+1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/rules/core/autopilot-mode.md`.
+2. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
 

@@ -58,12 +58,19 @@ RELATED COMMANDS:
 
 ---
 
+> ⚠️ **AUTOPILOT MODE CHECK**
+>
+> Before proceeding, check if `flow/.autopilot` exists.
+> - **If YES**: Autopilot is ON. After creating the plan and getting user approval, **auto-proceed** to `/execute-plan` with the plan output. Do NOT wait for manual invocation.
+> - **If NO**: Follow the standard rules below (stop and wait for user).
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
-| **No Auto-Chaining**     | NEVER auto-invoke /execute-plan - user must invoke it    |
-| **Complete and Stop**    | After presenting results, STOP and wait for user         |
+| **Discovery Required**   | NEVER create a plan without a discovery document. If none exists, run `/discovery-plan` first. No exceptions. |
+| **No Auto-Chaining**     | NEVER auto-invoke /execute-plan - user must invoke it (unless autopilot ON) |
+| **Complete and Stop**    | After presenting results, STOP and wait for user (unless autopilot ON) |
 
 ---
 
@@ -80,18 +87,27 @@ RELATED COMMANDS:
 
 ---
 
-### Step 2: Validate Discovery Phase Completion
+### Step 2: Validate Discovery Phase Completion (HARD BLOCK)
 
-**Before creating a plan, verify that proper discovery was performed.**
+**A discovery document is REQUIRED before creating any plan. No exceptions.**
 
-1. Check user input for discovery indicators:
-   - Discovery document reference (`@flow/discovery/...`)
-   - FR/NFR prefixes in requirements
-2. Check the discovery folder for a matching document in `flow/discovery/`
-3. If NO discovery indicators found: Recommend `/discovery-plan` command first
-4. If discovery indicators ARE found: Proceed with plan creation
+1. Check user input for a discovery document reference (`@flow/discovery/...`)
+2. If no reference provided, search `flow/discovery/` for a matching discovery document
+3. **If NO discovery document exists**: **STOP immediately.** Do NOT create a plan. Instead:
+   - Inform the user that discovery is required before planning
+   - Invoke `/discovery-plan` to start the discovery process
+   - Example response:
+     ```
+     A discovery document is required before creating a plan. Discovery refines your idea,
+     gathers requirements, and identifies risks — skipping it leads to incomplete plans.
+
+     Starting discovery now...
+     ```
+   - Then run the discovery process for the user's feature
+4. If a discovery document IS found: Proceed with plan creation using that document
 
 **Important**: NEVER read or reference files in `flow/archive/` - these are outdated.
+**Important**: NEVER create a plan without a discovery document. This rule has NO exceptions.
 
 ---
 
@@ -138,7 +154,9 @@ Plan Created!
 3. When ready, invoke `/execute-plan @flow/plans/plan_<feature>_v<version>.md`
 ```
 
-**CRITICAL**: This command is now complete. Do NOT auto-invoke `/execute-plan`. Wait for the user to explicitly invoke it.
+**CRITICAL**: If autopilot mode is OFF (`flow/.autopilot` does not exist), this command is now complete. Do NOT auto-invoke `/execute-plan`. Wait for the user to explicitly invoke it.
+
+**If autopilot mode is ON** (`flow/.autopilot` exists): Auto-proceed to `/execute-plan` with the plan file after the user approves the plan.
 
 ---
 
