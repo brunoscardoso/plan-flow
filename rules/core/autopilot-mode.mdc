@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Purpose
 
-When `flow/.autopilot` exists, this rule is active. It automatically orchestrates the full plan-flow workflow for feature requests, loading only the relevant command context at each step.
+When `flow/.autopilot` exists, this rule is active. It automatically orchestrates the full plan-flow workflow for feature requests. **You MUST follow every step below in order. Do NOT skip steps. Do NOT jump to implementation without discovery and planning first.**
 
 ---
 
@@ -23,133 +23,146 @@ When `flow/.autopilot` exists, this rule is active. It automatically orchestrate
 
 When autopilot is ON, classify every new user input before acting:
 
-### Category 1: Slash Command
-**Signals**: Input starts with `/` (e.g., `/review-pr`, `/write-tests`, `/flow -disable`)
-**Action**: Run that command normally. Do NOT trigger the flow.
-
-### Category 2: Question or Exploration
-**Signals**: User is asking about code, requesting explanations, exploring the codebase, or asking for help.
-**Examples**: "What does this function do?", "How does auth work here?", "Show me the API routes"
-**Action**: Answer normally. Do NOT trigger the flow.
-
-### Category 3: Trivial Task
-**Signals**: Single-file change, obvious fix, user specifies exact change, no architectural decisions needed. Estimated complexity 0-2.
-**Examples**: "Fix the typo in README", "Rename this variable to camelCase", "Add a missing import"
-**Action**: Execute directly. Do NOT trigger the flow.
-
-### Category 4: Feature Request
-**Signals**: Adding new functionality, behavior changes, multi-file scope, mentions creating/building/implementing, references APIs/integrations/components. Estimated complexity 3+.
-**Examples**: "Add dark mode support", "Implement user authentication", "Create a new API endpoint for payments"
-**Action**: **Trigger the full flow** (see below).
+| Category | Signals | Action |
+|----------|---------|--------|
+| Slash Command | Input starts with `/` | Run that command normally. Do NOT trigger the flow. |
+| Question/Exploration | Asking about code, explanations, help | Answer normally. Do NOT trigger the flow. |
+| Trivial Task | Single-file change, obvious fix, complexity 0-2 | Execute directly. Do NOT trigger the flow. |
+| **Feature Request** | New functionality, behavior changes, multi-file scope, complexity 3+ | **TRIGGER THE FULL FLOW BELOW. You MUST complete ALL 6 steps in order.** |
 
 ### When Uncertain
-If the input doesn't clearly fit a category, use the `AskUserQuestion` tool:
 
-```typescript
-AskUserQuestion({
-  questions: [{
-    question: "I'm in autopilot mode. How should I handle this request?",
-    header: "Flow mode",
-    options: [
-      { label: "Run full flow", description: "Run the full workflow: discovery → plan → execute → review" },
-      { label: "Handle directly", description: "Just handle this task directly without the full flow" }
-    ],
-    multiSelect: false
-  }]
-})
-```
+Ask the user directly: "I'm in autopilot mode. Should I run the full flow (discovery → plan → execute → review) for this, or just handle it directly?"
 
 ---
 
-## Flow Execution Steps
+## FULL FLOW — 6 MANDATORY STEPS
 
-When a **feature request** is detected, execute these steps in order. At each step, **Read the relevant command file** to load its context, then follow its instructions.
+**CRITICAL**: When a feature request is detected, you MUST execute ALL 6 steps below in order. **Do NOT skip discovery. Do NOT skip planning. Do NOT jump to writing code.**
+
+The flow is: **Contracts → Discovery → Plan → Execute → Review → Archive**
+
+---
 
 ### Step 1: Check Contracts
 
-Check `flow/contracts/` for any relevant integration contracts. If found, note them for the discovery step.
+Check `flow/contracts/` for any relevant integration contracts. If found, note them for Step 2.
 
-### Step 2: Discovery
+---
 
-1. **Read** the file `.cursor/commands/discovery-plan.md` to load discovery context
-2. Execute the discovery skill following that command's instructions
-3. **PAUSE**: Ask user discovery questions as needed (mandatory checkpoint)
-4. Produce the discovery document in `flow/discovery/`
-5. Write transition summary (see format below)
-6. **Auto-proceed** to Step 3 (override the "ask before proceeding" rule)
+### Step 2: Discovery (MANDATORY — Do NOT skip)
 
-### Step 3: Create Plan
+**PURPOSE**: Gather requirements, search the codebase for context, ask clarifying questions. **NO CODE is written in this step.**
 
-**GATE CHECK**: Before proceeding, verify that Step 2 produced a discovery document in `flow/discovery/`. If no discovery document exists, **DO NOT proceed** — go back to Step 2. A plan cannot be created without a discovery document. This is a hard requirement with no exceptions.
+**What to do**:
 
-1. **Verify** discovery document exists in `flow/discovery/` (created in Step 2)
-2. **Read** the file `.cursor/commands/create-plan.md` to load planning context
-3. Execute the create-plan skill with the discovery document as input
-4. **PAUSE**: Present the plan for user approval (mandatory checkpoint)
-5. Wait for user to approve the plan before proceeding
-6. Produce the plan document in `flow/plans/`
-7. Write transition summary
-8. **Auto-proceed** to Step 4 (override the "no auto-chaining" rule)
+1. Read the file `.cursor/commands/discovery-plan.md` for detailed instructions
+2. Search the codebase to find all files related to the feature (components, types, API routes, stores, tests)
+3. Read referenced documents or contracts if any
+4. **PAUSE and ask the user clarifying questions** about requirements — this is a mandatory checkpoint
+5. Document requirements as: Functional (FR-), Non-Functional (NFR-), Constraints (C-)
+6. Identify technical considerations, risks, and proposed approach (high-level, NO code)
+7. **Save the discovery document** to `flow/discovery/discovery_<feature>_v1.md`
+
+**Output**: A discovery markdown file in `flow/discovery/`
+
+**FORBIDDEN during discovery**: Writing code, editing source files, creating plans, running build/test commands
+
+**After completing discovery**: Auto-proceed to Step 3. Do NOT ask "Would you like to proceed?" — just continue.
+
+---
+
+### Step 3: Create Plan (MANDATORY — Do NOT skip)
+
+**GATE CHECK**: Before this step, verify that Step 2 produced a discovery document in `flow/discovery/`. **If no discovery document exists, go back to Step 2. A plan CANNOT be created without discovery. No exceptions.**
+
+**What to do**:
+
+1. Read the file `.cursor/commands/create-plan.md` for detailed instructions
+2. Read the discovery document created in Step 2
+3. Extract requirements (FR, NFR, Constraints) from discovery
+4. Create phases with complexity scores (0-10) for each phase
+5. Tests MUST be the last phase
+6. Include a Key Changes section
+7. **Save the plan** to `flow/plans/plan_<feature>_v1.md`
+8. **PAUSE and present the plan for user approval** — this is a mandatory checkpoint
+9. Wait for user to approve before proceeding
+
+**Output**: A plan markdown file in `flow/plans/`
+
+**FORBIDDEN during planning**: Writing code, editing source files, running build/test commands
+
+**After user approves**: Auto-proceed to Step 4.
+
+---
 
 ### Step 4: Execute Plan
 
-1. **Read** the file `.cursor/commands/execute-plan.md` to load execution context
-2. Execute the plan following complexity-based grouping strategy
-3. Update the plan file with progress
-4. Run build + test verification at the end
-5. Write transition summary
-6. **Auto-proceed** to Step 5
+**What to do**:
+
+1. Read the file `.cursor/commands/execute-plan.md` for detailed instructions
+2. Read the plan file created in Step 3
+3. Execute phases following complexity-based grouping:
+   - Combined score ≤ 6: Aggregate phases together
+   - Combined score 7-10: Execute 1-2 phases at a time
+   - Combined score > 10: Execute one phase at a time
+   - Tests phase: Always execute separately
+4. For each phase: implement the code, then mark tasks complete in the plan file
+5. **Run build + test verification ONLY at the very end** (not between phases)
+6. Update the plan file with progress after each phase
+
+**After execution completes**: Auto-proceed to Step 5.
+
+---
 
 ### Step 5: Review Code
 
-1. **Read** the file `.cursor/commands/review-code.md` to load review context
-2. Review all uncommitted changes
-3. Present the review summary
+**What to do**:
+
+1. Read the file `.cursor/commands/review-code.md` for detailed instructions
+2. Review all uncommitted changes (git diff)
+3. Check for pattern consistency, security issues, and code quality
+4. Present a review summary
+
+**After review**: Auto-proceed to Step 6.
+
+---
 
 ### Step 6: Archive and Complete
 
 1. Move the discovery document to `flow/archive/`
 2. Move the plan document to `flow/archive/`
-3. Present completion summary
-4. **Prompt for context cleanup** (see below)
-
----
-
-## Transition Summary Format
-
-At each step boundary, write this brief summary to bridge context:
-
-```
-## Flow Progress
-
-**Feature**: [feature name from user input]
-**Current Step**: [N] of 6
-**Completed**:
-- Step 1: Contracts check → [found/none]
-- Step 2: Discovery → `flow/discovery/discovery_<feature>_v1.md`
-- Step 3: Plan → `flow/plans/plan_<feature>_v1.md`
-**Next**: [description of next step]
-**Key context**: [1-2 sentences of what matters for the next step]
-```
-
----
-
-## Context Cleanup Prompt
-
-After Step 6 completes, always prompt:
+3. Present completion summary:
 
 ```
 Flow complete! All artifacts archived.
 
-**Summary**:
+Summary:
 - Discovery: archived
 - Plan: archived
 - Code: reviewed
 - Build: passing
 - Tests: passing
 
-For best results on your next feature, consider starting a fresh context with `/clear`.
 Ready for the next task?
+```
+
+---
+
+## Transition Summary Format
+
+At each step boundary, write this brief summary:
+
+```
+## Flow Progress
+
+**Feature**: [feature name]
+**Current Step**: [N] of 6
+**Completed**:
+- Step 1: Contracts check → [found/none]
+- Step 2: Discovery → `flow/discovery/discovery_<feature>_v1.md`
+- Step 3: Plan → `flow/plans/plan_<feature>_v1.md`
+**Next**: [description of next step]
 ```
 
 ---
@@ -161,12 +174,10 @@ Even in autopilot, these checkpoints **always** pause for user input:
 | Checkpoint | When | Why |
 | --- | --- | --- |
 | Discovery Q&A | Step 2 | User must answer requirements questions |
-| Discovery Gate | Step 2→3 | Discovery document must exist before plan creation. No exceptions. |
-| Plan Approval | Step 3 | User must review and approve the plan before execution |
+| Discovery Gate | Step 2→3 | Discovery document MUST exist before plan. No exceptions. |
+| Plan Approval | Step 3 | User must approve plan before execution begins |
 
-All other transitions happen automatically.
-
-**Hard Rule**: Step 3 (Create Plan) CANNOT start unless Step 2 (Discovery) produced a document in `flow/discovery/`. If the discovery document does not exist, the flow must loop back to Step 2. A plan without discovery is incomplete and will lead to poor implementations.
+All other transitions happen automatically without asking.
 
 ---
 
