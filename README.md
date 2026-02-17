@@ -99,8 +99,11 @@ Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Generate tests for coverage target |
+| `/flow` | Toggle autopilot mode on/off |
 
 ## Workflow
+
+### Manual (default)
 
 ```
 1. /setup           -> Index project patterns (run once)
@@ -109,6 +112,35 @@ Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
 4. /execute-plan    -> Execute the plan phase by phase
 5. /review-code     -> Review changes before committing
 ```
+
+### Autopilot Mode
+
+Enable autopilot with `/flow -enable` and the full workflow runs automatically for feature requests:
+
+```
+You: "Add dark mode support"
+
+  -> Contracts check (automatic)
+  -> Discovery (pauses for your Q&A)
+  -> Create plan (pauses for your approval)
+  -> Execute plan (automatic)
+  -> Review code (automatic)
+  -> Archive (automatic)
+```
+
+Autopilot classifies every input and only triggers the full flow for feature requests (complexity 3+). Questions, trivial tasks, and slash commands are handled normally.
+
+| Usage | Description |
+|-------|-------------|
+| `/flow -enable` | Enable autopilot mode |
+| `/flow -disable` | Disable autopilot mode |
+| `/flow -status` | Check current state |
+
+**Mandatory checkpoints** — even in autopilot, the flow always pauses for:
+- **Discovery Q&A**: You answer requirements questions
+- **Plan approval**: You review and approve the plan before execution
+
+State is persisted in `flow/.autopilot` (survives session restarts).
 
 ## Complexity Scoring
 
@@ -134,7 +166,8 @@ flow/
 ├── plans/             # Active implementation plans
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
-└── reviewed-pr/       # PR review documents
+├── reviewed-pr/       # PR review documents
+└── ledger.md          # Persistent project learning journal
 ```
 
 ## Requirements
