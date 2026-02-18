@@ -32,7 +32,14 @@ When autopilot is ON, classify every new user input before acting:
 
 ### When Uncertain
 
-Ask the user directly: "I'm in autopilot mode. Should I run the full flow (discovery → plan → execute → review) for this, or just handle it directly?"
+If the input doesn't clearly fit a category, **CALL** `AskQuestion` to ask:
+
+- **CALL** `SwitchMode(target_mode_id: "plan", explanation: "Classifying user input for autopilot mode")` — **actually invoke the tool**
+- **CALL** `AskQuestion` with these options:
+  - A) Run the full flow (discovery → plan → execute → review)
+  - B) Handle it directly without the full flow
+- After the user answers, **CALL** `SwitchMode(target_mode_id: "agent", explanation: "Input classified, returning to Agent mode")` — **actually invoke the tool**
+- If `SwitchMode` or `AskQuestion` tools are not available, fall back to asking as plain text in chat
 
 ---
 
@@ -59,7 +66,12 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 1. Read the file `.cursor/commands/discovery-plan.md` for detailed instructions
 2. Search the codebase to find all files related to the feature (components, types, API routes, stores, tests)
 3. Read referenced documents or contracts if any
-4. **PAUSE and ask the user clarifying questions** about requirements — this is a mandatory checkpoint
+4. **SWITCH TO PLAN MODE and ask clarifying questions** — this is a mandatory checkpoint:
+   - **CALL** `SwitchMode(target_mode_id: "plan", explanation: "Discovery phase: Gathering requirements via interactive questions")` — **actually invoke the tool, do not describe it**
+   - **CALL** `AskQuestion` tool for each clarifying question about requirements (use 2-6 options per question, A/B/C/D format)
+   - Wait for the user to answer all questions
+   - **CALL** `SwitchMode(target_mode_id: "agent", explanation: "Discovery questions complete, returning to Agent mode")` — **actually invoke the tool**
+   - If `SwitchMode` or `AskQuestion` tools are not available, fall back to asking questions as plain text in chat
 5. Document requirements as: Functional (FR-), Non-Functional (NFR-), Constraints (C-)
 6. Identify technical considerations, risks, and proposed approach (high-level, NO code)
 7. **Save the discovery document** to `flow/discovery/discovery_<feature>_v1.md`

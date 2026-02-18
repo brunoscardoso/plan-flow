@@ -1,6 +1,6 @@
 {
   "name": "planflow-ai",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Structured AI-assisted development workflows for discovery, planning, execution, code reviews, and testing",
   "type": "module",
   "main": "dist/cli/index.js",

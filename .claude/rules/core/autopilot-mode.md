@@ -68,7 +68,7 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 
 1. **Read** the file `.claude/commands/discovery-plan.md` to load discovery context
 2. Execute the discovery skill following that command's instructions
-3. **PAUSE**: Ask user discovery questions as needed (mandatory checkpoint)
+3. **PAUSE**: Use the `AskUserQuestion` tool to ask clarifying questions about requirements (mandatory checkpoint). Present structured multiple-choice options — do NOT ask as plain text when the tool is available.
 4. Produce the discovery document in `flow/discovery/`
 5. Write transition summary (see format below)
 6. **Auto-proceed** to Step 3 (override the "ask before proceeding" rule)
