@@ -20,7 +20,7 @@ This interactive command installs plan-flow into your project for your chosen pl
 npx plan-flow init --claude
 ```
 
-Installs slash commands (`.claude/commands/`) and pattern rules (`.claude/rules/`) into your project. Creates or updates your `CLAUDE.md` with plan-flow instructions.
+Installs slash commands (`.claude/commands/`), core rules (`.claude/rules/`), and reference docs (`.claude/resources/`) into your project. Creates or updates your `CLAUDE.md` with plan-flow instructions.
 
 ### Cursor
 
@@ -72,7 +72,8 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 
 1. Copy `.claude/commands/*.md` to your project's `.claude/commands/`
 2. Copy `.claude/rules/` to your project's `.claude/rules/`
-3. Add the plan-flow section from `templates/shared/CLAUDE.md.template` to your `CLAUDE.md`
+3. Copy `.claude/resources/` to your project's `.claude/resources/`
+4. Add the plan-flow section from `templates/shared/CLAUDE.md.template` to your `CLAUDE.md`
 
 ### Cursor (Manual)
 

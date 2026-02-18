@@ -64,9 +64,10 @@ The Project Ledger (`flow/ledger.md`) is an always-active persistent learning jo
 
 ## Rules
 
-Core patterns and rules are in `.claude/rules/`:
+Core rules (always loaded) are in `.claude/rules/core/`:
+- Allowed patterns, forbidden patterns, complexity scoring, project ledger, autopilot mode
 
-- `core/` - Allowed patterns, forbidden patterns, complexity scoring, project ledger
+On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
 - `patterns/` - Templates and patterns for plans, discovery, contracts
 - `languages/` - Language-specific patterns (TypeScript, Python)
 - `tools/` - Tool-specific patterns (Jest, Pytest, auth)
@@ -108,7 +109,8 @@ Core patterns and rules are in `.claude/rules/`:
 | Directory | Target Platform | Description |
 |-----------|----------------|-------------|
 | `.claude/commands/` | Claude Code | Slash command definitions |
-| `.claude/rules/` | Claude Code | Pattern rules (.md) |
+| `.claude/rules/` | Claude Code | Core rules (.md, always loaded) |
+| `.claude/resources/` | Claude Code | Reference files (.md, on-demand) |
 | `rules/` | Cursor | Pattern rules (.mdc) |
 | `skills/plan-flow/` | OpenClaw | Skill manifests |
 | `templates/` | All | CLAUDE.md template |

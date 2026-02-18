@@ -81,7 +81,7 @@ RELATED COMMANDS:
 
 ## Critical Rules
 
-These rules are mandatory. For detailed patterns and guidelines, see `.claude/rules/patterns/discovery-patterns.md`.
+These rules are mandatory. For detailed patterns and guidelines, see `.claude/resources/patterns/discovery-patterns.md`.
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
@@ -158,7 +158,7 @@ The skill will:
 10. Ask user if they want to proceed to /create-plan
 11. Wait for user confirmation before proceeding
 
-See: `.claude/rules/skills/discovery-skill.md`
+See: `.claude/resources/skills/discovery-skill.md`
 
 ---
 
@@ -275,9 +275,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find discovery templates and patterns |
-| `rules/skills/_index.md` | To understand skill workflow |
-| `rules/tools/_index.md` | When using interactive questions |
+| `resources/patterns/_index.md` | To find discovery templates and patterns |
+| `resources/skills/_index.md` | To understand skill workflow |
+| `resources/tools/_index.md` | When using interactive questions |
 
 ### Reference Codes for Discovery
 
@@ -294,7 +294,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/skills/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -302,10 +302,10 @@ When executing this command:
 **Example expansion**:
 ```
 # To get the discovery template
-Read: rules/patterns/discovery-templates.md (lines from PTN-DIST-1)
+Read: resources/patterns/discovery-templates.md (lines from PTN-DIST-1)
 
 # To understand question workflow
-Read: rules/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
+Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 ```
 
 ---
@@ -314,9 +314,9 @@ Read: rules/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `rules/skills/_index.md`      | Index of skills with reference codes   |
-| `rules/patterns/_index.md`    | Index of patterns with reference codes |
-| `rules/tools/_index.md`       | Index of tools with reference codes    |
+| `resources/skills/_index.md`      | Index of skills with reference codes   |
+| `resources/patterns/_index.md`    | Index of patterns with reference codes |
+| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `discovery-skill.md`          | Skill that executes the discovery      |
 | `discovery-patterns.md`       | Rules and patterns for discovery       |
 | `discovery-templates.md`      | Document templates                     |
@@ -501,7 +501,7 @@ Ask questions about gaps identified in documents and unclear requirements.
 
 **Use Interactive Questions Tool**:
 
-Follow `.claude/rules/tools/interactive-questions-tool.md`:
+Follow `.claude/resources/tools/interactive-questions-tool.md`:
 
 1. Call `SwitchMode` tool to enter Plan mode
 2. Call `Ask the user directly in conversation` tool for each question (2-6 options, A/B/C/D format)
@@ -626,7 +626,7 @@ Create the discovery markdown file:
 
 **Location**: `flow/discovery/discovery_<feature_name>_v<version>.md`
 
-**Use Template**: See `.claude/rules/patterns/discovery-templates.md`
+**Use Template**: See `.claude/resources/patterns/discovery-templates.md`
 
 **Required Sections**:
 
@@ -644,7 +644,7 @@ Create the discovery markdown file:
 
 ## Output Format
 
-The discovery document should follow the template in `.claude/rules/patterns/discovery-templates.md`.
+The discovery document should follow the template in `.claude/resources/patterns/discovery-templates.md`.
 
 **Naming Convention**: `discovery_<feature_name>_v<version>.md`
 
@@ -683,7 +683,7 @@ Before completing discovery, verify:
 
 | File                                              | Purpose                           |
 | ------------------------------------------------- | --------------------------------- |
-| `.claude/rules/patterns/discovery-patterns.md`   | Rules and patterns for discovery  |
-| `.claude/rules/patterns/discovery-templates.md`  | Document templates                |
-| `.claude/rules/tools/interactive-questions-tool.md` | Interactive Questions UI workflow |
+| `.claude/resources/patterns/discovery-patterns.md`   | Rules and patterns for discovery  |
+| `.claude/resources/patterns/discovery-templates.md`  | Document templates                |
+| `.claude/resources/tools/interactive-questions-tool.md` | Interactive Questions UI workflow |
 | `flow/discovery/`                                 | Output folder for discovery docs  |

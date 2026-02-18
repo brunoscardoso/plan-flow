@@ -61,8 +61,10 @@ Every plan phase has a complexity score (0-10):
 
 ## Rules
 
-Pattern rules are in `.claude/rules/`:
-- `core/` - Allowed patterns, forbidden patterns, complexity scoring, project ledger
+Core rules (always loaded) are in `.claude/rules/core/`:
+- Allowed patterns, forbidden patterns, complexity scoring, project ledger, autopilot mode
+
+On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
 - `patterns/` - Templates and patterns for plans, discovery, contracts
 - `languages/` - Language-specific patterns (TypeScript, Python)
 - `tools/` - Tool-specific patterns (Jest, Pytest, auth)

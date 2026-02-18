@@ -130,7 +130,7 @@ The skill will:
 4. Add key changes summary
 5. Generate plan document
 
-See: `.claude/rules/skills/create-plan-skill.md`
+See: `.claude/resources/skills/create-plan-skill.md`
 
 ---
 
@@ -254,8 +254,8 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find plan patterns and templates |
-| `rules/skills/_index.md` | To understand skill workflow |
+| `resources/patterns/_index.md` | To find plan patterns and templates |
+| `resources/skills/_index.md` | To understand skill workflow |
 | `rules/core/_index.md` | For complexity scoring reference |
 
 ### Reference Codes for Plan Creation
@@ -272,7 +272,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/core/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `rules/core/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -283,8 +283,8 @@ When executing this command:
 
 | Resource                    | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `rules/skills/_index.md`   | Index of skills with reference codes |
-| `rules/patterns/_index.md` | Index of patterns with reference codes |
+| `resources/skills/_index.md`   | Index of skills with reference codes |
+| `resources/patterns/_index.md` | Index of patterns with reference codes |
 | `rules/core/_index.md`     | Index of core rules with reference codes |
 | `create-plan-skill.md`     | Skill that creates the plan       |
 | `plans-patterns.md`        | Rules and patterns for plans      |
@@ -430,7 +430,7 @@ Create the plan markdown file:
 
 **Location**: `flow/plans/plan_<feature_name>_v<version>.md`
 
-**Use Template**: See `.claude/rules/patterns/plans-templates.md`
+**Use Template**: See `.claude/resources/patterns/plans-templates.md`
 
 **Required Sections**:
 
@@ -446,7 +446,7 @@ Create the plan markdown file:
 
 ## Output Format
 
-The plan document should follow the template in `.claude/rules/patterns/plans-templates.md`.
+The plan document should follow the template in `.claude/resources/patterns/plans-templates.md`.
 
 **Naming Convention**: `plan_<feature_name>_v<version>.md`
 
@@ -544,8 +544,8 @@ Before completing the plan, verify:
 
 | File                                           | Purpose                          |
 | ---------------------------------------------- | -------------------------------- |
-| `.claude/rules/patterns/plans-patterns.md`    | Rules and patterns for plans     |
-| `.claude/rules/patterns/plans-templates.md`   | Plan templates                   |
+| `.claude/resources/patterns/plans-patterns.md`    | Rules and patterns for plans     |
+| `.claude/resources/patterns/plans-templates.md`   | Plan templates                   |
 | `.claude/rules/core/complexity-scoring.md`    | Complexity scoring system        |
 | `flow/plans/`                                  | Output folder for plan documents |
 | `flow/discovery/`                              | Input discovery documents        |

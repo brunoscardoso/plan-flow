@@ -11,8 +11,8 @@
 2. **Identify the language(s)** in the PR being reviewed
 3. **Apply general review patterns** from this file
 4. **Reference language-specific patterns** based on the codebase:
-   - For TypeScript/JavaScript: See `.claude/rules/languages/typescript-patterns.md`
-   - For Python: See `.claude/rules/languages/python-patterns.md`
+   - For TypeScript/JavaScript: See `.claude/resources/languages/typescript-patterns.md`
+   - For Python: See `.claude/resources/languages/python-patterns.md`
 5. **Cross-check against forbidden patterns** in `.claude/rules/core/forbidden-patterns.md`
 6. **Validate alignment with allowed patterns** in `.claude/rules/core/allowed-patterns.md`
 
@@ -67,7 +67,7 @@ Before approving any PR, verify the following:
 
 ### TypeScript/JavaScript PRs
 
-When reviewing TypeScript or JavaScript code, apply these additional checks from `.claude/rules/languages/typescript-patterns.md`:
+When reviewing TypeScript or JavaScript code, apply these additional checks from `.claude/resources/languages/typescript-patterns.md`:
 
 **Type Safety:**
 
@@ -102,13 +102,13 @@ let value: any;
 - [ ] `readonly` is used where mutation should be prevented
 - [ ] Arrays are not mutated directly; spread operators or `.map()` are used
 
-**Reference:** See `.claude/rules/languages/typescript-patterns.md` for the complete TypeScript best practices.
+**Reference:** See `.claude/resources/languages/typescript-patterns.md` for the complete TypeScript best practices.
 
 ---
 
 ### Python PRs
 
-When reviewing Python code, apply these additional checks from `.claude/rules/languages/python-patterns.md`:
+When reviewing Python code, apply these additional checks from `.claude/resources/languages/python-patterns.md`:
 
 **Type Hints:**
 
@@ -149,7 +149,7 @@ def fetch_user(user_id):
 - [ ] Docstrings for public functions and classes
 - [ ] No circular imports
 
-**Reference:** See `.claude/rules/languages/python-patterns.md` for the complete Python best practices.
+**Reference:** See `.claude/resources/languages/python-patterns.md` for the complete Python best practices.
 
 ---
 
@@ -324,7 +324,7 @@ Reference: See `.claude/rules/core/forbidden-patterns.md` for details on why thi
 
 Consider using `unknown` with a type guard, or define a specific interface.
 
-Reference: See `.claude/rules/languages/typescript-patterns.md` section on "Avoid the `any` Type".
+Reference: See `.claude/resources/languages/typescript-patterns.md` section on "Avoid the `any` Type".
 ```
 
 ### Flagging Missing Error Handling
@@ -356,5 +356,5 @@ A PR should only be approved when:
 | ------------------------- | ------------------------------ | ------------------------------ |
 | `.claude/rules/core/forbidden-patterns.md`  | Anti-patterns to avoid         | When flagging problematic code |
 | `.claude/rules/core/allowed-patterns.md`    | Best practices to follow       | When suggesting improvements   |
-| `.claude/rules/languages/typescript-patterns.md` | TypeScript-specific guidelines | When reviewing TS/JS code      |
-| `.claude/rules/languages/python-patterns.md`     | Python-specific guidelines     | When reviewing Python code     |
+| `.claude/resources/languages/typescript-patterns.md` | TypeScript-specific guidelines | When reviewing TS/JS code      |
+| `.claude/resources/languages/python-patterns.md`     | Python-specific guidelines     | When reviewing Python code     |

@@ -101,7 +101,7 @@ RELATED COMMANDS:
 
 This command uses the Interactive Questions Tool for user confirmation.
 
-See: `.claude/rules/tools/interactive-questions-tool.md`
+See: `.claude/resources/tools/interactive-questions-tool.md`
 
 ---
 
@@ -218,7 +218,7 @@ Check for existing rules:
 
 **Use the Interactive Questions Tool to confirm detected patterns with the user.**
 
-See: `.claude/rules/tools/interactive-questions-tool.md`
+See: `.claude/resources/tools/interactive-questions-tool.md`
 
 #### 7.1: Present Analysis Summary First
 
@@ -388,7 +388,7 @@ With confirmed patterns, the skill will:
 3. Create project analysis document
 4. Update core pattern files
 
-See: `.claude/rules/skills/setup-skill.md`
+See: `.claude/resources/skills/setup-skill.md`
 
 ---
 
@@ -656,10 +656,10 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/skills/_index.md` | To understand setup workflow |
-| `rules/tools/_index.md` | For interactive questions tool |
+| `resources/skills/_index.md` | To understand setup workflow |
+| `resources/tools/_index.md` | For interactive questions tool |
 | `rules/core/_index.md` | For pattern references |
-| `rules/languages/_index.md` | For language-specific patterns |
+| `resources/languages/_index.md` | For language-specific patterns |
 
 ### Reference Codes for Setup
 
@@ -678,7 +678,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/skills/_index.md` and `rules/tools/_index.md`
+1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/tools/_index.md`
 2. **Expand for detection phase**: Load minimal context during code analysis
 3. **Expand for questions**: Load TLS-IQ-* before asking confirmation questions
 4. **Expand for generation**: Load relevant language patterns when generating files
@@ -690,10 +690,10 @@ When executing this command:
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `rules/skills/_index.md`      | Index of skills with reference codes   |
-| `rules/tools/_index.md`       | Index of tools with reference codes    |
+| `resources/skills/_index.md`      | Index of skills with reference codes   |
+| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `rules/core/_index.md`        | Index of core rules with reference codes |
-| `rules/languages/_index.md`   | Index of language patterns with reference codes |
+| `resources/languages/_index.md`   | Index of language patterns with reference codes |
 | `setup-skill.md`              | Detailed execution logic               |
 | `interactive-questions-tool.md` | Questions UI for confirmations       |
 | `allowed-patterns.md`         | Core allowed patterns                  |
@@ -1605,5 +1605,5 @@ Before completing setup, verify each pattern file:
 | ---------------------------------------------- | --------------------------------- |
 | `.claude/rules/core/allowed-patterns.md`      | Core allowed patterns             |
 | `.claude/rules/core/forbidden-patterns.md`    | Core forbidden patterns           |
-| `.claude/rules/tools/interactive-questions-tool.md` | Questions UI                |
+| `.claude/resources/tools/interactive-questions-tool.md` | Questions UI                |
 | `flow/references/project_analysis.md`          | Analysis output                   |

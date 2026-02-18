@@ -214,7 +214,7 @@ Glob: "**/*user*.test.ts*" or "**/*profile*.test.ts*"
 3. Wait for responses
 4. Call `SwitchMode` tool to return to Agent mode
 
-See `.claude/rules/tools/interactive-questions-tool.md` for detailed instructions.
+See `.claude/resources/tools/interactive-questions-tool.md` for detailed instructions.
 
 **Question Format**:
 
@@ -240,7 +240,7 @@ Every discovery document must include these sections:
 | Risks and Unknowns       | Identified risks with mitigation           |
 | Next Steps               | Follow-up actions linking to `/create-plan` |
 
-See `.claude/rules/patterns/discovery-templates.md` for the full template.
+See `.claude/resources/patterns/discovery-templates.md` for the full template.
 
 ---
 
@@ -412,8 +412,8 @@ The discovery document is the **ONLY** deliverable. It must be:
 ## Related Resources
 
 - **Command**: `/discovery-plan` - Orchestrates the discovery workflow
-- **Templates**: `.claude/rules/patterns/discovery-templates.md`
-- **Interactive Questions**: `.claude/rules/tools/interactive-questions-tool.md`
+- **Templates**: `.claude/resources/patterns/discovery-templates.md`
+- **Interactive Questions**: `.claude/resources/tools/interactive-questions-tool.md`
 - **Plan Command**: `/create-plan` - Creates plan from discovery
 
 ---

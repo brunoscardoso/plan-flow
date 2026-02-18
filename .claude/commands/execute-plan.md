@@ -178,7 +178,7 @@ The skill will:
 5. Run final build and test verification
 6. Present completion summary
 
-See: `.claude/rules/skills/execute-plan-skill.md`
+See: `.claude/resources/skills/execute-plan-skill.md`
 
 ---
 
@@ -281,9 +281,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/skills/_index.md` | To understand execution workflow |
+| `resources/skills/_index.md` | To understand execution workflow |
 | `rules/core/_index.md` | For complexity scoring reference |
-| `rules/tools/_index.md` | When switching to Plan mode |
+| `resources/tools/_index.md` | When switching to Plan mode |
 
 ### Reference Codes for Plan Execution
 
@@ -299,7 +299,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/skills/_index.md` and `rules/core/_index.md`
+1. **Start with indexes**: Read `resources/skills/_index.md` and `rules/core/_index.md`
 2. **Identify needed codes**: Based on current phase, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current phase
@@ -310,9 +310,9 @@ When executing this command:
 
 | Resource                   | Purpose                           |
 | -------------------------- | --------------------------------- |
-| `rules/skills/_index.md`  | Index of skills with reference codes |
+| `resources/skills/_index.md`  | Index of skills with reference codes |
 | `rules/core/_index.md`    | Index of core rules with reference codes |
-| `rules/tools/_index.md`   | Index of tools with reference codes |
+| `resources/tools/_index.md`   | Index of tools with reference codes |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
 | `plans-patterns.md`       | Rules and patterns for plans      |
 | `complexity-scoring.md`   | Complexity scoring system         |
@@ -697,8 +697,8 @@ If the user wants to stop execution:
 
 | File                                        | Purpose                          |
 | ------------------------------------------- | -------------------------------- |
-| `.claude/rules/patterns/plans-patterns.md` | Plan patterns and rules          |
+| `.claude/resources/patterns/plans-patterns.md` | Plan patterns and rules          |
 | `.claude/rules/core/complexity-scoring.md` | Complexity scoring system        |
-| `.claude/rules/tools/plan-mode-tool.md`    | Plan mode switching instructions |
+| `.claude/resources/tools/plan-mode-tool.md`    | Plan mode switching instructions |
 | `flow/plans/`                               | Input plan documents             |
 | `flow/archive/`                             | Completed plans destination      |

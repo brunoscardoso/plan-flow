@@ -111,7 +111,7 @@ The skill will:
 3. Ask clarifying questions via Interactive Questions Tool
 4. Generate contract document
 
-See: `.claude/rules/skills/create-contract-skill.md`
+See: `.claude/resources/skills/create-contract-skill.md`
 
 ---
 
@@ -204,9 +204,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find contract patterns |
-| `rules/skills/_index.md` | To understand skill workflow |
-| `rules/tools/_index.md` | When using interactive questions |
+| `resources/patterns/_index.md` | To find contract patterns |
+| `resources/skills/_index.md` | To understand skill workflow |
+| `resources/tools/_index.md` | When using interactive questions |
 
 ### Reference Codes for Contract Creation
 
@@ -222,7 +222,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/skills/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -233,9 +233,9 @@ When executing this command:
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `rules/skills/_index.md`      | Index of skills with reference codes   |
-| `rules/patterns/_index.md`    | Index of patterns with reference codes |
-| `rules/tools/_index.md`       | Index of tools with reference codes    |
+| `resources/skills/_index.md`      | Index of skills with reference codes   |
+| `resources/patterns/_index.md`    | Index of patterns with reference codes |
+| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `create-contract-skill.md`    | Skill that creates the contract        |
 | `contract-patterns.md`        | Rules and patterns for contracts       |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
@@ -337,7 +337,7 @@ If the source is a repository URL:
 
 **Use Interactive Questions Tool** to gather requirements.
 
-Follow `.claude/rules/tools/interactive-questions-tool.md`:
+Follow `.claude/resources/tools/interactive-questions-tool.md`:
 
 1. Call `SwitchMode` tool to enter Plan mode
 2. Call `Ask the user directly in conversation` tool for each question about:
@@ -463,6 +463,6 @@ Before completing the contract, verify:
 
 | File                                               | Purpose                           |
 | -------------------------------------------------- | --------------------------------- |
-| `.claude/rules/patterns/contract-patterns.md`     | Rules and patterns for contracts  |
-| `.claude/rules/tools/interactive-questions-tool.md` | Interactive Questions workflow  |
+| `.claude/resources/patterns/contract-patterns.md`     | Rules and patterns for contracts  |
+| `.claude/resources/tools/interactive-questions-tool.md` | Interactive Questions workflow  |
 | `flow/contracts/`                                  | Output folder for contracts       |

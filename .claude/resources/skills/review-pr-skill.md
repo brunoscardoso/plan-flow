@@ -1,177 +1,18 @@
----
-description: This command reviews a Pull Request from GitHub or Azure DevOps by invoking the `review-pr` skill. T
----
 
-# Review PR Command
+# Review PR Skill
 
-## Command Description
+## Purpose
 
-This command reviews a Pull Request from GitHub or Azure DevOps by invoking the `review-pr` skill. The command validates inputs and orchestrates the review process.
+Perform a comprehensive **read-only analysis** of a Pull Request using established patterns and guidelines, then generate a structured review document.
 
----
+This skill **only produces a markdown file** with findings. It does NOT:
 
-
-## Help
-
-**If the user invokes this command with `-help`, display only this section and stop:**
-
-```
-/review-pr - Review Pull Request
-
-DESCRIPTION:
-  Reviews a Pull Request from GitHub or Azure DevOps. Authenticates,
-  fetches PR details, and generates a detailed review document.
-
-USAGE:
-  /review-pr <pr_url>
-  /review-pr -help
-
-ARGUMENTS:
-  pr_url   URL of the Pull Request to review
-
-EXAMPLES:
-  /review-pr https://github.com/org/repo/pull/123
-  /review-pr https://dev.azure.com/org/project/_git/repo/pullrequest/456
-  /review-pr https://github.com/myorg/myrepo/pull/789
-
-SUPPORTED PLATFORMS:
-  - GitHub (github.com)
-  - Azure DevOps (dev.azure.com, visualstudio.com)
-
-OUTPUT:
-  Creates: flow/reviewed-pr/<pr_identifier>.md
-
-WORKFLOW:
-  1. Validates PR URL format
-  2. Authenticates using auth-pr tool
-  3. Fetches PR information and diff
-  4. Loads review patterns from project rules
-  5. Analyzes code changes
-  6. Generates review document
-
-REVIEW INCLUDES:
-  - Summary of changes
-  - Pattern compliance check
-  - Code quality issues
-  - Suggestions for improvement
-  - Approval recommendation
-
-RECOMMENDED MODEL:
-  Claude Opus 4.6 or Sonnet 4.5 for best results
-
-RELATED COMMANDS:
-  /review-code   Review local changes instead
-```
+- Run any build or test commands
+- Modify any code
+- Execute any scripts
+- Make changes to the codebase
 
 ---
-
-## Critical Rules
-
-| Rule                     | Description                                              |
-| ------------------------ | -------------------------------------------------------- |
-| **Read-Only Analysis**   | This command ONLY produces a review document             |
-| **Complete and Stop**    | After presenting results, STOP and wait for user         |
-
----
-
-## Instructions
-
-### Step 1: Validate Inputs
-
-| Input | Required | Description |
-|-------|----------|-------------|
-| `pr_link` | Yes | The URL of the Pull Request to review |
-| `language` | Optional | Primary language (auto-detected if not provided) |
-
-### Step 2: Validate PR URL Format
-
-- **GitHub**: Must contain `github.com` and `/pull/`
-- **Azure DevOps**: Must contain `dev.azure.com` or `visualstudio.com` and `pullrequest`
-
-### Step 3: Invoke Review PR Skill
-
-The skill will:
-1. Authenticate using the `auth-pr` tool
-2. Fetch PR information
-3. Load review patterns
-4. Analyze code changes
-5. Generate review document
-
-### Step 4: Present Results
-
-**Review document created**: `flow/reviewed-pr/{filename}.md`
-
----
-
-## Example Usage
-
-```bash
-# Review a GitHub PR
-review-pr https://github.com/org/repo/pull/123
-
-# Review an Azure DevOps PR
-review-pr https://dev.azure.com/org/project/_git/repo/pullrequest/456
-```
-
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/review-pr.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for PR Review
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/skills/_index.md` | To understand review workflow |
-| `resources/tools/_index.md` | For authentication tool |
-| `resources/patterns/_index.md` | For review patterns |
-| `rules/core/_index.md` | For allowed/forbidden patterns |
-
-### Reference Codes for PR Review
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-PR-1 | Review PR skill workflow | Understanding full process |
-| TLS-AUTH-1 | Auth tool configuration | Setting up authentication |
-| TLS-AUTH-2 | Authentication workflow | Authenticating to platform |
-| PTN-PR-1 | PR review patterns | Creating review output |
-| COR-AP-1 | Allowed patterns overview | Checking pattern compliance |
-| COR-FP-1 | Forbidden patterns overview | Identifying anti-patterns |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/tools/_index.md`
-2. **Expand auth first**: Load TLS-AUTH-* codes for authentication
-3. **Then expand review patterns**: Load PTN-PR-* codes for review structure
-4. **Don't expand everything**: Only load patterns relevant to the PR being reviewed
-
----
-
-## Related Resources
-
-| Resource                       | Purpose                                |
-| ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/tools/_index.md`       | Index of tools with reference codes    |
-| `resources/patterns/_index.md`    | Index of patterns with reference codes |
-| `rules/core/_index.md`        | Index of core rules with reference codes |
-| `review-pr-skill.md`          | Skill that executes the review         |
-| `auth-pr-tool.md`             | Authentication tool for PR platforms   |
-| `review-pr-patterns.md`       | Review patterns and guidelines         |
-
----
-
-# Implementation Details
-
 
 ## Restrictions - READ ONLY
 
@@ -273,7 +114,7 @@ curl -s -u ":$AZURE_DEVOPS_PAT" \
   "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
 ```
 
-> 📝 **Output**: All findings, comments, and suggestions are saved to a local markdown file in `flow/reviewed-pr/`. The user can then manually copy comments to the PR if desired.
+> **Output**: All findings, comments, and suggestions are saved to a local markdown file in `flow/reviewed-pr/`. The user can then manually copy comments to the PR if desired.
 
 ---
 
@@ -367,7 +208,7 @@ pr-notes-{sanitized-pr-title}.md
 flow/reviewed-pr/pr-notes-add-user-authentication-flow.md
 ```
 
-> 💡 **Tip**: Use the PR number in the filename for easier matching on re-reviews (e.g., `pr-notes-123-add-user-authentication-flow.md`)
+> **Tip**: Use the PR number in the filename for easier matching on re-reviews (e.g., `pr-notes-123-add-user-authentication-flow.md`)
 
 ---
 
@@ -408,10 +249,10 @@ The generated review document should follow this structure:
 | Metric               | Value              |
 | -------------------- | ------------------ |
 | **Total Findings**   | {count}            |
-| Critical 🔴          | {critical_count}   |
-| Major 🟠             | {major_count}      |
-| Minor 🟡             | {minor_count}      |
-| Suggestion 🔵        | {suggestion_count} |
+| Critical             | {critical_count}   |
+| Major                | {major_count}      |
+| Minor                | {minor_count}      |
+| Suggestion           | {suggestion_count} |
 | **Total Fix Effort** | {sum_of_scores}/X  |
 
 > **Total Fix Effort**: Sum of all fix complexity scores. Use this to estimate the overall effort needed to address all findings.
@@ -426,14 +267,14 @@ The generated review document should follow this structure:
 | -------------- | -------------------------------------------------- |
 | File           | `{file_path}`                                      |
 | Line           | {line_number}                                      |
-| **Link**       | **[View in PR]({direct_url_to_line})** ⬅️ REQUIRED |
-| Severity       | {Critical \| Major \| Minor \| Suggestion}         |
+| **Link**       | **[View in PR]({direct_url_to_line})** REQUIRED    |
+| Severity       | {Critical | Major | Minor | Suggestion}            |
 | Fix Complexity | {X/10} - {Level}                                   |
-| Status         | {Open \| Resolved}                                 |
+| Status         | {Open | Resolved}                                  |
 | Pattern        | {Reference to pattern from rules, if applicable}   |
 
-> ⚠️ **Important**: The Link field is REQUIRED. Always include a clickable link to the exact line in the PR.
-> 📊 **Fix Complexity**: Use the [`complexity-scoring` pattern](../core/complexity-scoring.md) to calculate the effort required to fix this finding.
+> **Important**: The Link field is REQUIRED. Always include a clickable link to the exact line in the PR.
+> **Fix Complexity**: Use the [`complexity-scoring` pattern](../core/complexity-scoring.md) to calculate the effort required to fix this finding.
 
 **Description**:
 {Detailed explanation of the issue found}
@@ -466,7 +307,7 @@ List any particularly well-written code or good practices observed:
 
 ## Approval Recommendation
 
-| Status | {Approve \| Request Changes \| Needs Discussion} |
+| Status | {Approve | Request Changes | Needs Discussion} |
 | ------ | ------------------------------------------------ |
 | Reason | {Brief explanation of the recommendation}        |
 ```
@@ -475,12 +316,12 @@ List any particularly well-written code or good practices observed:
 
 ## Severity Levels
 
-| Level      | Icon | Description                                              |
-| ---------- | ---- | -------------------------------------------------------- |
-| Critical   | 🔴   | Security vulnerabilities, data loss risks, blocking bugs |
-| Major      | 🟠   | Significant issues affecting functionality or quality    |
-| Minor      | 🟡   | Code style, minor improvements, non-critical concerns    |
-| Suggestion | 🔵   | Nice-to-have improvements, optional enhancements         |
+| Level      | Description                                              |
+| ---------- | -------------------------------------------------------- |
+| Critical   | Security vulnerabilities, data loss risks, blocking bugs |
+| Major      | Significant issues affecting functionality or quality    |
+| Minor      | Code style, minor improvements, non-critical concerns    |
+| Suggestion | Nice-to-have improvements, optional enhancements         |
 
 ---
 
@@ -550,7 +391,7 @@ https://github.com/{owner}/{repo}/pull/{pr_number}/files#diff-{file_path_hash}R{
 https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{pr_id}?_a=files&path={file_path}&line={line_number}&lineEnd={line_number}&lineStartColumn=1&lineEndColumn=1000&lineStyle=plain
 ```
 
-> ⚠️ **Critical Parameters**:
+> **Critical Parameters**:
 >
 > - `_a=files` - Required to navigate to the Files tab
 > - `lineStyle=plain` - Ensures line highlighting works
@@ -571,7 +412,7 @@ https://dev.azure.com/{org}/{project}/_git/{repo}?path={file_path}&version=GB{br
 | Azure DevOps | PR Files  | `https://dev.azure.com/org/project/_git/repo/pullrequest/123?_a=files&path=/src/api/route.ts&line=45&lineEnd=45&lineStartColumn=1&lineEndColumn=1000&lineStyle=plain` |
 | Azure DevOps | Branch    | `https://dev.azure.com/org/project/_git/repo?path=/src/api/route.ts&version=GBfeature-branch&line=45&lineEnd=45&_a=contents`                                          |
 
-> ⚠️ **REQUIRED**: Every finding MUST include a clickable link. This allows reviewers to quickly navigate to the exact location of the issue.
+> **REQUIRED**: Every finding MUST include a clickable link. This allows reviewers to quickly navigate to the exact location of the issue.
 
 ---
 
@@ -584,10 +425,10 @@ https://dev.azure.com/{org}/{project}/_git/{repo}?path={file_path}&version=GB{br
 | File           | `src/services/userService.ts`                                                                     |
 | Line           | 45                                                                                                |
 | **Link**       | **[View in PR](https://github.com/org/repo/blob/feature-branch/src/services/userService.ts#L45)** |
-| Severity       | Major 🟠                                                                                          |
+| Severity       | Major                                                                                             |
 | Fix Complexity | 3/10 - Low                                                                                        |
 | Status         | Open                                                                                              |
-| Pattern        | `forbidden-patterns.md` - DON'T Swallow Errors                                                   |
+| Pattern        | `forbidden-patterns.md` - DON'T Swallow Errors                                                    |
 
 > **Azure DevOps example link**: `[View in PR](https://dev.azure.com/org/project/_git/repo/pullrequest/123?_a=files&path=/src/services/userService.ts&line=45&lineEnd=45&lineStartColumn=1&lineEndColumn=1000&lineStyle=plain)`
 
@@ -628,12 +469,12 @@ review-pr https://github.com/org/repo/pull/123 --language typescript
 | File                                       | Purpose                              |
 | ------------------------------------------ | ------------------------------------ |
 | `.claude/resources/patterns/review-pr-patterns.md` | Main review checklist and guidelines |
-| `.claude/rules/core/forbidden-patterns.md`        | Anti-patterns to flag                |
-| `.claude/rules/core/allowed-patterns.md`          | Best practices to encourage          |
-| `.claude/resources/languages/typescript-patterns.md`  | TypeScript-specific checks           |
-| `.claude/resources/languages/python-patterns.md`      | Python-specific checks               |
-| `.claude/rules/core/complexity-scoring.md`        | Fix complexity scoring system        |
-| `tools/auth-pr-tool.md`                   | PR authentication tool               |
+| `.claude/rules/core/forbidden-patterns.md`  | Anti-patterns to flag                |
+| `.claude/rules/core/allowed-patterns.md`    | Best practices to encourage          |
+| `.claude/resources/languages/typescript-patterns.md` | TypeScript-specific checks           |
+| `.claude/resources/languages/python-patterns.md` | Python-specific checks               |
+| `.claude/rules/core/complexity-scoring.md`  | Fix complexity scoring system        |
+| `.claude/resources/tools/auth-pr-tool.md`   | PR authentication tool               |
 | `flow/reviewed-pr/`                        | Output folder for review documents   |
 | `.plan.flow.env`                           | Authentication tokens (gitignored)   |
 | `.example.plan.flow.env`                   | Example env file template            |

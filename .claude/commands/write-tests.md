@@ -117,7 +117,7 @@ The skill will:
    - Verify coverage improved
 4. Run final verification
 
-See: `.claude/rules/skills/write-tests-skill.md`
+See: `.claude/resources/skills/write-tests-skill.md`
 
 ---
 
@@ -215,9 +215,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/skills/_index.md` | To understand test writing workflow |
-| `rules/patterns/_index.md` | For testing patterns |
-| `rules/tools/_index.md` | For testing tool commands |
+| `resources/skills/_index.md` | To understand test writing workflow |
+| `resources/patterns/_index.md` | For testing patterns |
+| `resources/tools/_index.md` | For testing tool commands |
 
 ### Reference Codes for Writing Tests
 
@@ -235,7 +235,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/skills/_index.md` and `rules/patterns/_index.md`
+1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/patterns/_index.md`
 2. **Detect framework first**: Determine Jest or Pytest before expanding patterns
 3. **Expand framework-specific**: Only load PTN-JEST-* or PTN-PYTEST-*, not both
 4. **Expand tool commands**: Load TLS-JEST-* or TLS-PYTEST-* for running tests
@@ -247,9 +247,9 @@ When executing this command:
 
 | Resource                  | Purpose                         |
 | ------------------------- | ------------------------------- |
-| `rules/skills/_index.md` | Index of skills with reference codes |
-| `rules/patterns/_index.md` | Index of patterns with reference codes |
-| `rules/tools/_index.md`  | Index of tools with reference codes |
+| `resources/skills/_index.md` | Index of skills with reference codes |
+| `resources/patterns/_index.md` | Index of patterns with reference codes |
+| `resources/tools/_index.md`  | Index of tools with reference codes |
 | `write-tests-skill.md`   | Skill that writes the tests     |
 | `jest-patterns.md`       | Jest testing patterns           |
 | `pytest-patterns.md`     | Pytest testing patterns         |
@@ -284,8 +284,8 @@ Identify the testing framework based on project files:
 | Pytest    | `pytest.ini`, `pyproject.toml`, `conftest.py` |
 
 Load the appropriate patterns:
-- Jest: `.claude/rules/patterns/jest-patterns.md`
-- Pytest: `.claude/rules/patterns/pytest-patterns.md`
+- Jest: `.claude/resources/patterns/jest-patterns.md`
+- Pytest: `.claude/resources/patterns/pytest-patterns.md`
 
 ---
 
@@ -537,7 +537,7 @@ All metrics meet or exceed the target coverage.
 
 | File                                        | Purpose                         |
 | ------------------------------------------- | ------------------------------- |
-| `.claude/rules/patterns/jest-patterns.md`  | Jest testing patterns           |
-| `.claude/rules/patterns/pytest-patterns.md`| Pytest testing patterns         |
-| `.claude/rules/tools/jest-testing-tool.md` | Jest commands and utilities     |
-| `.claude/rules/tools/pytest-testing-tool.md`| Pytest commands and utilities  |
+| `.claude/resources/patterns/jest-patterns.md`  | Jest testing patterns           |
+| `.claude/resources/patterns/pytest-patterns.md`| Pytest testing patterns         |
+| `.claude/resources/tools/jest-testing-tool.md` | Jest commands and utilities     |
+| `.claude/resources/tools/pytest-testing-tool.md`| Pytest commands and utilities  |

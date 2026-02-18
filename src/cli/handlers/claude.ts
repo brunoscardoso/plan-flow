@@ -1,7 +1,7 @@
 /**
  * Claude Code handler
  *
- * Copies .claude/commands/ and .claude/rules/ to the user's project,
+ * Copies .claude/commands/, .claude/rules/, and .claude/resources/ to the user's project,
  * and creates/updates CLAUDE.md with plan-flow instructions.
  */
 
@@ -142,7 +142,29 @@ export async function initClaude(
     }
   }
 
-  // 3. Handle CLAUDE.md
+  // 3. Copy .claude/resources/ (on-demand reference files)
+  const resourcesSrc = join(packageRoot, '.claude', 'resources');
+  const resourcesDest = join(target, '.claude', 'resources');
+
+  if (existsSync(resourcesSrc)) {
+    ensureDir(resourcesDest);
+    const resourcesResult = copyDir(resourcesSrc, resourcesDest, options);
+    result.created.push(...resourcesResult.created);
+    result.skipped.push(...resourcesResult.skipped);
+    result.updated.push(...resourcesResult.updated);
+
+    for (const f of resourcesResult.created) {
+      log.success(`Created ${f.replace(target + '/', '')}`);
+    }
+    for (const f of resourcesResult.skipped) {
+      log.skip(`Skipped ${f.replace(target + '/', '')}`);
+    }
+    for (const f of resourcesResult.updated) {
+      log.warn(`Updated ${f.replace(target + '/', '')}`);
+    }
+  }
+
+  // 4. Handle CLAUDE.md
   const mdResult = handleClaudeMd(target, packageRoot, options);
   result.created.push(...mdResult.created);
   result.skipped.push(...mdResult.skipped);
