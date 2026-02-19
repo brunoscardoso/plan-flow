@@ -473,7 +473,7 @@ review-pr https://github.com/org/repo/pull/123 --language typescript
 | `.claude/rules/core/allowed-patterns.md`    | Best practices to encourage          |
 | `.claude/resources/languages/typescript-patterns.md` | TypeScript-specific checks           |
 | `.claude/resources/languages/python-patterns.md` | Python-specific checks               |
-| `.claude/rules/core/complexity-scoring.md`  | Fix complexity scoring system        |
+| `.claude/resources/core/complexity-scoring.md`  | Fix complexity scoring system        |
 | `.claude/resources/tools/auth-pr-tool.md`   | PR authentication tool               |
 | `flow/reviewed-pr/`                        | Output folder for review documents   |
 | `.plan.flow.env`                           | Authentication tokens (gitignored)   |

@@ -58,23 +58,27 @@ flow/
 └── ledger.md          # Persistent project learning journal
 ```
 
-## Project Ledger
+## Session Start Behaviors
 
-The Project Ledger (`flow/ledger.md`) is an always-active persistent learning journal. It captures project-specific mistakes, corrections, quirks, and knowledge across sessions. The rule is defined in `.claude/rules/core/project-ledger.md` and works silently in the background - reading on session start, updating during work, and maintaining itself over time.
+- **Project Ledger**: If `flow/ledger.md` exists, read it silently and internalize learnings. Update it when you learn project-specific lessons. See `.claude/resources/core/project-ledger.md` for full rules.
+- **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Rules
 
-Core rules (always loaded) are in `.claude/rules/core/`:
-- Allowed patterns, forbidden patterns, complexity scoring, project ledger, autopilot mode
+Always-loaded rules are in `.claude/rules/core/`:
+- `allowed-patterns.md` - Coding standards to follow
+- `forbidden-patterns.md` - Anti-patterns to avoid
 
 On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
+- `core/` - Complexity scoring, project ledger rules, autopilot mode, reference index
 - `patterns/` - Templates and patterns for plans, discovery, contracts
+- `skills/` - Skill implementation details
 - `languages/` - Language-specific patterns (TypeScript, Python)
 - `tools/` - Tool-specific patterns (Jest, Pytest, auth)
 
 ## Critical Rules
 
-1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/rules/core/autopilot-mode.md`.
+1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/resources/core/autopilot-mode.md`.
 2. **Complete and Stop**: After completing a skill, stop and wait for user input.
 3. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 4. **Tests Last**: Tests are always the last phase of any implementation plan.

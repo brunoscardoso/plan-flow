@@ -111,7 +111,7 @@ mv flow/plans/plan_feature_name_v1.md flow/archive/
 
 Every phase must include a **Complexity Score** from 0-10.
 
-See `.claude/rules/core/complexity-scoring.md` for the complete scoring system.
+See `.claude/resources/core/complexity-scoring.md` for the complete scoring system.
 
 ---
 

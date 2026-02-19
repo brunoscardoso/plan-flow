@@ -81,7 +81,7 @@ Based on extracted requirements:
 
 1. Identify the major components/areas of work
 2. Group related tasks into logical phases
-3. Estimate complexity for each phase using `.claude/rules/core/complexity-scoring.md`
+3. Estimate complexity for each phase using `.claude/resources/core/complexity-scoring.md`
 
 ---
 
@@ -112,7 +112,7 @@ Create phases following these guidelines:
 5. Integration
 6. Tests (ALWAYS last)
 
-**Complexity Scoring** (per `.claude/rules/core/complexity-scoring.md`):
+**Complexity Scoring** (per `.claude/resources/core/complexity-scoring.md`):
 
 | Score | Level     | Description                      |
 | ----- | --------- | -------------------------------- |
@@ -259,6 +259,6 @@ Before completing the plan, verify:
 | ---------------------------------------------- | -------------------------------- |
 | `.claude/resources/patterns/plans-patterns.md`  | Rules and patterns for plans     |
 | `.claude/resources/patterns/plans-templates.md` | Plan templates                   |
-| `.claude/rules/core/complexity-scoring.md`      | Complexity scoring system        |
+| `.claude/resources/core/complexity-scoring.md`      | Complexity scoring system        |
 | `flow/plans/`                                  | Output folder for plan documents |
 | `flow/discovery/`                              | Input discovery documents        |

@@ -22,13 +22,14 @@
 4. `/execute-plan` - Execute the plan phase by phase
 5. `/review-code` or `/review-pr` - Review changes before merging
 
-## Project Ledger
+## Session Start Behaviors
 
-The Project Ledger (`flow/ledger.md`) is always active. It silently captures project-specific learnings, mistakes, and corrections across sessions - building institutional memory that improves AI assistance over time. See `.claude/rules/core/project-ledger.md` for details.
+- **Project Ledger**: If `flow/ledger.md` exists, read it silently and internalize learnings. Update it when you learn project-specific lessons. See `.claude/resources/core/project-ledger.md` for full rules.
+- **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Critical Rules
 
-1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/rules/core/autopilot-mode.md`.
+1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per `.claude/resources/core/autopilot-mode.md`.
 2. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
@@ -61,10 +62,13 @@ Every plan phase has a complexity score (0-10):
 
 ## Rules
 
-Core rules (always loaded) are in `.claude/rules/core/`:
-- Allowed patterns, forbidden patterns, complexity scoring, project ledger, autopilot mode
+Always-loaded rules are in `.claude/rules/core/`:
+- `allowed-patterns.md` - Coding standards to follow
+- `forbidden-patterns.md` - Anti-patterns to avoid
 
 On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
+- `core/` - Complexity scoring, project ledger rules, autopilot mode, reference index
 - `patterns/` - Templates and patterns for plans, discovery, contracts
+- `skills/` - Skill implementation details
 - `languages/` - Language-specific patterns (TypeScript, Python)
 - `tools/` - Tool-specific patterns (Jest, Pytest, auth)

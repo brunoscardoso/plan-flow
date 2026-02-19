@@ -115,7 +115,7 @@ Lines: 244-279 (for PTN-DIS-2)
 **Step 1**: Load indexes
 ```
 Read: resources/skills/_index.md
-Read: rules/core/_index.md
+Read: resources/core/_index.md
 ```
 
 **Step 2**: Identify needed codes
@@ -162,7 +162,7 @@ Update the relevant `_index.md` when:
 
 | Folder | Index Path |
 |--------|------------|
-| Core | `rules/core/_index.md` |
+| Core | `resources/core/_index.md` |
 | Languages | `resources/languages/_index.md` |
 | Patterns | `resources/patterns/_index.md` |
 | Skills | `resources/skills/_index.md` |
@@ -282,7 +282,7 @@ The context optimization system consists of:
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Index Template | `resources/templates/index-template.md` | Template for creating new indexes |
-| Core Index | `rules/core/_index.md` | Core rules reference codes |
+| Core Index | `resources/core/_index.md` | Core rules reference codes |
 | Languages Index | `resources/languages/_index.md` | Language patterns reference codes |
 | Patterns Index | `resources/patterns/_index.md` | Pattern files reference codes |
 | Skills Index | `resources/skills/_index.md` | Skill files reference codes |

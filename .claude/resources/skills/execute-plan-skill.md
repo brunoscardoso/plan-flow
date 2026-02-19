@@ -378,7 +378,7 @@ If the user wants to stop execution:
 | File                                        | Purpose                          |
 | ------------------------------------------- | -------------------------------- |
 | `.claude/resources/patterns/plans-patterns.md` | Plan patterns and rules          |
-| `.claude/rules/core/complexity-scoring.md`  | Complexity scoring system        |
+| `.claude/resources/core/complexity-scoring.md`  | Complexity scoring system        |
 | `.claude/resources/tools/plan-mode-tool.md` | Plan mode switching instructions |
 | `flow/plans/`                               | Input plan documents             |
 | `flow/archive/`                             | Completed plans destination      |

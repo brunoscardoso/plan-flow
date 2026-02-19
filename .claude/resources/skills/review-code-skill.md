@@ -286,7 +286,7 @@ review-code --language typescript
 | `.claude/rules/core/allowed-patterns.md`            | Best practices to encourage          |
 | `.claude/resources/languages/typescript-patterns.md` | TypeScript-specific checks           |
 | `.claude/resources/languages/python-patterns.md`    | Python-specific checks               |
-| `.claude/rules/core/complexity-scoring.md`          | Fix complexity scoring system        |
+| `.claude/resources/core/complexity-scoring.md`          | Fix complexity scoring system        |
 | `flow/reviewed-code/`                              | Output folder for review documents   |
 
 ---

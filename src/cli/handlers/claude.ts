@@ -156,7 +156,7 @@ export async function initClaude(
   //    In v1, patterns/tools/languages lived under .claude/rules/ (auto-loaded).
   //    In v2, they moved to .claude/resources/ (loaded on-demand).
   //    Only remove files we shipped; preserve any user-created files.
-  for (const sub of ['patterns', 'tools', 'languages']) {
+  for (const sub of ['patterns', 'tools', 'languages', 'core']) {
     const legacyDir = join(target, '.claude', 'rules', sub);
     if (!existsSync(legacyDir)) continue;
 
