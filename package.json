@@ -32,6 +32,7 @@
     "dist/",
     ".claude/commands/",
     ".claude/rules/",
+    ".claude/resources/",
     "rules/",
     "skills/",
     "templates/",

@@ -130,7 +130,7 @@ The skill will:
 4. Add key changes summary
 5. Generate plan document
 
-See: `.claude/rules/skills/create-plan-skill.md`
+See: `.claude/resources/skills/create-plan-skill.md`
 
 ---
 
@@ -254,9 +254,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find plan patterns and templates |
-| `rules/skills/_index.md` | To understand skill workflow |
-| `rules/core/_index.md` | For complexity scoring reference |
+| `resources/patterns/_index.md` | To find plan patterns and templates |
+| `resources/skills/_index.md` | To understand skill workflow |
+| `resources/core/_index.md` | For complexity scoring reference |
 
 ### Reference Codes for Plan Creation
 
@@ -272,7 +272,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/core/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/core/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -283,9 +283,9 @@ When executing this command:
 
 | Resource                    | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `rules/skills/_index.md`   | Index of skills with reference codes |
-| `rules/patterns/_index.md` | Index of patterns with reference codes |
-| `rules/core/_index.md`     | Index of core rules with reference codes |
+| `resources/skills/_index.md`   | Index of skills with reference codes |
+| `resources/patterns/_index.md` | Index of patterns with reference codes |
+| `resources/core/_index.md`     | Index of core rules with reference codes |
 | `create-plan-skill.md`     | Skill that creates the plan       |
 | `plans-patterns.md`        | Rules and patterns for plans      |
 | `plans-templates.md`       | Plan templates                    |
@@ -293,259 +293,3 @@ When executing this command:
 | `/discovery-plan` command   | Run discovery first               |
 | `/execute-plan` command     | Execute the created plan          |
 
----
-
-# Implementation Details
-
-
-## Restrictions - PLANNING ONLY
-
-This skill is **strictly for creating plan documents**. The process:
-
-1. **Reads** the discovery document or gathers requirements
-2. **Analyzes** complexity and scope
-3. **Structures** phases with complexity scores
-4. **Generates** a plan markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                    | Reason                           |
-| ----------------------------------- | -------------------------------- |
-| Create/edit source code files       | Planning only, no implementation |
-| Write implementation code           | Plans describe what, not how     |
-| Execute any plan phases             | Use /execute-plan for that       |
-| Run build or test commands          | No execution commands            |
-| Create files outside `flow/plans/`  | Only write plan documents        |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                           |
-| -------------------------------------- | --------------------------------- |
-| Read discovery documents               | Extract requirements              |
-| Read any project file                  | Understand existing codebase      |
-| Search codebase (grep, glob, semantic) | Find existing patterns            |
-| Write to `flow/plans/`                 | Save plan document                |
-| Read project rule files                | Understand patterns to follow     |
-
-> **Important**: The ONLY writable location is `flow/plans/`. No source code or other files should be modified.
-
----
-
-## Inputs
-
-| Input                | Required | Description                                        |
-| -------------------- | -------- | -------------------------------------------------- |
-| `discovery_document` | Optional | Path to discovery document (recommended)           |
-| `feature_name`       | Yes      | Name of the feature to plan                        |
-| `requirements`       | Optional | Direct requirements if no discovery document       |
-| `version`            | Optional | Version number (auto-incremented if not provided)  |
-
----
-
-## Workflow
-
-### Step 1: Extract Requirements
-
-**If discovery document was provided**:
-
-1. Read the discovery document
-2. Extract feature name, description, goals from the document
-3. Extract FR, NFR, Constraints
-4. Note any risks identified
-
-**If no discovery document**:
-
-1. Use requirements provided directly
-2. Note that discovery was skipped
-
----
-
-### Step 2: Analyze Scope and Complexity
-
-Based on extracted requirements:
-
-1. Identify the major components/areas of work
-2. Group related tasks into logical phases
-3. Estimate complexity for each phase using `.claude/rules/core/complexity-scoring.md`
-
----
-
-### Step 3: Structure Phases
-
-Create phases following these guidelines:
-
-**Phase Structure**:
-
-```markdown
-### Phase X: [Phase Name]
-
-**Scope**: [What this phase covers]
-**Complexity**: X/10
-
-- [ ] Task 1
-- [ ] Task 2
-
-**Build Verification**: Run `npm run build`
-```
-
-**Standard Phase Order**:
-
-1. Types and Schemas (usually low complexity)
-2. Backend/API Implementation
-3. Store/State Management
-4. UI Components
-5. Integration
-6. Tests (ALWAYS last)
-
-**Complexity Scoring** (per `.claude/rules/core/complexity-scoring.md`):
-
-| Score | Level     | Description                      |
-| ----- | --------- | -------------------------------- |
-| 0-2   | Trivial   | Simple, mechanical changes       |
-| 3-4   | Low       | Straightforward implementation   |
-| 5-6   | Medium    | Moderate effort, some decisions  |
-| 7-8   | High      | Complex, multiple considerations |
-| 9-10  | Very High | Significant complexity/risk      |
-
----
-
-### Step 4: Add Key Changes Summary
-
-Document the most important modifications:
-
-```markdown
-## Key Changes
-
-1. **[Category]**: [Description of change]
-2. **[Category]**: [Description of change]
-```
-
----
-
-### Step 5: Generate Plan Document
-
-Create the plan markdown file:
-
-**Location**: `flow/plans/plan_<feature_name>_v<version>.md`
-
-**Use Template**: See `.claude/rules/patterns/plans-templates.md`
-
-**Required Sections**:
-
-1. Overview (with discovery document reference)
-2. Goals
-3. Non-Goals
-4. Requirements Summary (FR, NFR, Constraints)
-5. Risks
-6. Phases (with complexity scores)
-7. Key Changes
-
----
-
-## Output Format
-
-The plan document should follow the template in `.claude/rules/patterns/plans-templates.md`.
-
-**Naming Convention**: `plan_<feature_name>_v<version>.md`
-
-**Examples**:
-- `plan_user_authentication_v1.md`
-- `plan_dark_mode_v2.md`
-
----
-
-## Plan Template
-
-```markdown
-# Plan: [Feature Name]
-
-## Overview
-
-[Brief description of the feature and its purpose]
-
-**Based on Discovery**: `flow/discovery/discovery_<feature>_v1.md` (or "Discovery skipped")
-
-## Goals
-
-- [Goal 1]
-- [Goal 2]
-
-## Non-Goals
-
-- [What this plan explicitly does NOT cover]
-
-## Requirements Summary
-
-### Functional Requirements
-
-- [FR-1]: [Description]
-
-### Non-Functional Requirements
-
-- [NFR-1]: [Description]
-
-### Constraints
-
-- [C-1]: [Description]
-
-## Risks
-
-| Risk     | Impact          | Mitigation            |
-| -------- | --------------- | --------------------- |
-| [Risk 1] | High/Medium/Low | [Mitigation strategy] |
-
-## Phases
-
-### Phase 1: [Phase Name]
-
-**Scope**: [What this phase covers]
-**Complexity**: X/10
-
-- [ ] Task 1
-- [ ] Task 2
-
-**Build Verification**: Run `npm run build`
-
-### Phase N: Tests (Final)
-
-**Scope**: Write comprehensive tests
-**Complexity**: X/10
-
-- [ ] Unit tests
-- [ ] Integration tests
-
-**Build Verification**: Run `npm run build && npm run test`
-
-## Key Changes
-
-1. **[Category]**: [Description]
-```
-
----
-
-## Validation Checklist
-
-Before completing the plan, verify:
-
-- [ ] Plan is saved in `flow/plans/` folder
-- [ ] File uses snake_case naming: `plan_<feature>_v<version>.md`
-- [ ] All phases have complexity scores (X/10)
-- [ ] Tests are the LAST phase
-- [ ] Key Changes section is populated
-- [ ] Discovery document is referenced (or noted as skipped)
-- [ ] **NO implementation code is included**
-- [ ] **NO source files were created or modified**
-
----
-
-## Related Files
-
-| File                                           | Purpose                          |
-| ---------------------------------------------- | -------------------------------- |
-| `.claude/rules/patterns/plans-patterns.md`    | Rules and patterns for plans     |
-| `.claude/rules/patterns/plans-templates.md`   | Plan templates                   |
-| `.claude/rules/core/complexity-scoring.md`    | Complexity scoring system        |
-| `flow/plans/`                                  | Output folder for plan documents |
-| `flow/discovery/`                              | Input discovery documents        |

@@ -1,7 +1,3 @@
----
-description: "Summary index for core rules - load this to see available references"
-alwaysApply: false
----
 
 # Core Rules Index
 
@@ -16,44 +12,44 @@ Core rules define the foundational coding standards that apply across the entire
 
 ## Reference Codes
 
-### Allowed Patterns (`allowed-patterns.mdc`)
+### Allowed Patterns (`allowed-patterns.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| COR-AP-1 | Example patterns (Naming, SRP, Errors, Types, Organization) | allowed-patterns.mdc | 45-152 |
-| COR-AP-2 | Template for adding new patterns | allowed-patterns.mdc | 167-186 |
+| COR-AP-1 | Example patterns (Naming, SRP, Errors, Types, Organization) | allowed-patterns.md | 45-152 |
+| COR-AP-2 | Template for adding new patterns | allowed-patterns.md | 167-186 |
 
-### Forbidden Patterns (`forbidden-patterns.mdc`)
-
-| Code | Description | Source | Lines |
-|------|-------------|--------|-------|
-| COR-FP-1 | Example anti-patterns (Magic Numbers, Silent Errors, Ternaries, Mutation, Async) | forbidden-patterns.mdc | 41-230 |
-| COR-FP-2 | Template for adding new anti-patterns | forbidden-patterns.mdc | 245-264 |
-
-### Complexity Scoring (`complexity-scoring.mdc`)
+### Forbidden Patterns (`forbidden-patterns.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| COR-CS-1 | Complexity scale table (0-10 levels) | complexity-scoring.mdc | 12-21 |
-| COR-CS-2 | Scoring criteria modifiers (+/- points) | complexity-scoring.mdc | 23-51 |
-| COR-CS-3 | Execution strategy and aggregation rules | complexity-scoring.mdc | 53-70 |
-| COR-CS-4 | Common complexity patterns table | complexity-scoring.mdc | 168-185 |
-| COR-CS-5 | Real-world scoring examples | complexity-scoring.mdc | 187-236 |
+| COR-FP-1 | Example anti-patterns (Magic Numbers, Silent Errors, Ternaries, Mutation, Async) | forbidden-patterns.md | 41-230 |
+| COR-FP-2 | Template for adding new anti-patterns | forbidden-patterns.md | 245-264 |
 
-### Autopilot Mode (`autopilot-mode.mdc`)
+### Complexity Scoring (`complexity-scoring.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| COR-AM-1 | Input classification (slash commands, questions, trivial, feature requests) | autopilot-mode.mdc | 18-50 |
-| COR-AM-2 | Flow execution steps (contracts, discovery, plan, execute, review, archive) | autopilot-mode.mdc | 52-110 |
-| COR-AM-3 | Mandatory checkpoints and overriding rules | autopilot-mode.mdc | 140-178 |
+| COR-CS-1 | Complexity scale table (0-10 levels) | complexity-scoring.md | 12-21 |
+| COR-CS-2 | Scoring criteria modifiers (+/- points) | complexity-scoring.md | 23-51 |
+| COR-CS-3 | Execution strategy and aggregation rules | complexity-scoring.md | 53-70 |
+| COR-CS-4 | Common complexity patterns table | complexity-scoring.md | 168-185 |
+| COR-CS-5 | Real-world scoring examples | complexity-scoring.md | 187-236 |
 
-### Project Ledger (`project-ledger.mdc`)
+### Autopilot Mode (`autopilot-mode.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| COR-LDG-1 | Ledger behavior, entry format, and sections | project-ledger.mdc | 10-110 |
-| COR-LDG-2 | Maintenance rules and plan-flow integration | project-ledger.mdc | 112-155 |
+| COR-AM-1 | Input classification (slash commands, questions, trivial, feature requests) | autopilot-mode.md | 18-50 |
+| COR-AM-2 | Flow execution steps (contracts, discovery, plan, execute, review, archive) | autopilot-mode.md | 52-110 |
+| COR-AM-3 | Mandatory checkpoints and overriding rules | autopilot-mode.md | 140-178 |
+
+### Project Ledger (`project-ledger.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-LDG-1 | Ledger behavior, entry format, and sections | project-ledger.md | 10-110 |
+| COR-LDG-2 | Maintenance rules and plan-flow integration | project-ledger.md | 112-155 |
 
 ---
 
@@ -105,7 +101,7 @@ Core rules define the foundational coding standards that apply across the entire
 
 ## Notes
 
-- `allowed-patterns.mdc` and `forbidden-patterns.mdc` have `alwaysApply: true` - they are loaded automatically by Cursor
-- `project-ledger.mdc` has `alwaysApply: false` - loaded when `flow/ledger.md` exists or when learnings are produced
-- `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
-- `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)
+- `allowed-patterns.md` and `forbidden-patterns.md` have `alwaysApply: true` - they are loaded automatically
+- `project-ledger.md` has `alwaysApply: true` - maintains persistent project memory
+- `complexity-scoring.md` is loaded on-demand when needed for planning
+- `autopilot-mode.md` has `alwaysApply: true` - detects and orchestrates autopilot flow mode

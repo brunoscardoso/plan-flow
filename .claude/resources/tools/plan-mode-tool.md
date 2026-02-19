@@ -159,6 +159,6 @@ Phase 4 (Tests) always executed separately
 
 ## Related Rules
 
-- Plan patterns: `.claude/rules/patterns/plans-patterns.md`
-- Complexity scoring: `.claude/rules/core/complexity-scoring.md`
+- Plan patterns: `.claude/resources/patterns/plans-patterns.md`
+- Complexity scoring: `.claude/resources/core/complexity-scoring.md`
 - Execute plan skill: `.claude/skills/execute-plan/SKILL.md`

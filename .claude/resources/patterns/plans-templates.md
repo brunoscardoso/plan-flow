@@ -218,7 +218,7 @@ Use this template when creating new implementation plans:
 ```markdown
 ## Execution Strategy
 
-Based on complexity scores (per `.claude/rules/core/complexity-scoring.md`):
+Based on complexity scores (per `.claude/resources/core/complexity-scoring.md`):
 
 - **Phases 1-2**: Execute separately (Phase 2 is 7/10)
 - **Phases 3-4**: Can be aggregated (combined complexity: 11, but cautious)

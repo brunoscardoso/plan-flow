@@ -36,7 +36,7 @@ All implementation plans must be created inside `flow/plans/` using snake_case n
 
 ### 2. Discovery is Required Before Planning
 
-A discovery document in `flow/discovery/` is **required** before creating any plan. Plans cannot be created without a completed discovery document. If no discovery exists, run `/discovery-plan` first. No exceptions. See `.claude/rules/patterns/discovery-patterns.md` for details.
+A discovery document in `flow/discovery/` is **required** before creating any plan. Plans cannot be created without a completed discovery document. If no discovery exists, run `/discovery-plan` first. No exceptions. See `.claude/resources/patterns/discovery-patterns.md` for details.
 
 ---
 
@@ -49,7 +49,7 @@ Every plan must include:
 - **Phases**: Implementation steps with complexity scores
 - **Key Changes**: Summary of modifications
 
-See `.claude/rules/patterns/plans-templates.md` for the full template.
+See `.claude/resources/patterns/plans-templates.md` for the full template.
 
 ---
 
@@ -111,7 +111,7 @@ mv flow/plans/plan_feature_name_v1.md flow/archive/
 
 Every phase must include a **Complexity Score** from 0-10.
 
-See `.claude/rules/core/complexity-scoring.md` for the complete scoring system.
+See `.claude/resources/core/complexity-scoring.md` for the complete scoring system.
 
 ---
 
@@ -119,14 +119,14 @@ See `.claude/rules/core/complexity-scoring.md` for the complete scoring system.
 
 When executing a plan, each phase must trigger **Plan mode** before implementation:
 
-1. Use the [Plan Mode Tool](.claude/rules/tools/plan-mode-tool.md) to switch to Plan mode automatically
+1. Use the [Plan Mode Tool](.claude/resources/tools/plan-mode-tool.md) to switch to Plan mode automatically
 2. Present phase details and approach
 3. Get user approval
 4. Implement
 5. Verify build
 6. Update progress in plan file
 
-**Reference**: See `.claude/rules/tools/plan-mode-tool.md` for complete instructions on switching to Plan mode.
+**Reference**: See `.claude/resources/tools/plan-mode-tool.md` for complete instructions on switching to Plan mode.
 
 ---
 
@@ -200,7 +200,7 @@ Use the scoring criteria consistently. When in doubt, score higher.
 
 ### 12. DON'T Execute Phases Without Plan Mode
 
-Always switch to Plan mode before executing each phase group. Use the [Plan Mode Tool](.claude/rules/tools/plan-mode-tool.md) to ensure proper switching.
+Always switch to Plan mode before executing each phase group. Use the [Plan Mode Tool](.claude/resources/tools/plan-mode-tool.md) to ensure proper switching.
 
 ---
 

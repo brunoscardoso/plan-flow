@@ -6,10 +6,10 @@
 | Prefix | Folder | Description |
 |--------|--------|-------------|
 | COR- | `rules/core/` | Core rules (allowed/forbidden patterns, complexity) |
-| LNG- | `rules/languages/` | Language-specific patterns |
-| PTN- | `rules/patterns/` | Pattern files (discovery, plans, tests, etc.) |
-| SKL- | `rules/skills/` | Skill files for commands |
-| TLS- | `rules/tools/` | Tool documentation |
+| LNG- | `resources/languages/` | Language-specific patterns |
+| PTN- | `resources/patterns/` | Pattern files (discovery, plans, tests, etc.) |
+| SKL- | `resources/skills/` | Skill files for commands |
+| TLS- | `resources/tools/` | Tool documentation |
 
 ### Code Format
 
@@ -33,7 +33,7 @@
 When a command or skill is invoked, load the relevant `_index.md` file:
 
 ```
-rules/[folder]/_index.md
+docs/[folder]/_index.md
 ```
 
 The index contains a table of all reference codes with descriptions.
@@ -51,7 +51,7 @@ Based on the current task, identify which reference codes are needed:
 Use the Read tool to load the specific line range:
 
 ```
-Read file: rules/[folder]/[filename].md
+Read file: docs/[folder]/[filename].md
 Lines: [start]-[end]
 ```
 
@@ -90,7 +90,7 @@ The expanded content is now in context. Use it for the current task.
 
 **Step 1**: Load index
 ```
-Read: rules/patterns/_index.md
+Read: resources/patterns/_index.md
 ```
 
 **Step 2**: Identify needed codes from index
@@ -99,7 +99,7 @@ Read: rules/patterns/_index.md
 
 **Step 3**: Expand specific sections
 ```
-Read: rules/patterns/discovery-templates.md
+Read: resources/patterns/discovery-templates.md
 Lines: 15-80  (for PTN-DIS-1)
 Lines: 244-279 (for PTN-DIS-2)
 ```
@@ -114,8 +114,8 @@ Lines: 244-279 (for PTN-DIS-2)
 
 **Step 1**: Load indexes
 ```
-Read: rules/skills/_index.md
-Read: rules/core/_index.md
+Read: resources/skills/_index.md
+Read: resources/core/_index.md
 ```
 
 **Step 2**: Identify needed codes
@@ -162,11 +162,11 @@ Update the relevant `_index.md` when:
 
 | Folder | Index Path |
 |--------|------------|
-| Core | `rules/core/_index.md` |
-| Languages | `rules/languages/_index.md` |
-| Patterns | `rules/patterns/_index.md` |
-| Skills | `rules/skills/_index.md` |
-| Tools | `rules/tools/_index.md` |
+| Core | `resources/core/_index.md` |
+| Languages | `resources/languages/_index.md` |
+| Patterns | `resources/patterns/_index.md` |
+| Skills | `resources/skills/_index.md` |
+| Tools | `resources/tools/_index.md` |
 
 ---
 
@@ -201,12 +201,12 @@ When adding content to the project that should be indexed:
 
 ### Step 1: Create or Edit the Source File
 
-Add your new section to the appropriate file in `rules/`:
+Add your new section to the appropriate file:
 - Core rules → `rules/core/`
-- Language patterns → `rules/languages/`
-- Patterns → `rules/patterns/`
-- Skills → `rules/skills/`
-- Tools → `rules/tools/`
+- Language patterns → `resources/languages/`
+- Patterns → `resources/patterns/`
+- Skills → `resources/skills/`
+- Tools → `resources/tools/`
 
 ### Step 2: Determine the Reference Code
 
@@ -218,14 +218,14 @@ Use the naming convention:
 | Prefix | For Files In |
 |--------|--------------|
 | COR- | rules/core/ |
-| LNG- | rules/languages/ |
-| PTN- | rules/patterns/ |
-| SKL- | rules/skills/ |
-| TLS- | rules/tools/ |
+| LNG- | resources/languages/ |
+| PTN- | resources/patterns/ |
+| SKL- | resources/skills/ |
+| TLS- | resources/tools/ |
 
 ### Step 3: Update the Index
 
-Open `rules/[folder]/_index.md` and add a new row to the reference table:
+Open the relevant `_index.md` file and add a new row to the reference table:
 
 ```markdown
 | NEW-CODE-1 | 150-180 | Description of the new section |
@@ -248,10 +248,10 @@ The hierarchical loading system reduces context consumption significantly:
 | Folder | Total Lines | Always Loaded |
 |--------|-------------|---------------|
 | rules/core/ | ~1,200 | Yes (partial) |
-| rules/languages/ | ~800 | No |
-| rules/patterns/ | ~2,500 | No |
-| rules/skills/ | ~2,800 | No |
-| rules/tools/ | ~1,400 | No |
+| resources/languages/ | ~800 | No |
+| resources/patterns/ | ~2,500 | No |
+| resources/skills/ | ~2,800 | No |
+| resources/tools/ | ~1,400 | No |
 | **Total** | **~8,700** | |
 
 ### After (Index + On-Demand)
@@ -281,13 +281,13 @@ The context optimization system consists of:
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Index Template | `rules/templates/index-template.md` | Template for creating new indexes |
-| Core Index | `rules/core/_index.md` | Core rules reference codes |
-| Languages Index | `rules/languages/_index.md` | Language patterns reference codes |
-| Patterns Index | `rules/patterns/_index.md` | Pattern files reference codes |
-| Skills Index | `rules/skills/_index.md` | Skill files reference codes |
-| Tools Index | `rules/tools/_index.md` | Tool files reference codes |
-| Expansion Tool | `rules/tools/reference-expansion-tool.md` | This documentation |
+| Index Template | `resources/templates/index-template.md` | Template for creating new indexes |
+| Core Index | `resources/core/_index.md` | Core rules reference codes |
+| Languages Index | `resources/languages/_index.md` | Language patterns reference codes |
+| Patterns Index | `resources/patterns/_index.md` | Pattern files reference codes |
+| Skills Index | `resources/skills/_index.md` | Skill files reference codes |
+| Tools Index | `resources/tools/_index.md` | Tool files reference codes |
+| Expansion Tool | `resources/tools/reference-expansion-tool.md` | This documentation |
 
 ### Workflow Summary
 

@@ -81,7 +81,7 @@ RELATED COMMANDS:
 
 ## Critical Rules
 
-These rules are mandatory. For detailed patterns and guidelines, see `.claude/rules/patterns/discovery-patterns.md`.
+These rules are mandatory. For detailed patterns and guidelines, see `.claude/resources/patterns/discovery-patterns.md`.
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
@@ -158,7 +158,7 @@ The skill will:
 10. Ask user if they want to proceed to /create-plan
 11. Wait for user confirmation before proceeding
 
-See: `.claude/rules/skills/discovery-skill.md`
+See: `.claude/resources/skills/discovery-skill.md`
 
 ---
 
@@ -275,9 +275,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find discovery templates and patterns |
-| `rules/skills/_index.md` | To understand skill workflow |
-| `rules/tools/_index.md` | When using interactive questions |
+| `resources/patterns/_index.md` | To find discovery templates and patterns |
+| `resources/skills/_index.md` | To understand skill workflow |
+| `resources/tools/_index.md` | When using interactive questions |
 
 ### Reference Codes for Discovery
 
@@ -294,7 +294,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/skills/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -302,10 +302,10 @@ When executing this command:
 **Example expansion**:
 ```
 # To get the discovery template
-Read: rules/patterns/discovery-templates.md (lines from PTN-DIST-1)
+Read: resources/patterns/discovery-templates.md (lines from PTN-DIST-1)
 
 # To understand question workflow
-Read: rules/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
+Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 ```
 
 ---
@@ -314,376 +314,12 @@ Read: rules/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `rules/skills/_index.md`      | Index of skills with reference codes   |
-| `rules/patterns/_index.md`    | Index of patterns with reference codes |
-| `rules/tools/_index.md`       | Index of tools with reference codes    |
+| `resources/skills/_index.md`      | Index of skills with reference codes   |
+| `resources/patterns/_index.md`    | Index of patterns with reference codes |
+| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `discovery-skill.md`          | Skill that executes the discovery      |
 | `discovery-patterns.md`       | Rules and patterns for discovery       |
 | `discovery-templates.md`      | Document templates                     |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/create-plan` command         | Creates plan from discovery document   |
 
----
-
-# Implementation Details
-
-
-## Restrictions - DISCOVERY ONLY
-
-This skill is **strictly for gathering and documenting requirements**. The process:
-
-1. **Reads** all referenced documents and contracts
-2. **Asks** clarifying questions via Interactive Questions Tool
-3. **Documents** requirements (FR, NFR, Constraints)
-4. **Identifies** technical considerations (high-level only)
-5. **Proposes** approach (conceptual, no code)
-6. **Generates** a discovery markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                       | Reason                                    |
-| -------------------------------------- | ----------------------------------------- |
-| Create/edit source code files          | Discovery is requirements gathering only  |
-| Write implementation code in responses | No code during discovery                  |
-| Create implementation plans            | Plans come after discovery via /create-plan |
-| Create files in `flow/plans/`          | Planning is a separate command            |
-| Auto-invoke /create-plan without asking| Must ASK user before proceeding           |
-| Execute implementation steps           | Discovery does not execute anything       |
-| Modify configuration files             | No codebase changes                       |
-| Run build or test commands             | No execution commands                     |
-| Create files outside `flow/discovery/` | Only write discovery documents            |
-| Proceed without user confirmation      | Must wait for user response               |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
-| Read any project file                  | Understand existing implementation   |
-| Read referenced documents              | Extract requirements and constraints |
-| Search codebase (grep, glob, semantic) | Find existing patterns               |
-| Use Interactive Questions Tool         | Gather requirements from user        |
-| Write to `flow/discovery/`             | Save discovery document              |
-| Read project rule files                | Understand patterns to follow        |
-
-> **Important**: The ONLY writable location is `flow/discovery/`. No source code, configuration files, or any other project files should be modified.
-
----
-
-## Inputs
-
-| Input                | Required | Description                                           |
-| -------------------- | -------- | ----------------------------------------------------- |
-| `feature_name`       | Yes      | Name of the feature or topic to explore               |
-| `context`            | Optional | Why this discovery is needed                          |
-| `referenced_docs`    | Optional | List of documents to review (@mentions, file paths)   |
-| `known_requirements` | Optional | Any requirements already known                        |
-
----
-
-## Workflow
-
-### Step 1: Read All Referenced Documents
-
-**BEFORE asking detailed questions**, read every referenced document.
-
-**Actions**:
-
-1. Identify references (look for @mentions, file paths, URLs)
-2. Read each file using the Read tool
-3. Extract key information (requirements, constraints, contracts)
-4. Summarize findings for each source
-
-**Document Analysis Format**:
-
-```markdown
-## Referenced Documents Analysis
-
-### `flow/contracts/api-contract.md`
-
-**Key Findings**:
-- [Key point 1]
-- [Key point 2]
-
-**Questions Raised**:
-- [Gap or unclear aspect]
-```
-
-**Important**: NEVER read or reference files in `flow/archive/` - these are outdated documents.
-
----
-
-### Step 2: Find All Related Code References
-
-**BEFORE asking questions**, search the codebase to find **all code locations** related to the feature.
-
-**Why**: Understanding where a feature is currently used prevents incomplete implementations and reveals hidden dependencies.
-
-**Actions**:
-
-1. **Identify key terms** from the user's request (e.g., "user profile", "workflow editor")
-2. **Search for components** using Grep:
-   ```bash
-   Grep: "UserProfile|userProfile|user-profile"
-         --output_mode content --type ts --type tsx
-   ```
-3. **Search for types** using Grep:
-   ```bash
-   Grep: "interface.*User|type.*User"
-         --output_mode content --type ts
-   ```
-4. **Search for API routes** using Glob:
-   ```bash
-   Glob: "**/api/**/user*/**"
-   Glob: "**/api/**/profile*/**"
-   ```
-5. **Search for stores** using Grep:
-   ```bash
-   Grep: "userStore|profileStore|useUser"
-         --output_mode content --type ts
-   ```
-6. **Search for tests** using Glob:
-   ```bash
-   Glob: "**/*user*.test.ts*"
-   Glob: "**/*profile*.test.ts*"
-   ```
-
-**Document Format**:
-
-```markdown
-## Code Context Analysis
-
-### Components Found
-| File | Usage | Line(s) |
-|------|-------|---------|
-| `src/components/UserProfile.tsx` | Main profile component | - |
-| `src/components/Settings/ProfileSettings.tsx` | Settings integration | - |
-
-### API Endpoints Found
-| File | Endpoint | Method |
-|------|----------|--------|
-| `src/app/api/user/profile/route.ts` | `/api/user/profile` | GET, PUT |
-
-### State Management Found
-| File | Purpose |
-|------|---------|
-| `src/stores/userStore.ts` | User profile state |
-
-### Type Definitions Found
-| File | Types |
-|------|-------|
-| `src/types/user.ts` | `User`, `UserProfile` |
-
-**Total References**: X files across Y categories
-
-### Key Patterns Observed
-- [Pattern 1 from existing code]
-- [Pattern 2 from existing code]
-```
-
-**Read Key Files**: After finding references, read 2-3 key files to understand current implementation patterns.
-
----
-
-### Step 3: Ask Clarifying Questions
-
-Ask questions about gaps identified in documents and unclear requirements.
-
-**Question Categories**:
-
-| Category   | Focus                              |
-| ---------- | ---------------------------------- |
-| Functional | What the feature must do           |
-| NFR        | Performance, security, scalability |
-| Technical  | Architecture, dependencies         |
-| UI/UX      | User interface and experience      |
-
-**Use Interactive Questions Tool**:
-
-Follow `.claude/rules/tools/interactive-questions-tool.md`:
-
-1. Call `SwitchMode` tool to enter Plan mode
-2. Call `Ask the user directly in conversation` tool for each question (2-6 options, A/B/C/D format)
-3. Wait for responses
-4. Call `SwitchMode` tool to return to Agent mode
-
-**Skip Interactive Questions If**:
-
-- All questions answered in chat already
-- User confirmed all assumptions
-- No blocked or open questions remain
-
----
-
-### Step 4: Track Question Status
-
-Maintain a question tracking table:
-
-```markdown
-## Open Questions
-
-| #   | Category   | Question                   | Status   | Answer            |
-| --- | ---------- | -------------------------- | -------- | ----------------- |
-| 1   | Functional | Max steps per workflow?    | Answered | 20 steps maximum  |
-| 2   | Technical  | Use existing store or new? | Open     | -                 |
-| 3   | NFR        | Required response time?    | Assumed  | <500ms (validate) |
-```
-
-**Status Legend**:
-
-- **Open**: Awaiting answer
-- **Answered**: Response received
-- **Assumed**: Made assumption (needs validation)
-- **Blocked**: Cannot proceed without answer
-
----
-
-### Step 5: Document Requirements
-
-Categorize requirements as they are gathered:
-
-```markdown
-## Requirements Gathered
-
-### Functional Requirements
-- [FR-1]: [Description] (Source: [document or user])
-
-### Non-Functional Requirements
-- [NFR-1]: [Description]
-
-### Constraints
-- [C-1]: [Description]
-```
-
----
-
-### Step 6: Identify Technical Considerations
-
-Document high-level technical insights (NO implementation code):
-
-```markdown
-## Technical Considerations
-
-### Architecture Fit
-- [How this fits into existing system]
-
-### Dependencies
-- [What this relies on]
-
-### Patterns to Apply
-- [Relevant patterns from cursor rules]
-
-### Challenges Identified
-- [Potential difficulties]
-```
-
----
-
-### Step 7: Propose High-Level Approach
-
-Suggest an approach based on findings (NO implementation code):
-
-```markdown
-## Proposed Approach
-
-Based on the requirements gathered, I recommend:
-
-1. [High-level approach point 1]
-2. [High-level approach point 2]
-
-### Alternative Approaches Considered
-
-| Approach | Pros | Cons | Recommendation |
-| -------- | ---- | ---- | -------------- |
-| [A]      | ...  | ...  | Yes/No         |
-```
-
----
-
-### Step 8: Document Risks and Unknowns
-
-Capture risks discovered:
-
-```markdown
-## Risks and Unknowns
-
-### Risks
-
-| Risk | Impact | Likelihood | Mitigation |
-| ---- | ------ | ---------- | ---------- |
-| ...  | ...    | ...        | ...        |
-
-### Unknowns (Require Further Investigation)
-- [ ] [Unknown item]
-```
-
----
-
-### Step 9: Generate Discovery Document
-
-Create the discovery markdown file:
-
-**Location**: `flow/discovery/discovery_<feature_name>_v<version>.md`
-
-**Use Template**: See `.claude/rules/patterns/discovery-templates.md`
-
-**Required Sections**:
-
-1. Context
-2. Referenced Documents
-3. Code Context Analysis
-4. Requirements Gathered (FR, NFR, Constraints)
-5. Open Questions (all answered)
-6. Technical Considerations
-7. Proposed Approach
-8. Risks and Unknowns
-9. Next Steps
-
----
-
-## Output Format
-
-The discovery document should follow the template in `.claude/rules/patterns/discovery-templates.md`.
-
-**Naming Convention**: `discovery_<feature_name>_v<version>.md`
-
-**Examples**:
-- `discovery_workflow_editor_v1.md`
-- `discovery_user_authentication_v1.md`
-
----
-
-## Validation Checklist
-
-Before completing discovery, verify:
-
-- [ ] All referenced documents have been read
-- [ ] Code context analysis completed (all related files found)
-- [ ] Key patterns observed and documented
-- [ ] Document is saved in `flow/discovery/` folder
-- [ ] File uses correct naming convention
-- [ ] Open questions table has no "Blocked" status
-- [ ] Requirements are categorized (FR, NFR, Constraints)
-- [ ] Technical considerations are documented
-- [ ] Risks and unknowns are identified
-- [ ] Proposed approach is documented (high-level only)
-- [ ] Next steps are defined (pointing to `/create-plan`)
-- [ ] **NO implementation code is included**
-- [ ] **NO source files were created or modified**
-- [ ] **NO implementation plans were created**
-- [ ] **NO files created in flow/plans/ directory**
-- [ ] **ASKED user if they want to proceed to /create-plan**
-- [ ] **WAITING for user confirmation before proceeding**
-- [ ] **Did NOT auto-invoke /create-plan without asking**
-
----
-
-## Related Files
-
-| File                                              | Purpose                           |
-| ------------------------------------------------- | --------------------------------- |
-| `.claude/rules/patterns/discovery-patterns.md`   | Rules and patterns for discovery  |
-| `.claude/rules/patterns/discovery-templates.md`  | Document templates                |
-| `.claude/rules/tools/interactive-questions-tool.md` | Interactive Questions UI workflow |
-| `flow/discovery/`                                 | Output folder for discovery docs  |

@@ -230,6 +230,6 @@ AskUserQuestion({
 
 ## Related Rules
 
-- Discovery patterns: `.claude/rules/patterns/discovery-patterns.md`
-- Plan patterns: `.claude/rules/patterns/plans-patterns.md`
+- Discovery patterns: `.claude/resources/patterns/discovery-patterns.md`
+- Plan patterns: `.claude/resources/patterns/plans-patterns.md`
 - Setup skill: `.claude/skills/setup/SKILL.md`

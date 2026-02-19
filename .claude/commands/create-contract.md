@@ -111,7 +111,7 @@ The skill will:
 3. Ask clarifying questions via Interactive Questions Tool
 4. Generate contract document
 
-See: `.claude/rules/skills/create-contract-skill.md`
+See: `.claude/resources/skills/create-contract-skill.md`
 
 ---
 
@@ -204,9 +204,9 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Index | When to Load |
 |-------|--------------|
-| `rules/patterns/_index.md` | To find contract patterns |
-| `rules/skills/_index.md` | To understand skill workflow |
-| `rules/tools/_index.md` | When using interactive questions |
+| `resources/patterns/_index.md` | To find contract patterns |
+| `resources/skills/_index.md` | To understand skill workflow |
+| `resources/tools/_index.md` | When using interactive questions |
 
 ### Reference Codes for Contract Creation
 
@@ -222,7 +222,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 When executing this command:
 
-1. **Start with indexes**: Read `rules/patterns/_index.md` and `rules/skills/_index.md`
+1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
 2. **Identify needed codes**: Based on current step, identify which codes are relevant
 3. **Expand as needed**: Use the Read tool with specific line ranges from the index
 4. **Don't expand everything**: Only load content required for the current step
@@ -233,236 +233,12 @@ When executing this command:
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `rules/skills/_index.md`      | Index of skills with reference codes   |
-| `rules/patterns/_index.md`    | Index of patterns with reference codes |
-| `rules/tools/_index.md`       | Index of tools with reference codes    |
+| `resources/skills/_index.md`      | Index of skills with reference codes   |
+| `resources/patterns/_index.md`    | Index of patterns with reference codes |
+| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `create-contract-skill.md`    | Skill that creates the contract        |
 | `contract-patterns.md`        | Rules and patterns for contracts       |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/discovery-plan` command      | Create discovery from contract         |
 | `/create-plan` command         | Create plan from discovery             |
 
----
-
-# Implementation Details
-
-
-## Restrictions - CONTRACT CREATION ONLY
-
-This skill is **strictly for creating contract documents**. The process:
-
-1. **Fetches** information from the source URL
-2. **Analyzes** the API structure and schemas
-3. **Asks** clarifying questions via Interactive Questions Tool
-4. **Generates** a contract markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                       | Reason                              |
-| -------------------------------------- | ----------------------------------- |
-| Create/edit source code files          | Contract creation only              |
-| Write implementation code              | Contracts describe, not implement   |
-| Modify configuration files             | No codebase changes                 |
-| Run build or test commands             | No execution commands               |
-| Create files outside `flow/contracts/` | Only write contract documents       |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
-| Use Web Search tool                    | Fetch documentation from URLs        |
-| Read repository files                  | Analyze API structure                |
-| Use Interactive Questions Tool         | Gather requirements from user        |
-| Write to `flow/contracts/`             | Save contract document               |
-| Read project rule files                | Understand patterns to follow        |
-
-> **Important**: The ONLY writable location is `flow/contracts/`. No source code or other files should be modified.
-
----
-
-## Inputs
-
-| Input         | Required | Description                                          |
-| ------------- | -------- | ---------------------------------------------------- |
-| `source_url`  | Yes      | Documentation URL or repository URL                  |
-| `description` | Yes      | What the user wants to integrate on the frontend     |
-
----
-
-## Workflow
-
-### Step 1: Detect Source Type
-
-Analyze the provided URL to determine the source type:
-
-| Source Type      | Detection                                      |
-| ---------------- | ---------------------------------------------- |
-| Documentation    | Contains `/docs`, `/api`, swagger, openapi     |
-| Repository       | Contains github.com, gitlab.com, bitbucket.org |
-| OpenAPI Spec     | Ends with `.json`, `.yaml`, `/swagger`         |
-
----
-
-### Step 2A: Handle Documentation URL
-
-If the source is a documentation URL:
-
-1. Use Web Search tool to fetch documentation content
-2. Extract key information:
-   - API endpoints
-   - Request/response schemas
-   - Authentication methods
-   - Error formats
-   - Rate limits
-
----
-
-### Step 2B: Handle Repository URL
-
-If the source is a repository URL:
-
-1. Analyze repository structure
-2. Identify relevant files:
-   - API route definitions
-   - Type definitions
-   - Schema files
-   - README/docs
-3. Read and extract key information
-
----
-
-### Step 3: Ask Clarifying Questions
-
-**Use Interactive Questions Tool** to gather requirements.
-
-Follow `.claude/rules/tools/interactive-questions-tool.md`:
-
-1. Call `SwitchMode` tool to enter Plan mode
-2. Call `Ask the user directly in conversation` tool for each question about:
-   - **Scope**: Which specific endpoints/features are needed?
-   - **Authentication**: How will the FE authenticate?
-   - **Error Handling**: How should the FE handle errors?
-   - **Caching**: Any caching requirements?
-3. Wait for all responses
-4. Call `SwitchMode` tool to return to Agent mode
-5. Document answers for use in the contract document
-
----
-
-### Step 4: Generate Contract Document
-
-Create the contract with all gathered information:
-
-**Location**: `flow/contracts/<service_name>_contract.md`
-
-**Required Sections**:
-
-1. Overview
-2. Authentication
-3. Endpoints (with request/response schemas)
-4. Error Handling
-5. Integration Notes
-6. Usage Examples
-
----
-
-## Output Format
-
-### Contract Template
-
-```markdown
-# Integration Contract: [Service Name]
-
-## Overview
-
-**Source**: [URL]
-**Description**: [What this integration provides]
-**Version**: [API version if applicable]
-
-## Authentication
-
-**Method**: [Bearer token, API key, OAuth, etc.]
-**Header**: [Authorization header format]
-**Token Source**: [Where FE gets the token]
-
-## Endpoints
-
-### [Endpoint Name]
-
-**Method**: [GET/POST/PUT/DELETE]
-**URL**: [Endpoint URL]
-**Description**: [What this endpoint does]
-
-**Request**:
-```typescript
-interface RequestBody {
-  // Request schema
-}
-```
-
-**Response**:
-```typescript
-interface Response {
-  // Response schema
-}
-```
-
-**Example**:
-```bash
-curl -X POST /api/endpoint \
-  -H "Authorization: Bearer token" \
-  -d '{"field": "value"}'
-```
-
-## Error Handling
-
-| Status Code | Meaning              | FE Action                 |
-| ----------- | -------------------- | ------------------------- |
-| 400         | Bad Request          | Show validation error     |
-| 401         | Unauthorized         | Redirect to login         |
-| 404         | Not Found            | Show not found message    |
-| 500         | Server Error         | Show generic error        |
-
-## Integration Notes
-
-### Rate Limits
-[Any rate limiting information]
-
-### Caching
-[Caching recommendations]
-
-### Pagination
-[Pagination format if applicable]
-
-## Usage Examples
-
-### [Use Case 1]
-[Code example or description]
-```
-
----
-
-## Validation Checklist
-
-Before completing the contract, verify:
-
-- [ ] Contract is saved in `flow/contracts/` folder
-- [ ] File uses naming: `<service_name>_contract.md`
-- [ ] All requested endpoints are documented
-- [ ] Authentication method is clear
-- [ ] Request/response schemas are defined
-- [ ] Error handling is documented
-- [ ] **NO implementation code is included**
-- [ ] **NO source files were created or modified**
-
----
-
-## Related Files
-
-| File                                               | Purpose                           |
-| -------------------------------------------------- | --------------------------------- |
-| `.claude/rules/patterns/contract-patterns.md`     | Rules and patterns for contracts  |
-| `.claude/rules/tools/interactive-questions-tool.md` | Interactive Questions workflow  |
-| `flow/contracts/`                                  | Output folder for contracts       |

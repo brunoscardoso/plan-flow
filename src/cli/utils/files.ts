@@ -8,6 +8,8 @@ import {
   copyFileSync,
   readdirSync,
   readFileSync,
+  renameSync,
+  rmSync,
   statSync,
 } from 'node:fs';
 import { join, dirname, relative, resolve } from 'node:path';
@@ -125,6 +127,55 @@ export function copyFile(
 export function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
+  }
+}
+
+/**
+ * Removes a directory recursively if it exists.
+ * Returns the list of removed paths.
+ */
+export function removeDir(dir: string): string[] {
+  if (!existsSync(dir)) {
+    return [];
+  }
+  const removed: string[] = [dir];
+  rmSync(dir, { recursive: true, force: true });
+  return removed;
+}
+
+/**
+ * Lists all files in a directory recursively, returning paths relative to the dir.
+ */
+export function listFilesRecursive(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  const files: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const fullPath = join(dir, entry);
+    if (statSync(fullPath).isDirectory()) {
+      for (const sub of listFilesRecursive(fullPath)) {
+        files.push(join(entry, sub));
+      }
+    } else {
+      files.push(entry);
+    }
+  }
+  return files;
+}
+
+/**
+ * Moves a file from src to dest, creating parent directories as needed.
+ */
+export function moveFile(src: string, dest: string): void {
+  ensureDir(dirname(dest));
+  renameSync(src, dest);
+}
+
+/**
+ * Removes a single file if it exists.
+ */
+export function removeFile(filePath: string): void {
+  if (existsSync(filePath)) {
+    rmSync(filePath, { force: true });
   }
 }
 

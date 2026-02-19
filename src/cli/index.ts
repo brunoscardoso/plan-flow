@@ -53,4 +53,24 @@ program
     await runInit(options);
   });
 
+program
+  .command('update')
+  .description(
+    'Update plan-flow files to the latest version (replaces plan-flow files, preserves user files)'
+  )
+  .option('--claude', 'Update Claude Code files')
+  .option('--cursor', 'Update Cursor files')
+  .option('--openclaw', 'Update OpenClaw files')
+  .option('--codex', 'Update Codex CLI files')
+  .option('--all', 'Update all platforms')
+  .option(
+    '--target <dir>',
+    'Target directory (defaults to current directory)',
+    process.cwd()
+  )
+  .action(async (options) => {
+    const { runUpdate } = await import('./commands/update.js');
+    await runUpdate(options);
+  });
+
 program.parse();

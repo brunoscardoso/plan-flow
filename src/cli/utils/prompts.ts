@@ -7,6 +7,51 @@ import { stdin, stdout } from 'node:process';
 import type { Platform } from '../types.js';
 
 /**
+ * Asks the user what to do with custom (non-plan-flow) files found in a
+ * legacy .claude/rules/ subdirectory during v1 → v2 migration.
+ */
+export async function askLegacyFilesAction(
+  subdir: string,
+  files: string[]
+): Promise<'keep' | 'move' | 'remove'> {
+  const rl = createInterface({ input: stdin, output: stdout });
+
+  try {
+    console.log(
+      `\nFound ${files.length} custom file(s) in .claude/rules/${subdir}/:`
+    );
+    for (const f of files) {
+      console.log(`  - ${f}`);
+    }
+    console.log(
+      '\nThese files were not installed by plan-flow. What would you like to do?\n'
+    );
+    console.log(
+      '  1. Keep in current location (still auto-loaded by Claude Code) [default]'
+    );
+    console.log(
+      `  2. Move to .claude/resources/${subdir}/ (loaded on-demand only)`
+    );
+    console.log('  3. Remove them');
+    console.log('');
+
+    const answer = await rl.question('Enter your choice (1-3) [1]: ');
+    const choice = answer.trim() || '1';
+
+    switch (choice) {
+      case '2':
+        return 'move';
+      case '3':
+        return 'remove';
+      default:
+        return 'keep';
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+/**
  * Asks the user which platforms to install for.
  * Returns selected platform names.
  */
