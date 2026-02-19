@@ -106,6 +106,6 @@ Core rules define the foundational coding standards that apply across the entire
 ## Notes
 
 - `allowed-patterns.mdc` and `forbidden-patterns.mdc` have `alwaysApply: true` - they are loaded automatically by Cursor
-- `project-ledger.mdc` has `alwaysApply: true` - maintains persistent project memory
-- `complexity-scoring.mdc` is loaded on-demand when needed for planning
-- `autopilot-mode.mdc` has `alwaysApply: true` - detects and orchestrates autopilot flow mode
+- `project-ledger.mdc` has `alwaysApply: false` - loaded when `flow/ledger.md` exists or when learnings are produced
+- `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
+- `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)

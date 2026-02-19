@@ -1,6 +1,6 @@
 ---
-description: "Persistent project learning journal - always active to maintain institutional memory across sessions"
-alwaysApply: true
+description: "Persistent project learning journal - maintains institutional memory across sessions. Include when working on tasks that produce learnings or when flow/ledger.md exists."
+alwaysApply: false
 ---
 
 # Project Ledger
