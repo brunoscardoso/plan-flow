@@ -8,7 +8,17 @@
 import { join } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import type { CopyOptions, CopyResult } from '../types.js';
-import { copyDir, copyFile, getPackageRoot, ensureDir } from '../utils/files.js';
+import {
+  copyDir,
+  copyFile,
+  getPackageRoot,
+  ensureDir,
+  removeDir,
+  listFilesRecursive,
+  moveFile,
+  removeFile,
+} from '../utils/files.js';
+import { askLegacyFilesAction } from '../utils/prompts.js';
 import * as log from '../utils/logger.js';
 
 const MARKER_START = '<!-- plan-flow-start -->';
@@ -142,7 +152,64 @@ export async function initClaude(
     }
   }
 
-  // 3. Copy .claude/resources/ (on-demand reference files)
+  // 3. Migrate v1 → v2: remove old plan-flow files from .claude/rules/
+  //    In v1, patterns/tools/languages lived under .claude/rules/ (auto-loaded).
+  //    In v2, they moved to .claude/resources/ (loaded on-demand).
+  //    Only remove files we shipped; preserve any user-created files.
+  for (const sub of ['patterns', 'tools', 'languages']) {
+    const legacyDir = join(target, '.claude', 'rules', sub);
+    if (!existsSync(legacyDir)) continue;
+
+    // Files we ship (in resources) — used to identify plan-flow files
+    const ourResourceDir = join(packageRoot, '.claude', 'resources', sub);
+    const ourFiles = new Set(listFilesRecursive(ourResourceDir));
+
+    // Files currently in the legacy directory
+    const legacyFiles = listFilesRecursive(legacyDir);
+    const planFlowFiles = legacyFiles.filter((f) => ourFiles.has(f));
+    const userFiles = legacyFiles.filter((f) => !ourFiles.has(f));
+
+    // Remove plan-flow files (they'll be installed fresh in resources)
+    for (const f of planFlowFiles) {
+      removeFile(join(legacyDir, f));
+      log.warn(`Removed legacy .claude/rules/${sub}/${f}`);
+    }
+
+    // Handle user-created files
+    if (userFiles.length > 0) {
+      const action = await askLegacyFilesAction(sub, userFiles);
+
+      switch (action) {
+        case 'move':
+          for (const f of userFiles) {
+            const src = join(legacyDir, f);
+            const dest = join(target, '.claude', 'resources', sub, f);
+            moveFile(src, dest);
+            log.info(`Moved ${f} → .claude/resources/${sub}/${f}`);
+          }
+          break;
+        case 'remove':
+          for (const f of userFiles) {
+            removeFile(join(legacyDir, f));
+            log.warn(`Removed .claude/rules/${sub}/${f}`);
+          }
+          break;
+        default:
+          log.info(
+            `Keeping ${userFiles.length} custom file(s) in .claude/rules/${sub}/`
+          );
+          break;
+      }
+    }
+
+    // Clean up empty legacy directory
+    const remaining = listFilesRecursive(legacyDir);
+    if (remaining.length === 0) {
+      removeDir(legacyDir);
+    }
+  }
+
+  // 4. Copy .claude/resources/ (on-demand reference files)
   const resourcesSrc = join(packageRoot, '.claude', 'resources');
   const resourcesDest = join(target, '.claude', 'resources');
 
@@ -164,7 +231,7 @@ export async function initClaude(
     }
   }
 
-  // 4. Handle CLAUDE.md
+  // 5. Handle CLAUDE.md
   const mdResult = handleClaudeMd(target, packageRoot, options);
   result.created.push(...mdResult.created);
   result.skipped.push(...mdResult.skipped);
