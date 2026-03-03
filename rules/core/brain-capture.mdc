@@ -1,0 +1,101 @@
+---
+description: "Automatic knowledge capture system - processes brain-capture blocks and maintains project brain. Include when flow/brain/index.md exists or when brain-capture blocks need processing."
+alwaysApply: false
+---
+
+# Brain Capture
+
+## Purpose
+
+Automatic knowledge capture that builds a secondary brain during skill execution. The brain stores features, errors, decisions, and session logs in Obsidian-compatible markdown with `[[wiki-links]]`.
+
+**Location**: `flow/brain/`
+
+---
+
+## Session Start Behavior
+
+1. Check if `flow/brain/index.md` exists
+2. If it exists, read it silently and internalize:
+   - Active features and their status
+   - Recent errors (reusable patterns)
+   - Recent decisions (context for new work)
+3. Apply context naturally - never announce "I read the brain"
+
+---
+
+## Brain-Capture Block Format
+
+After each skill completes, process any `<!-- brain-capture -->` blocks:
+
+```html
+<!-- brain-capture
+skill: [skill-name]
+feature: [feature-name]
+phase: [optional phase]
+status: [completed/failed/partial]
+data:
+  key: value
+-->
+```
+
+---
+
+## Processing Rules
+
+### Features (`flow/brain/features/`)
+
+- File naming: `{feature-name}.md` (kebab-case)
+- Create on first discovery, update on subsequent skills
+- Track lifecycle: `discovered → planned → in-progress → completed → archived`
+- Link to related features with `[[wiki-links]]`
+
+### Errors (`flow/brain/errors/`)
+
+- File naming: `{error-name}.md` (kebab-case)
+- Only create for **reusable** error patterns (not one-offs)
+- Include: error description, root cause, solution, related features
+
+### Decisions (`flow/brain/decisions/`)
+
+- File naming: `{decision-name}.md` (kebab-case)
+- Record: context, options considered, choice made, rationale
+
+### Sessions (`flow/brain/sessions/`)
+
+- File naming: `YYYY-MM-DD.md`
+- Append-only daily log of activities
+- Auto-created on first brain entry of the day
+
+---
+
+## Index Management
+
+`flow/brain/index.md` caps:
+- **5 recent errors** (rotate oldest when exceeded)
+- **3 recent decisions** (rotate oldest when exceeded)
+- **3 cross-project patterns** (rotate oldest when exceeded)
+- **Unlimited active features** (move to archived when done)
+
+---
+
+## Brain vs Ledger
+
+| Aspect | Ledger | Brain |
+|--------|--------|-------|
+| Purpose | Curated lessons (opinions) | Raw factual history (record) |
+| Style | "Don't do X because Y" | "X happened during Y" |
+| Managed by | AI judgment | Automatic capture |
+| Size | ~150 lines max | Unlimited (file-per-entry) |
+
+Both coexist - ledger captures wisdom, brain captures facts.
+
+---
+
+## Rules
+
+1. **Silent by default**: Never tell the user "I updated the brain" unless asked
+2. **Post-skill processing**: Process brain-capture blocks after skill completion
+3. **Wiki-links always**: Use `[[kebab-case-name]]` for all cross-references
+4. **Index caps enforced**: Rotate oldest entries when limits exceeded
+5. **No bulk loading**: Only load specific brain files when relevant to current work

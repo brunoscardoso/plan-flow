@@ -10,7 +10,20 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { runInit } from './init';
+import { jest } from '@jest/globals';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Mock prompts to avoid interactive stdin in tests
+jest.unstable_mockModule(resolve(__dirname, '../utils/prompts'), () => ({
+  askLegacyFilesAction: jest.fn<() => Promise<string>>().mockResolvedValue('keep'),
+  selectPlatforms: jest.fn<() => Promise<string[]>>().mockResolvedValue(['claude']),
+}));
+
+const { runInit } = await import('./init');
 
 function createTempDir(): string {
   const dir = join(tmpdir(), `plan-flow-init-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -24,7 +37,7 @@ function cleanup(dir: string): void {
 
 // Suppress console output during tests
 beforeEach(() => {
-  jest.spyOn(console, 'log').mockImplementation();
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -57,7 +70,7 @@ describe('runInit', () => {
   it('should install Cursor files with --cursor flag', async () => {
     await runInit({ cursor: true, target: tempDir });
 
-    expect(existsSync(join(tempDir, 'rules'))).toBe(true);
+    expect(existsSync(join(tempDir, '.cursor', 'rules'))).toBe(true);
     // Shared resources
     expect(existsSync(join(tempDir, 'flow'))).toBe(true);
   });
@@ -86,7 +99,7 @@ describe('runInit', () => {
     expect(existsSync(join(tempDir, '.claude', 'commands'))).toBe(true);
     expect(existsSync(join(tempDir, 'CLAUDE.md'))).toBe(true);
     // Cursor
-    expect(existsSync(join(tempDir, 'rules'))).toBe(true);
+    expect(existsSync(join(tempDir, '.cursor', 'rules'))).toBe(true);
     // OpenClaw
     expect(existsSync(join(tempDir, 'skills', 'plan-flow'))).toBe(true);
     // Codex
@@ -104,6 +117,6 @@ describe('runInit', () => {
 
     // Should still have everything
     expect(existsSync(join(tempDir, '.claude', 'commands'))).toBe(true);
-    expect(existsSync(join(tempDir, 'rules'))).toBe(true);
+    expect(existsSync(join(tempDir, '.cursor', 'rules'))).toBe(true);
   });
 });

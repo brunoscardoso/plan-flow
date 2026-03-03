@@ -35,7 +35,7 @@ describe('initCursor', () => {
   it('should copy cursor rules (.mdc files)', async () => {
     const result = await initCursor(tempDir, { force: false });
 
-    const rulesDir = join(tempDir, 'rules');
+    const rulesDir = join(tempDir, '.cursor', 'rules');
     expect(existsSync(rulesDir)).toBe(true);
 
     // Should have copied rule files
@@ -45,7 +45,7 @@ describe('initCursor', () => {
   it('should preserve subdirectory structure in rules/', async () => {
     await initCursor(tempDir, { force: false });
 
-    const rulesDir = join(tempDir, 'rules');
+    const rulesDir = join(tempDir, '.cursor', 'rules');
     expect(existsSync(join(rulesDir, 'core'))).toBe(true);
     expect(existsSync(join(rulesDir, 'patterns'))).toBe(true);
   });

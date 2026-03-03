@@ -5,12 +5,20 @@
 
 Pattern files provide templates, examples, and guidelines for specific workflows. This is the largest category covering discovery, planning, testing, code review, and contracts.
 
-**Total Files**: 9 files, ~3,145 lines
-**Reference Codes**: PTN-CON-1 through PTN-PR-6
+**Total Files**: 10 files, ~3,300 lines
+**Reference Codes**: PTN-BR-1 through PTN-PR-6
 
 ---
 
 ## Reference Codes
+
+### Brain Patterns (`brain-patterns.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-BR-1 | Brain directory structure and file naming conventions | brain-patterns.md | 5-45 |
+| PTN-BR-2 | Wiki-link patterns and brain-capture block per skill | brain-patterns.md | 47-160 |
+| PTN-BR-3 | Feature status lifecycle and index update rules | brain-patterns.md | 162-210 |
 
 ### Contract Patterns (`contract-patterns.md`)
 

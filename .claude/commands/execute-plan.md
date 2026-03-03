@@ -320,3 +320,41 @@ When executing this command:
 | `/create-plan` command     | Create a plan first               |
 | `/discovery-plan` command  | Run discovery before planning     |
 
+---
+
+## Brain Capture
+
+After each phase completes (and after full execution), append brain-capture blocks. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following per phase**:
+
+```
+<!-- brain-capture
+skill: execute-plan
+feature: [feature name]
+phase: [phase number and name]
+status: [completed/failed]
+data:
+  complexity: [phase complexity score]
+  errors_hit: [list of errors encountered, if any]
+  user_corrections: [any user interventions]
+  files_changed: [list of files modified/created]
+-->
+```
+
+**Capture at execution end**:
+
+```
+<!-- brain-capture
+skill: execute-plan
+feature: [feature name]
+status: [completed/partial/failed]
+data:
+  phases_completed: [X of Y]
+  build_result: [pass/fail]
+  test_result: [pass/fail]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` with execution results. If errors were hit, create/update `flow/brain/errors/[error-name].md`.
+

@@ -1,23 +1,18 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      useESM: false,
-      tsconfig: {
-        module: 'commonjs',
-        moduleResolution: 'node',
-      },
-      diagnostics: {
-        ignoreDiagnostics: [1343],
-      },
+      useESM: true,
+      diagnostics: false,
     }],
   },
   collectCoverageFrom: [
@@ -35,6 +30,6 @@ module.exports = {
       statements: 50,
     },
   },
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  testTimeout: 10000,
   verbose: true,
 };

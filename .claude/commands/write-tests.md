@@ -257,3 +257,28 @@ When executing this command:
 | `pytest-testing-tool.md` | Pytest commands and utilities   |
 | `/execute-plan` command   | Tests are last phase of plans   |
 
+---
+
+## Brain Capture
+
+After test writing completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: write-tests
+feature: [feature or scope tested]
+status: completed
+data:
+  test_framework: [jest/pytest/vitest]
+  coverage_before: [percentage]
+  coverage_after: [percentage]
+  coverage_target: [target percentage]
+  tests_written: [count of new test files/cases]
+  failures_encountered: [list of test failures during writing, if any]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` if testing a known feature. Log to `flow/brain/sessions/YYYY-MM-DD.md` otherwise.
+

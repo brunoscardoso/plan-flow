@@ -11,8 +11,21 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { initClaude } from './claude';
-import { getPackageRoot } from '../utils/files';
+import { jest } from '@jest/globals';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Mock the prompts module to avoid interactive stdin in tests
+jest.unstable_mockModule(resolve(__dirname, '../utils/prompts'), () => ({
+  askLegacyFilesAction: jest.fn<() => Promise<string>>().mockResolvedValue('keep'),
+  selectPlatforms: jest.fn<() => Promise<string[]>>().mockResolvedValue(['claude']),
+}));
+
+const { initClaude } = await import('./claude');
+const { getPackageRoot } = await import('../utils/files');
 
 function createTempDir(): string {
   const dir = join(tmpdir(), `plan-flow-claude-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -49,15 +62,17 @@ describe('initClaude', () => {
     expect(existsSync(setupCmd)).toBe(true);
   });
 
-  it('should copy rules preserving subdirectory structure', async () => {
+  it('should copy rules and resources preserving subdirectory structure', async () => {
     const result = await initClaude(tempDir, { force: false });
 
     const rulesDir = join(tempDir, '.claude', 'rules');
     expect(existsSync(rulesDir)).toBe(true);
-
-    // Check subdirectories are preserved
     expect(existsSync(join(rulesDir, 'core'))).toBe(true);
-    expect(existsSync(join(rulesDir, 'patterns'))).toBe(true);
+
+    // Resources are in .claude/resources/ (v2 layout)
+    const resourcesDir = join(tempDir, '.claude', 'resources');
+    expect(existsSync(resourcesDir)).toBe(true);
+    expect(existsSync(join(resourcesDir, 'patterns'))).toBe(true);
   });
 
   it('should create CLAUDE.md from template when none exists', async () => {

@@ -171,3 +171,28 @@ When executing this command:
 | `review-code-skill.md`        | Skill that executes the review         |
 | `review-pr-patterns.md`       | Review patterns and guidelines         |
 
+---
+
+## Brain Capture
+
+After code review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: review-code
+feature: [feature or scope reviewed]
+status: completed
+data:
+  files_reviewed: [count]
+  issues_found: [total count]
+  severity_critical: [count]
+  severity_warning: [count]
+  severity_info: [count]
+  pattern_conflicts: [list of pattern conflicts found, if any]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` if reviewing a known feature. Log to `flow/brain/sessions/YYYY-MM-DD.md` otherwise.
+

@@ -399,13 +399,13 @@ See: `.claude/resources/skills/setup-skill.md`
 If the `flow/` folder doesn't exist, create it:
 
 ```bash
-mkdir -p flow/archive flow/contracts flow/discovery flow/plans flow/references flow/reviewed-code flow/reviewed-pr
+mkdir -p flow/archive flow/brain/features flow/brain/errors flow/brain/decisions flow/brain/sessions flow/contracts flow/discovery flow/plans flow/references flow/reviewed-code flow/reviewed-pr
 ```
 
 **Add `.gitkeep` files**:
 
 ```bash
-touch flow/archive/.gitkeep flow/contracts/.gitkeep flow/discovery/.gitkeep flow/plans/.gitkeep flow/references/.gitkeep flow/reviewed-code/.gitkeep flow/reviewed-pr/.gitkeep
+touch flow/archive/.gitkeep flow/brain/.gitkeep flow/contracts/.gitkeep flow/discovery/.gitkeep flow/plans/.gitkeep flow/references/.gitkeep flow/reviewed-code/.gitkeep flow/reviewed-pr/.gitkeep
 ```
 
 **Directory Structure Created**:
@@ -413,6 +413,11 @@ touch flow/archive/.gitkeep flow/contracts/.gitkeep flow/discovery/.gitkeep flow
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── features/      # Feature history and context
+│   ├── errors/        # Reusable error patterns
+│   ├── decisions/     # Decision records
+│   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
@@ -446,6 +451,11 @@ Setup Complete!
 
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── features/      # Feature history and context
+│   ├── errors/        # Reusable error patterns
+│   ├── decisions/     # Decision records
+│   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
@@ -698,4 +708,27 @@ When executing this command:
 | `interactive-questions-tool.md` | Questions UI for confirmations       |
 | `allowed-patterns.md`         | Core allowed patterns                  |
 | `forbidden-patterns.md`       | Core forbidden patterns                |
+
+---
+
+## Brain Capture
+
+After setup completes successfully, append a brain-capture block to the session file. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: setup
+feature: project-setup
+status: completed
+data:
+  project_name: [detected project name]
+  stack: [language + framework]
+  patterns_generated: [count of pattern files created]
+  files_created: [list of generated files]
+-->
+```
+
+Write to `flow/brain/sessions/YYYY-MM-DD.md` and update `flow/brain/index.md` if this is a new project setup.
 

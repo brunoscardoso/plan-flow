@@ -25,6 +25,11 @@ function cleanup(dir: string): void {
 
 const EXPECTED_SUBDIRS = [
   'archive',
+  'brain',
+  'brain/features',
+  'brain/errors',
+  'brain/decisions',
+  'brain/sessions',
   'contracts',
   'discovery',
   'plans',
@@ -90,30 +95,31 @@ describe('gitignore management', () => {
     expect(gitignore).toContain('# >>> plan-flow');
     expect(gitignore).toContain('# <<< plan-flow');
     expect(gitignore).toContain('flow/');
-    expect(gitignore).toContain('.claude/commands/');
-    expect(gitignore).toContain('.claude/rules/');
+    expect(gitignore).toContain('.claude/');
+    expect(gitignore).toContain('CLAUDE.md');
   });
 
   it('should include platform-specific entries based on selected platforms', async () => {
     await initShared(tempDir, { force: false }, ['cursor', 'openclaw']);
 
     const gitignore = readFileSync(join(tempDir, '.gitignore'), 'utf-8');
-    expect(gitignore).toContain('rules/');
+    expect(gitignore).toContain('.cursor/');
     expect(gitignore).toContain('skills/plan-flow/');
     // Should not contain Claude-specific entries
-    expect(gitignore).not.toContain('.claude/commands/');
-    expect(gitignore).not.toContain('.claude/rules/');
+    expect(gitignore).not.toContain('.claude/');
+    expect(gitignore).not.toContain('CLAUDE.md');
   });
 
   it('should include all platform entries when all platforms selected', async () => {
     await initShared(tempDir, { force: false }, ['claude', 'cursor', 'openclaw', 'codex']);
 
     const gitignore = readFileSync(join(tempDir, '.gitignore'), 'utf-8');
-    expect(gitignore).toContain('.claude/commands/');
-    expect(gitignore).toContain('.claude/rules/');
-    expect(gitignore).toContain('rules/');
+    expect(gitignore).toContain('.claude/');
+    expect(gitignore).toContain('CLAUDE.md');
+    expect(gitignore).toContain('.cursor/');
     expect(gitignore).toContain('skills/plan-flow/');
-    expect(gitignore).toContain('.agents/skills/plan-flow/');
+    expect(gitignore).toContain('.agents/');
+    expect(gitignore).toContain('AGENTS.md');
   });
 
   it('should always include shared entries regardless of platform', async () => {
@@ -158,7 +164,7 @@ describe('gitignore management', () => {
     const gitignore = readFileSync(join(tempDir, '.gitignore'), 'utf-8');
     const markerCount = (gitignore.match(/# >>> plan-flow/g) || []).length;
     expect(markerCount).toBe(1);
-    expect(gitignore).toContain('rules/');
-    expect(gitignore).toContain('.claude/commands/');
+    expect(gitignore).toContain('.cursor/');
+    expect(gitignore).toContain('.claude/');
   });
 });

@@ -1,0 +1,63 @@
+---
+description: "Manual brain entry skill - capture meeting notes, ideas, brainstorms, and insights. Invoked via /brain command."
+alwaysApply: false
+---
+
+# Brain Skill
+
+## Purpose
+
+Allow manual brain entries for capturing meeting notes, brainstorms, ad-hoc ideas, and insights that don't come from skill execution. Supports two modes: free-text (default) and guided prompts.
+
+This skill **only writes to `flow/brain/`**. It does NOT:
+- Write any source code
+- Modify any configuration files
+- Execute any commands
+- Create files outside `flow/brain/`
+
+---
+
+## Modes
+
+### Free-Text Mode (Default)
+
+When user runs `/brain {free text}`:
+
+1. Parse input text
+2. Extract entities (features, technologies, people, errors, decisions)
+3. Categorize into appropriate brain subdirectory
+4. Create/update brain files with `[[wiki-links]]`
+5. Update `flow/brain/index.md` if needed
+
+### Guided Mode (`/brain -guided`)
+
+When user runs `/brain -guided`:
+
+1. Ask structured questions about work, insights, meetings, decisions
+2. Gather responses and follow-up text
+3. Generate properly formatted brain files
+4. Link everything with `[[wiki-links]]`
+5. Update `flow/brain/index.md`
+
+---
+
+## Output
+
+```markdown
+Brain entry captured!
+
+**Written to**: flow/brain/[subdirectory]/[file].md
+**Links created**: [[feature-1]], [[error-name]]
+**Index updated**: Yes/No
+```
+
+---
+
+## Validation
+
+- Entry written to appropriate `flow/brain/` subdirectory
+- All `[[wiki-links]]` reference valid file names (kebab-case)
+- `flow/brain/index.md` updated if new feature, error, or decision added
+- Index caps enforced (5 errors, 3 decisions, 3 cross-project)
+- No files created outside `flow/brain/`
+- No source code written

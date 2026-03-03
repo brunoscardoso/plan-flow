@@ -5,12 +5,20 @@
 
 Skills implement the workflow logic for commands. Each skill orchestrates a specific process like discovery, planning, execution, or code review.
 
-**Total Files**: 8 files, ~2,506 lines
-**Reference Codes**: SKL-CON-1 through SKL-TEST-5
+**Total Files**: 9 files, ~2,700 lines
+**Reference Codes**: SKL-BR-1 through SKL-TEST-5
 
 ---
 
 ## Reference Codes
+
+### Brain Skill (`brain-skill.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| SKL-BR-1 | Purpose and restrictions (brain-only actions) | brain-skill.md | 8-45 |
+| SKL-BR-2 | Workflow (free-text mode and guided mode) | brain-skill.md | 55-130 |
+| SKL-BR-3 | Output format and validation checklist | brain-skill.md | 132-175 |
 
 ### Create Contract Skill (`create-contract-skill.md`)
 
@@ -145,6 +153,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
+| `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |
 | `/create-plan` | create-plan-skill | SKL-PLN-1 through SKL-PLN-4 |
 | `/execute-plan` | execute-plan-skill | SKL-EXEC-1 through SKL-EXEC-6 |

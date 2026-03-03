@@ -13,6 +13,11 @@ import * as log from '../utils/logger.js';
 
 const FLOW_SUBDIRS = [
   'archive',
+  'brain',
+  'brain/features',
+  'brain/errors',
+  'brain/decisions',
+  'brain/sessions',
   'contracts',
   'discovery',
   'plans',

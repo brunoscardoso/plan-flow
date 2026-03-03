@@ -9,8 +9,8 @@ alwaysApply: false
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 5 files, ~1011 lines
-**Reference Codes**: COR-AP-1 through COR-AM-3
+**Total Files**: 6 files, ~1150 lines
+**Reference Codes**: COR-AP-1 through COR-BR-3
 
 ---
 
@@ -55,6 +55,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-LDG-1 | Ledger behavior, entry format, and sections | project-ledger.mdc | 10-110 |
 | COR-LDG-2 | Maintenance rules and plan-flow integration | project-ledger.mdc | 112-155 |
 
+### Brain Capture (`brain-capture.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-BR-1 | Session start behavior and brain-capture processing rules | brain-capture.mdc | 10-50 |
+| COR-BR-2 | File templates (feature, error, decision, session) and naming conventions | brain-capture.mdc | 52-100 |
+| COR-BR-3 | Index management (caps, rotation) and brain vs ledger comparison | brain-capture.mdc | 102-140 |
+
 ---
 
 ## When to Expand
@@ -72,6 +80,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-CS-5 | Need detailed scoring examples |
 | COR-LDG-1 | Need ledger behavior and entry guidelines |
 | COR-LDG-2 | Need ledger maintenance and integration rules |
+| COR-BR-1 | Need brain session start behavior and processing rules |
+| COR-BR-2 | Need brain file templates and naming conventions |
+| COR-BR-3 | Need index management caps and brain vs ledger comparison |
 | COR-AM-1 | Need to understand input classification for autopilot |
 | COR-AM-2 | Need autopilot flow execution steps |
 | COR-AM-3 | Need mandatory checkpoint and override rules |
@@ -107,5 +118,6 @@ Core rules define the foundational coding standards that apply across the entire
 
 - `allowed-patterns.mdc` and `forbidden-patterns.mdc` have `alwaysApply: true` - they are loaded automatically by Cursor
 - `project-ledger.mdc` has `alwaysApply: false` - loaded when `flow/ledger.md` exists or when learnings are produced
+- `brain-capture.mdc` has `alwaysApply: false` - loaded when `flow/brain/index.md` exists or when brain-capture blocks need processing
 - `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
 - `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)

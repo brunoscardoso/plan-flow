@@ -12,6 +12,7 @@
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow
@@ -26,6 +27,10 @@
 
 The Project Ledger (`flow/ledger.md`) is always active. It silently captures project-specific learnings, mistakes, and corrections across sessions - building institutional memory that improves AI assistance over time.
 
+## Project Brain
+
+The Project Brain (`flow/brain/`) automatically captures features, errors, decisions, and session logs during skill execution. If `flow/brain/index.md` exists, read it silently at session start. Uses Obsidian-compatible `[[wiki-links]]` for cross-referencing.
+
 ## Critical Rules
 
 1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per the autopilot flow skill.
@@ -38,6 +43,12 @@ The Project Ledger (`flow/ledger.md`) is always active. It silently captures pro
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── index.md       # Brain index (loaded at session start)
+│   ├── features/      # Feature history and context
+│   ├── errors/        # Reusable error patterns
+│   ├── decisions/     # Decision records
+│   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans

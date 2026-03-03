@@ -293,3 +293,27 @@ When executing this command:
 | `/discovery-plan` command   | Run discovery first               |
 | `/execute-plan` command     | Execute the created plan          |
 
+---
+
+## Brain Capture
+
+After plan creation completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: create-plan
+feature: [feature name]
+status: completed
+data:
+  phase_count: [number of phases]
+  total_complexity: [sum of complexity scores]
+  highest_phase: [phase name with highest score]
+  discovery_link: [[discovery-feature-name]]
+  plan_doc: [path to plan document]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` with plan details and link to discovery entry.
+

@@ -16,6 +16,7 @@ Use slash commands to invoke skills:
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Workflow
@@ -49,6 +50,12 @@ All plan-flow artifacts are stored in `flow/`:
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── index.md       # Brain index (loaded at session start)
+│   ├── features/      # Feature history and context
+│   ├── errors/        # Reusable error patterns
+│   ├── decisions/     # Decision records
+│   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
@@ -61,6 +68,7 @@ flow/
 ## Session Start Behaviors
 
 - **Project Ledger**: If `flow/ledger.md` exists, read it silently and internalize learnings. Update it when you learn project-specific lessons. See `.claude/resources/core/project-ledger.md` for full rules.
+- **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features, recent errors, and recent decisions. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Rules

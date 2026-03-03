@@ -1,0 +1,77 @@
+---
+description: "Brain file templates, naming conventions, and wiki-link patterns for the brain capture system."
+alwaysApply: false
+---
+
+# Brain Patterns
+
+## Directory Structure
+
+```
+flow/brain/
+├── index.md        # Brain index (loaded at session start)
+├── features/       # Feature history and context
+│   └── {feature-name}.md
+├── errors/         # Reusable error patterns
+│   └── {error-name}.md
+├── decisions/      # Decision records
+│   └── {decision-name}.md
+└── sessions/       # Daily activity logs
+    └── YYYY-MM-DD.md
+```
+
+## File Naming
+
+- All files use **kebab-case**: `user-authentication.md`, `api-rate-limit.md`
+- Feature files match the feature name from discovery/plans
+- Error files describe the error pattern, not the instance
+- Decision files describe the decision topic
+- Session files use ISO date format
+
+## Wiki-Link Patterns
+
+Use `[[kebab-case-name]]` to link between brain files:
+
+```markdown
+## Feature: [[user-authentication]]
+
+During implementation, we hit [[api-timeout-error]] which led to
+the decision in [[use-retry-with-backoff]].
+
+See today's session: [[2025-01-15]]
+```
+
+## Feature Status Lifecycle
+
+```
+discovered → planned → in-progress → completed → archived
+```
+
+Update status in both the feature file and `flow/brain/index.md`.
+
+## Brain-Capture Block Format
+
+Each skill appends a brain-capture block after completion:
+
+```html
+<!-- brain-capture
+skill: [skill-name]
+feature: [feature-name]
+status: [completed/failed]
+data:
+  key: value
+-->
+```
+
+## Index Update Rules
+
+Update `flow/brain/index.md` when:
+- New feature discovered or created
+- Feature status changes
+- New error pattern identified
+- New decision recorded
+
+Enforce caps:
+- 5 recent errors (rotate oldest)
+- 3 recent decisions (rotate oldest)
+- 3 cross-project patterns (rotate oldest)

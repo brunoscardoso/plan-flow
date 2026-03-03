@@ -242,3 +242,26 @@ When executing this command:
 | `/discovery-plan` command      | Create discovery from contract         |
 | `/create-plan` command         | Create plan from discovery             |
 
+---
+
+## Brain Capture
+
+After contract creation completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: create-contract
+feature: [service name]
+status: completed
+data:
+  service_name: [API/service name]
+  endpoints_documented: [count]
+  auth_type: [detected auth type]
+  contract_doc: [path to contract document]
+-->
+```
+
+Update `flow/brain/features/[service-name].md` with contract context and update `flow/brain/index.md`.
+

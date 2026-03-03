@@ -23,6 +23,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/flow` | Toggle autopilot mode (auto-chains the full workflow) |
 
 ## Always-Active Features
@@ -30,6 +31,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 | Feature | Description |
 |---------|-------------|
 | Project Ledger | Persistent learning journal at `flow/ledger.md` - silently captures mistakes, corrections, and project-specific knowledge across sessions |
+| Project Brain | Automatic knowledge capture at `flow/brain/` - records features, errors, decisions, and session logs with Obsidian-compatible `[[wiki-links]]` |
 
 ## Recommended Workflow
 
@@ -73,6 +75,12 @@ All artifacts are stored in `flow/`:
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── index.md       # Brain index (loaded at session start)
+│   ├── features/      # Feature history and context
+│   ├── errors/        # Reusable error patterns
+│   ├── decisions/     # Decision records
+│   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans

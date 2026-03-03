@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 5 files, ~1011 lines
-**Reference Codes**: COR-AP-1 through COR-AM-3
+**Total Files**: 6 files, ~1200 lines
+**Reference Codes**: COR-AP-1 through COR-BR-3
 
 ---
 
@@ -51,6 +51,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-LDG-1 | Ledger behavior, entry format, and sections | project-ledger.md | 10-110 |
 | COR-LDG-2 | Maintenance rules and plan-flow integration | project-ledger.md | 112-155 |
 
+### Brain Capture (`brain-capture.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-BR-1 | Session start behavior and brain-capture processing rules | brain-capture.md | 10-50 |
+| COR-BR-2 | File templates (feature, error, decision, session) and naming conventions | brain-capture.md | 52-170 |
+| COR-BR-3 | Index management (caps, rotation) and global brain sync | brain-capture.md | 172-240 |
+
 ---
 
 ## When to Expand
@@ -71,6 +79,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AM-1 | Need to understand input classification for autopilot |
 | COR-AM-2 | Need autopilot flow execution steps |
 | COR-AM-3 | Need mandatory checkpoint and override rules |
+| COR-BR-1 | Need brain session start behavior and processing rules |
+| COR-BR-2 | Need brain file templates and naming conventions |
+| COR-BR-3 | Need index management caps and global sync rules |
 
 ---
 
@@ -105,3 +116,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `project-ledger.md` has `alwaysApply: true` - maintains persistent project memory
 - `complexity-scoring.md` is loaded on-demand when needed for planning
 - `autopilot-mode.md` has `alwaysApply: true` - detects and orchestrates autopilot flow mode
+- `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
