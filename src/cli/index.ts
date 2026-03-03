@@ -40,6 +40,7 @@ program
   .option('--claude', 'Install for Claude Code (slash commands + rules)')
   .option('--cursor', 'Install for Cursor (rules)')
   .option('--openclaw', 'Install for OpenClaw (skill manifests)')
+  .option('--clawhub', 'Install for ClawHub (skill manifests + lock file)')
   .option('--codex', 'Install for Codex CLI (skills + AGENTS.md)')
   .option('--all', 'Install for all platforms')
   .option('--force', 'Overwrite existing files')
@@ -61,6 +62,7 @@ program
   .option('--claude', 'Update Claude Code files')
   .option('--cursor', 'Update Cursor files')
   .option('--openclaw', 'Update OpenClaw files')
+  .option('--clawhub', 'Update ClawHub files')
   .option('--codex', 'Update Codex CLI files')
   .option('--all', 'Update all platforms')
   .option(

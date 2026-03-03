@@ -1,7 +1,8 @@
 ---
 name: plan-flow
+version: 1.0.8
 description: Structured AI-assisted development workflows - discovery, planning, execution, code reviews, and testing
-metadata: {"openclaw":{"requires":{"bins":["git","gh"]}}}
+metadata: {"openclaw":{"requires":{"bins":["git","gh"]}},"clawhub":{"requires":{"bins":["git","gh"]},"emoji":"🗺️","homepage":"https://github.com/brunoscardoso/plan-flow"}}
 homepage: https://github.com/brunoscardoso/plan-flow
 user-invocable: true
 ---

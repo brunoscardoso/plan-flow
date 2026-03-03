@@ -15,6 +15,7 @@ export interface UpdateOptions {
   claude?: boolean;
   cursor?: boolean;
   openclaw?: boolean;
+  clawhub?: boolean;
   codex?: boolean;
   all?: boolean;
   target: string;
@@ -33,13 +34,14 @@ function printBanner(): void {
 
 function detectPlatforms(options: UpdateOptions): Platform[] | null {
   if (options.all) {
-    return ['claude', 'cursor', 'openclaw', 'codex'];
+    return ['claude', 'cursor', 'openclaw', 'clawhub', 'codex'];
   }
 
   const platforms: Platform[] = [];
   if (options.claude) platforms.push('claude');
   if (options.cursor) platforms.push('cursor');
   if (options.openclaw) platforms.push('openclaw');
+  if (options.clawhub) platforms.push('clawhub');
   if (options.codex) platforms.push('codex');
 
   return platforms.length > 0 ? platforms : null;
@@ -56,6 +58,9 @@ function detectInstalledPlatforms(target: string): Platform[] {
   }
   if (fileExists(resolve(target, 'skills', 'plan-flow'))) {
     platforms.push('openclaw');
+  }
+  if (fileExists(resolve(target, '.clawdhub', 'lock.json'))) {
+    platforms.push('clawhub');
   }
   if (fileExists(resolve(target, '.agents', 'skills', 'plan-flow'))) {
     platforms.push('codex');
@@ -93,6 +98,7 @@ export async function runUpdate(options: UpdateOptions): Promise<void> {
     claude: platforms.includes('claude'),
     cursor: platforms.includes('cursor'),
     openclaw: platforms.includes('openclaw'),
+    clawhub: platforms.includes('clawhub'),
     codex: platforms.includes('codex'),
     force: true,
   });

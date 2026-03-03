@@ -10,6 +10,7 @@ import { selectPlatforms } from '../utils/prompts.js';
 import { initClaude } from '../handlers/claude.js';
 import { initCursor } from '../handlers/cursor.js';
 import { initOpenClaw } from '../handlers/openclaw.js';
+import { initClawHub } from '../handlers/clawhub.js';
 import { initCodex } from '../handlers/codex.js';
 import { initShared } from '../handlers/shared.js';
 
@@ -24,13 +25,14 @@ function printBanner(): void {
 
 function detectPlatforms(options: InitOptions): Platform[] | null {
   if (options.all) {
-    return ['claude', 'cursor', 'openclaw', 'codex'];
+    return ['claude', 'cursor', 'openclaw', 'clawhub', 'codex'];
   }
 
   const platforms: Platform[] = [];
   if (options.claude) platforms.push('claude');
   if (options.cursor) platforms.push('cursor');
   if (options.openclaw) platforms.push('openclaw');
+  if (options.clawhub) platforms.push('clawhub');
   if (options.codex) platforms.push('codex');
 
   return platforms.length > 0 ? platforms : null;
@@ -113,6 +115,10 @@ function printNextSteps(platforms: Platform[]): void {
     log.info('OpenClaw: Skills installed in skills/plan-flow/. Run clawhub to verify.');
   }
 
+  if (platforms.includes('clawhub')) {
+    log.info('ClawHub: Skills installed in skills/plan-flow/ and registered in .clawdhub/lock.json.');
+  }
+
   if (platforms.includes('codex')) {
     log.info(
       'Codex CLI: Skills in .agents/skills/plan-flow/. Use /setup in Codex to get started.'
@@ -159,6 +165,9 @@ export async function runInit(options: InitOptions): Promise<void> {
         break;
       case 'openclaw':
         result = await initOpenClaw(target, { force });
+        break;
+      case 'clawhub':
+        result = await initClawHub(target, { force });
         break;
       case 'codex':
         result = await initCodex(target, { force });

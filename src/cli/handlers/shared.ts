@@ -31,6 +31,7 @@ const PLATFORM_GITIGNORE_ENTRIES: Record<Platform, string[]> = {
   claude: ['.claude/', 'CLAUDE.md'],
   cursor: ['.cursor/'],
   openclaw: ['skills/plan-flow/'],
+  clawhub: ['skills/plan-flow/', '.clawdhub/'],
   codex: ['.agents/', 'AGENTS.md'],
 };
 

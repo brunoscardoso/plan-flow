@@ -63,11 +63,12 @@ export async function selectPlatforms(): Promise<Platform[]> {
     console.log('  1. Claude Code  (.claude/commands/ + .claude/rules/)');
     console.log('  2. Cursor       (.cursor/commands/ + .cursor/rules/)');
     console.log('  3. OpenClaw     (skills/plan-flow/)');
-    console.log('  4. Codex CLI    (.agents/skills/plan-flow/ + AGENTS.md)');
-    console.log('  5. All of the above');
+    console.log('  4. ClawHub      (skills/plan-flow/ + .clawdhub/lock.json)');
+    console.log('  5. Codex CLI    (.agents/skills/plan-flow/ + AGENTS.md)');
+    console.log('  6. All of the above');
     console.log('');
 
-    const answer = await rl.question('Enter your choice (1-5, comma-separated): ');
+    const answer = await rl.question('Enter your choice (1-6, comma-separated): ');
 
     const choices = answer
       .split(',')
@@ -88,14 +89,17 @@ export async function selectPlatforms(): Promise<Platform[]> {
           if (!platforms.includes('openclaw')) platforms.push('openclaw');
           break;
         case '4':
-          if (!platforms.includes('codex')) platforms.push('codex');
+          if (!platforms.includes('clawhub')) platforms.push('clawhub');
           break;
         case '5':
-          return ['claude', 'cursor', 'openclaw', 'codex'];
+          if (!platforms.includes('codex')) platforms.push('codex');
+          break;
+        case '6':
+          return ['claude', 'cursor', 'openclaw', 'clawhub', 'codex'];
         default:
           // Try matching platform names directly
           if (
-            ['claude', 'cursor', 'openclaw', 'codex'].includes(
+            ['claude', 'cursor', 'openclaw', 'clawhub', 'codex'].includes(
               choice.toLowerCase() as Platform
             )
           ) {

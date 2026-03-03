@@ -6,6 +6,7 @@ export interface InitOptions {
   claude?: boolean;
   cursor?: boolean;
   openclaw?: boolean;
+  clawhub?: boolean;
   codex?: boolean;
   all?: boolean;
   force?: boolean;
@@ -27,4 +28,4 @@ export interface InitResult {
   result: CopyResult;
 }
 
-export type Platform = 'claude' | 'cursor' | 'openclaw' | 'codex';
+export type Platform = 'claude' | 'cursor' | 'openclaw' | 'clawhub' | 'codex';
