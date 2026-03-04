@@ -52,6 +52,42 @@ export async function askLegacyFilesAction(
 }
 
 /**
+ * Asks the user 3 questions to build a business context document.
+ * Accepts an optional readmeHint to pre-fill the "What does this project do?" question.
+ */
+export async function askBusinessContext(readmeHint?: string): Promise<{
+  whatItDoes: string;
+  targetAudience: string;
+  problemItSolves: string;
+}> {
+  const rl = createInterface({ input: stdin, output: stdout });
+
+  try {
+    console.log('\n📋 Business Context\n');
+
+    if (readmeHint) {
+      console.log(`  (from README: "${readmeHint}")\n`);
+    }
+
+    const defaultHint = readmeHint ? ` [${readmeHint}]` : '';
+    const whatItDoes =
+      (await rl.question(`  What does this project do?${defaultHint} `)).trim() ||
+      readmeHint ||
+      '';
+
+    const targetAudience =
+      (await rl.question('  Who is the target audience? ')).trim() || '';
+
+    const problemItSolves =
+      (await rl.question('  What problem does it solve? ')).trim() || '';
+
+    return { whatItDoes, targetAudience, problemItSolves };
+  } finally {
+    rl.close();
+  }
+}
+
+/**
  * Asks the user which platforms to install for.
  * Returns selected platform names.
  */

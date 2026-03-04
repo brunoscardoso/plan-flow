@@ -292,3 +292,13 @@ All metrics meet or exceed the target coverage.
 | `.cursor/rules/patterns/pytest-patterns.mdc`| Pytest testing patterns         |
 | `.cursor/rules/tools/jest-testing-tool.mdc` | Jest commands and utilities     |
 | `.cursor/rules/tools/pytest-testing-tool.mdc`| Pytest commands and utilities  |
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `resource-capture.mdc` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.

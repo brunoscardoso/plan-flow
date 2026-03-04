@@ -32,6 +32,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 |---------|-------------|
 | Project Ledger | Persistent learning journal at `flow/ledger.md` - silently captures mistakes, corrections, and project-specific knowledge across sessions |
 | Project Brain | Automatic knowledge capture at `flow/brain/` - records features, errors, decisions, and session logs with Obsidian-compatible `[[wiki-links]]` |
+| Resource Capture | During any skill execution, watches for valuable reference materials (API specs, architecture notes, domain knowledge) and asks user before saving to `flow/resources/` |
 
 ## Recommended Workflow
 
@@ -84,9 +85,12 @@ flow/
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
-├── references/        # Reference materials
+├── references/        # Auto-generated reference materials (tech-foundation, business-context)
+├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
+├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── log.md             # Heartbeat log of important events
 └── ledger.md          # Persistent project learning journal
 ```
 

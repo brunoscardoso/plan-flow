@@ -22,6 +22,11 @@ const __dirname = dirname(__filename);
 jest.unstable_mockModule(resolve(__dirname, '../utils/prompts'), () => ({
   askLegacyFilesAction: jest.fn<() => Promise<string>>().mockResolvedValue('keep'),
   selectPlatforms: jest.fn<() => Promise<string[]>>().mockResolvedValue(['claude']),
+  askBusinessContext: jest.fn<() => Promise<{ whatItDoes: string; targetAudience: string; problemItSolves: string }>>().mockResolvedValue({
+    whatItDoes: 'Test project',
+    targetAudience: 'Developers',
+    problemItSolves: 'Testing',
+  }),
 }));
 
 const { runInit } = await import('./init');

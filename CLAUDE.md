@@ -59,9 +59,12 @@ flow/
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
-├── references/        # Reference materials
+├── references/        # Auto-generated reference materials (tech-foundation, business-context)
+├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Local code review documents
 ├── reviewed-pr/       # PR review documents
+├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── log.md             # Heartbeat log of important events
 └── ledger.md          # Persistent project learning journal
 ```
 

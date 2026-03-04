@@ -2,6 +2,7 @@
  * Tests for shared handler
  */
 
+import { jest } from '@jest/globals';
 import {
   mkdirSync,
   existsSync,
@@ -14,7 +15,20 @@ import {
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { initShared } from './shared';
+
+// Mock askBusinessContext to avoid interactive prompts during tests
+jest.unstable_mockModule('../utils/prompts.js', () => ({
+  askBusinessContext: jest.fn<() => Promise<{ whatItDoes: string; targetAudience: string; problemItSolves: string }>>().mockResolvedValue({
+    whatItDoes: 'Test project description',
+    targetAudience: 'Developers',
+    problemItSolves: 'Testing automation',
+  }),
+  askLegacyFilesAction: jest.fn(),
+  selectPlatforms: jest.fn(),
+}));
+
+const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog } = await import('./shared.js');
+const { askBusinessContext } = await import('../utils/prompts.js') as { askBusinessContext: jest.Mock };
 
 function createTempDir(): string {
   const dir = join(tmpdir(), `plan-flow-shared-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -37,6 +51,7 @@ const EXPECTED_SUBDIRS = [
   'discovery',
   'plans',
   'references',
+  'resources',
   'reviewed-code',
   'reviewed-pr',
 ];
@@ -216,7 +231,7 @@ describe('vault registration', () => {
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(12);
+    expect(config.colorGroups).toHaveLength(13);
     const queries = config.colorGroups.map((g: { query: string }) => g.query);
     expect(queries).toContain('path:patterns');
     expect(queries).toContain('path:features');
@@ -230,6 +245,7 @@ describe('vault registration', () => {
     expect(queries).toContain('path:reviewed-code');
     expect(queries).toContain('path:reviewed-pr');
     expect(queries).toContain('path:references');
+    expect(queries).toContain('path:resources');
     expect(config['collapse-color']).toBe(false);
     expect(config['collapse-filter']).toBe(true);
   });
@@ -247,7 +263,7 @@ describe('vault registration', () => {
     expect(stat.isSymbolicLink()).toBe(false);
 
     // Check individual symlinks
-    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references'];
+    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources'];
     for (const linkName of expectedLinks) {
       const linkPath = join(projectDir, linkName);
       expect(existsSync(linkPath)).toBe(true);
@@ -437,5 +453,348 @@ describe('legacy artifact scanning', () => {
     // Should still work without errors
     const brainFeaturesDir = join(tempDir, 'flow', 'brain', 'features');
     expect(existsSync(brainFeaturesDir)).toBe(true);
+  });
+});
+
+describe('generateTechFoundation', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    // Ensure flow/references exists
+    mkdirSync(join(tempDir, 'flow', 'references'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create tech-foundation.md from a package.json', () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({
+        name: 'test-project',
+        dependencies: {
+          react: '^18.2.0',
+          next: '^14.0.0',
+        },
+        devDependencies: {
+          jest: '^29.0.0',
+          typescript: '^5.0.0',
+        },
+      }),
+      'utf-8'
+    );
+    writeFileSync(
+      join(tempDir, 'tsconfig.json'),
+      JSON.stringify({ compilerOptions: { strict: true, target: 'ES2022' } }),
+      'utf-8'
+    );
+
+    const result = generateTechFoundation(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Tech Foundation');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('| Language | TypeScript |');
+    expect(content).toContain('Next.js');
+    expect(content).toContain('| Jest |');
+    expect(content).toContain('| react |');
+    expect(content).toContain('| next |');
+    expect(content).toContain('Strict mode');
+  });
+
+  it('should detect Python projects from pyproject.toml', () => {
+    writeFileSync(
+      join(tempDir, 'pyproject.toml'),
+      '[tool.poetry]\nname = "my-app"\n\n[tool.poetry.dependencies]\nfastapi = ">=0.100"\n\n[tool.pytest]\n',
+      'utf-8'
+    );
+
+    const result = generateTechFoundation(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('| Language | Python |');
+    expect(content).toContain('| Test Framework | Pytest |');
+  });
+
+  it('should skip if file exists and no force', () => {
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    writeFileSync(filePath, 'existing content', 'utf-8');
+
+    const result = generateTechFoundation(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing content');
+  });
+
+  it('should overwrite with --force', () => {
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    writeFileSync(filePath, 'old content', 'utf-8');
+
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'test', dependencies: {} }),
+      'utf-8'
+    );
+
+    const result = generateTechFoundation(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Tech Foundation');
+    expect(content).not.toBe('old content');
+  });
+
+  it('should detect Rust projects from Cargo.toml', () => {
+    writeFileSync(join(tempDir, 'Cargo.toml'), '[package]\nname = "my-app"\n', 'utf-8');
+
+    const result = generateTechFoundation(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    expect(result.created).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('| Language | Rust |');
+  });
+
+  it('should handle projects with no dependency files', () => {
+    const result = generateTechFoundation(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    expect(result.created).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('| Language | Unknown |');
+  });
+});
+
+describe('generateBusinessContext', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    mkdirSync(join(tempDir, 'flow', 'references'), { recursive: true });
+    (askBusinessContext as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create business-context.md from provided answers', async () => {
+    (askBusinessContext as jest.Mock).mockResolvedValue({
+      whatItDoes: 'A CLI tool for AI workflows',
+      targetAudience: 'Software developers',
+      problemItSolves: 'Structured AI-assisted development',
+    });
+
+    const result = await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Business Context');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('A CLI tool for AI workflows');
+    expect(content).toContain('Software developers');
+    expect(content).toContain('Structured AI-assisted development');
+  });
+
+  it('should extract README hint and pass to askBusinessContext', async () => {
+    writeFileSync(join(tempDir, 'README.md'), '# My Project\n\nThis is a great tool.\n', 'utf-8');
+
+    await generateBusinessContext(tempDir, { force: false });
+
+    expect(askBusinessContext).toHaveBeenCalledWith('This is a great tool.');
+  });
+
+  it('should include README summary in output', async () => {
+    writeFileSync(join(tempDir, 'README.md'), '# My Project\n\nThis is the summary line.\n', 'utf-8');
+
+    await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('## README Summary');
+    expect(content).toContain('This is the summary line.');
+  });
+
+  it('should show "No README found." when no README exists', async () => {
+    await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('No README found.');
+  });
+
+  it('should skip if file exists and no force', async () => {
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    writeFileSync(filePath, 'existing content', 'utf-8');
+
+    const result = await generateBusinessContext(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing content');
+    expect(askBusinessContext).not.toHaveBeenCalled();
+  });
+
+  it('should overwrite with --force', async () => {
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    writeFileSync(filePath, 'old content', 'utf-8');
+
+    const result = await generateBusinessContext(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Business Context');
+  });
+});
+
+describe('initShared calls generators', () => {
+  let tempDir: string;
+  let vaultDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    vaultDir = join(tmpdir(), `plan-flow-vault-gen-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(vaultDir, { recursive: true });
+    process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
+    (askBusinessContext as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+    cleanup(vaultDir);
+    delete process.env.PLAN_FLOW_VAULT_DIR;
+  });
+
+  it('should generate all init files during init', async () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'test-project', dependencies: { express: '^4.0.0' } }),
+      'utf-8'
+    );
+
+    await initShared(tempDir, { force: false }, ['claude']);
+
+    const techPath = join(tempDir, 'flow', 'references', 'tech-foundation.md');
+    const bizPath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const tasklistPath = join(tempDir, 'flow', 'tasklist.md');
+    const logPath = join(tempDir, 'flow', 'log.md');
+
+    expect(existsSync(techPath)).toBe(true);
+    expect(existsSync(bizPath)).toBe(true);
+    expect(existsSync(tasklistPath)).toBe(true);
+    expect(existsSync(logPath)).toBe(true);
+
+    const techContent = readFileSync(techPath, 'utf-8');
+    expect(techContent).toContain('Express');
+
+    expect(askBusinessContext).toHaveBeenCalled();
+  });
+});
+
+describe('generateTasklist', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    mkdirSync(join(tempDir, 'flow'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create tasklist.md with project template', () => {
+    const result = generateTasklist(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'tasklist.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Tasklist');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('## In Progress');
+    expect(content).toContain('## To Do');
+    expect(content).toContain('## Done');
+  });
+
+  it('should skip if file exists and no force', () => {
+    const filePath = join(tempDir, 'flow', 'tasklist.md');
+    writeFileSync(filePath, 'existing tasklist', 'utf-8');
+
+    const result = generateTasklist(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing tasklist');
+  });
+
+  it('should overwrite with --force', () => {
+    const filePath = join(tempDir, 'flow', 'tasklist.md');
+    writeFileSync(filePath, 'old tasklist', 'utf-8');
+
+    const result = generateTasklist(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Tasklist');
+  });
+});
+
+describe('generateLog', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    mkdirSync(join(tempDir, 'flow'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create log.md with initial entry', () => {
+    const result = generateLog(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'log.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Project Log');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('plan-flow initialized');
+  });
+
+  it('should skip if file exists and no force', () => {
+    const filePath = join(tempDir, 'flow', 'log.md');
+    writeFileSync(filePath, 'existing log', 'utf-8');
+
+    const result = generateLog(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing log');
+  });
+
+  it('should overwrite with --force', () => {
+    const filePath = join(tempDir, 'flow', 'log.md');
+    writeFileSync(filePath, 'old log', 'utf-8');
+
+    const result = generateLog(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Project Log');
   });
 });

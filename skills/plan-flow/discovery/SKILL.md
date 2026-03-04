@@ -85,3 +85,13 @@ Follow-up actions
 ## Next Command
 
 After discovery, run `/create-plan @flow/discovery/discovery_<topic>_v1.md` to create an implementation plan.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See the resource-capture rules for capture criteria, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.

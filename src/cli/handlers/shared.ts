@@ -6,7 +6,7 @@
  */
 
 import { join, resolve } from 'node:path';
-import { existsSync, readFileSync, writeFileSync, readdirSync, lstatSync, unlinkSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, lstatSync, unlinkSync, rmSync, statSync } from 'node:fs';
 import type { CopyOptions, CopyResult, Platform } from '../types.js';
 import {
   ensureDir,
@@ -15,6 +15,7 @@ import {
   createSymlink,
   readSymlinkTarget,
 } from '../utils/files.js';
+import { askBusinessContext } from '../utils/prompts.js';
 import * as log from '../utils/logger.js';
 
 const FLOW_SUBDIRS = [
@@ -28,6 +29,7 @@ const FLOW_SUBDIRS = [
   'discovery',
   'plans',
   'references',
+  'resources',
   'reviewed-code',
   'reviewed-pr',
 ];
@@ -145,6 +147,7 @@ const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'reviewed-code', subpath: 'reviewed-code' },
   { name: 'reviewed-pr', subpath: 'reviewed-pr' },
   { name: 'references', subpath: 'references' },
+  { name: 'resources', subpath: 'resources' },
 ];
 
 /**
@@ -281,6 +284,7 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
       { query: 'path:reviewed-code', color: { a: 1, rgb: 16761035 } },  // pink
       { query: 'path:reviewed-pr', color: { a: 1, rgb: 14381056 } },    // coral
       { query: 'path:references', color: { a: 1, rgb: 9868950 } },      // sage
+      { query: 'path:resources', color: { a: 1, rgb: 6724044 } },       // olive
     ],
     'collapse-display': true,
     'collapse-forces': false,
@@ -674,6 +678,794 @@ function scanLegacyArtifacts(
   return result;
 }
 
+// --- Dependency file detection ---
+
+interface DepFileInfo {
+  file: string;
+  language: string;
+  packageManager: string;
+}
+
+const DEP_FILES: DepFileInfo[] = [
+  { file: 'package.json', language: 'JavaScript', packageManager: 'npm' },
+  { file: 'pyproject.toml', language: 'Python', packageManager: 'pip' },
+  { file: 'Cargo.toml', language: 'Rust', packageManager: 'cargo' },
+  { file: 'go.mod', language: 'Go', packageManager: 'go' },
+  { file: 'Gemfile', language: 'Ruby', packageManager: 'bundler' },
+];
+
+/** Well-known dependency → framework label mapping */
+const FRAMEWORK_MAP: Record<string, string> = {
+  'next': 'Next.js',
+  'react': 'React',
+  'vue': 'Vue',
+  'nuxt': 'Nuxt',
+  '@angular/core': 'Angular',
+  'svelte': 'Svelte',
+  'express': 'Express',
+  'fastify': 'Fastify',
+  'koa': 'Koa',
+  'hono': 'Hono',
+  'nestjs': 'NestJS',
+  '@nestjs/core': 'NestJS',
+  'fastapi': 'FastAPI',
+  'django': 'Django',
+  'flask': 'Flask',
+  'actix-web': 'Actix Web',
+  'rocket': 'Rocket',
+  'gin': 'Gin',
+  'rails': 'Ruby on Rails',
+  'remix': 'Remix',
+  'gatsby': 'Gatsby',
+  'astro': 'Astro',
+  'solid-js': 'SolidJS',
+  'qwik': 'Qwik',
+};
+
+const TEST_FRAMEWORK_MAP: Record<string, string> = {
+  'jest': 'Jest',
+  'vitest': 'Vitest',
+  'mocha': 'Mocha',
+  'ava': 'Ava',
+  'jasmine': 'Jasmine',
+  'pytest': 'Pytest',
+  'unittest': 'unittest',
+};
+
+const PKG_MANAGER_INDICATORS: Record<string, string> = {
+  'bun.lockb': 'bun',
+  'bun.lock': 'bun',
+  'yarn.lock': 'yarn',
+  'pnpm-lock.yaml': 'pnpm',
+  'package-lock.json': 'npm',
+  'Pipfile.lock': 'pipenv',
+  'poetry.lock': 'poetry',
+};
+
+/** Directories to skip when scanning project structure */
+const SKIP_DIRS = new Set([
+  'node_modules', '.git', 'dist', 'build', '.next', '.nuxt',
+  'coverage', '__pycache__', '.pytest_cache', 'target', 'vendor',
+  '.cache', '.turbo', '.vercel', '.output', 'flow',
+]);
+
+/**
+ * Scans directory structure up to maxDepth levels deep.
+ * Returns a tree representation with file counts per directory.
+ */
+function scanDirectoryTree(
+  rootDir: string,
+  maxDepth: number
+): { tree: string; extensions: Record<string, number> } {
+  const extensions: Record<string, number> = {};
+  const lines: string[] = [];
+
+  function scan(dir: string, prefix: string, depth: number): void {
+    if (depth > maxDepth) return;
+
+    let entries: string[];
+    try {
+      entries = readdirSync(dir).filter((e) => !e.startsWith('.') && !SKIP_DIRS.has(e));
+    } catch {
+      return;
+    }
+
+    // Sort: directories first, then files
+    const dirs: string[] = [];
+    const files: string[] = [];
+    for (const entry of entries) {
+      try {
+        const stat = statSync(join(dir, entry));
+        if (stat.isDirectory()) dirs.push(entry);
+        else files.push(entry);
+      } catch {
+        // skip unreadable entries
+      }
+    }
+
+    // Count files by extension in this directory (recursively)
+    const fileCounts: Record<string, number> = {};
+    function countFiles(d: string): number {
+      let total = 0;
+      try {
+        for (const e of readdirSync(d)) {
+          if (e.startsWith('.') || SKIP_DIRS.has(e)) continue;
+          const p = join(d, e);
+          try {
+            const s = statSync(p);
+            if (s.isDirectory()) {
+              total += countFiles(p);
+            } else {
+              total++;
+              const ext = e.includes('.') ? '.' + e.split('.').pop() : '(no ext)';
+              extensions[ext] = (extensions[ext] || 0) + 1;
+              fileCounts[ext] = (fileCounts[ext] || 0) + 1;
+            }
+          } catch {
+            // skip
+          }
+        }
+      } catch {
+        // skip
+      }
+      return total;
+    }
+
+    for (let i = 0; i < dirs.length; i++) {
+      const d = dirs[i];
+      const isLast = i === dirs.length - 1 && files.length === 0;
+      const connector = isLast ? '└── ' : '├── ';
+      const childPrefix = isLast ? '    ' : '│   ';
+      const dirPath = join(dir, d);
+      const fileCount = countFiles(dirPath);
+      lines.push(`${prefix}${connector}${d}/    (${fileCount} files)`);
+
+      if (depth < maxDepth) {
+        scan(dirPath, prefix + childPrefix, depth + 1);
+      }
+    }
+  }
+
+  scan(rootDir, '', 0);
+  return { tree: lines.join('\n'), extensions };
+}
+
+/**
+ * Detects architecture pattern from top-level directory names.
+ */
+function detectArchitecturePattern(target: string): string {
+  const srcDir = join(target, 'src');
+  const hasPackagesDir = existsSync(join(target, 'packages'));
+  const hasAppsDir = existsSync(join(target, 'apps'));
+
+  if (hasPackagesDir || hasAppsDir) return 'Monorepo';
+
+  if (existsSync(srcDir)) {
+    try {
+      const srcEntries = readdirSync(srcDir);
+      const featureDirs = ['features', 'modules', 'domains'];
+      const layerDirs = ['controllers', 'services', 'models', 'repositories'];
+
+      if (featureDirs.some((d) => srcEntries.includes(d))) return 'Feature-based';
+      if (layerDirs.some((d) => srcEntries.includes(d))) return 'Layer-based';
+      if (srcEntries.includes('components')) return 'Component-based';
+    } catch {
+      // skip
+    }
+  }
+
+  return 'Standard';
+}
+
+/**
+ * Parses a package.json and extracts dependency info.
+ */
+function parsePackageJson(target: string): {
+  language: string;
+  framework: string;
+  testFramework: string;
+  packageManager: string;
+  prodDeps: { name: string; version: string; category: string }[];
+  devDeps: { name: string; version: string; category: string }[];
+  tsStrict: boolean;
+  tsTarget: string;
+  tsPaths: boolean;
+} | null {
+  const pkgPath = join(target, 'package.json');
+  if (!existsSync(pkgPath)) return null;
+
+  try {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+    const hasTsConfig = existsSync(join(target, 'tsconfig.json'));
+    const hasTs = allDeps['typescript'] || hasTsConfig;
+    const language = hasTs ? 'TypeScript' : 'JavaScript';
+
+    // Detect framework
+    let framework = 'None';
+    for (const [dep, label] of Object.entries(FRAMEWORK_MAP)) {
+      if (allDeps[dep]) {
+        const version = allDeps[dep] as string;
+        framework = `${label} ${version.replace(/^[\^~]/, '')}`;
+        break;
+      }
+    }
+
+    // Detect test framework
+    let testFramework = 'None';
+    for (const [dep, label] of Object.entries(TEST_FRAMEWORK_MAP)) {
+      if (allDeps[dep]) {
+        testFramework = label;
+        break;
+      }
+    }
+
+    // Detect package manager from lock files
+    let packageManager = 'npm';
+    for (const [lockFile, pm] of Object.entries(PKG_MANAGER_INDICATORS)) {
+      if (existsSync(join(target, lockFile))) {
+        packageManager = pm;
+        break;
+      }
+    }
+
+    // Categorize dependencies
+    function categorizeDep(name: string): string {
+      if (FRAMEWORK_MAP[name]) return 'Framework';
+      if (TEST_FRAMEWORK_MAP[name]) return 'Testing';
+      if (name.startsWith('@types/')) return 'Types';
+      if (name === 'typescript') return 'Language';
+      if (['eslint', 'prettier', 'biome'].some((t) => name.includes(t))) return 'Linting';
+      if (['webpack', 'vite', 'rollup', 'esbuild', 'tsup', 'swc'].some((t) => name.includes(t))) return 'Build';
+      return 'Library';
+    }
+
+    const prodDeps = Object.entries(pkg.dependencies || {}).map(([name, version]) => ({
+      name,
+      version: version as string,
+      category: categorizeDep(name),
+    }));
+
+    const devDeps = Object.entries(pkg.devDependencies || {}).map(([name, version]) => ({
+      name,
+      version: version as string,
+      category: categorizeDep(name),
+    }));
+
+    // Parse tsconfig
+    let tsStrict = false;
+    let tsTarget = '';
+    let tsPaths = false;
+    if (hasTsConfig) {
+      try {
+        const tsconfig = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf-8'));
+        tsStrict = tsconfig.compilerOptions?.strict === true;
+        tsTarget = tsconfig.compilerOptions?.target || '';
+        tsPaths = !!(tsconfig.compilerOptions?.paths && Object.keys(tsconfig.compilerOptions.paths).length > 0);
+      } catch {
+        // Could not parse tsconfig
+      }
+    }
+
+    return {
+      language,
+      framework,
+      testFramework,
+      packageManager,
+      prodDeps,
+      devDeps,
+      tsStrict,
+      tsTarget,
+      tsPaths,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parses pyproject.toml for Python projects (basic key=value parsing).
+ */
+function parsePyprojectToml(target: string): {
+  language: string;
+  framework: string;
+  testFramework: string;
+  packageManager: string;
+  prodDeps: { name: string; version: string; category: string }[];
+  devDeps: { name: string; version: string; category: string }[];
+} | null {
+  const pyPath = join(target, 'pyproject.toml');
+  if (!existsSync(pyPath)) return null;
+
+  try {
+    const content = readFileSync(pyPath, 'utf-8');
+
+    // Extract dependencies from [project.dependencies] or [tool.poetry.dependencies]
+    const depPattern = /\[(?:project\.dependencies|tool\.poetry\.dependencies)\]\s*\n([\s\S]*?)(?:\n\[|\n$)/;
+    const depMatch = content.match(depPattern);
+    const deps: { name: string; version: string; category: string }[] = [];
+
+    if (depMatch) {
+      const lines = depMatch[1].split('\n').filter((l) => l.trim() && !l.trim().startsWith('#'));
+      for (const line of lines) {
+        const parts = line.match(/^["\s]*([a-zA-Z0-9_-]+)["\s]*[>=<~!]*(.*)/);
+        if (parts) {
+          deps.push({ name: parts[1], version: parts[2]?.trim() || '*', category: 'Library' });
+        }
+      }
+    }
+
+    // Detect framework
+    let framework = 'None';
+    const allDepNames = deps.map((d) => d.name.toLowerCase());
+    const pyFrameworks: Record<string, string> = {
+      'fastapi': 'FastAPI',
+      'django': 'Django',
+      'flask': 'Flask',
+      'starlette': 'Starlette',
+      'tornado': 'Tornado',
+      'sanic': 'Sanic',
+    };
+    for (const [dep, label] of Object.entries(pyFrameworks)) {
+      if (allDepNames.includes(dep)) {
+        framework = label;
+        break;
+      }
+    }
+
+    // Detect test framework
+    let testFramework = 'None';
+    if (content.includes('pytest') || existsSync(join(target, 'pytest.ini'))) {
+      testFramework = 'Pytest';
+    }
+
+    // Detect package manager
+    let packageManager = 'pip';
+    if (existsSync(join(target, 'poetry.lock'))) packageManager = 'poetry';
+    else if (existsSync(join(target, 'Pipfile.lock'))) packageManager = 'pipenv';
+    else if (content.includes('[tool.poetry]')) packageManager = 'poetry';
+
+    return { language: 'Python', framework, testFramework, packageManager, prodDeps: deps, devDeps: [] };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Detects config files and returns a summary.
+ */
+function detectConfigFiles(target: string): string[] {
+  const configs: string[] = [];
+
+  // TypeScript
+  if (existsSync(join(target, 'tsconfig.json'))) {
+    try {
+      const tsconfig = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf-8'));
+      const strict = tsconfig.compilerOptions?.strict ? 'strict mode' : 'non-strict';
+      const paths = tsconfig.compilerOptions?.paths
+        ? ', paths aliases (' + Object.keys(tsconfig.compilerOptions.paths).join(', ') + ')'
+        : '';
+      configs.push(`TypeScript: ${strict}${paths}`);
+    } catch {
+      configs.push('TypeScript: Could not parse tsconfig.json');
+    }
+  }
+
+  // ESLint
+  const eslintFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.cjs', '.eslintrc.json', '.eslintrc.yml', 'eslint.config.js', 'eslint.config.mjs'];
+  for (const f of eslintFiles) {
+    if (existsSync(join(target, f))) {
+      configs.push(`ESLint: ${f}`);
+      break;
+    }
+  }
+
+  // Prettier
+  const prettierFiles = ['.prettierrc', '.prettierrc.js', '.prettierrc.json', 'prettier.config.js', 'prettier.config.mjs'];
+  for (const f of prettierFiles) {
+    if (existsSync(join(target, f))) {
+      configs.push(`Prettier: ${f}`);
+      break;
+    }
+  }
+
+  // Biome
+  if (existsSync(join(target, 'biome.json')) || existsSync(join(target, 'biome.jsonc'))) {
+    configs.push('Biome: biome.json');
+  }
+
+  return configs;
+}
+
+/**
+ * Generates flow/references/tech-foundation.md from programmatic project analysis.
+ */
+export function generateTechFoundation(
+  target: string,
+  options: CopyOptions
+): CopyResult {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const filePath = join(target, 'flow', 'references', 'tech-foundation.md');
+
+  if (existsSync(filePath) && !options.force) {
+    result.skipped.push(filePath);
+    log.skip('Tech foundation already exists');
+    return result;
+  }
+
+  const projectName = getProjectName(target);
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Detect primary language and parse dependencies
+  let parsed: {
+    language: string;
+    framework: string;
+    testFramework: string;
+    packageManager: string;
+    prodDeps: { name: string; version: string; category: string }[];
+    devDeps: { name: string; version: string; category: string }[];
+    tsStrict?: boolean;
+    tsTarget?: string;
+    tsPaths?: boolean;
+  } | null = null;
+
+  // Try each dependency file in priority order
+  parsed = parsePackageJson(target);
+  if (!parsed) parsed = parsePyprojectToml(target);
+  if (!parsed) {
+    // Check for other language files
+    for (const depFile of DEP_FILES.slice(2)) {
+      if (existsSync(join(target, depFile.file))) {
+        parsed = {
+          language: depFile.language,
+          framework: 'None',
+          testFramework: 'None',
+          packageManager: depFile.packageManager,
+          prodDeps: [],
+          devDeps: [],
+        };
+        break;
+      }
+    }
+  }
+
+  // Also check for *.csproj
+  if (!parsed) {
+    try {
+      const rootFiles = readdirSync(target);
+      if (rootFiles.some((f) => f.endsWith('.csproj'))) {
+        parsed = {
+          language: 'C#',
+          framework: '.NET',
+          testFramework: 'None',
+          packageManager: 'dotnet',
+          prodDeps: [],
+          devDeps: [],
+        };
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  if (!parsed) {
+    parsed = {
+      language: 'Unknown',
+      framework: 'None',
+      testFramework: 'None',
+      packageManager: 'Unknown',
+      prodDeps: [],
+      devDeps: [],
+    };
+  }
+
+  // TypeScript info for stack overview
+  const tsLine = parsed.language === 'TypeScript' && parsed.tsStrict !== undefined
+    ? `| TypeScript | ${parsed.tsStrict ? 'Strict mode' : 'Non-strict'} |`
+    : '';
+
+  // Scan directory structure
+  const { tree } = scanDirectoryTree(target, 2);
+
+  // Detect architecture
+  const architecture = detectArchitecturePattern(target);
+
+  // Detect configs
+  const configs = detectConfigFiles(target);
+
+  // Build the markdown
+  const lines: string[] = [
+    '# Tech Foundation',
+    '',
+    `**Project**: [[${projectName}]]`,
+    `**Generated**: ${today}`,
+    '',
+    '## Stack Overview',
+    '',
+    '| Attribute | Value |',
+    '|-----------|-------|',
+    `| Language | ${parsed.language} |`,
+    `| Framework | ${parsed.framework} |`,
+    `| Package Manager | ${parsed.packageManager} |`,
+    `| Test Framework | ${parsed.testFramework} |`,
+  ];
+
+  if (tsLine) lines.push(tsLine);
+  lines.push(`| Architecture | ${architecture} |`);
+
+  // Production dependencies
+  if (parsed.prodDeps.length > 0) {
+    lines.push('', `## Dependencies`, '', `### Production (${parsed.prodDeps.length} packages)`, '');
+    lines.push('| Package | Version | Category |');
+    lines.push('|---------|---------|----------|');
+    for (const dep of parsed.prodDeps) {
+      lines.push(`| ${dep.name} | ${dep.version} | ${dep.category} |`);
+    }
+  }
+
+  // Dev dependencies
+  if (parsed.devDeps.length > 0) {
+    lines.push('', `### Development (${parsed.devDeps.length} packages)`, '');
+    lines.push('| Package | Version | Category |');
+    lines.push('|---------|---------|----------|');
+    for (const dep of parsed.devDeps) {
+      lines.push(`| ${dep.name} | ${dep.version} | ${dep.category} |`);
+    }
+  }
+
+  // Project structure
+  if (tree) {
+    lines.push('', '## Project Structure', '', '```');
+    lines.push(tree);
+    lines.push('```');
+  }
+
+  // Configuration
+  if (configs.length > 0) {
+    lines.push('', '## Configuration', '');
+    for (const config of configs) {
+      lines.push(`- ${config}`);
+    }
+  }
+
+  lines.push('');
+
+  const isUpdate = existsSync(filePath);
+  ensureDir(join(target, 'flow', 'references'));
+  writeFileSync(filePath, lines.join('\n'), 'utf-8');
+
+  if (isUpdate) {
+    result.updated.push(filePath);
+    log.warn('Updated tech foundation');
+  } else {
+    result.created.push(filePath);
+    log.success('Generated tech foundation');
+  }
+
+  return result;
+}
+
+/**
+ * Extracts a one-liner description from the first paragraph of a README.
+ */
+function extractReadmeHint(target: string): string | undefined {
+  const readmePath = join(target, 'README.md');
+  if (!existsSync(readmePath)) return undefined;
+
+  try {
+    const content = readFileSync(readmePath, 'utf-8');
+    const lines = content.split('\n').slice(0, 50);
+
+    // Skip badge/image lines and headings, find first paragraph text
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (trimmed.startsWith('#')) continue;
+      if (trimmed.startsWith('!')) continue;  // images
+      if (trimmed.startsWith('[!')) continue;  // badges
+      if (trimmed.startsWith('[![')) continue; // badge links
+      if (trimmed.startsWith('<')) continue;    // HTML tags
+      if (trimmed.startsWith('---')) continue;  // horizontal rules
+      // Found a real paragraph line
+      return trimmed;
+    }
+  } catch {
+    // skip
+  }
+
+  return undefined;
+}
+
+/**
+ * Generates flow/references/business-context.md from interactive prompts.
+ */
+export async function generateBusinessContext(
+  target: string,
+  options: CopyOptions
+): Promise<CopyResult> {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const filePath = join(target, 'flow', 'references', 'business-context.md');
+
+  if (existsSync(filePath) && !options.force) {
+    result.skipped.push(filePath);
+    log.skip('Business context already exists');
+    return result;
+  }
+
+  const projectName = getProjectName(target);
+  const today = new Date().toISOString().slice(0, 10);
+  const readmeHint = extractReadmeHint(target);
+
+  const answers = await askBusinessContext(readmeHint);
+
+  // Extract README summary (first ~5 lines of real content, skipping headings/badges)
+  let readmeSummary = 'No README found.';
+  const readmePath = join(target, 'README.md');
+  if (existsSync(readmePath)) {
+    try {
+      const readmeContent = readFileSync(readmePath, 'utf-8');
+      const readmeLines = readmeContent.split('\n').slice(0, 50);
+      const contentLines: string[] = [];
+      for (const line of readmeLines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          if (contentLines.length > 0) break; // stop at first blank line after content
+          continue;
+        }
+        if (trimmed.startsWith('#')) continue;
+        if (trimmed.startsWith('[![') || trimmed.startsWith('[!') || trimmed.startsWith('!')) continue;
+        if (trimmed.startsWith('<')) continue;
+        if (trimmed.startsWith('---')) continue;
+        contentLines.push(trimmed);
+        if (contentLines.length >= 5) break;
+      }
+      if (contentLines.length > 0) readmeSummary = contentLines.join('\n');
+    } catch {
+      // skip
+    }
+  }
+
+  const content = [
+    '# Business Context',
+    '',
+    `**Project**: [[${projectName}]]`,
+    `**Generated**: ${today}`,
+    '',
+    '## What It Does',
+    '',
+    answers.whatItDoes || 'Not specified.',
+    '',
+    '## Target Audience',
+    '',
+    answers.targetAudience || 'Not specified.',
+    '',
+    '## Problem It Solves',
+    '',
+    answers.problemItSolves || 'Not specified.',
+    '',
+    '## README Summary',
+    '',
+    readmeSummary,
+    '',
+  ].join('\n');
+
+  const isUpdate = existsSync(filePath);
+  ensureDir(join(target, 'flow', 'references'));
+  writeFileSync(filePath, content, 'utf-8');
+
+  if (isUpdate) {
+    result.updated.push(filePath);
+    log.warn('Updated business context');
+  } else {
+    result.created.push(filePath);
+    log.success('Generated business context');
+  }
+
+  return result;
+}
+
+/**
+ * Generates flow/tasklist.md — a persistent project todo list
+ * updated in real-time during skill execution.
+ */
+export function generateTasklist(
+  target: string,
+  options: CopyOptions
+): CopyResult {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const filePath = join(target, 'flow', 'tasklist.md');
+
+  if (existsSync(filePath) && !options.force) {
+    result.skipped.push(filePath);
+    log.skip('Tasklist already exists');
+    return result;
+  }
+
+  const projectName = getProjectName(target);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const content = [
+    '# Tasklist',
+    '',
+    `**Project**: [[${projectName}]]`,
+    `**Created**: ${today}`,
+    `**Last Updated**: ${today}`,
+    '',
+    '## In Progress',
+    '',
+    '',
+    '## To Do',
+    '',
+    '',
+    '## Done',
+    '',
+    '',
+  ].join('\n');
+
+  const isUpdate = existsSync(filePath);
+  ensureDir(join(target, 'flow'));
+  writeFileSync(filePath, content, 'utf-8');
+
+  if (isUpdate) {
+    result.updated.push(filePath);
+    log.warn('Updated tasklist');
+  } else {
+    result.created.push(filePath);
+    log.success('Generated tasklist');
+  }
+
+  return result;
+}
+
+/**
+ * Generates flow/log.md — an append-only heartbeat log
+ * of important events during project execution.
+ */
+export function generateLog(
+  target: string,
+  options: CopyOptions
+): CopyResult {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const filePath = join(target, 'flow', 'log.md');
+
+  if (existsSync(filePath) && !options.force) {
+    result.skipped.push(filePath);
+    log.skip('Log already exists');
+    return result;
+  }
+
+  const projectName = getProjectName(target);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const content = [
+    '# Project Log',
+    '',
+    `**Project**: [[${projectName}]]`,
+    `**Created**: ${today}`,
+    '',
+    '---',
+    '',
+    `### ${today}`,
+    '',
+    `- plan-flow initialized`,
+    '',
+  ].join('\n');
+
+  const isUpdate = existsSync(filePath);
+  ensureDir(join(target, 'flow'));
+  writeFileSync(filePath, content, 'utf-8');
+
+  if (isUpdate) {
+    result.updated.push(filePath);
+    log.warn('Updated log');
+  } else {
+    result.created.push(filePath);
+    log.success('Generated project log');
+  }
+
+  return result;
+}
+
 export async function initShared(
   target: string,
   options: CopyOptions,
@@ -702,19 +1494,43 @@ export async function initShared(
     }
   }
 
-  // 2. Update .gitignore with plan-flow entries
+  // 2. Generate tech foundation (programmatic scan)
+  const techResult = generateTechFoundation(target, options);
+  result.created.push(...techResult.created);
+  result.skipped.push(...techResult.skipped);
+  result.updated.push(...techResult.updated);
+
+  // 3. Generate business context (interactive prompts)
+  const bizResult = await generateBusinessContext(target, options);
+  result.created.push(...bizResult.created);
+  result.skipped.push(...bizResult.skipped);
+  result.updated.push(...bizResult.updated);
+
+  // 4. Generate tasklist
+  const tasklistResult = generateTasklist(target, options);
+  result.created.push(...tasklistResult.created);
+  result.skipped.push(...tasklistResult.skipped);
+  result.updated.push(...tasklistResult.updated);
+
+  // 5. Generate project log
+  const logResult = generateLog(target, options);
+  result.created.push(...logResult.created);
+  result.skipped.push(...logResult.skipped);
+  result.updated.push(...logResult.updated);
+
+  // 6. Update .gitignore with plan-flow entries
   const giResult = updateGitignore(target, platforms, options);
   result.created.push(...giResult.created);
   result.skipped.push(...giResult.skipped);
   result.updated.push(...giResult.updated);
 
-  // 3. Register project in central vault (~/plan-flow/brain/)
+  // 7. Register project in central vault (~/plan-flow/brain/)
   const vaultResult = registerVault(target, options);
   result.created.push(...vaultResult.created);
   result.skipped.push(...vaultResult.skipped);
   result.updated.push(...vaultResult.updated);
 
-  // 4. Scan legacy artifacts to populate brain
+  // 8. Scan legacy artifacts to populate brain
   const legacyResult = scanLegacyArtifacts(target, options);
   result.created.push(...legacyResult.created);
   result.skipped.push(...legacyResult.skipped);

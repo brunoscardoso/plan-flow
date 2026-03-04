@@ -9,8 +9,10 @@ alwaysApply: false
 
 Skills implement the workflow logic for commands. Each skill orchestrates a specific process like discovery, planning, execution, or code review.
 
-**Total Files**: 8 files, ~2,506 lines
+**Total Files**: 8 files, ~2,600 lines
 **Reference Codes**: SKL-CON-1 through SKL-TEST-5
+
+> **Note**: All skills (except brain and flow) include a Resource Capture section. During execution, the LLM watches for valuable reference materials and asks the user before saving to `flow/resources/`. See `resource-capture.mdc` for full rules.
 
 ---
 
