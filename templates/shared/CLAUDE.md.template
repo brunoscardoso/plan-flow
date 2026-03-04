@@ -53,6 +53,7 @@ flow/
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
+├── state/             # Execution state for session continuity
 └── ledger.md          # Persistent project learning journal
 ```
 

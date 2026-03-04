@@ -33,6 +33,7 @@ const FLOW_SUBDIRS = [
   'resources',
   'reviewed-code',
   'reviewed-pr',
+  'state',
 ];
 
 const MARKER_START = '# >>> plan-flow';

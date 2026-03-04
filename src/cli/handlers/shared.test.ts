@@ -53,6 +53,7 @@ const EXPECTED_SUBDIRS = [
   'resources',
   'reviewed-code',
   'reviewed-pr',
+  'state',
 ];
 
 describe('initShared', () => {

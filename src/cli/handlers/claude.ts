@@ -18,6 +18,7 @@ import {
   moveFile,
   removeFile,
 } from '../utils/files.js';
+import { installHooks } from '../utils/hooks.js';
 import { askLegacyFilesAction } from '../utils/prompts.js';
 import * as log from '../utils/logger.js';
 
@@ -236,6 +237,35 @@ export async function initClaude(
   result.created.push(...mdResult.created);
   result.skipped.push(...mdResult.skipped);
   result.updated.push(...mdResult.updated);
+
+  // 6. Copy hook scripts (scripts/hooks/)
+  const hooksSrc = join(packageRoot, 'scripts', 'hooks');
+  const hooksDest = join(target, 'scripts', 'hooks');
+
+  if (existsSync(hooksSrc)) {
+    ensureDir(hooksDest);
+    const hooksResult = copyDir(hooksSrc, hooksDest, options);
+    result.created.push(...hooksResult.created);
+    result.skipped.push(...hooksResult.skipped);
+    result.updated.push(...hooksResult.updated);
+
+    for (const f of hooksResult.created) {
+      log.success(`Created ${f.replace(target + '/', '')}`);
+    }
+    for (const f of hooksResult.skipped) {
+      log.skip(`Skipped ${f.replace(target + '/', '')}`);
+    }
+    for (const f of hooksResult.updated) {
+      log.warn(`Updated ${f.replace(target + '/', '')}`);
+    }
+  }
+
+  // 7. Install Plan-Flow hooks into .claude/settings.json
+  if (installHooks(target)) {
+    log.success('Installed Plan-Flow hooks in .claude/settings.json');
+  } else {
+    log.warn('Failed to install hooks in .claude/settings.json');
+  }
 
   return result;
 }

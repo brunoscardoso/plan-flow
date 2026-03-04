@@ -75,4 +75,18 @@ program
     await runUpdate(options);
   });
 
+program
+  .command('validate')
+  .description('Validate Plan-Flow artifacts (plans, discovery, brain)')
+  .option(
+    '--target <dir>',
+    'Target directory (defaults to current directory)',
+    process.cwd()
+  )
+  .option('--fix', 'Auto-fix issues where possible')
+  .action(async (options) => {
+    const { runValidate } = await import('./commands/validate.js');
+    await runValidate(options);
+  });
+
 program.parse();

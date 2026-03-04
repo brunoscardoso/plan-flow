@@ -64,6 +64,7 @@ flow/
 ├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Local code review documents
 ├── reviewed-pr/       # PR review documents
+├── state/             # Execution state for session continuity
 ├── tasklist.md        # Project todo list (updated in real-time during execution)
 ├── log.md             # Heartbeat log of important events
 └── ledger.md          # Persistent project learning journal

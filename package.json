@@ -36,6 +36,7 @@
     ".claude/resources/",
     "rules/",
     "skills/",
+    "scripts/",
     "templates/",
     "README.md",
     "LICENSE"

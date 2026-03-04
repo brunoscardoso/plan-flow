@@ -144,4 +144,44 @@ describe('initClaude', () => {
     expect(result.skipped.length).toBeGreaterThan(0);
     expect(result.created).toHaveLength(0);
   });
+
+  it('should copy hook scripts to scripts/hooks/', async () => {
+    await initClaude(tempDir, { force: false });
+
+    const hooksDir = join(tempDir, 'scripts', 'hooks');
+    expect(existsSync(hooksDir)).toBe(true);
+    expect(existsSync(join(hooksDir, 'pre-compact.js'))).toBe(true);
+    expect(existsSync(join(hooksDir, 'session-start.js'))).toBe(true);
+    expect(existsSync(join(hooksDir, 'session-end.js'))).toBe(true);
+  });
+
+  it('should install hooks in .claude/settings.json', async () => {
+    await initClaude(tempDir, { force: false });
+
+    const settingsPath = join(tempDir, '.claude', 'settings.json');
+    expect(existsSync(settingsPath)).toBe(true);
+
+    const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+    expect(settings.hooks).toBeDefined();
+    expect(settings.hooks.PreCompact).toBeDefined();
+    expect(settings.hooks.SessionStart).toBeDefined();
+    expect(settings.hooks.Stop).toBeDefined();
+  });
+
+  it('should preserve existing settings when installing hooks', async () => {
+    const claudeDir = join(tempDir, '.claude');
+    mkdirSync(claudeDir, { recursive: true });
+    writeFileSync(
+      join(claudeDir, 'settings.json'),
+      JSON.stringify({ permissions: { allow: ['Read'] } })
+    );
+
+    await initClaude(tempDir, { force: false });
+
+    const settings = JSON.parse(
+      readFileSync(join(claudeDir, 'settings.json'), 'utf-8')
+    );
+    expect(settings.permissions).toEqual({ allow: ['Read'] });
+    expect(settings.hooks).toBeDefined();
+  });
 });
