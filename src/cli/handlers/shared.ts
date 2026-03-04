@@ -355,18 +355,36 @@ function registerVault(
       }
     }
 
-    // Create project index file (the project node in Obsidian's graph)
+    // Create category group files (middle nodes in the cascade)
+    // Named {project}-{category}.md to avoid cross-project collisions
+    for (const link of VAULT_PROJECT_LINKS) {
+      const groupFilePath = join(projectDir, `${projectName}-${link.name}.md`);
+      if (!existsSync(groupFilePath) || options.force) {
+        const groupContent = [
+          `# ${link.name}`,
+          '',
+          `**Project**: [[${projectName}]]`,
+          '',
+          `> Category group for **${link.name}** in [[${projectName}]].`,
+          `> Files in this group are auto-linked via \`**Group**: [[${projectName}-${link.name}]]\`.`,
+          '',
+        ].join('\n');
+        writeFileSync(groupFilePath, groupContent, 'utf-8');
+      }
+    }
+
+    // Create project index file (the root node in the cascade)
     const projectIndexPath = join(projectDir, `${projectName}.md`);
     if (!existsSync(projectIndexPath) || options.force) {
       const linksList = VAULT_PROJECT_LINKS
-        .map((l) => `- [[${l.name}]]`)
+        .map((l) => `- [[${projectName}-${l.name}|${l.name}]]`)
         .join('\n');
       const projectIndexContent = [
         `# [[${projectName}]]`,
         '',
         `**Path**: \`${resolve(target)}\``,
         '',
-        '## Contents',
+        '## Groups',
         '',
         linksList,
         '',
@@ -445,6 +463,7 @@ function createBrainFeatureEntry(
     `# [[${featureName}]]`,
     '',
     `**Project**: [[${projectName}]]`,
+    `**Group**: [[${projectName}-features|features]]`,
     `**Status**: ${status}`,
     `**Created**: ${today}`,
     `**Last Updated**: ${today}`,
