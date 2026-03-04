@@ -15,7 +15,8 @@ import {
   createSymlink,
   readSymlinkTarget,
 } from '../utils/files.js';
-import { askBusinessContext } from '../utils/prompts.js';
+import { createInterface } from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
 import * as log from '../utils/logger.js';
 
 const FLOW_SUBDIRS = [
@@ -1277,7 +1278,66 @@ function extractReadmeHint(target: string): string | undefined {
 }
 
 /**
- * Generates flow/references/business-context.md from interactive prompts.
+ * Keyword-to-audience mapping for auto-inference from package.json keywords.
+ */
+const KEYWORD_AUDIENCE_MAP: Record<string, string> = {
+  cli: 'CLI users and developers',
+  react: 'Frontend developers',
+  vue: 'Frontend developers',
+  angular: 'Frontend developers',
+  svelte: 'Frontend developers',
+  next: 'Full-stack developers',
+  nuxt: 'Full-stack developers',
+  express: 'Backend developers',
+  fastify: 'Backend developers',
+  nestjs: 'Backend developers',
+  api: 'API consumers and developers',
+  sdk: 'Developers integrating with this SDK',
+  library: 'Developers using this library',
+  plugin: 'Developers extending a platform',
+  mobile: 'Mobile app developers',
+  devops: 'DevOps engineers',
+  testing: 'QA engineers and developers',
+};
+
+/**
+ * Infers target audience from package.json keywords or framework detection.
+ */
+function inferTargetAudience(keywords: string[], frameworks: string[]): string {
+  // Check keywords first
+  for (const kw of keywords) {
+    const lower = kw.toLowerCase();
+    if (KEYWORD_AUDIENCE_MAP[lower]) return KEYWORD_AUDIENCE_MAP[lower];
+  }
+
+  // Check detected frameworks
+  for (const fw of frameworks) {
+    const lower = fw.toLowerCase();
+    if (KEYWORD_AUDIENCE_MAP[lower]) return KEYWORD_AUDIENCE_MAP[lower];
+  }
+
+  return '';
+}
+
+/**
+ * Reads description from pyproject.toml [project] section.
+ */
+function extractPyprojectDescription(target: string): string {
+  const pyprojectPath = join(target, 'pyproject.toml');
+  if (!existsSync(pyprojectPath)) return '';
+
+  try {
+    const content = readFileSync(pyprojectPath, 'utf-8');
+    const match = content.match(/^\s*description\s*=\s*"([^"]+)"/m);
+    return match?.[1] ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Generates flow/references/business-context.md by auto-inferring from project metadata.
+ * Only prompts the user if no metadata is available at all.
  */
 export async function generateBusinessContext(
   target: string,
@@ -1294,9 +1354,47 @@ export async function generateBusinessContext(
 
   const projectName = getProjectName(target);
   const today = new Date().toISOString().slice(0, 10);
+
+  // Auto-infer from project metadata
+  let pkgDescription = '';
+  let pkgKeywords: string[] = [];
+  let pkgFrameworks: string[] = [];
+  const packageJsonPath = join(target, 'package.json');
+  if (existsSync(packageJsonPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+      pkgDescription = (pkg.description || '').trim();
+      pkgKeywords = Array.isArray(pkg.keywords) ? pkg.keywords : [];
+      // Detect frameworks from dependencies
+      const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+      for (const dep of Object.keys(deps)) {
+        if (KEYWORD_AUDIENCE_MAP[dep]) pkgFrameworks.push(dep);
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  const pyDescription = extractPyprojectDescription(target);
   const readmeHint = extractReadmeHint(target);
 
-  const answers = await askBusinessContext(readmeHint);
+  // Build the three fields
+  let whatItDoes = pkgDescription || pyDescription || readmeHint || '';
+  let targetAudience = inferTargetAudience(pkgKeywords, pkgFrameworks);
+  let problemItSolves = whatItDoes ? `Provides ${whatItDoes.charAt(0).toLowerCase()}${whatItDoes.slice(1)}` : '';
+
+  // If ALL three are empty, ask the user with a single question
+  if (!whatItDoes && !targetAudience && !problemItSolves) {
+    const rl = createInterface({ input: stdin, output: stdout });
+    try {
+      whatItDoes = (await rl.question('\nBriefly describe what this project does: ')).trim();
+      if (whatItDoes) {
+        problemItSolves = `Provides ${whatItDoes.charAt(0).toLowerCase()}${whatItDoes.slice(1)}`;
+      }
+    } finally {
+      rl.close();
+    }
+  }
 
   // Extract README summary (first ~5 lines of real content, skipping headings/badges)
   let readmeSummary = 'No README found.';
@@ -1333,15 +1431,15 @@ export async function generateBusinessContext(
     '',
     '## What It Does',
     '',
-    answers.whatItDoes || 'Not specified.',
+    whatItDoes || 'Not specified.',
     '',
     '## Target Audience',
     '',
-    answers.targetAudience || 'Not specified.',
+    targetAudience || 'Not specified.',
     '',
     '## Problem It Solves',
     '',
-    answers.problemItSolves || 'Not specified.',
+    problemItSolves || 'Not specified.',
     '',
     '## README Summary',
     '',

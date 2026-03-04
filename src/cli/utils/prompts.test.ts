@@ -15,72 +15,36 @@ jest.unstable_mockModule('node:readline/promises', () => ({
   })),
 }));
 
-const { askBusinessContext } = await import('./prompts.js');
+const { askLegacyFilesAction } = await import('./prompts.js');
 
-describe('askBusinessContext', () => {
+describe('askLegacyFilesAction', () => {
   beforeEach(() => {
     mockQuestion.mockReset();
     mockClose.mockReset();
   });
 
-  it('should return user answers from 3 prompts', async () => {
-    mockQuestion
-      .mockResolvedValueOnce('A CLI tool for workflows')
-      .mockResolvedValueOnce('Developers')
-      .mockResolvedValueOnce('Automates repetitive tasks');
+  it('should return keep by default', async () => {
+    mockQuestion.mockResolvedValueOnce('');
 
-    const result = await askBusinessContext();
+    const result = await askLegacyFilesAction('core', ['file1.md']);
 
-    expect(result).toEqual({
-      whatItDoes: 'A CLI tool for workflows',
-      targetAudience: 'Developers',
-      problemItSolves: 'Automates repetitive tasks',
-    });
-    expect(mockQuestion).toHaveBeenCalledTimes(3);
+    expect(result).toBe('keep');
     expect(mockClose).toHaveBeenCalled();
   });
 
-  it('should use readmeHint as default for first question when user presses enter', async () => {
-    mockQuestion
-      .mockResolvedValueOnce('')  // empty = use default
-      .mockResolvedValueOnce('Teams')
-      .mockResolvedValueOnce('Saves time');
+  it('should return move for choice 2', async () => {
+    mockQuestion.mockResolvedValueOnce('2');
 
-    const result = await askBusinessContext('A great project');
+    const result = await askLegacyFilesAction('core', ['file1.md']);
 
-    expect(result.whatItDoes).toBe('A great project');
-    expect(result.targetAudience).toBe('Teams');
-    expect(result.problemItSolves).toBe('Saves time');
+    expect(result).toBe('move');
   });
 
-  it('should allow user to override readmeHint', async () => {
-    mockQuestion
-      .mockResolvedValueOnce('Custom description')
-      .mockResolvedValueOnce('End users')
-      .mockResolvedValueOnce('Makes life easier');
+  it('should return remove for choice 3', async () => {
+    mockQuestion.mockResolvedValueOnce('3');
 
-    const result = await askBusinessContext('A great project');
+    const result = await askLegacyFilesAction('core', ['file1.md']);
 
-    expect(result.whatItDoes).toBe('Custom description');
-  });
-
-  it('should return empty strings when user provides no input and no hint', async () => {
-    mockQuestion
-      .mockResolvedValueOnce('')
-      .mockResolvedValueOnce('')
-      .mockResolvedValueOnce('');
-
-    const result = await askBusinessContext();
-
-    expect(result.whatItDoes).toBe('');
-    expect(result.targetAudience).toBe('');
-    expect(result.problemItSolves).toBe('');
-  });
-
-  it('should close readline interface even on error', async () => {
-    mockQuestion.mockRejectedValueOnce(new Error('readline error'));
-
-    await expect(askBusinessContext()).rejects.toThrow('readline error');
-    expect(mockClose).toHaveBeenCalled();
+    expect(result).toBe('remove');
   });
 });

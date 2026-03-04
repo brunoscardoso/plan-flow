@@ -16,19 +16,18 @@ import {
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
-// Mock askBusinessContext to avoid interactive prompts during tests
-jest.unstable_mockModule('../utils/prompts.js', () => ({
-  askBusinessContext: jest.fn<() => Promise<{ whatItDoes: string; targetAudience: string; problemItSolves: string }>>().mockResolvedValue({
-    whatItDoes: 'Test project description',
-    targetAudience: 'Developers',
-    problemItSolves: 'Testing automation',
-  }),
-  askLegacyFilesAction: jest.fn(),
-  selectPlatforms: jest.fn(),
+// Mock readline/promises to avoid interactive prompts during tests
+const mockQuestion = jest.fn<(q: string) => Promise<string>>().mockResolvedValue('');
+const mockClose = jest.fn();
+
+jest.unstable_mockModule('node:readline/promises', () => ({
+  createInterface: jest.fn(() => ({
+    question: mockQuestion,
+    close: mockClose,
+  })),
 }));
 
 const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog } = await import('./shared.js');
-const { askBusinessContext } = await import('../utils/prompts.js') as { askBusinessContext: jest.Mock };
 
 function createTempDir(): string {
   const dir = join(tmpdir(), `plan-flow-shared-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -581,19 +580,20 @@ describe('generateBusinessContext', () => {
   beforeEach(() => {
     tempDir = createTempDir();
     mkdirSync(join(tempDir, 'flow', 'references'), { recursive: true });
-    (askBusinessContext as jest.Mock).mockClear();
+    mockQuestion.mockReset().mockResolvedValue('');
+    mockClose.mockReset();
   });
 
   afterEach(() => {
     cleanup(tempDir);
   });
 
-  it('should create business-context.md from provided answers', async () => {
-    (askBusinessContext as jest.Mock).mockResolvedValue({
-      whatItDoes: 'A CLI tool for AI workflows',
-      targetAudience: 'Software developers',
-      problemItSolves: 'Structured AI-assisted development',
-    });
+  it('should auto-infer from package.json description', async () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'test-project', description: 'A CLI tool for AI workflows' }),
+      'utf-8'
+    );
 
     const result = await generateBusinessContext(tempDir, { force: false });
 
@@ -605,16 +605,46 @@ describe('generateBusinessContext', () => {
     expect(content).toContain('# Business Context');
     expect(content).toContain('**Project**:');
     expect(content).toContain('A CLI tool for AI workflows');
-    expect(content).toContain('Software developers');
-    expect(content).toContain('Structured AI-assisted development');
+    expect(mockQuestion).not.toHaveBeenCalled();
   });
 
-  it('should extract README hint and pass to askBusinessContext', async () => {
+  it('should infer target audience from package.json keywords', async () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'my-cli', description: 'A dev tool', keywords: ['cli'] }),
+      'utf-8'
+    );
+
+    await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('CLI users and developers');
+  });
+
+  it('should infer target audience from dependencies', async () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', description: 'A web app', dependencies: { react: '^18.0.0' } }),
+      'utf-8'
+    );
+
+    await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('Frontend developers');
+  });
+
+  it('should fall back to README hint when no package.json', async () => {
     writeFileSync(join(tempDir, 'README.md'), '# My Project\n\nThis is a great tool.\n', 'utf-8');
 
     await generateBusinessContext(tempDir, { force: false });
 
-    expect(askBusinessContext).toHaveBeenCalledWith('This is a great tool.');
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('This is a great tool.');
+    expect(mockQuestion).not.toHaveBeenCalled();
   });
 
   it('should include README summary in output', async () => {
@@ -629,6 +659,12 @@ describe('generateBusinessContext', () => {
   });
 
   it('should show "No README found." when no README exists', async () => {
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'test', description: 'Something' }),
+      'utf-8'
+    );
+
     await generateBusinessContext(tempDir, { force: false });
 
     const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
@@ -644,18 +680,52 @@ describe('generateBusinessContext', () => {
 
     expect(result.skipped).toContain(filePath);
     expect(readFileSync(filePath, 'utf-8')).toBe('existing content');
-    expect(askBusinessContext).not.toHaveBeenCalled();
+    expect(mockQuestion).not.toHaveBeenCalled();
   });
 
   it('should overwrite with --force', async () => {
     const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
     writeFileSync(filePath, 'old content', 'utf-8');
+    writeFileSync(
+      join(tempDir, 'package.json'),
+      JSON.stringify({ name: 'test', description: 'A test project' }),
+      'utf-8'
+    );
 
     const result = await generateBusinessContext(tempDir, { force: true });
 
     expect(result.updated).toContain(filePath);
     const content = readFileSync(filePath, 'utf-8');
     expect(content).toContain('# Business Context');
+  });
+
+  it('should ask user only when no metadata is available', async () => {
+    mockQuestion.mockResolvedValueOnce('User-provided description');
+
+    const result = await generateBusinessContext(tempDir, { force: false });
+
+    expect(mockQuestion).toHaveBeenCalledTimes(1);
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('User-provided description');
+  });
+
+  it('should extract description from pyproject.toml', async () => {
+    writeFileSync(
+      join(tempDir, 'pyproject.toml'),
+      '[project]\nname = "my-app"\ndescription = "A Python CLI tool"\n',
+      'utf-8'
+    );
+
+    await generateBusinessContext(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'references', 'business-context.md');
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('A Python CLI tool');
+    expect(mockQuestion).not.toHaveBeenCalled();
   });
 });
 
@@ -668,7 +738,6 @@ describe('initShared calls generators', () => {
     vaultDir = join(tmpdir(), `plan-flow-vault-gen-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     mkdirSync(vaultDir, { recursive: true });
     process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
-    (askBusinessContext as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -680,7 +749,7 @@ describe('initShared calls generators', () => {
   it('should generate all init files during init', async () => {
     writeFileSync(
       join(tempDir, 'package.json'),
-      JSON.stringify({ name: 'test-project', dependencies: { express: '^4.0.0' } }),
+      JSON.stringify({ name: 'test-project', description: 'An express app', dependencies: { express: '^4.0.0' } }),
       'utf-8'
     );
 
@@ -699,7 +768,8 @@ describe('initShared calls generators', () => {
     const techContent = readFileSync(techPath, 'utf-8');
     expect(techContent).toContain('Express');
 
-    expect(askBusinessContext).toHaveBeenCalled();
+    const bizContent = readFileSync(bizPath, 'utf-8');
+    expect(bizContent).toContain('An express app');
   });
 });
 

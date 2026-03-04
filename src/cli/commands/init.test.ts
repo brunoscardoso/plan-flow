@@ -22,11 +22,14 @@ const __dirname = dirname(__filename);
 jest.unstable_mockModule(resolve(__dirname, '../utils/prompts'), () => ({
   askLegacyFilesAction: jest.fn<() => Promise<string>>().mockResolvedValue('keep'),
   selectPlatforms: jest.fn<() => Promise<string[]>>().mockResolvedValue(['claude']),
-  askBusinessContext: jest.fn<() => Promise<{ whatItDoes: string; targetAudience: string; problemItSolves: string }>>().mockResolvedValue({
-    whatItDoes: 'Test project',
-    targetAudience: 'Developers',
-    problemItSolves: 'Testing',
-  }),
+}));
+
+// Mock readline/promises to avoid interactive stdin in tests (used by generateBusinessContext fallback)
+jest.unstable_mockModule('node:readline/promises', () => ({
+  createInterface: jest.fn(() => ({
+    question: jest.fn<(q: string) => Promise<string>>().mockResolvedValue('Test project'),
+    close: jest.fn(),
+  })),
 }));
 
 const { runInit } = await import('./init');
@@ -69,8 +72,8 @@ describe('runInit', () => {
 
   beforeEach(() => {
     tempDir = createTempDir();
-    // Create a project indicator so validation passes cleanly
-    writeFileSync(join(tempDir, 'package.json'), '{}');
+    // Create a project indicator with description so business context auto-infers
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({ name: 'test-project', description: 'A test project' }));
   });
 
   afterEach(() => {
