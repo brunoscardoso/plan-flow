@@ -173,7 +173,7 @@ describe('gitignore management', () => {
 
 describe('vault registration', () => {
   let tempDir: string;
-  const vaultDir = join(homedir(), '.plan-flow', 'brain');
+  const vaultDir = join(homedir(), 'plan-flow', 'brain');
 
   beforeEach(() => {
     tempDir = createTempDir();
@@ -195,7 +195,6 @@ describe('vault registration', () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
     expect(existsSync(vaultDir)).toBe(true);
-    expect(existsSync(join(vaultDir, 'errors'))).toBe(true);
     expect(existsSync(join(vaultDir, 'patterns'))).toBe(true);
     expect(existsSync(join(vaultDir, 'projects'))).toBe(true);
   });
@@ -245,7 +244,7 @@ describe('legacy artifact scanning', () => {
   afterEach(() => {
     cleanup(tempDir);
     // Clean up vault symlink
-    const vaultDir = join(homedir(), '.plan-flow', 'brain');
+    const vaultDir = join(homedir(), 'plan-flow', 'brain');
     const projectName = tempDir.split('/').pop() || '';
     const linkPath = join(vaultDir, 'projects', projectName);
     try {

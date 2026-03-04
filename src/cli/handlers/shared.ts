@@ -127,10 +127,10 @@ function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const VAULT_SUBDIRS = ['errors', 'patterns', 'projects'];
+const VAULT_SUBDIRS = ['patterns', 'projects'];
 
 /**
- * Updates the global vault index at ~/.plan-flow/brain/index.md
+ * Updates the global vault index at ~/plan-flow/brain/index.md
  * with the project entry.
  */
 function updateVaultIndex(vaultDir: string, projectName: string, target: string): void {
@@ -164,7 +164,7 @@ function updateVaultIndex(vaultDir: string, projectName: string, target: string)
 }
 
 /**
- * Registers the project in the central vault at ~/.plan-flow/brain/
+ * Registers the project in the central vault at ~/plan-flow/brain/
  * by creating a symlink from the vault to the project's flow/brain/.
  */
 function registerVault(
@@ -499,7 +499,7 @@ export async function initShared(
   result.skipped.push(...giResult.skipped);
   result.updated.push(...giResult.updated);
 
-  // 3. Register project in central vault (~/.plan-flow/brain/)
+  // 3. Register project in central vault (~/plan-flow/brain/)
   const vaultResult = registerVault(target, options);
   result.created.push(...vaultResult.created);
   result.skipped.push(...vaultResult.skipped);

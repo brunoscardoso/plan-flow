@@ -217,9 +217,9 @@ describe('copyDir', () => {
 });
 
 describe('getVaultDir', () => {
-  it('should return a path ending with .plan-flow/brain', () => {
+  it('should return a path ending with plan-flow/brain', () => {
     const dir = getVaultDir();
-    expect(dir).toMatch(/\.plan-flow[/\\]brain$/);
+    expect(dir).toMatch(/plan-flow[/\\]brain$/);
   });
 });
 

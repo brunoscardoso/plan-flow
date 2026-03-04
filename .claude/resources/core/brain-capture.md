@@ -6,7 +6,7 @@
 Automatic knowledge capture that builds a secondary brain during plan-flow skill execution. The brain captures prompts, errors, decisions, and file changes into Obsidian-compatible markdown files with `[[wiki-links]]`.
 
 **Location**: `flow/brain/`
-**Global Brain**: `~/.plan-flow/brain/`
+**Global Brain**: `~/plan-flow/brain/`
 
 ---
 
@@ -27,7 +27,7 @@ When any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute
 1. **Parse** the brain-capture block
 2. **Write** to the appropriate brain files
 3. **Update** `flow/brain/index.md` (enforce caps)
-4. **Sync** relevant patterns to `~/.plan-flow/brain/` (global brain)
+4. **Sync** relevant patterns to `~/plan-flow/brain/` (global brain)
 
 ---
 
@@ -252,13 +252,13 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Location
 
-`~/.plan-flow/brain/`
+`~/plan-flow/brain/`
 
 ### What Gets Synced
 
 | Content | Synced? | Why |
 |---------|---------|-----|
-| Error patterns | Yes | Reusable across projects |
+| Error patterns | No | Project-specific, kept in flow/brain/errors/ |
 | Cross-project patterns | Yes | By definition cross-project |
 | Feature history | No | Project-specific |
 | Session logs | No | Project-specific |
@@ -266,22 +266,16 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Sync Process
 
-1. Check if `~/.plan-flow/brain/` exists. If not, create it with subdirectories: `errors/`, `patterns/`, `projects/`
-2. For each error in the brain-capture block:
-   - Check if `~/.plan-flow/brain/errors/{error-name}.md` exists
-   - If yes: append project name to Occurrences
-   - If no: create with project reference
-3. Update `~/.plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
+1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
+2. Update `~/plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
 
 ### Global Brain Structure (Central Vault)
 
-The global brain at `~/.plan-flow/brain/` doubles as the central Obsidian vault. Each project's brain is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects in one graph.
+The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project's brain is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects in one graph.
 
 ```
-~/.plan-flow/brain/                          ← Open this as Obsidian vault
+~/plan-flow/brain/                          ← Open this as Obsidian vault
 ├── index.md                                 # Lists all registered projects
-├── errors/                                  # Cross-project error patterns
-│   └── prisma-connection-pooling.md
 ├── patterns/                                # Shared engineering patterns
 │   └── retry-with-backoff.md
 └── projects/

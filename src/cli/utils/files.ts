@@ -199,10 +199,10 @@ export function relativePath(filePath: string, base: string): string {
 }
 
 /**
- * Returns the central vault directory path: ~/.plan-flow/brain/
+ * Returns the central vault directory path: ~/plan-flow/brain/
  */
 export function getVaultDir(): string {
-  return join(homedir(), '.plan-flow', 'brain');
+  return join(homedir(), 'plan-flow', 'brain');
 }
 
 /**
