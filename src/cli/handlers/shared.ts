@@ -271,6 +271,13 @@ function createBrainFeatureEntry(
     .join('\n');
 
   const content = [
+    '---',
+    'tags:',
+    '  - feature',
+    `status: ${status}`,
+    `created: ${today}`,
+    '---',
+    '',
     `# [[${featureName}]]`,
     '',
     `**Status**: ${status}`,

@@ -64,6 +64,13 @@ artifacts: ["<flow/discovery/discovery_x.md>"]
 **Template**:
 
 ```markdown
+---
+tags:
+  - feature
+status: {active|completed|discarded}
+created: {YYYY-MM-DD}
+---
+
 # [[{feature-name}]]
 
 **Status**: {active|completed|discarded}
@@ -105,6 +112,13 @@ artifacts: ["<flow/discovery/discovery_x.md>"]
 **Template**:
 
 ```markdown
+---
+tags:
+  - error
+category: {build|runtime|test|config}
+first_seen: {YYYY-MM-DD}
+---
+
 # [[{error-name}]]
 
 **Category**: {build|runtime|test|config}
@@ -140,6 +154,13 @@ artifacts: ["<flow/discovery/discovery_x.md>"]
 **Template**:
 
 ```markdown
+---
+tags:
+  - decision
+date: {YYYY-MM-DD}
+feature: {feature-name}
+---
+
 # [[{decision-name}]]
 
 **Date**: {YYYY-MM-DD}
@@ -176,6 +197,12 @@ artifacts: ["<flow/discovery/discovery_x.md>"]
 **Template**:
 
 ```markdown
+---
+tags:
+  - session
+date: {YYYY-MM-DD}
+---
+
 # Session: {YYYY-MM-DD}
 
 ## Skills Run

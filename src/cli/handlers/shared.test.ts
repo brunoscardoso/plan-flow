@@ -270,6 +270,8 @@ describe('legacy artifact scanning', () => {
     expect(existsSync(brainFeature)).toBe(true);
 
     const content = readFileSync(brainFeature, 'utf-8');
+    expect(content).toContain('tags:');
+    expect(content).toContain('  - feature');
     expect(content).toContain('[[user-auth]]');
     expect(content).toContain('[[plan_user_auth_v1]]');
   });
