@@ -72,7 +72,6 @@ created: {YYYY-MM-DD}
 # [[{feature-name}]]
 
 **Project**: [[{project-name}]]
-**Group**: [[{project-name}-features|features]]
 **Status**: {active|completed|discarded}
 **Created**: {YYYY-MM-DD}
 **Last Updated**: {YYYY-MM-DD}
@@ -120,7 +119,6 @@ first_seen: {YYYY-MM-DD}
 # [[{error-name}]]
 
 **Project**: [[{project-name}]]
-**Group**: [[{project-name}-errors|errors]]
 **Category**: {build|runtime|test|config}
 **First Seen**: {YYYY-MM-DD}
 **Last Seen**: {YYYY-MM-DD}
@@ -162,7 +160,6 @@ feature: {feature-name}
 # [[{decision-name}]]
 
 **Project**: [[{project-name}]]
-**Group**: [[{project-name}-decisions|decisions]]
 **Date**: {YYYY-MM-DD}
 **Feature**: [[{feature-name}]]
 **Skill**: {skill-name}
@@ -204,7 +201,6 @@ date: {YYYY-MM-DD}
 # Session: {YYYY-MM-DD}
 
 **Project**: [[{project-name}]]
-**Group**: [[{project-name}-sessions|sessions]]
 
 ## Skills Run
 

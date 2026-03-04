@@ -255,33 +255,16 @@ describe('vault registration', () => {
     expect(featuresTarget).toBe(join(resolve(tempDir), 'flow', 'brain', 'features'));
   });
 
-  it('should create project index and category group files', async () => {
+  it('should create project index file', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
     const projectName = tempDir.split('/').pop() || '';
     const projectDir = join(vaultDir, 'projects', projectName);
 
-    // Project index links to category groups
     const projectIndexPath = join(projectDir, `${projectName}.md`);
     expect(existsSync(projectIndexPath)).toBe(true);
-    const indexContent = readFileSync(projectIndexPath, 'utf-8');
-    expect(indexContent).toContain(`# [[${projectName}]]`);
-    expect(indexContent).toContain(`[[${projectName}-features|features]]`);
-    expect(indexContent).toContain(`[[${projectName}-errors|errors]]`);
-    expect(indexContent).toContain(`[[${projectName}-discovery|discovery]]`);
-    expect(indexContent).toContain(`[[${projectName}-plans|plans]]`);
-
-    // Category group files link back to project
-    const featuresGroupPath = join(projectDir, `${projectName}-features.md`);
-    expect(existsSync(featuresGroupPath)).toBe(true);
-    const groupContent = readFileSync(featuresGroupPath, 'utf-8');
-    expect(groupContent).toContain(`**Project**: [[${projectName}]]`);
-
-    // All 8 category group files should exist
-    const categories = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts'];
-    for (const cat of categories) {
-      expect(existsSync(join(projectDir, `${projectName}-${cat}.md`))).toBe(true);
-    }
+    const content = readFileSync(projectIndexPath, 'utf-8');
+    expect(content).toContain(`# [[${projectName}]]`);
   });
 
   it('should create vault index with project entry', async () => {
@@ -359,10 +342,9 @@ describe('legacy artifact scanning', () => {
     expect(content).toContain('status: active');
     expect(content).toContain('[[user-auth]]');
     expect(content).toContain('[[plan_user_auth_v1]]');
-    // Should link back to project and group
+    // Should link back to project
     const projectName = tempDir.split('/').pop() || '';
     expect(content).toContain(`**Project**: [[${projectName}]]`);
-    expect(content).toContain(`**Group**: [[${projectName}-features|features]]`);
   });
 
   it('should create brain entries from existing discovery docs', async () => {
