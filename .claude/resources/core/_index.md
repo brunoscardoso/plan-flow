@@ -80,6 +80,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AG-1 | Profile definitions (read-only, write-restricted, full-access) | agent-profiles.md | 18-80 |
 | COR-AG-2 | Command → profile mapping table | agent-profiles.md | 82-100 |
 
+### Orchestration Workflows (`orchestration-workflows.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-OW-1 | Workflow type definitions (feature, bugfix, refactor, security) | orchestration-workflows.md | 14-130 |
+| COR-OW-2 | Workflow selection guide, priority order, complexity thresholds | orchestration-workflows.md | 132-170 |
+
 ---
 
 ## When to Expand
@@ -107,6 +114,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-2 | Need resource file format and naming conventions |
 | COR-AG-1 | Need agent profile definitions and tool access rules |
 | COR-AG-2 | Need command-to-profile mapping |
+| COR-OW-1 | Need workflow type definitions and step sequences |
+| COR-OW-2 | Need workflow selection guide and complexity thresholds |
 
 ---
 
@@ -144,3 +153,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
 - `agent-profiles.md` is loaded on-demand - defines tool access boundaries per skill profile
+- `orchestration-workflows.md` is loaded on-demand - defines workflow step sequences for autopilot mode

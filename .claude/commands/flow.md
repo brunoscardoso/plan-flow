@@ -22,25 +22,37 @@ The LLM pauses only at mandatory checkpoints (discovery Q&A, plan approval).
 /flow - Autopilot Flow Mode Toggle
 
 DESCRIPTION:
-  Enables or disables autopilot flow mode. When enabled, feature requests
+  Enables or disables autopilot flow mode. When enabled, actionable requests
   automatically run the full plan-flow workflow without manual command invocation.
+  Supports 4 workflow types: feature (default), bugfix, refactor, security.
 
 USAGE:
-  /flow -enable       Enable autopilot mode (persists across sessions)
-  /flow -disable      Disable autopilot mode
-  /flow -status       Show current autopilot state
-  /flow               Same as -status
-  /flow -help         Show this help
+  /flow -enable [type]   Enable autopilot mode with workflow type (default: feature)
+  /flow -disable         Disable autopilot mode
+  /flow -status          Show current autopilot state and workflow type
+  /flow                  Same as -status
+  /flow -help            Show this help
+
+WORKFLOW TYPES:
+  feature    New functionality, behavior changes (default)
+             Steps: contracts → discovery → plan → execute → review → archive
+  bugfix     Bug reports, error fixes, regression fixes
+             Steps: review (diagnostic) → plan → execute → review (verification) → archive
+  refactor   Code restructuring, tech debt, pattern migration
+             Steps: review (baseline) → discovery → plan → execute → review (comparison) → archive
+  security   Security hardening, vulnerability fixes, auth changes
+             Steps: review (audit) → discovery → plan → execute → review (verification) → archive
 
 BEHAVIOR WHEN ENABLED:
-  - Feature requests → full flow (discovery → plan → execute → review → archive)
-  - Trivial tasks (complexity 0-2) → executed directly, no flow
+  - Actionable requests → full flow using the active workflow type
+  - Trivial tasks (below workflow threshold) → executed directly, no flow
   - Questions/exploration → answered normally
   - Slash commands → run as normal
 
 MANDATORY CHECKPOINTS (even in autopilot):
-  - Discovery phase: pauses for user Q&A
-  - Plan review: pauses for user approval before execution
+  - Discovery phase: pauses for user Q&A (feature, refactor, security)
+  - Plan review: pauses for user approval before execution (all workflows)
+  - Security review: pauses for user approval after execution (security only)
 
 CONTEXT MANAGEMENT:
   - Only loads the relevant command context at each step
@@ -48,6 +60,7 @@ CONTEXT MANAGEMENT:
 
 STATE:
   Persisted in flow/.autopilot (survives session restarts)
+  File content determines workflow type (empty = feature)
 ```
 
 ---
@@ -57,20 +70,25 @@ STATE:
 
 ## Instructions
 
-### When invoked with `-enable`
+### When invoked with `-enable` or `-enable <type>`
 
-1. Create the file `flow/.autopilot` (empty file)
-2. Confirm to the user:
+1. Parse the workflow type from the argument (default: `feature`)
+   - Valid types: `feature`, `bugfix`, `refactor`, `security`
+   - If an invalid type is provided, show an error and list valid types
+2. Create the file `flow/.autopilot` with the workflow type as content
+   - For `feature` (default), write `feature` to the file
+   - For other types, write the type name (e.g., `bugfix`, `refactor`, `security`)
+3. Confirm to the user:
 
 ```markdown
-Autopilot flow mode **enabled**.
+Autopilot flow mode **enabled** (workflow: **[type]**).
 
-From now on, feature requests will automatically run the full workflow:
-1. Check contracts → 2. Discovery (pause for Q&A) → 3. Create plan (pause for approval) → 4. Execute plan → 5. Review code → 6. Archive
+From now on, actionable requests will automatically run the [type] workflow:
+[Show step sequence for the active workflow type]
 
 Trivial tasks and questions are handled normally without the flow.
 
-Use `/flow -disable` to turn off, or `/flow -status` to check state.
+Use `/flow -enable <type>` to switch workflow, `/flow -disable` to turn off, or `/flow -status` to check state.
 ```
 
 ### When invoked with `-disable`
@@ -88,12 +106,17 @@ Commands will no longer auto-chain. Use individual slash commands as before:
 ### When invoked with `-status` or no arguments
 
 1. Check if `flow/.autopilot` exists
-2. Report:
+2. If exists, read its content to determine active workflow type
+3. Report:
 
 ```markdown
 Autopilot flow mode: **[ENABLED/DISABLED]**
 
-[If enabled]: Feature requests will automatically run the full workflow.
+[If enabled]:
+- **Workflow type**: [feature/bugfix/refactor/security]
+- **Steps**: [step sequence for active workflow]
+- Actionable requests will automatically run the [type] workflow.
+
 [If disabled]: Use individual slash commands to run each step manually.
 ```
 
@@ -104,5 +127,6 @@ Autopilot flow mode: **[ENABLED/DISABLED]**
 | Rule | Description |
 | --- | --- |
 | **File-based state** | State is stored in `flow/.autopilot` - create to enable, delete to disable |
+| **Workflow type in file content** | The workflow type is written as file content (e.g., `feature`, `bugfix`, `refactor`, `security`) |
 | **No other side effects** | This command ONLY manages the marker file. It does not run any workflow steps. |
 | **Complete and stop** | After toggling state, STOP and wait for user input |

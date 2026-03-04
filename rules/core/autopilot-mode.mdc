@@ -19,16 +19,46 @@ When `flow/.autopilot` exists, this rule is active. It automatically orchestrate
 
 ---
 
+## Workflow Type Detection
+
+After confirming autopilot is ON, read the **content** of `flow/.autopilot` to determine the active workflow type:
+
+- File contains `bugfix` → **bugfix** workflow
+- File contains `refactor` → **refactor** workflow
+- File contains `security` → **security** workflow
+- File is empty, contains `feature`, or any unrecognized value → **feature** workflow (default)
+
+See `rules/core/orchestration-workflows.mdc` [COR-OW-1] for full workflow definitions.
+
+---
+
 ## Input Classification
 
 When autopilot is ON, classify every new user input before acting:
 
-| Category | Signals | Action |
-|----------|---------|--------|
-| Slash Command | Input starts with `/` | Run that command normally. Do NOT trigger the flow. |
-| Question/Exploration | Asking about code, explanations, help | Answer normally. Do NOT trigger the flow. |
-| Trivial Task | Single-file change, obvious fix, complexity 0-2 | Execute directly. Do NOT trigger the flow. |
-| **Feature Request** | New functionality, behavior changes, multi-file scope, complexity 3+ | **TRIGGER THE FULL FLOW BELOW. You MUST complete ALL 6 steps in order.** |
+### Category 1: Slash Command
+**Signals**: Input starts with `/` (e.g., `/review-pr`, `/write-tests`, `/flow -disable`)
+**Action**: Run that command normally. Do NOT trigger the flow.
+
+### Category 2: Question or Exploration
+**Signals**: User is asking about code, requesting explanations, exploring the codebase, or asking for help.
+**Action**: Answer normally. Do NOT trigger the flow.
+
+### Category 3: Trivial Task
+**Signals**: Single-file change, obvious fix, user specifies exact change, no architectural decisions needed. Estimated complexity below the active workflow's threshold.
+**Action**: Execute directly. Do NOT trigger the flow.
+
+### Category 4: Actionable Request
+**Signals**: Complexity meets or exceeds the active workflow's threshold. Classify by input signals:
+
+| Priority | Workflow | Input Signals | Threshold |
+|----------|----------|---------------|-----------|
+| 1 | **security** | "security", "vulnerability", "auth", "XSS", "injection", "encrypt", "permissions" | 2+ |
+| 2 | **bugfix** | "fix", "bug", "broken", "error", "regression", "crash", "not working" | 1+ |
+| 3 | **refactor** | "refactor", "restructure", "clean up", "tech debt", "migrate", "reorganize" | 3+ |
+| 4 | **feature** | "add", "create", "implement", "build", "integrate" (default) | 3+ |
+
+**Action**: Trigger the flow using the **active workflow type** (from `.autopilot` file). If the input signals suggest a different workflow type than what's active, use the active type — the user chose it deliberately.
 
 ### When Uncertain
 
@@ -43,108 +73,168 @@ If the input doesn't clearly fit a category, **CALL** `AskQuestion` to ask:
 
 ---
 
-## FULL FLOW — 6 MANDATORY STEPS
+## Flow Execution — Workflow Dispatch
 
-**CRITICAL**: When a feature request is detected, you MUST execute ALL 6 steps below in order. **Do NOT skip discovery. Do NOT skip planning. Do NOT jump to writing code.**
+When an actionable request is detected, execute the step sequence for the **active workflow type**. At each step, **Read the relevant command file** to load its context, then follow its instructions.
 
-The flow is: **Contracts → Discovery → Plan → Execute → Review → Archive**
+### Feature Workflow (default)
 
----
+**Steps**: contracts → discovery → plan → execute → review → archive
 
-### Step 1: Check Contracts
+#### Step 1: Check Contracts
+Check `flow/contracts/` for any relevant integration contracts. If found, note them for discovery.
 
-Check `flow/contracts/` for any relevant integration contracts. If found, note them for Step 2.
+#### Step 2: Discovery
+1. **Read** `.cursor/commands/discovery-plan.md`
+2. Execute the discovery skill
+3. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
+4. Produce discovery document in `flow/discovery/`
+5. **Auto-proceed** to Step 3
 
----
+#### Step 3: Create Plan
+**GATE CHECK**: Verify discovery document exists in `flow/discovery/`. If not, go back to Step 2.
+1. **Read** `.cursor/commands/create-plan.md`
+2. Execute with discovery document as input
+3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+4. **Auto-proceed** to Step 4
 
-### Step 2: Discovery (MANDATORY — Do NOT skip)
+#### Step 4: Execute Plan
+1. **Read** `.cursor/commands/execute-plan.md`
+2. Execute following complexity-based grouping
+3. Run build + test verification at the end
+4. **Auto-proceed** to Step 5
 
-**PURPOSE**: Gather requirements, search the codebase for context, ask clarifying questions. **NO CODE is written in this step.**
+#### Step 5: Review Code
+1. **Read** `.cursor/commands/review-code.md`
+2. Review all uncommitted changes
 
-**What to do**:
-
-1. Read the file `.cursor/commands/discovery-plan.md` for detailed instructions
-2. Search the codebase to find all files related to the feature (components, types, API routes, stores, tests)
-3. Read referenced documents or contracts if any
-4. **SWITCH TO PLAN MODE and ask clarifying questions** — this is a mandatory checkpoint:
-   - **CALL** `SwitchMode(target_mode_id: "plan", explanation: "Discovery phase: Gathering requirements via interactive questions")` — **actually invoke the tool, do not describe it**
-   - **CALL** `AskQuestion` tool for each clarifying question about requirements (use 2-6 options per question, A/B/C/D format)
-   - Wait for the user to answer all questions
-   - **CALL** `SwitchMode(target_mode_id: "agent", explanation: "Discovery questions complete, returning to Agent mode")` — **actually invoke the tool**
-   - If `SwitchMode` or `AskQuestion` tools are not available, fall back to asking questions as plain text in chat
-5. Document requirements as: Functional (FR-), Non-Functional (NFR-), Constraints (C-)
-6. Identify technical considerations, risks, and proposed approach (high-level, NO code)
-7. **Save the discovery document** to `flow/discovery/discovery_<feature>_v1.md`
-
-**Output**: A discovery markdown file in `flow/discovery/`
-
-**FORBIDDEN during discovery**: Writing code, editing source files, creating plans, running build/test commands
-
-**After completing discovery**: Auto-proceed to Step 3. Do NOT ask "Would you like to proceed?" — just continue.
-
----
-
-### Step 3: Create Plan (MANDATORY — Do NOT skip)
-
-**GATE CHECK**: Before this step, verify that Step 2 produced a discovery document in `flow/discovery/`. **If no discovery document exists, go back to Step 2. A plan CANNOT be created without discovery. No exceptions.**
-
-**What to do**:
-
-1. Read the file `.cursor/commands/create-plan.md` for detailed instructions
-2. Read the discovery document created in Step 2
-3. Extract requirements (FR, NFR, Constraints) from discovery
-4. Create phases with complexity scores (0-10) for each phase
-5. Tests MUST be the last phase
-6. Include a Key Changes section
-7. **Save the plan** to `flow/plans/plan_<feature>_v1.md`
-8. **PAUSE and present the plan for user approval** — this is a mandatory checkpoint
-9. Wait for user to approve before proceeding
-
-**Output**: A plan markdown file in `flow/plans/`
-
-**FORBIDDEN during planning**: Writing code, editing source files, running build/test commands
-
-**After user approves**: Auto-proceed to Step 4.
+#### Step 6: Archive and Complete
+1. Move discovery + plan to `flow/archive/`
+2. Present completion summary
+3. **Prompt for context cleanup** (see below)
 
 ---
 
-### Step 4: Execute Plan
+### Bugfix Workflow
 
-**What to do**:
+**Steps**: review-code (diagnostic) → plan → execute → review-code (verification) → archive
 
-1. Read the file `.cursor/commands/execute-plan.md` for detailed instructions
-2. Read the plan file created in Step 3
-3. Execute phases following complexity-based grouping:
-   - Combined score ≤ 6: Aggregate phases together
-   - Combined score 7-10: Execute 1-2 phases at a time
-   - Combined score > 10: Execute one phase at a time
-   - Tests phase: Always execute separately
-4. For each phase: implement the code, then mark tasks complete in the plan file
-5. **Run build + test verification ONLY at the very end** (not between phases)
-6. Update the plan file with progress after each phase
+#### Step 1: Diagnostic Review
+1. **Read** `.cursor/commands/review-code.md`
+2. Review current code state with focus on **diagnosing the bug** — identify root cause, affected files, and broken behavior
+3. Summarize findings for the planning step
 
-**After execution completes**: Auto-proceed to Step 5.
+#### Step 2: Create Plan
+1. **Read** `.cursor/commands/create-plan.md`
+2. Create fix plan based on user's bug description + diagnostic review findings
+3. **Note**: No discovery document required for bugfix — the bug report + diagnostic review serve as input
+4. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+5. **Auto-proceed** to Step 3
+
+#### Step 3: Execute Plan
+1. **Read** `.cursor/commands/execute-plan.md`
+2. Execute the fix plan
+3. Run build + test verification at the end
+4. **Auto-proceed** to Step 4
+
+#### Step 4: Verification Review
+1. **Read** `.cursor/commands/review-code.md`
+2. Review all uncommitted changes with focus on **verifying the fix** — confirm root cause addressed, no regressions
+
+#### Step 5: Archive and Complete
+1. Move plan to `flow/archive/`
+2. Present completion summary
+3. **Prompt for context cleanup**
 
 ---
 
-### Step 5: Review Code
+### Refactor Workflow
 
-**What to do**:
+**Steps**: review-code (baseline) → discovery → plan → execute → review-code (comparison) → archive
 
-1. Read the file `.cursor/commands/review-code.md` for detailed instructions
-2. Review all uncommitted changes (git diff)
-3. Check for pattern consistency, security issues, and code quality
-4. Present a review summary
+#### Step 1: Baseline Review
+1. **Read** `.cursor/commands/review-code.md`
+2. Review current code with focus on **baselining quality** — document patterns, code smells, metrics
+3. Summarize findings for the discovery step
 
-**After review**: Auto-proceed to Step 6.
+#### Step 2: Discovery
+1. **Read** `.cursor/commands/discovery-plan.md`
+2. Focus discovery on **refactoring scope**: what to change, target patterns, success criteria
+3. Include baseline review findings as input context
+4. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
+5. Produce discovery document in `flow/discovery/`
+6. **Auto-proceed** to Step 3
+
+#### Step 3: Create Plan
+**GATE CHECK**: Verify discovery document exists.
+1. **Read** `.cursor/commands/create-plan.md`
+2. Create refactoring plan with before/after pattern descriptions
+3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+4. **Auto-proceed** to Step 4
+
+#### Step 4: Execute Plan
+1. **Read** `.cursor/commands/execute-plan.md`
+2. Execute the refactoring plan
+3. Run build + test verification at the end
+4. **Auto-proceed** to Step 5
+
+#### Step 5: Comparison Review
+1. **Read** `.cursor/commands/review-code.md`
+2. Review all changes with focus on **comparing against baseline** — verify patterns improved, no quality regressions
+
+#### Step 6: Archive and Complete
+1. Move discovery + plan to `flow/archive/`
+2. Present completion summary with before/after comparison
+3. **Prompt for context cleanup**
 
 ---
 
-### Step 6: Archive and Complete
+### Security Workflow
 
-1. Move the discovery document to `flow/archive/`
-2. Move the plan document to `flow/archive/`
-3. Present completion summary:
+**Steps**: review-code (security audit) → discovery → plan → execute → review-code (security verification) → archive
+
+#### Step 1: Security Audit
+1. **Read** `.cursor/commands/review-code.md`
+2. Review current code with **security focus** — vulnerabilities, auth flows, data handling, input validation
+3. Summarize findings for the discovery step
+
+#### Step 2: Discovery
+1. **Read** `.cursor/commands/discovery-plan.md`
+2. Focus discovery on **security requirements**: threat model, attack surface, compliance needs
+3. Include security audit findings as input context
+4. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
+5. Produce discovery document in `flow/discovery/`
+6. **Auto-proceed** to Step 3
+
+#### Step 3: Create Plan
+**GATE CHECK**: Verify discovery document exists.
+1. **Read** `.cursor/commands/create-plan.md`
+2. Create security hardening plan
+3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+4. **Auto-proceed** to Step 4
+
+#### Step 4: Execute Plan
+1. **Read** `.cursor/commands/execute-plan.md`
+2. Execute the security plan
+3. Run build + test verification at the end
+4. **Auto-proceed** to Step 5
+
+#### Step 5: Security Verification Review
+1. **Read** `.cursor/commands/review-code.md`
+2. Review all changes with **security focus** — verify vulnerabilities addressed, no new attack surface
+3. **PAUSE**: Present security review for user approval (extra mandatory checkpoint)
+4. Wait for user to approve before archiving
+
+#### Step 6: Archive and Complete
+1. Move discovery + plan to `flow/archive/`
+2. Present completion summary with security findings resolved
+3. **Prompt for context cleanup**
+
+---
+
+## Context Cleanup Prompt
+
+After Step 6 completes, always prompt:
 
 ```
 Flow complete! All artifacts archived.
@@ -156,6 +246,7 @@ Summary:
 - Build: passing
 - Tests: passing
 
+For best results on your next feature, consider starting a fresh context with `/clear`.
 Ready for the next task?
 ```
 
@@ -183,13 +274,16 @@ At each step boundary, write this brief summary:
 
 Even in autopilot, these checkpoints **always** pause for user input:
 
-| Checkpoint | When | Why |
+| Checkpoint | Workflows | Why |
 | --- | --- | --- |
-| Discovery Q&A | Step 2 | User must answer requirements questions |
-| Discovery Gate | Step 2→3 | Discovery document MUST exist before plan. No exceptions. |
-| Plan Approval | Step 3 | User must approve plan before execution begins |
+| Discovery Q&A | feature, refactor, security | User must answer requirements questions |
+| Discovery Gate | feature, refactor, security | Discovery document must exist before plan creation |
+| Plan Approval | all workflows | User must approve plan before execution |
+| Security Review Approval | security only | User must approve post-execution security review |
 
-All other transitions happen automatically without asking.
+All other transitions happen automatically.
+
+**Hard Rule**: For workflows that include discovery (feature, refactor, security), the plan step CANNOT start unless discovery produced a document in `flow/discovery/`. The bugfix workflow is exempt — it uses the bug report + diagnostic review as plan input instead.
 
 ---
 

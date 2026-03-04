@@ -77,6 +77,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AG-1 | Profile definitions (read-only, write-restricted, full-access) | agent-profiles.mdc | 22-84 |
 | COR-AG-2 | Command → profile mapping table | agent-profiles.mdc | 86-104 |
 
+### Orchestration Workflows (`orchestration-workflows.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-OW-1 | Workflow type definitions (feature, bugfix, refactor, security) | orchestration-workflows.mdc | 18-115 |
+| COR-OW-2 | Workflow selection guide, priority order, complexity thresholds | orchestration-workflows.mdc | 117-145 |
+
 ---
 
 ## When to Expand
@@ -104,6 +111,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-2 | Need resource file format and naming conventions |
 | COR-AG-1 | Need agent profile definitions and tool access rules |
 | COR-AG-2 | Need command-to-profile mapping |
+| COR-OW-1 | Need workflow type definitions and step sequences |
+| COR-OW-2 | Need workflow selection guide and complexity thresholds |
 
 ---
 
@@ -141,3 +150,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)
 - `resource-capture.mdc` has `alwaysApply: false` - loaded during skill execution to watch for valuable reference materials
 - `agent-profiles.mdc` has `alwaysApply: false` - defines tool access boundaries per skill profile
+- `orchestration-workflows.mdc` has `alwaysApply: false` - defines workflow step sequences for autopilot mode

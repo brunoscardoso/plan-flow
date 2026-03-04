@@ -1,0 +1,133 @@
+---
+description: "Orchestration workflow definitions - load when autopilot mode triggers a flow to determine step sequence"
+alwaysApply: false
+---
+
+# Orchestration Workflows
+
+## Overview
+
+Orchestration workflows define predefined command sequences for common development scenarios. Each workflow type specifies which plan-flow commands to run, in what order, with what checkpoints, and at what complexity threshold.
+
+The active workflow type is stored in `flow/.autopilot`. If the file is empty or contains no recognized type, the default is `feature`.
+
+**Reference Codes**: COR-OW-1 (workflow definitions), COR-OW-2 (selection guide)
+
+---
+
+## COR-OW-1: Workflow Type Definitions
+
+### feature (default)
+
+**When**: New functionality, behavior changes, multi-file scope
+**Complexity threshold**: 3+
+**Steps**:
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | Contracts check | Find relevant integration contracts |
+| 2 | `/discovery-plan` | Gather requirements, ask clarifying questions |
+| 3 | `/create-plan` | Create phased implementation plan |
+| 4 | `/execute-plan` | Implement the plan phase by phase |
+| 5 | `/review-code` | Review all uncommitted changes |
+| 6 | Archive | Move discovery + plan to `flow/archive/` |
+
+**Checkpoints**: Discovery Q&A (step 2), Plan approval (step 3)
+
+**Input signals**: "add", "create", "implement", "build", "new feature", "integrate"
+
+---
+
+### bugfix
+
+**When**: Bug reports, error fixes, regression fixes
+**Complexity threshold**: 1+
+**Steps**:
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/review-code` (diagnostic) | Understand the current broken state |
+| 2 | `/create-plan` | Plan the fix based on bug description + review |
+| 3 | `/execute-plan` | Implement the fix |
+| 4 | `/review-code` (verification) | Verify fix doesn't introduce new issues |
+| 5 | Archive | Move plan to `flow/archive/` |
+
+**Checkpoints**: Plan approval (step 2)
+
+**Key differences**: Skips discovery. Starts with diagnostic review. No discovery document.
+
+**Input signals**: "fix", "bug", "broken", "error", "regression", "crash", "not working"
+
+---
+
+### refactor
+
+**When**: Code restructuring, pattern migration, tech debt cleanup
+**Complexity threshold**: 3+
+**Steps**:
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/review-code` (baseline) | Assess current code quality |
+| 2 | `/discovery-plan` | Define refactoring scope and target patterns |
+| 3 | `/create-plan` | Plan the refactoring phases |
+| 4 | `/execute-plan` | Execute the refactoring |
+| 5 | `/review-code` (comparison) | Compare before/after quality |
+| 6 | Archive | Move discovery + plan to `flow/archive/` |
+
+**Checkpoints**: Discovery Q&A (step 2), Plan approval (step 3)
+
+**Key differences**: Starts with baseline review. Discovery focuses on target patterns.
+
+**Input signals**: "refactor", "restructure", "clean up", "tech debt", "migrate", "reorganize"
+
+---
+
+### security
+
+**When**: Security hardening, vulnerability fixes, auth changes
+**Complexity threshold**: 2+
+**Steps**:
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/review-code` (security audit) | Identify current security posture |
+| 2 | `/discovery-plan` | Document security requirements and threat model |
+| 3 | `/create-plan` | Plan security changes |
+| 4 | `/execute-plan` | Implement security changes |
+| 5 | `/review-code` (security verification) | Verify no new vulnerabilities |
+| 6 | Archive | Move discovery + plan to `flow/archive/` |
+
+**Checkpoints**: Discovery Q&A (step 2), Plan approval (step 3), Security review approval (step 5)
+
+**Key differences**: Both reviews use security focus. Extra checkpoint after execution. Lower threshold.
+
+**Input signals**: "security", "vulnerability", "auth", "XSS", "injection", "encrypt", "permissions"
+
+---
+
+## COR-OW-2: Workflow Selection Guide
+
+### Automatic Selection
+
+**Priority order** (when signals overlap):
+1. **security** — security/vulnerability/auth concepts
+2. **bugfix** — broken behavior or error
+3. **refactor** — restructuring without new features
+4. **feature** — default
+
+### Manual Selection
+
+- `/flow -enable feature` (default)
+- `/flow -enable bugfix`
+- `/flow -enable refactor`
+- `/flow -enable security`
+
+### Complexity Thresholds
+
+| Workflow | Threshold | Rationale |
+|----------|-----------|-----------|
+| feature | 3+ | Small additions don't need full flow |
+| bugfix | 1+ | Most bugs benefit from structured fixing |
+| refactor | 3+ | Simple renames don't need flow |
+| security | 2+ | Security always warrants extra care |
