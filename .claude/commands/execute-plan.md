@@ -8,7 +8,7 @@ description: This command executes an implementation plan phase by phase, using 
 
 This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
 
-**Output**: Implements all phases from the plan, updates progress, and optionally archives the completed plan.
+**Output**: Implements all phases from the plan, updates progress, and auto-archives the completed plan and its discovery document.
 
 ---
 
@@ -39,7 +39,7 @@ OUTPUT:
   - Implements all phases from the plan
   - Updates plan file with completed tasks
   - Runs build/test verification at the end
-  - Optionally archives completed plan
+  - Auto-archives completed plan and discovery
 
 WORKFLOW:
   1. Reads and parses the plan file
@@ -50,7 +50,7 @@ WORKFLOW:
      - Implements after approval
      - Updates progress in plan file
   4. Runs npm run build && npm run test (ONLY at the end)
-  5. Archives plan if requested
+  5. Auto-archives plan and discovery to flow/archive/
 
 EXECUTION STRATEGIES:
   Combined Score <= 6   Aggregate phases together
@@ -188,7 +188,11 @@ After the skill completes:
 
 1. Present summary of all changes made
 2. Confirm all tests pass
-3. Ask if the plan should be archived using the `AskUserQuestion` tool:
+3. **Auto-archive** the completed plan and its discovery document to `flow/archive/`:
+   - Move the plan file from `flow/plans/` to `flow/archive/`
+   - Find and move the matching discovery document from `flow/discovery/` to `flow/archive/`
+   - Do NOT ask the user — archive automatically
+4. Present completion summary:
 
 ```markdown
 Execution Complete!
@@ -197,20 +201,7 @@ Execution Complete!
 - X phases completed
 - All tests passing
 - Build successful
-```
-
-```typescript
-AskUserQuestion({
-  questions: [{
-    question: "Would you like to archive this completed plan?",
-    header: "Archive",
-    options: [
-      { label: "Yes, archive it", description: "Move the plan to flow/archive/ - recommended for completed plans" },
-      { label: "No, keep it", description: "Keep the plan in flow/plans/ for reference" }
-    ],
-    multiSelect: false
-  }]
-})
+- Archived: plan and discovery moved to flow/archive/
 ```
 
 ---
@@ -246,7 +237,7 @@ AskUserQuestion({
 +------------------------------------------+
 | Step 4: Handle Completion                |
 | - Present summary                        |
-| - Offer to archive plan                  |
+| - Auto-archive plan and discovery        |
 +------------------------------------------+
 ```
 
@@ -263,7 +254,7 @@ AskUserQuestion({
 3. Invoke execute-plan skill
 4. Skill executes all phases with Plan mode
 5. Final build and test verification
-6. Present summary and archive prompt
+6. Auto-archive plan and discovery to flow/archive/
 
 ---
 

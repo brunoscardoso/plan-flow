@@ -273,18 +273,24 @@ After processing a brain-capture block, sync relevant entries to the global brai
    - If no: create with project reference
 3. Update `~/.plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
 
-### Global Brain Structure
+### Global Brain Structure (Central Vault)
+
+The global brain at `~/.plan-flow/brain/` doubles as the central Obsidian vault. Each project's brain is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects in one graph.
 
 ```
-~/.plan-flow/brain/
-├── errors/                    # Cross-project error patterns
+~/.plan-flow/brain/                          ← Open this as Obsidian vault
+├── index.md                                 # Lists all registered projects
+├── errors/                                  # Cross-project error patterns
 │   └── prisma-connection-pooling.md
-├── patterns/                  # Shared engineering patterns
+├── patterns/                                # Shared engineering patterns
 │   └── retry-with-backoff.md
 └── projects/
-    ├── parcels.md             # Summary only
-    └── plan-flow.md           # Summary only
+    ├── my-app/ → /home/user/my-app/flow/brain/    ← symlink
+    ├── api/    → /home/user/api/flow/brain/        ← symlink
+    └── webapp/ → /home/user/webapp/flow/brain/     ← symlink
 ```
+
+Symlinks are created automatically by `plan-flow init`. Each init registers the project and links its brain.
 
 ---
 

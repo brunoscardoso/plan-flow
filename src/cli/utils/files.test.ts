@@ -8,8 +8,10 @@ import {
   existsSync,
   readFileSync,
   rmSync,
+  lstatSync,
+  readlinkSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   getPackageRoot,
@@ -17,6 +19,10 @@ import {
   copyFile,
   ensureDir,
   fileExists,
+  getVaultDir,
+  createSymlink,
+  readSymlinkTarget,
+  getProjectName,
 } from './files';
 
 function createTempDir(): string {
@@ -207,5 +213,84 @@ describe('copyDir', () => {
     expect(result.created).toHaveLength(0);
     expect(result.skipped).toHaveLength(0);
     expect(result.updated).toHaveLength(0);
+  });
+});
+
+describe('getVaultDir', () => {
+  it('should return a path ending with .plan-flow/brain', () => {
+    const dir = getVaultDir();
+    expect(dir).toMatch(/\.plan-flow[/\\]brain$/);
+  });
+});
+
+describe('getProjectName', () => {
+  it('should return the basename of a path', () => {
+    expect(getProjectName('/home/user/projects/my-app')).toBe('my-app');
+  });
+
+  it('should handle trailing slashes', () => {
+    expect(getProjectName('/home/user/projects/my-app/')).toBe('my-app');
+  });
+});
+
+describe('createSymlink and readSymlinkTarget', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create a symlink and read its target', () => {
+    const targetDir = join(tempDir, 'target');
+    const linkPath = join(tempDir, 'link');
+    mkdirSync(targetDir, { recursive: true });
+
+    createSymlink(targetDir, linkPath);
+
+    expect(existsSync(linkPath)).toBe(true);
+    const stat = lstatSync(linkPath);
+    expect(stat.isSymbolicLink()).toBe(true);
+
+    const target = readSymlinkTarget(linkPath);
+    expect(target).toBe(targetDir);
+  });
+
+  it('should replace an existing symlink', () => {
+    const target1 = join(tempDir, 'target1');
+    const target2 = join(tempDir, 'target2');
+    const linkPath = join(tempDir, 'link');
+    mkdirSync(target1, { recursive: true });
+    mkdirSync(target2, { recursive: true });
+
+    createSymlink(target1, linkPath);
+    expect(readSymlinkTarget(linkPath)).toBe(target1);
+
+    createSymlink(target2, linkPath);
+    expect(readSymlinkTarget(linkPath)).toBe(target2);
+  });
+
+  it('should return null for non-symlink paths', () => {
+    const filePath = join(tempDir, 'file.txt');
+    writeFileSync(filePath, 'hello');
+
+    expect(readSymlinkTarget(filePath)).toBeNull();
+  });
+
+  it('should return null for non-existent paths', () => {
+    expect(readSymlinkTarget(join(tempDir, 'nonexistent'))).toBeNull();
+  });
+
+  it('should create parent directories for symlink', () => {
+    const targetDir = join(tempDir, 'target');
+    const linkPath = join(tempDir, 'nested', 'deep', 'link');
+    mkdirSync(targetDir, { recursive: true });
+
+    createSymlink(targetDir, linkPath);
+
+    expect(existsSync(linkPath)).toBe(true);
   });
 });

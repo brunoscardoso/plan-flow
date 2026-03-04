@@ -56,6 +56,10 @@ flow/
 └── ledger.md          # Persistent project learning journal
 ```
 
+## Central Vault
+
+All projects' brains are linked into a central Obsidian vault at `~/.plan-flow/brain/`. Each `plan-flow init` automatically creates a symlink from the vault to the project's `flow/brain/`. Open `~/.plan-flow/brain/` as your Obsidian vault to see all projects in one graph.
+
 ## Complexity Scoring
 
 Every plan phase has a complexity score (0-10):

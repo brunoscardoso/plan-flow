@@ -11,8 +11,13 @@ import {
   renameSync,
   rmSync,
   statSync,
+  symlinkSync,
+  lstatSync,
+  readlinkSync,
+  unlinkSync,
 } from 'node:fs';
-import { join, dirname, relative, resolve } from 'node:path';
+import { join, dirname, relative, resolve, basename } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import type { CopyOptions, CopyResult } from '../types.js';
 
@@ -191,4 +196,56 @@ export function fileExists(filePath: string): boolean {
  */
 export function relativePath(filePath: string, base: string): string {
   return relative(base, filePath);
+}
+
+/**
+ * Returns the central vault directory path: ~/.plan-flow/brain/
+ */
+export function getVaultDir(): string {
+  return join(homedir(), '.plan-flow', 'brain');
+}
+
+/**
+ * Creates a symlink. Uses 'junction' on Windows (no admin rights needed), 'dir' on Unix.
+ * If the symlink already exists, removes it first.
+ */
+export function createSymlink(target: string, linkPath: string): void {
+  ensureDir(dirname(linkPath));
+
+  // Remove existing symlink if present
+  if (existsSync(linkPath)) {
+    try {
+      const stat = lstatSync(linkPath);
+      if (stat.isSymbolicLink()) {
+        unlinkSync(linkPath);
+      }
+    } catch {
+      // Ignore errors reading existing path
+    }
+  }
+
+  const type = process.platform === 'win32' ? 'junction' : 'dir';
+  symlinkSync(target, linkPath, type);
+}
+
+/**
+ * Reads the target of a symlink. Returns null if the path is not a symlink or doesn't exist.
+ */
+export function readSymlinkTarget(linkPath: string): string | null {
+  try {
+    const stat = lstatSync(linkPath);
+    if (stat.isSymbolicLink()) {
+      return readlinkSync(linkPath, 'utf-8');
+    }
+  } catch {
+    // Path doesn't exist or can't be read
+  }
+  return null;
+}
+
+/**
+ * Derives a project name from a target directory path.
+ */
+export function getProjectName(target: string): string {
+  return basename(resolve(target));
 }
