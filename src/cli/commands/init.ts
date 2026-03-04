@@ -128,8 +128,8 @@ function printNextSteps(platforms: Platform[]): void {
   log.blank();
   log.header('Brain & Obsidian Vault');
   log.info('Your project brain lives at flow/brain/ — features, errors, and decisions are tracked here.');
-  log.info('All projects are linked in the central vault at ~/plan-flow/vault/');
-  log.info('Open ~/plan-flow/vault/ as an Obsidian vault to browse all projects in one graph.');
+  log.info('All projects are linked in the central vault at ~/plan-flow/brain/');
+  log.info('Open ~/plan-flow/brain/ as an Obsidian vault to browse all projects in one graph.');
   log.blank();
 }
 

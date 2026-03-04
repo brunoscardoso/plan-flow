@@ -51,6 +51,8 @@ Creates: `flow/reviewed-pr/pr_<number>.md`
 ```markdown
 # PR Review: #<number>
 
+**Project**: [[{project-name}]]
+
 ## PR Information
 | Field | Value |
 |-------|-------|

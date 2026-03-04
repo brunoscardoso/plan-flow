@@ -174,6 +174,8 @@ The plan document should follow the template in `.claude/resources/patterns/plan
 ```markdown
 # Plan: [Feature Name]
 
+**Project**: [[{project-name}]]
+
 ## Overview
 
 [Brief description of the feature and its purpose]

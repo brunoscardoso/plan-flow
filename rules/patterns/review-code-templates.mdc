@@ -16,6 +16,8 @@ The generated review document should follow this structure:
 ```markdown
 # Local Code Review: {Description}
 
+**Project**: [[{project-name}]]
+
 ## Review Information
 
 | Field          | Value                 |

@@ -6,7 +6,7 @@
 Automatic knowledge capture that builds a secondary brain during plan-flow skill execution. The brain captures prompts, errors, decisions, and file changes into Obsidian-compatible markdown files with `[[wiki-links]]`.
 
 **Location**: `flow/brain/`
-**Central Vault**: `~/plan-flow/vault/`
+**Global Brain**: `~/plan-flow/brain/`
 
 ---
 
@@ -27,7 +27,7 @@ When any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute
 1. **Parse** the brain-capture block
 2. **Write** to the appropriate brain files
 3. **Update** `flow/brain/index.md` (enforce caps)
-4. **Sync** relevant patterns to `~/plan-flow/vault/` (central vault)
+4. **Sync** relevant patterns to `~/plan-flow/brain/` (central vault)
 
 ---
 
@@ -276,7 +276,7 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Location
 
-`~/plan-flow/vault/`
+`~/plan-flow/brain/`
 
 ### What Gets Synced
 
@@ -290,15 +290,15 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Sync Process
 
-1. Check if `~/plan-flow/vault/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
-2. Update `~/plan-flow/vault/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
+1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
+2. Update `~/plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
 
 ### Global Brain Structure (Central Vault)
 
-The central vault at `~/plan-flow/vault/` is the Obsidian vault root. Each project gets a real directory in `projects/` with individual symlinks for each flow subdirectory. Wiki-links between brain entries, plans, and discoveries resolve correctly across all projects.
+The global brain at `~/plan-flow/brain/` is the Obsidian vault root. Each project gets a real directory in `projects/` with individual symlinks for each flow subdirectory. Wiki-links between brain entries, plans, and discoveries resolve correctly across all projects.
 
 ```
-~/plan-flow/vault/                                    ← Open this as Obsidian vault
+~/plan-flow/brain/                                    ← Open this as Obsidian vault
 ├── .obsidian/                                         # Pre-configured graph color groups
 │   └── graph.json                                     # Uses path-based queries (path:features, etc.)
 ├── index.md                                           # Lists all registered projects

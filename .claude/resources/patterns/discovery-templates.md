@@ -6,6 +6,8 @@ Use this template when creating discovery documents:
 ```markdown
 # Discovery: [Feature/Topic Name]
 
+**Project**: [[{project-name}]]
+
 ## Context
 
 [Why this discovery is needed. What triggered it? What problem are we solving?]

@@ -345,6 +345,10 @@ describe('legacy artifact scanning', () => {
     // Should link back to project
     const projectName = tempDir.split('/').pop() || '';
     expect(content).toContain(`**Project**: [[${projectName}]]`);
+
+    // The original plan file should also get the project tag injected
+    const planContent = readFileSync(join(tempDir, 'flow', 'plans', 'plan_user_auth_v1.md'), 'utf-8');
+    expect(planContent).toContain(`**Project**: [[${projectName}]]`);
   });
 
   it('should create brain entries from existing discovery docs', async () => {

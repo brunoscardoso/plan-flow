@@ -219,6 +219,8 @@ The generated review document should follow this structure:
 ```markdown
 # PR Review: {PR Title}
 
+**Project**: [[{project-name}]]
+
 ## PR Information
 
 | Field       | Value                |

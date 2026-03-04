@@ -178,6 +178,8 @@ The plan document should follow the template in `.cursor/rules/patterns/plans-te
 ```markdown
 # Plan: [Feature Name]
 
+**Project**: [[{project-name}]]
+
 ## Overview
 
 [Brief description of the feature and its purpose]

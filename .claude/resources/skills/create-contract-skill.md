@@ -142,6 +142,8 @@ Create the contract with all gathered information:
 ```markdown
 # Integration Contract: [Service Name]
 
+**Project**: [[{project-name}]]
+
 ## Overview
 
 **Source**: [URL]

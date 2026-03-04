@@ -6,6 +6,8 @@ Use this template when creating new implementation plans:
 ```markdown
 # Plan: [Feature Name]
 
+**Project**: [[{project-name}]]
+
 ## Overview
 
 [Brief description of the feature and its purpose]

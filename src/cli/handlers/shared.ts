@@ -212,7 +212,7 @@ function cleanBrokenSymlinks(vaultDir: string): void {
 }
 
 /**
- * Updates the global vault index at ~/plan-flow/vault/index.md
+ * Updates the global vault index at ~/plan-flow/brain/index.md
  * with the project entry.
  */
 function updateVaultIndex(vaultDir: string, projectName: string, target: string): void {
@@ -294,7 +294,7 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
 }
 
 /**
- * Registers the project in the central vault at ~/plan-flow/vault/
+ * Registers the project in the central vault at ~/plan-flow/brain/
  * by creating a real directory per project with individual symlinks
  * for each flow subdirectory (features, errors, decisions, sessions,
  * discovery, plans, archive, contracts).
@@ -588,6 +588,34 @@ function scanLegacyArtifacts(
     }
   }
 
+  // Inject [[project-name]] into legacy artifact files that don't have it
+  const projectName = getProjectName(target);
+  const projectTag = `**Project**: [[${projectName}]]`;
+
+  for (const { dir } of scanDirs) {
+    if (!existsSync(dir)) continue;
+    try {
+      const files = readdirSync(dir).filter((f) => f.endsWith('.md') && f !== '.gitkeep');
+      for (const file of files) {
+        const filePath = join(dir, file);
+        const content = readFileSync(filePath, 'utf-8');
+        if (content.includes(`[[${projectName}]]`)) continue; // Already tagged
+
+        // Insert after the first heading (# ...)
+        const updated = content.replace(
+          /^(# .+)$/m,
+          `$1\n\n${projectTag}`
+        );
+        if (updated !== content) {
+          writeFileSync(filePath, updated, 'utf-8');
+          result.updated.push(filePath);
+        }
+      }
+    } catch {
+      // Skip directories we can't read
+    }
+  }
+
   // Create brain entries for each feature
   const indexFeatures: { name: string; status: string; title: string }[] = [];
 
@@ -665,7 +693,7 @@ export async function initShared(
   result.skipped.push(...giResult.skipped);
   result.updated.push(...giResult.updated);
 
-  // 3. Register project in central vault (~/plan-flow/vault/)
+  // 3. Register project in central vault (~/plan-flow/brain/)
   const vaultResult = registerVault(target, options);
   result.created.push(...vaultResult.created);
   result.skipped.push(...vaultResult.skipped);

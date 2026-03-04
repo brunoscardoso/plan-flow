@@ -47,6 +47,8 @@ Creates: `flow/plans/plan_<feature>_v<version>.md`
 ```markdown
 # Plan: [Feature Name]
 
+**Project**: [[{project-name}]]
+
 ## Overview
 Brief description
 
