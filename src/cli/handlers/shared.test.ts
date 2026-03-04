@@ -263,7 +263,7 @@ describe('vault registration', () => {
     expect(stat.isSymbolicLink()).toBe(false);
 
     // Check individual symlinks
-    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources'];
+    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources', 'log.md', 'tasklist.md'];
     for (const linkName of expectedLinks) {
       const linkPath = join(projectDir, linkName);
       expect(existsSync(linkPath)).toBe(true);

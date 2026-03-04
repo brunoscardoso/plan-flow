@@ -164,6 +164,20 @@ Verify all files meet the target coverage.
 
 ---
 
+### Step 6: Knowledge Capture
+
+After achieving the coverage target, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`write-tests`), files tested, status, and coverage achieved
+2. **Feature file** (`flow/brain/features/{feature-name}.md`): If tests relate to a known feature, append Timeline entry
+3. **Errors** (`flow/brain/errors/{error-name}.md`): Create for each non-trivial test framework issue encountered (e.g., ESM mocking quirks, configuration issues, flaky test patterns)
+4. **Index** (`flow/brain/index.md`): Add new error entries if created. Enforce caps (5 errors, 3 decisions)
+5. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- write-tests: {scope} — {coverage}% achieved`
+
+> **Emphasis**: Test writing often surfaces **test framework errors** (mocking issues, configuration quirks). Capture these so future test sessions avoid the same pitfalls.
+
+---
+
 ## Coverage Metrics Priority
 
 1. **Lines**: Most important metric

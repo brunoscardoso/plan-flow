@@ -150,6 +150,8 @@ const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'reviewed-pr', subpath: 'reviewed-pr' },
   { name: 'references', subpath: 'references' },
   { name: 'resources', subpath: 'resources' },
+  { name: 'log.md', subpath: 'log.md' },
+  { name: 'tasklist.md', subpath: 'tasklist.md' },
 ];
 
 /**
@@ -344,8 +346,10 @@ function registerVault(
       const linkPath = join(projectDir, link.name);
       const linkTarget = join(flowDir, link.subpath);
 
-      // Ensure the source directory exists in the project
-      ensureDir(linkTarget);
+      // Ensure the source directory exists in the project (skip for file targets)
+      if (!link.subpath.endsWith('.md')) {
+        ensureDir(linkTarget);
+      }
 
       const existingTarget = readSymlinkTarget(linkPath);
 

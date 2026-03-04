@@ -89,6 +89,14 @@ Write approved patterns to `flow/resources/learned-{kebab-case-name}.md`.
 
 ---
 
+### Step 5: Log Entry
+
+After saving approved patterns, append to the project log:
+
+1. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- learn: {pattern_count} patterns extracted — {pattern_names}`
+
+---
+
 ## Output Format
 
 ### Pattern File Template

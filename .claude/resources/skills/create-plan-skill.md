@@ -43,9 +43,10 @@ This skill is **strictly for creating plan documents**. The process:
 | Read any project file                  | Understand existing codebase      |
 | Search codebase (grep, glob, semantic) | Find existing patterns            |
 | Write to `flow/plans/`                 | Save plan document                |
+| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 6)        |
 | Read project rule files                | Understand patterns to follow     |
 
-> **Important**: The ONLY writable location is `flow/plans/`. No source code or other files should be modified.
+> **Important**: Writable locations are `flow/plans/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code or other files should be modified.
 
 ---
 
@@ -157,6 +158,20 @@ Create the plan markdown file:
 5. Risks
 6. Phases (with complexity scores)
 7. Key Changes
+
+---
+
+### Step 6: Knowledge Capture
+
+After completing the plan document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`create-plan`), feature name, status, and files changed count
+2. **Feature file** (`flow/brain/features/{feature-name}.md`): Create if new feature (use feature template), or append Timeline entry if exists
+3. **Decisions** (`flow/brain/decisions/{decision-name}.md`): Create if the user chose between alternative approaches or architectures during planning
+4. **Index** (`flow/brain/index.md`): Add new feature/decision entries. Enforce caps (5 errors, 3 decisions)
+5. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- create-plan: {feature} — {outcome}`
+
+> **Emphasis**: If the user chose between competing approaches during planning, capture each choice as a **decision** with context and trade-offs.
 
 ---
 

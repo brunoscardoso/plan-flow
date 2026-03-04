@@ -104,6 +104,14 @@ Options:
 
 ---
 
+### Log Entry
+
+After writing the brain entry, append to the project log:
+
+1. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- brain: {category} — {summary}`
+
+---
+
 ## Output Format
 
 ### Free-Text Entry Result

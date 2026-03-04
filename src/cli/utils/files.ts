@@ -225,7 +225,8 @@ export function createSymlink(target: string, linkPath: string): void {
     }
   }
 
-  const type = process.platform === 'win32' ? 'junction' : 'dir';
+  const isFile = existsSync(target) && statSync(target).isFile();
+  const type = process.platform === 'win32' ? (isFile ? 'file' : 'junction') : (isFile ? 'file' : 'dir');
   symlinkSync(target, linkPath, type);
 }
 

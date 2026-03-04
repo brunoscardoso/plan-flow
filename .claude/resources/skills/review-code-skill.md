@@ -49,9 +49,10 @@ This skill is **strictly read-only analysis**. The review process:
 | Read any project file                  | Find similar implementations    |
 | Search codebase (grep, glob, semantic) | Find reference patterns         |
 | Write to `flow/reviewed-code/`     | Save review notes locally       |
+| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 7)      |
 | Read project rule files                | Load patterns for analysis      |
 
-> **Important**: The ONLY writable location is `flow/reviewed-code/`. No source code, configuration files, or any other project files should be modified.
+> **Important**: Writable locations are `flow/reviewed-code/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code, configuration files, or any other project files should be modified.
 
 ---
 
@@ -173,6 +174,18 @@ flow/reviewed-code/code-review-2026-01-14-user-authentication.md
 ```
 
 **Output Format**: Use the templates from `.claude/resources/patterns/review-code-templates.md`
+
+---
+
+### Step 7: Knowledge Capture
+
+After generating the review document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`review-code`), scope reviewed, status, and finding count
+2. **Feature file** (`flow/brain/features/{feature-name}.md`): If the reviewed changes relate to a known feature, append Timeline entry
+3. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- review-code: {scope} — {finding_count} findings ({critical}/{major}/{minor})`
+
+> **Note**: Review-code uses a lighter capture — session, log, and feature only. Skip errors and decisions unless a critical pattern conflict was identified.
 
 ---
 

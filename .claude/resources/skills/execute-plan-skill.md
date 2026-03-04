@@ -184,6 +184,8 @@ Ready to begin execution?
 
 Wait for user confirmation before proceeding.
 
+**Tasklist Update**: Before beginning execution, update `flow/tasklist.md` — add the feature under `## In Progress` if not already listed.
+
 ---
 
 ### Step 4: Execute Each Phase with Plan Mode
@@ -320,6 +322,22 @@ After build/tests pass, run an automatic cleanup pass:
 ```bash
 mv flow/plans/plan_feature_name_v1.md flow/archive/
 ```
+
+---
+
+### Step 9: Knowledge Capture
+
+After all phases complete and verification passes, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`execute-plan`), feature name, status, and files changed count
+2. **Feature file** (`flow/brain/features/{feature-name}.md`): Create if new feature (use feature template), or append Timeline entry if exists
+3. **Errors** (`flow/brain/errors/{error-name}.md`): Create for each non-trivial error encountered during build/test failures and how it was resolved
+4. **Decisions** (`flow/brain/decisions/{decision-name}.md`): Create if significant implementation decisions were made during execution
+5. **Index** (`flow/brain/index.md`): Add new feature/error/decision entries. Enforce caps (5 errors, 3 decisions)
+6. **Tasklist** (`flow/tasklist.md`): Move the feature from "In Progress" to "Done" (or remove if already tracked)
+7. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- execute-plan: {feature} — {outcome}`
+
+> **Emphasis**: Execution often surfaces **errors** from build/test failures. Capture each non-trivial error with its resolution so future sessions can avoid the same issues.
 
 ---
 

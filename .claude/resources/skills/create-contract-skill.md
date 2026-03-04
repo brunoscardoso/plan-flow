@@ -43,9 +43,10 @@ This skill is **strictly for creating contract documents**. The process:
 | Read repository files                  | Analyze API structure                |
 | Use Interactive Questions Tool         | Gather requirements from user        |
 | Write to `flow/contracts/`             | Save contract document               |
+| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 5)           |
 | Read project rule files                | Understand patterns to follow        |
 
-> **Important**: The ONLY writable location is `flow/contracts/`. No source code or other files should be modified.
+> **Important**: Writable locations are `flow/contracts/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code or other files should be modified.
 
 ---
 
@@ -132,6 +133,16 @@ Create the contract with all gathered information:
 4. Error Handling
 5. Integration Notes
 6. Usage Examples
+
+---
+
+### Step 5: Knowledge Capture
+
+After completing the contract document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`create-contract`), service name, status, and endpoint count
+2. **Feature file** (`flow/brain/features/{service-name}.md`): Create or update feature entry for the integration service
+3. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- create-contract: {service-name} — {endpoint_count} endpoints documented`
 
 ---
 

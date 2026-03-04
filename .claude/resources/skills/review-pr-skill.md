@@ -75,11 +75,12 @@ This skill is **strictly read-only analysis**. The review process:
 | Allowed Action                   | Purpose                               |
 | -------------------------------- | ------------------------------------- |
 | Write to `flow/reviewed-pr/` | Save review notes locally             |
+| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 5)    |
 | Write to `/tmp/`                 | Temporary file storage for processing |
 | Read project rule files          | Load patterns for analysis            |
 | `source .plan.flow.env`          | Load environment credentials          |
 
-> **Important**: The ONLY writable location is `flow/reviewed-pr/`. No source code, configuration files, or any other project files should be modified.
+> **Important**: Writable locations are `flow/reviewed-pr/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code, configuration files, or any other project files should be modified.
 
 ### Allowed Command Examples
 
@@ -209,6 +210,17 @@ flow/reviewed-pr/pr-notes-add-user-authentication-flow.md
 ```
 
 > **Tip**: Use the PR number in the filename for easier matching on re-reviews (e.g., `pr-notes-123-add-user-authentication-flow.md`)
+
+---
+
+### Step 5: Knowledge Capture
+
+After generating the review document, capture minimal knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`review-pr`), PR title, status, and finding count
+2. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- review-pr: PR #{number} {title} — {finding_count} findings`
+
+> **Note**: Review-pr uses the lightest capture — session and log only. No feature/error/decision files unless the PR reveals a critical cross-project pattern.
 
 ---
 

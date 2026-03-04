@@ -47,9 +47,10 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 | Search codebase (grep, glob, semantic) | Find existing patterns               |
 | Use Interactive Questions Tool         | Gather requirements from user        |
 | Write to `flow/discovery/`             | Save discovery document              |
+| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 9)           |
 | Read project rule files                | Understand patterns to follow        |
 
-> **Important**: The ONLY writable location is `flow/discovery/`. No source code, configuration files, or any other project files should be modified.
+> **Important**: Writable locations are `flow/discovery/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code, configuration files, or any other project files should be modified.
 
 ---
 
@@ -262,6 +263,20 @@ Create the discovery markdown file:
 6. Proposed Approach
 7. Risks and Unknowns
 8. Next Steps
+
+---
+
+### Step 9: Knowledge Capture
+
+After completing the discovery document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`discovery`), feature name, status, and files changed count
+2. **Feature file** (`flow/brain/features/{feature-name}.md`): Create if new feature (use feature template), or append Timeline entry if exists
+3. **Decisions** (`flow/brain/decisions/{decision-name}.md`): Create for each significant decision made during user Q&A — especially when the user chose between alternative approaches, architectures, or trade-offs
+4. **Index** (`flow/brain/index.md`): Add new feature/decision entries. Enforce caps (5 errors, 3 decisions)
+5. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- discovery: {feature} — {outcome}`
+
+> **Emphasis**: Discovery often surfaces important **decisions** from user Q&A. Capture each decision where the user chose between alternatives with meaningful trade-offs.
 
 ---
 

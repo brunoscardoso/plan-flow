@@ -873,6 +873,18 @@ flow/
 
 ---
 
+### Step 13: Knowledge Capture
+
+After completing setup, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
+
+1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`setup`), project name, status, and pattern files created count
+2. **Feature file** (`flow/brain/features/project-setup.md`): Create with detected stack, frameworks, and conventions as the feature entry
+3. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- setup: {project-name} — initialized ({language}, {framework})`
+
+> **Note**: Setup uses a light capture — session, log, and a `project-setup` feature entry. Skip errors and decisions unless the user made significant stack choices during setup.
+
+---
+
 ## Pattern Quality Checklist
 
 Before completing setup, verify each pattern file:

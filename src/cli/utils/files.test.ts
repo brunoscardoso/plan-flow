@@ -310,4 +310,22 @@ describe('createSymlink and readSymlinkTarget', () => {
 
     expect(existsSync(linkPath)).toBe(true);
   });
+
+  it('should create a file-type symlink for file targets', () => {
+    const targetFile = join(tempDir, 'target.md');
+    const linkPath = join(tempDir, 'link.md');
+    writeFileSync(targetFile, '# Test', 'utf-8');
+
+    createSymlink(targetFile, linkPath);
+
+    expect(existsSync(linkPath)).toBe(true);
+    const stat = lstatSync(linkPath);
+    expect(stat.isSymbolicLink()).toBe(true);
+
+    const target = readSymlinkTarget(linkPath);
+    expect(target).toBe(targetFile);
+
+    // Verify the content is accessible through the symlink
+    expect(readFileSync(linkPath, 'utf-8')).toBe('# Test');
+  });
 });
