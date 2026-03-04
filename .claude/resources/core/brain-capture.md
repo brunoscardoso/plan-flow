@@ -6,7 +6,7 @@
 Automatic knowledge capture that builds a secondary brain during plan-flow skill execution. The brain captures prompts, errors, decisions, and file changes into Obsidian-compatible markdown files with `[[wiki-links]]`.
 
 **Location**: `flow/brain/`
-**Global Brain**: `~/plan-flow/brain/`
+**Central Vault**: `~/plan-flow/vault/`
 
 ---
 
@@ -27,7 +27,7 @@ When any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute
 1. **Parse** the brain-capture block
 2. **Write** to the appropriate brain files
 3. **Update** `flow/brain/index.md` (enforce caps)
-4. **Sync** relevant patterns to `~/plan-flow/brain/` (global brain)
+4. **Sync** relevant patterns to `~/plan-flow/vault/` (central vault)
 
 ---
 
@@ -65,8 +65,6 @@ artifacts: ["<flow/discovery/discovery_x.md>"]
 
 ```markdown
 ---
-tags:
-  - feature
 status: {active|completed|discarded}
 created: {YYYY-MM-DD}
 ---
@@ -113,8 +111,6 @@ created: {YYYY-MM-DD}
 
 ```markdown
 ---
-tags:
-  - error
 category: {build|runtime|test|config}
 first_seen: {YYYY-MM-DD}
 ---
@@ -155,8 +151,6 @@ first_seen: {YYYY-MM-DD}
 
 ```markdown
 ---
-tags:
-  - decision
 date: {YYYY-MM-DD}
 feature: {feature-name}
 ---
@@ -198,8 +192,6 @@ feature: {feature-name}
 
 ```markdown
 ---
-tags:
-  - session
 date: {YYYY-MM-DD}
 ---
 
@@ -279,7 +271,7 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Location
 
-`~/plan-flow/brain/`
+`~/plan-flow/vault/`
 
 ### What Gets Synced
 
@@ -293,15 +285,15 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Sync Process
 
-1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
-2. Update `~/plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
+1. Check if `~/plan-flow/vault/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
+2. Update `~/plan-flow/vault/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
 
 ### Global Brain Structure (Central Vault)
 
-The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project gets a real directory in `projects/` with individual symlinks for each flow subdirectory. This avoids nested "brain inside brain" confusion and lets wiki-links to discovery/plans resolve correctly.
+The central vault at `~/plan-flow/vault/` is the Obsidian vault root. Each project gets a real directory in `projects/` with individual symlinks for each flow subdirectory. Wiki-links between brain entries, plans, and discoveries resolve correctly across all projects.
 
 ```
-~/plan-flow/brain/                                    ← Open this as Obsidian vault
+~/plan-flow/vault/                                    ← Open this as Obsidian vault
 ├── .obsidian/                                         # Pre-configured graph color groups
 │   └── graph.json                                     # Uses path-based queries (path:features, etc.)
 ├── index.md                                           # Lists all registered projects

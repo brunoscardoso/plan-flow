@@ -227,10 +227,10 @@ describe('getVaultDir', () => {
     }
   });
 
-  it('should return a path ending with plan-flow/brain when env var is not set', () => {
+  it('should return a path ending with plan-flow/vault when env var is not set', () => {
     delete process.env.PLAN_FLOW_VAULT_DIR;
     const dir = getVaultDir();
-    expect(dir).toMatch(/plan-flow[/\\]brain$/);
+    expect(dir).toMatch(/plan-flow[/\\]vault$/);
   });
 
   it('should return env var value when PLAN_FLOW_VAULT_DIR is set', () => {

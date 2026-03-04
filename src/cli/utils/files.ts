@@ -200,10 +200,10 @@ export function relativePath(filePath: string, base: string): string {
 
 /**
  * Returns the central vault directory path.
- * Checks PLAN_FLOW_VAULT_DIR env var first, falls back to ~/plan-flow/brain/
+ * Checks PLAN_FLOW_VAULT_DIR env var first, falls back to ~/plan-flow/vault/
  */
 export function getVaultDir(): string {
-  return process.env.PLAN_FLOW_VAULT_DIR || join(homedir(), 'plan-flow', 'brain');
+  return process.env.PLAN_FLOW_VAULT_DIR || join(homedir(), 'plan-flow', 'vault');
 }
 
 /**

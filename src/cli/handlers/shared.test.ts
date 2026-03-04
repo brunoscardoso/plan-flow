@@ -216,13 +216,15 @@ describe('vault registration', () => {
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(6);
-    expect(config.colorGroups[0].query).toBe('path:features');
-    expect(config.colorGroups[1].query).toBe('path:errors');
-    expect(config.colorGroups[2].query).toBe('path:decisions');
-    expect(config.colorGroups[3].query).toBe('path:sessions');
-    expect(config.colorGroups[4].query).toBe('path:discovery');
-    expect(config.colorGroups[5].query).toBe('path:plans');
+    expect(config.colorGroups).toHaveLength(8);
+    expect(config.colorGroups[0].query).toBe('path:patterns');
+    expect(config.colorGroups[1].query).toBe('path:features');
+    expect(config.colorGroups[2].query).toBe('path:errors');
+    expect(config.colorGroups[3].query).toBe('path:decisions');
+    expect(config.colorGroups[4].query).toBe('path:sessions');
+    expect(config.colorGroups[5].query).toBe('path:discovery');
+    expect(config.colorGroups[6].query).toBe('path:plans');
+    expect(config.colorGroups[7].query).toBe('path:contracts');
     expect(config['collapse-color']).toBe(false);
     expect(config['collapse-filter']).toBe(true);
   });
@@ -325,8 +327,7 @@ describe('legacy artifact scanning', () => {
     expect(existsSync(brainFeature)).toBe(true);
 
     const content = readFileSync(brainFeature, 'utf-8');
-    expect(content).toContain('tags:');
-    expect(content).toContain('  - feature');
+    expect(content).toContain('status: active');
     expect(content).toContain('[[user-auth]]');
     expect(content).toContain('[[plan_user_auth_v1]]');
   });

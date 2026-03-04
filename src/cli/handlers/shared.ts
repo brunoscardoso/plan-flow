@@ -212,7 +212,7 @@ function cleanBrokenSymlinks(vaultDir: string): void {
 }
 
 /**
- * Updates the global vault index at ~/plan-flow/brain/index.md
+ * Updates the global vault index at ~/plan-flow/vault/index.md
  * with the project entry.
  */
 function updateVaultIndex(vaultDir: string, projectName: string, target: string): void {
@@ -266,12 +266,14 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
     'showOrphans': true,
     'collapse-color': false,
     'colorGroups': [
-      { query: 'path:features', color: { a: 1, rgb: 5025616 } },    // green
+      { query: 'path:patterns', color: { a: 1, rgb: 16771584 } },    // yellow
+      { query: 'path:features', color: { a: 1, rgb: 10040217 } },    // purple
       { query: 'path:errors', color: { a: 1, rgb: 16007990 } },      // red
       { query: 'path:decisions', color: { a: 1, rgb: 2201331 } },    // blue
       { query: 'path:sessions', color: { a: 1, rgb: 10395294 } },    // gray
       { query: 'path:discovery', color: { a: 1, rgb: 16747520 } },   // orange
-      { query: 'path:plans', color: { a: 1, rgb: 10040217 } },       // purple
+      { query: 'path:plans', color: { a: 1, rgb: 5025616 } },        // green
+      { query: 'path:contracts', color: { a: 1, rgb: 52428 } },      // teal
     ],
     'collapse-display': true,
     'collapse-forces': false,
@@ -292,7 +294,7 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
 }
 
 /**
- * Registers the project in the central vault at ~/plan-flow/brain/
+ * Registers the project in the central vault at ~/plan-flow/vault/
  * by creating a real directory per project with individual symlinks
  * for each flow subdirectory (features, errors, decisions, sessions,
  * discovery, plans, archive, contracts).
@@ -416,8 +418,6 @@ function createBrainFeatureEntry(
 
   const content = [
     '---',
-    'tags:',
-    '  - feature',
     `status: ${status}`,
     `created: ${today}`,
     '---',
@@ -650,7 +650,7 @@ export async function initShared(
   result.skipped.push(...giResult.skipped);
   result.updated.push(...giResult.updated);
 
-  // 3. Register project in central vault (~/plan-flow/brain/)
+  // 3. Register project in central vault (~/plan-flow/vault/)
   const vaultResult = registerVault(target, options);
   result.created.push(...vaultResult.created);
   result.skipped.push(...vaultResult.skipped);
