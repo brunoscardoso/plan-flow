@@ -254,10 +254,24 @@ Mark completed tasks in the plan file:
 
 - **Autopilot mode ON** (`flow/.autopilot` exists): Auto-commit without asking:
   `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
-- **Autopilot mode OFF**: Ask the user first:
-  > Phase N verified. Create a checkpoint commit? This enables rollback via `git reset --hard <sha>` if needed.
-  - If user accepts: commit as above
-  - If user declines: continue without committing
+- **Autopilot mode OFF**: Ask the user using the `AskUserQuestion` tool:
+
+```typescript
+AskUserQuestion({
+  questions: [{
+    question: "Phase N complete and verified. Create a checkpoint commit? This enables rollback via git reset --hard <sha> if needed.",
+    header: "Commit",
+    options: [
+      { label: "Yes, commit (Recommended)", description: "Run git add -A && git commit with planflow message" },
+      { label: "No, skip", description: "Continue to next phase without committing" }
+    ],
+    multiSelect: false
+  }]
+})
+```
+
+  - If user selects "Yes": `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
+  - If user selects "No": continue without committing
 - Log to `flow/state/checkpoints.log`: `timestamp | phase N | sha | tests-status`
 
 Then continue to the next phase (NO BUILD HERE).
