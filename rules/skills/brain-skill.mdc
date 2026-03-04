@@ -17,6 +17,14 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 
 ---
 
+## Tool Access
+
+This skill uses the **write-restricted** agent profile. See `agent-profiles.mdc` [COR-AG-1] for full details.
+
+**Quick reference**: Read/Write allowed within `flow/brain/` only. No source code, no config files, no `flow/ledger.md`.
+
+---
+
 ## Modes
 
 ### Free-Text Mode (Default)

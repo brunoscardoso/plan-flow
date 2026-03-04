@@ -1,0 +1,88 @@
+
+# Agent Profiles
+
+## Overview
+
+Agent profiles define tool access boundaries for each plan-flow skill. Every command file references one of three profiles via its `AGENT_PROFILE` header. This ensures skills operate with minimal privilege — read-only skills cannot edit code, write-restricted skills can only modify `flow/` content, and full-access skills have unrestricted project access.
+
+**Reference Codes**: COR-AG-1 (profile definitions), COR-AG-2 (command mapping)
+
+---
+
+## COR-AG-1: Profile Definitions
+
+### read-only
+
+**Purpose**: Research, analysis, and document generation. No source code modification.
+
+| Category | Allowed |
+|----------|---------|
+| **Tools** | Read, Grep, Glob, WebSearch, WebFetch, AskUserQuestion |
+| **Bash (read)** | `git status`, `git diff`, `git log`, `git show`, `gh pr view`, `gh api` (GET only) |
+| **Bash (forbidden)** | `git commit`, `git add`, `git checkout`, `git reset`, `npm run build`, `npm run test`, any write command |
+| **Edit/Write** | Forbidden on source code |
+| **Writable dirs** | `flow/{skill-output}/` (e.g., `flow/reviewed-code/`, `flow/reviewed-pr/`, `flow/discovery/`, `flow/plans/`, `flow/contracts/`), `flow/brain/`, `flow/log.md` |
+
+**Commands**: discovery-plan, create-plan, create-contract, review-code, review-pr
+
+---
+
+### write-restricted
+
+**Purpose**: Knowledge capture and configuration. Write access limited to `flow/` directories.
+
+| Category | Allowed |
+|----------|---------|
+| **Tools** | Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, AskUserQuestion |
+| **Bash (read)** | `git status`, `git diff`, `git log` |
+| **Bash (write)** | Only within `flow/` directories |
+| **Edit/Write** | Only files within `flow/` |
+| **Writable dirs** | `flow/brain/`, `flow/resources/`, `flow/.autopilot`, `flow/log.md` |
+
+**Commands**: brain, learn, flow
+
+---
+
+### full-access
+
+**Purpose**: Implementation, setup, and test writing. Unrestricted project access.
+
+| Category | Allowed |
+|----------|---------|
+| **Tools** | All tools |
+| **Bash** | All commands (subject to per-skill critical rules, e.g., no direct DB commands in execute-plan) |
+| **Edit/Write** | All project files |
+| **Writable dirs** | All project directories |
+
+**Commands**: execute-plan, setup, write-tests
+
+> **Note**: Full-access skills still have per-skill critical rules (e.g., execute-plan forbids direct database/ORM commands). Check the skill file for additional constraints.
+
+---
+
+## COR-AG-2: Command → Profile Mapping
+
+| Command | Profile | Output Directory |
+|---------|---------|-----------------|
+| `/discovery-plan` | read-only | `flow/discovery/` |
+| `/create-plan` | read-only | `flow/plans/` |
+| `/create-contract` | read-only | `flow/contracts/` |
+| `/review-code` | read-only | `flow/reviewed-code/` |
+| `/review-pr` | read-only | `flow/reviewed-pr/` |
+| `/brain` | write-restricted | `flow/brain/` |
+| `/learn` | write-restricted | `flow/resources/` |
+| `/flow` | write-restricted | `flow/.autopilot` |
+| `/execute-plan` | full-access | All project files |
+| `/setup` | full-access | `.claude/rules/`, `flow/references/` |
+| `/write-tests` | full-access | Test files (framework-dependent) |
+
+---
+
+## Enforcement
+
+Profiles are enforced by convention — the `AGENT_PROFILE` header in each command file and the `## Tool Access` section in each skill file reference this document. The LLM must respect the boundaries defined here.
+
+**If a skill needs to perform an action outside its profile**:
+1. Stop and explain why the action is needed
+2. Ask the user for explicit permission
+3. Document the exception in the review output

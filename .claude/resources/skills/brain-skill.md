@@ -14,26 +14,11 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 
 ---
 
-## Restrictions
+## Tool Access
 
-### Allowed Actions
+This skill uses the **write-restricted** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
 
-| Action | Purpose |
-|--------|---------|
-| Read `flow/brain/index.md` | Understand current brain state |
-| Read any `flow/brain/` file | Context for linking |
-| Write to `flow/brain/features/` | Feature-related entries |
-| Write to `flow/brain/decisions/` | Decision records |
-| Write to `flow/brain/sessions/` | Session log entries |
-| Update `flow/brain/index.md` | Keep index current |
-
-### Forbidden Actions
-
-| Action | Reason |
-|--------|--------|
-| Write source code | Brain is for knowledge, not code |
-| Create files outside `flow/brain/` | Brain files only |
-| Modify `flow/ledger.md` | Ledger is managed separately |
+**Quick reference**: Read/Write allowed within `flow/brain/` only. No source code, no config files, no `flow/ledger.md`.
 
 ---
 

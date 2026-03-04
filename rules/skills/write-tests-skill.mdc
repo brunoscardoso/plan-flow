@@ -13,6 +13,14 @@ This skill writes test code to achieve the specified coverage target.
 
 ---
 
+## Tool Access
+
+This skill uses the **full-access** agent profile. See `agent-profiles.mdc` [COR-AG-1] for full details.
+
+**Quick reference**: All tools allowed. Full project read/write access for test file creation.
+
+---
+
 ## Inputs
 
 | Input               | Required | Description                                      |

@@ -70,6 +70,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-1 | Capture behavior, criteria, and what NOT to capture | resource-capture.mdc | 10-60 |
 | COR-RC-2 | File format, naming conventions, and rules | resource-capture.mdc | 62-110 |
 
+### Agent Profiles (`agent-profiles.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AG-1 | Profile definitions (read-only, write-restricted, full-access) | agent-profiles.mdc | 22-84 |
+| COR-AG-2 | Command → profile mapping table | agent-profiles.mdc | 86-104 |
+
 ---
 
 ## When to Expand
@@ -95,6 +102,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AM-3 | Need mandatory checkpoint and override rules |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
+| COR-AG-1 | Need agent profile definitions and tool access rules |
+| COR-AG-2 | Need command-to-profile mapping |
 
 ---
 
@@ -131,3 +140,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
 - `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)
 - `resource-capture.mdc` has `alwaysApply: false` - loaded during skill execution to watch for valuable reference materials
+- `agent-profiles.mdc` has `alwaysApply: false` - defines tool access boundaries per skill profile

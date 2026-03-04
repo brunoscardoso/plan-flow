@@ -14,106 +14,37 @@ This skill **only produces a markdown file** with findings. It does NOT:
 
 ---
 
-## Restrictions - READ ONLY
+## Tool Access
 
-This skill is **strictly read-only analysis**. The review process:
+This skill uses the **read-only** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
 
-1. **Reads** the PR diff and files
-2. **Analyzes** against patterns and guidelines
-3. **Generates** a markdown file with findings
+**Quick reference**: Read/Grep/Glob allowed. Edit/Write/Bash(write) forbidden. Output to `flow/reviewed-pr/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
 
-**No code execution, no code modification, no builds.**
+### Platform-Specific Commands
 
-### NEVER Do These Actions
+#### GitHub
 
-| Forbidden Action                         | Reason                                         |
-| ---------------------------------------- | ---------------------------------------------- |
-| `npm run build`                          | No build commands - analysis only              |
-| `npm run test`                           | No test commands - analysis only               |
-| `npm install`                            | No dependency installation                     |
-| Edit/modify any source code              | No code changes - review produces findings     |
-| Create/edit files outside `flow/`    | Only write to `flow/reviewed-pr/`          |
-| `git commit`                             | No commits to any repository                   |
-| `git push`                               | No pushing to remote repositories              |
-| `git checkout`                           | No branch switching on external repos          |
-| `gh pr merge`                            | No merging pull requests                       |
-| `gh pr close`                            | No closing pull requests                       |
-| `gh pr review --approve`                 | No approving PRs directly via CLI              |
-| `gh pr review --request-changes`         | No requesting changes directly via CLI         |
-| `gh pr comment`                          | No posting comments directly to the PR         |
-| Any write operation to the external repo | All output goes to local markdown only         |
-| Any shell command that modifies code     | This is a read-only analysis, not an execution |
-
-### Allowed Actions
-
-#### GitHub Commands
-
-| Allowed Action               | Purpose                                      |
-| ---------------------------- | -------------------------------------------- |
-| `gh auth status`             | Check authentication status                  |
+| Allowed Command | Purpose |
+|----------------|---------|
+| `gh auth status` | Check authentication status |
 | `gh auth login --with-token` | Authenticate using PAT from `.plan.flow.env` |
-| `gh pr view`                 | Read PR information                          |
-| `gh pr diff`                 | Read PR diff/changes                         |
-| `gh pr files`                | List files changed in PR                     |
-| `gh api` (GET requests only) | Fetch additional PR data                     |
+| `gh pr view` | Read PR information |
+| `gh pr diff` | Read PR diff/changes |
+| `gh pr files` | List files changed in PR |
+| `gh api` (GET only) | Fetch additional PR data |
 
-#### Azure DevOps Commands
+**Forbidden**: `gh pr merge`, `gh pr close`, `gh pr review --approve`, `gh pr review --request-changes`, `gh pr comment`
 
-| Allowed Action                                        | Purpose                                 |
-| ----------------------------------------------------- | --------------------------------------- |
-| `az devops configure`                                 | Configure Azure DevOps defaults         |
-| `az devops invoke --area git --resource pullRequests` | Fetch PR details                        |
-| `az devops invoke --area git --resource blobs`        | Fetch file contents                     |
-| `az devops invoke --area git --resource diffs`        | Fetch PR diff                           |
-| `az devops invoke --area git --resource commits`      | Fetch commit information                |
-| `az repos pr show`                                    | Show PR details                         |
-| `az repos pr list`                                    | List PRs (for finding existing reviews) |
-| `curl` with GET + PAT auth                            | Direct API calls to Azure DevOps        |
+#### Azure DevOps
 
-#### Local Operations
-
-| Allowed Action                   | Purpose                               |
-| -------------------------------- | ------------------------------------- |
-| Write to `flow/reviewed-pr/` | Save review notes locally             |
-| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 5)    |
-| Write to `/tmp/`                 | Temporary file storage for processing |
-| Read project rule files          | Load patterns for analysis            |
-| `source .plan.flow.env`          | Load environment credentials          |
-
-> **Important**: Writable locations are `flow/reviewed-pr/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code, configuration files, or any other project files should be modified.
-
-### Allowed Command Examples
-
-```bash
-# Fetch file content from Azure DevOps
-az devops invoke \
-  --area git \
-  --resource blobs \
-  --route-parameters project={project} repositoryId={repo} sha1={sha} \
-  --query-parameters '$format=text' \
-  --api-version 7.0 \
-  --out-file /tmp/{filename} \
-  && cat /tmp/{filename}
-
-# Fetch PR details from Azure DevOps
-az devops invoke \
-  --area git \
-  --resource pullRequests \
-  --route-parameters project={project} repositoryId={repo} pullRequestId={pr_id} \
-  --api-version 7.0
-
-# Fetch PR diff/changes
-az devops invoke \
-  --area git \
-  --resource diffs \
-  --route-parameters project={project} repositoryId={repo} \
-  --query-parameters 'baseVersion={base}&targetVersion={target}' \
-  --api-version 7.0
-
-# Direct API call with PAT
-curl -s -u ":$AZURE_DEVOPS_PAT" \
-  "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
-```
+| Allowed Command | Purpose |
+|----------------|---------|
+| `az devops configure` | Configure Azure DevOps defaults |
+| `az devops invoke --area git --resource pullRequests` | Fetch PR details |
+| `az devops invoke --area git --resource blobs` | Fetch file contents |
+| `az devops invoke --area git --resource diffs` | Fetch PR diff |
+| `az repos pr show` | Show PR details |
+| `curl` with GET + PAT auth | Direct API calls to Azure DevOps |
 
 > **Output**: All findings, comments, and suggestions are saved to a local markdown file in `flow/reviewed-pr/`. The user can then manually copy comments to the PR if desired.
 

@@ -84,6 +84,9 @@ RELATED COMMANDS:
 
 ---
 
+> **AGENT_PROFILE: full-access**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |

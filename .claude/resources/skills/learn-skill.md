@@ -14,25 +14,11 @@ This skill **only writes to `flow/resources/`**. It does NOT:
 
 ---
 
-## Restrictions
+## Tool Access
 
-### Allowed Actions
+This skill uses the **write-restricted** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
 
-| Action | Purpose |
-|--------|---------|
-| Read conversation history | Identify extractable patterns |
-| Read `flow/resources/learned-*.md` | Check for duplicates |
-| Read `flow/brain/index.md` | Context for wiki-links |
-| Write to `flow/resources/learned-*.md` | Save approved patterns |
-
-### Forbidden Actions
-
-| Action | Reason |
-|--------|--------|
-| Write source code | Learn is for knowledge capture, not code |
-| Create files outside `flow/resources/` | Learned patterns only go to resources |
-| Save without user approval | User must confirm every pattern |
-| Save trivial patterns | Only non-obvious, reusable knowledge |
+**Quick reference**: Read conversation history and `flow/` files allowed. Write to `flow/resources/learned-*.md` only. User must confirm every pattern before saving.
 
 ---
 

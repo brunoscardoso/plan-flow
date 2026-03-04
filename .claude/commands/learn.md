@@ -55,6 +55,9 @@ RELATED COMMANDS:
 
 ---
 
+> **AGENT_PROFILE: write-restricted**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                                      |

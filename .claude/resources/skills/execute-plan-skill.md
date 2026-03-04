@@ -15,6 +15,14 @@ This skill **implements the plan** by:
 
 ---
 
+## Tool Access
+
+This skill uses the **full-access** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
+
+**Quick reference**: All tools allowed. Additional per-skill restrictions below (build timing, database commands).
+
+---
+
 ## CRITICAL RULE: Build Verification ONLY at the End
 
 **DO NOT run the project's build command after each phase or group.**

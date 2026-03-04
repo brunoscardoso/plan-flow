@@ -73,6 +73,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-TD-1 | Language detection and command mapping table | tech-detection.md | 10-50 |
 | COR-TD-2 | Package manager variants and special rules | tech-detection.md | 52-85 |
 
+### Agent Profiles (`agent-profiles.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AG-1 | Profile definitions (read-only, write-restricted, full-access) | agent-profiles.md | 18-80 |
+| COR-AG-2 | Command → profile mapping table | agent-profiles.md | 82-100 |
+
 ---
 
 ## When to Expand
@@ -98,6 +105,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-BR-3 | Need index management caps and global sync rules |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
+| COR-AG-1 | Need agent profile definitions and tool access rules |
+| COR-AG-2 | Need command-to-profile mapping |
 
 ---
 
@@ -134,3 +143,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `autopilot-mode.md` has `alwaysApply: true` - detects and orchestrates autopilot flow mode
 - `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
+- `agent-profiles.md` is loaded on-demand - defines tool access boundaries per skill profile

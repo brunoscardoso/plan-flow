@@ -14,39 +14,11 @@ This skill **only produces a markdown file** in `flow/contracts/`. It does NOT:
 
 ---
 
-## Restrictions - CONTRACT CREATION ONLY
+## Tool Access
 
-This skill is **strictly for creating contract documents**. The process:
+This skill uses the **read-only** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
 
-1. **Fetches** information from the source URL
-2. **Analyzes** the API structure and schemas
-3. **Asks** clarifying questions via Interactive Questions Tool
-4. **Generates** a contract markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                       | Reason                              |
-| -------------------------------------- | ----------------------------------- |
-| Create/edit source code files          | Contract creation only              |
-| Write implementation code              | Contracts describe, not implement   |
-| Modify configuration files             | No codebase changes                 |
-| Run build or test commands             | No execution commands               |
-| Create files outside `flow/contracts/` | Only write contract documents       |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
-| Use Web Search tool                    | Fetch documentation from URLs        |
-| Read repository files                  | Analyze API structure                |
-| Use Interactive Questions Tool         | Gather requirements from user        |
-| Write to `flow/contracts/`             | Save contract document               |
-| Write to `flow/brain/`, `flow/log.md`  | Knowledge capture (Step 5)           |
-| Read project rule files                | Understand patterns to follow        |
-
-> **Important**: Writable locations are `flow/contracts/` and `flow/brain/` + `flow/log.md` (Knowledge Capture step only). No source code or other files should be modified.
+**Quick reference**: Read/Grep/Glob/WebSearch/WebFetch allowed. Edit/Write/Bash(write) forbidden. Output to `flow/contracts/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
 
 ---
 

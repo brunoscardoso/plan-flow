@@ -22,6 +22,9 @@ This command creates a discovery document for gathering and clarifying requireme
 > Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
 > Ask clarifying questions when uncertain. Don't jump to implementation.
 
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 > ⚠️ **IMPORTANT - DISCOVERY ONLY**
 >
 > This command ONLY creates a discovery document. It does NOT:

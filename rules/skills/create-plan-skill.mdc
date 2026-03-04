@@ -18,38 +18,11 @@ This skill **only produces a markdown file** in `flow/plans/`. It does NOT:
 
 ---
 
-## Restrictions - PLANNING ONLY
+## Tool Access
 
-This skill is **strictly for creating plan documents**. The process:
+This skill uses the **read-only** agent profile. See `agent-profiles.mdc` [COR-AG-1] for full details.
 
-1. **Reads** the discovery document or gathers requirements
-2. **Analyzes** complexity and scope
-3. **Structures** phases with complexity scores
-4. **Generates** a plan markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                    | Reason                           |
-| ----------------------------------- | -------------------------------- |
-| Create/edit source code files       | Planning only, no implementation |
-| Write implementation code           | Plans describe what, not how     |
-| Execute any plan phases             | Use /execute-plan for that       |
-| Run build or test commands          | No execution commands            |
-| Create files outside `flow/plans/`  | Only write plan documents        |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                           |
-| -------------------------------------- | --------------------------------- |
-| Read discovery documents               | Extract requirements              |
-| Read any project file                  | Understand existing codebase      |
-| Search codebase (grep, glob, semantic) | Find existing patterns            |
-| Write to `flow/plans/`                 | Save plan document                |
-| Read project rule files                | Understand patterns to follow     |
-
-> **Important**: The ONLY writable location is `flow/plans/`. No source code or other files should be modified.
+**Quick reference**: Read/Grep/Glob/WebSearch allowed. Edit/Write/Bash(write) forbidden. Output to `flow/plans/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
 
 ---
 

@@ -14,6 +14,14 @@ This skill produces:
 
 ---
 
+## Tool Access
+
+This skill uses the **full-access** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
+
+**Quick reference**: All tools allowed. Full project read/write access for pattern file generation.
+
+---
+
 ## Critical Approach
 
 **This is NOT a surface-level scan.** The setup skill must:

@@ -52,6 +52,9 @@ STATE:
 
 ---
 
+> **AGENT_PROFILE: write-restricted**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Instructions
 
 ### When invoked with `-enable`

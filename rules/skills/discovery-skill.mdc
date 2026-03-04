@@ -18,42 +18,11 @@ This skill **only produces a markdown file** in `flow/discovery/`. It does NOT:
 
 ---
 
-## Restrictions - DISCOVERY ONLY
+## Tool Access
 
-This skill is **strictly for gathering and documenting requirements**. The process:
+This skill uses the **read-only** agent profile. See `agent-profiles.mdc` [COR-AG-1] for full details.
 
-1. **Reads** all referenced documents and contracts
-2. **Asks** clarifying questions via Interactive Questions Tool
-3. **Documents** requirements (FR, NFR, Constraints)
-4. **Identifies** technical considerations (high-level only)
-5. **Proposes** approach (conceptual, no code)
-6. **Generates** a discovery markdown file
-
-**No code, no implementation, no source file modifications.**
-
-### NEVER Do These Actions
-
-| Forbidden Action                       | Reason                                    |
-| -------------------------------------- | ----------------------------------------- |
-| Create/edit source code files          | Discovery is requirements gathering only  |
-| Write implementation code in responses | No code during discovery                  |
-| Create implementation plans            | Plans come after discovery                |
-| Modify configuration files             | No codebase changes                       |
-| Run build or test commands             | No execution commands                     |
-| Create files outside `flow/discovery/` | Only write discovery documents            |
-
-### Allowed Actions
-
-| Allowed Action                         | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
-| Read any project file                  | Understand existing implementation   |
-| Read referenced documents              | Extract requirements and constraints |
-| Search codebase (grep, glob, semantic) | Find existing patterns               |
-| Use Interactive Questions Tool         | Gather requirements from user        |
-| Write to `flow/discovery/`             | Save discovery document              |
-| Read project rule files                | Understand patterns to follow        |
-
-> **Important**: The ONLY writable location is `flow/discovery/`. No source code, configuration files, or any other project files should be modified.
+**Quick reference**: Read/Grep/Glob/WebSearch allowed. Edit/Write/Bash(write) forbidden. Output to `flow/discovery/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
 
 ---
 
