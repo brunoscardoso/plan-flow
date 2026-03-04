@@ -17,6 +17,7 @@ Use slash commands to invoke skills:
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/learn` | Extract reusable patterns from current session |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Workflow

@@ -5,7 +5,7 @@
 
 Skills implement the workflow logic for commands. Each skill orchestrates a specific process like discovery, planning, execution, or code review.
 
-**Total Files**: 9 files, ~2,800 lines
+**Total Files**: 10 files, ~2,900 lines
 **Reference Codes**: SKL-BR-1 through SKL-TEST-5
 
 > **Note**: All skills (except brain and flow) include a Resource Capture section. During execution, the LLM watches for valuable reference materials and asks the user before saving to `flow/resources/`. See `.claude/resources/core/resource-capture.md` for full rules.
@@ -48,6 +48,13 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | SKL-DIS-2 | Workflow steps 1-4 (read docs, questions, tracking, requirements) | discovery-skill.md | 71-173 |
 | SKL-DIS-3 | Workflow steps 5-8 (tech considerations, approach, risks, generate) | discovery-skill.md | 175-256 |
 | SKL-DIS-4 | Validation checklist | discovery-skill.md | 270-296 |
+
+### Learn Skill (`learn-skill.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| SKL-LRN-1 | Purpose, restrictions, and extraction criteria | learn-skill.md | 1-55 |
+| SKL-LRN-2 | Workflow, output format, and validation | learn-skill.md | 57-115 |
 
 ### Execute Plan Skill (`execute-plan-skill.md`)
 
@@ -156,6 +163,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
 | `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
+| `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-2 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |
 | `/create-plan` | create-plan-skill | SKL-PLN-1 through SKL-PLN-4 |
 | `/execute-plan` | execute-plan-skill | SKL-EXEC-1 through SKL-EXEC-6 |
@@ -178,4 +186,5 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | discovery-skill | 295 | 4 | Medium - requirements gathering |
 | write-tests-skill | 294 | 5 | Medium - iterative testing |
 | create-plan-skill | 271 | 4 | Low - plan structuring |
+| learn-skill | 115 | 2 | Low - session pattern extraction |
 | create-contract-skill | 239 | 4 | Low - contract generation |
