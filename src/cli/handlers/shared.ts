@@ -164,8 +164,39 @@ function updateVaultIndex(vaultDir: string, projectName: string, target: string)
 }
 
 /**
+ * Creates the .obsidian/ config in the vault with pre-configured
+ * graph color groups for tags (feature, error, decision, session).
+ */
+function ensureObsidianConfig(vaultDir: string): void {
+  const obsidianDir = join(vaultDir, '.obsidian');
+  const graphPath = join(obsidianDir, 'graph.json');
+
+  // Don't overwrite existing config
+  if (existsSync(graphPath)) return;
+
+  ensureDir(obsidianDir);
+
+  const graphConfig = {
+    collapse: false,
+    search: '',
+    showTags: true,
+    showAttachments: false,
+    showOrphans: true,
+    colorGroups: [
+      { query: 'tag:#feature', color: { a: 1, rgb: 5025616 } },
+      { query: 'tag:#error', color: { a: 1, rgb: 16007990 } },
+      { query: 'tag:#decision', color: { a: 1, rgb: 2201331 } },
+      { query: 'tag:#session', color: { a: 1, rgb: 10395294 } },
+    ],
+  };
+
+  writeFileSync(graphPath, JSON.stringify(graphConfig, null, 2), 'utf-8');
+}
+
+/**
  * Registers the project in the central vault at ~/plan-flow/brain/
- * by creating a symlink from the vault to the project's flow/brain/.
+ * by creating a symlink from the vault to the project's flow/ directory.
+ * This makes all flow artifacts (brain, plans, discovery, archive) accessible in Obsidian.
  */
 function registerVault(
   target: string,
@@ -174,7 +205,7 @@ function registerVault(
   const result: CopyResult = { created: [], skipped: [], updated: [] };
   const vaultDir = getVaultDir();
   const projectName = getProjectName(target);
-  const brainDir = join(resolve(target), 'flow', 'brain');
+  const flowDir = join(resolve(target), 'flow');
   const linkPath = join(vaultDir, 'projects', projectName);
 
   try {
@@ -184,18 +215,21 @@ function registerVault(
       ensureDir(join(vaultDir, sub));
     }
 
+    // Set up Obsidian config with graph color groups
+    ensureObsidianConfig(vaultDir);
+
     // Check existing symlink
     const existingTarget = readSymlinkTarget(linkPath);
 
     if (existingTarget !== null) {
       const resolvedExisting = resolve(join(vaultDir, 'projects'), existingTarget);
-      const resolvedBrain = resolve(brainDir);
+      const resolvedFlow = resolve(flowDir);
 
-      if (resolvedExisting === resolvedBrain) {
+      if (resolvedExisting === resolvedFlow) {
         result.skipped.push(linkPath);
         log.skip(`Vault symlink already exists for ${projectName}`);
       } else if (options.force) {
-        createSymlink(brainDir, linkPath);
+        createSymlink(flowDir, linkPath);
         result.updated.push(linkPath);
         log.warn(`Updated vault symlink for ${projectName}`);
       } else {
@@ -208,12 +242,12 @@ function registerVault(
         const hashSuffix = resolve(target).split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) & 0xffff, 0).toString(16);
         const altName = `${projectName}-${hashSuffix}`;
         const altPath = join(vaultDir, 'projects', altName);
-        createSymlink(brainDir, altPath);
+        createSymlink(flowDir, altPath);
         result.created.push(altPath);
         log.success(`Created vault symlink: ${altName} (name collision avoided)`);
         updateVaultIndex(vaultDir, altName, target);
       } else {
-        createSymlink(brainDir, linkPath);
+        createSymlink(flowDir, linkPath);
         result.created.push(linkPath);
         log.success(`Created vault symlink: ${projectName}`);
         updateVaultIndex(vaultDir, projectName, target);

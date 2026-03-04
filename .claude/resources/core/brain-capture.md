@@ -298,20 +298,22 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Global Brain Structure (Central Vault)
 
-The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project's brain is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects in one graph.
+The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project's entire `flow/` directory is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects with their brain entries, plans, discoveries, and archives — and wiki-links between them resolve correctly.
 
 ```
 ~/plan-flow/brain/                          ← Open this as Obsidian vault
+├── .obsidian/                               # Pre-configured graph color groups
+│   └── graph.json
 ├── index.md                                 # Lists all registered projects
 ├── patterns/                                # Shared engineering patterns
 │   └── retry-with-backoff.md
 └── projects/
-    ├── my-app/ → /home/user/my-app/flow/brain/    ← symlink
-    ├── api/    → /home/user/api/flow/brain/        ← symlink
-    └── webapp/ → /home/user/webapp/flow/brain/     ← symlink
+    ├── my-app/ → /home/user/my-app/flow/    ← symlink to entire flow/
+    ├── api/    → /home/user/api/flow/        ← symlink
+    └── webapp/ → /home/user/webapp/flow/     ← symlink
 ```
 
-Symlinks are created automatically by `plan-flow init`. Each init registers the project and links its brain.
+Symlinks are created automatically by `plan-flow init`. Each init registers the project and links its `flow/` directory.
 
 ---
 

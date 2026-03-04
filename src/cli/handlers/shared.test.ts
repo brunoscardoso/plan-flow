@@ -199,6 +199,20 @@ describe('vault registration', () => {
     expect(existsSync(join(vaultDir, 'projects'))).toBe(true);
   });
 
+  it('should create Obsidian config with graph color groups', async () => {
+    await initShared(tempDir, { force: false }, ['claude']);
+
+    const graphPath = join(vaultDir, '.obsidian', 'graph.json');
+    expect(existsSync(graphPath)).toBe(true);
+
+    const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
+    expect(config.colorGroups).toHaveLength(4);
+    expect(config.colorGroups[0].query).toBe('tag:#feature');
+    expect(config.colorGroups[1].query).toBe('tag:#error');
+    expect(config.colorGroups[2].query).toBe('tag:#decision');
+    expect(config.colorGroups[3].query).toBe('tag:#session');
+  });
+
   it('should create symlink from vault to project brain', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
@@ -210,7 +224,7 @@ describe('vault registration', () => {
     expect(stat.isSymbolicLink()).toBe(true);
 
     const target = readlinkSync(linkPath, 'utf-8');
-    expect(target).toBe(join(resolve(tempDir), 'flow', 'brain'));
+    expect(target).toBe(join(resolve(tempDir), 'flow'));
   });
 
   it('should create vault index with project entry', async () => {
