@@ -164,7 +164,7 @@ Every phase in a plan must include a complexity score:
 - [ ] Task 1
 - [ ] Task 2
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ---

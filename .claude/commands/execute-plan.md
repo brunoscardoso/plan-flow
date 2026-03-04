@@ -49,7 +49,7 @@ WORKFLOW:
      - Presents phase details for approval
      - Implements after approval
      - Updates progress in plan file
-  4. Runs npm run build && npm run test (ONLY at the end)
+  4. Runs build and test verification using detected language commands (ONLY at the end)
   5. Auto-archives plan and discovery to flow/archive/
 
 EXECUTION STRATEGIES:
@@ -138,9 +138,9 @@ Please run this command and let me know when it's complete.
 
 ## CRITICAL RULE: Build Verification ONLY at the End
 
-**DO NOT run `npm run build` after each phase or group.**
+**DO NOT run the project's build command after each phase or group.**
 
-**`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+**Build and test commands MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.** Use `.claude/resources/core/tech-detection.md` to determine the correct commands for the project's language.
 
 **Structured Verification Format**: When running final verification, output:
 
@@ -321,6 +321,7 @@ When executing this command:
 | `resources/core/_index.md`    | Index of core rules with reference codes |
 | `resources/tools/_index.md`   | Index of tools with reference codes |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
+| `core/tech-detection.md`  | Language-adaptive build/test commands |
 | `plans-patterns.md`       | Rules and patterns for plans      |
 | `complexity-scoring.md`   | Complexity scoring system         |
 | `plan-mode-tool.md`       | Plan mode switching instructions  |
@@ -344,7 +345,7 @@ After ALL phases complete and build/tests pass, run an automatic cleanup pass to
 ### Safety Protocol
 
 1. Make all cleanup changes
-2. Run the full test suite (`npm run test`)
+2. Run the full test suite (using the detected test command)
 3. **If ANY test fails** → revert ALL cleanup changes and report: "Cleanup reverted — {N} test(s) failed after removing {description}"
 4. **If all tests pass** → report: "Cleanup: removed {X} debug statements, {Y} commented blocks, {Z} redundant tests. All tests passing."
 

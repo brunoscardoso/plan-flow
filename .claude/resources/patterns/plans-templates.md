@@ -55,7 +55,7 @@ Use this template when creating new implementation plans:
 - [ ] Task 1
 - [ ] Task 2
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 
 ### Phase 2: [Phase Name]
 
@@ -65,7 +65,7 @@ Use this template when creating new implementation plans:
 - [ ] Task 1
 - [ ] Task 2
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 
 ### Phase N: Tests (Final)
 
@@ -76,7 +76,7 @@ Use this template when creating new implementation plans:
 - [ ] Unit tests for utilities
 - [ ] Integration tests
 
-**Build Verification**: Run `npm run build && npm run test`
+**Build Verification**: Run the project's build and test commands (see `tech-detection.md`)
 
 ## Key Changes
 
@@ -100,7 +100,7 @@ Use this template when creating new implementation plans:
 - [ ] Create type definitions in `/src/types/`
 - [ ] Create Zod validation schemas in `/src/types/rest-inputs.ts`
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ### Backend Implementation Phase
@@ -115,7 +115,7 @@ Use this template when creating new implementation plans:
 - [ ] Create API route in `/src/app/api/`
 - [ ] Add database operations if needed
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ### Store and State Management Phase
@@ -129,7 +129,7 @@ Use this template when creating new implementation plans:
 - [ ] Create or extend store in `/src/stores/`
 - [ ] Add actions and selectors
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ### UI Components Phase
@@ -144,7 +144,7 @@ Use this template when creating new implementation plans:
 - [ ] Create view component (`index.tsx`)
 - [ ] Follow view/logic separation pattern
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ### Integration Phase
@@ -159,7 +159,7 @@ Use this template when creating new implementation plans:
 - [ ] Connect to API endpoints
 - [ ] Verify end-to-end flow
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 ### Tests Phase (Always Last)
@@ -175,8 +175,44 @@ Use this template when creating new implementation plans:
 - [ ] Integration tests for API routes
 - [ ] Command tests
 
-**Build Verification**: Run `npm run build && npm run test`
+**Build Verification**: Run the project's build and test commands (see `tech-detection.md`)
 ```
+
+---
+
+## Multi-Language Phase Examples
+
+### Go Project Phase
+
+```markdown
+### Phase 2: API Implementation
+
+**Scope**: Implement HTTP handlers and middleware.
+**Complexity**: 6/10
+
+- [ ] Create handler in `internal/handler/`
+- [ ] Add middleware for authentication
+- [ ] Wire routes in `cmd/server/main.go`
+
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
+```
+
+### Python Project Phase
+
+```markdown
+### Phase 1: Data Models
+
+**Scope**: Define Pydantic models and database schemas.
+**Complexity**: 3/10
+
+- [ ] Create models in `src/models/`
+- [ ] Add Pydantic validation schemas
+- [ ] Create Alembic migration
+
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
+```
+
+> **Note**: Build verification adapts to the detected language. For Python projects, this may skip the build step and run tests only. See `.claude/resources/core/tech-detection.md` for the full command mapping.
 
 ---
 

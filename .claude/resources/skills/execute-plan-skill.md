@@ -17,9 +17,9 @@ This skill **implements the plan** by:
 
 ## CRITICAL RULE: Build Verification ONLY at the End
 
-**DO NOT run `npm run build` after each phase or group.**
+**DO NOT run the project's build command after each phase or group.**
 
-**`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+**Build and test commands MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
 
 **Why**:
 
@@ -29,7 +29,7 @@ This skill **implements the plan** by:
 
 **The ONLY time to run build/test**:
 
-- After ALL phases are complete -> `npm run build && npm run test`
+- After ALL phases are complete → run the detected build and test commands (see `.claude/resources/core/tech-detection.md`)
 
 ---
 
@@ -99,6 +99,14 @@ Please run this command and let me know when it's complete, or if you encounter 
 ---
 
 ## Workflow
+
+### Step 0: Detect Project Language
+
+Before beginning execution, read `flow/references/tech-foundation.md` to detect the project's language, package manager, and test framework. Use `.claude/resources/core/tech-detection.md` to map these to the correct build, test, and lint commands.
+
+All subsequent references to "build command" and "test command" in this skill use the detected commands, NOT hardcoded `npm` commands.
+
+---
 
 ### Step 1: Parse the Plan
 
@@ -182,7 +190,7 @@ Wait for user confirmation before proceeding.
 
 **CRITICAL RULE**: Use the [Plan Mode Tool](../tools/plan-mode-tool.md) to switch to Plan mode for **EACH individual phase**.
 
-**REMINDER**: Do NOT run `npm run build` between phases.
+**REMINDER**: Do NOT run the project's build command between phases.
 
 **For Each Phase**:
 
@@ -268,12 +276,7 @@ The Tests phase is **always executed separately**, regardless of complexity scor
 
 After ALL phases are complete (including Tests phase):
 
-1. **Run each verification check independently** (a build failure should NOT skip type/test checks):
-
-```bash
-npm run build
-npm run test
-```
+1. **Run each verification check independently** using the detected commands from Step 0 (a build failure should NOT skip type/test checks). Refer to `.claude/resources/core/tech-detection.md` for the language-specific commands.
 
 2. **Output structured verification report**:
 
@@ -376,7 +379,7 @@ Group 1: Phase 1 + Phase 2 (combined complexity: 5)
 
 ### Build Failures (at Completion)
 
-If `npm run build` fails at Step 7:
+If the project's build command fails at Step 7:
 
 1. Analyze the error
 2. Determine which phase introduced the issue
@@ -386,7 +389,7 @@ If `npm run build` fails at Step 7:
 
 ### Test Failures (at Completion)
 
-If `npm run test` fails at Step 7:
+If the project's test command fails at Step 7:
 
 1. Analyze failing tests
 2. Determine if it's a test issue or implementation bug
@@ -410,7 +413,7 @@ If the user wants to stop execution:
 | Rule                         | Description                                                 |
 | ---------------------------- | ----------------------------------------------------------- |
 | **Auto-switch to Plan mode** | Switch immediately for each phase, no asking                |
-| **Build ONLY at end**        | `npm run build && npm run test` runs once, after ALL phases |
+| **Build ONLY at end**        | Build and test commands run once, after ALL phases (see `tech-detection.md`) |
 | **No intermediate builds**   | Never run build between phases or groups                    |
 | **Tests phase separate**     | Always execute Tests phase individually                     |
 | **Update progress**          | Mark tasks complete in plan file after each phase           |

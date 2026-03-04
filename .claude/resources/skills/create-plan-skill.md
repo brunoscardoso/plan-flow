@@ -101,7 +101,7 @@ Create phases following these guidelines:
 - [ ] Task 1
 - [ ] Task 2
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
 
 **Model Routing**: Assign recommended models per phase based on complexity (see `.claude/resources/core/complexity-scoring.md` Model Routing section). This is advisory — 0-4 → Haiku, 5-7 → Sonnet, 8-10 → Opus.
@@ -224,7 +224,7 @@ The plan document should follow the template in `.claude/resources/patterns/plan
 - [ ] Task 1
 - [ ] Task 2
 
-**Build Verification**: Run `npm run build`
+**Build Verification**: Run the project's build command (see `tech-detection.md`)
 
 ### Phase N: Tests (Final)
 
@@ -234,7 +234,7 @@ The plan document should follow the template in `.claude/resources/patterns/plan
 - [ ] Unit tests
 - [ ] Integration tests
 
-**Build Verification**: Run `npm run build && npm run test`
+**Build Verification**: Run the project's build and test commands (see `tech-detection.md`)
 
 ## Key Changes
 

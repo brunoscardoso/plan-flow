@@ -66,6 +66,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-1 | Capture behavior, criteria, and what NOT to capture | resource-capture.md | 10-60 |
 | COR-RC-2 | File format, naming conventions, and rules | resource-capture.md | 62-110 |
 
+### Tech Detection (`tech-detection.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-TD-1 | Language detection and command mapping table | tech-detection.md | 10-50 |
+| COR-TD-2 | Package manager variants and special rules | tech-detection.md | 52-85 |
+
 ---
 
 ## When to Expand

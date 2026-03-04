@@ -87,7 +87,7 @@ Always schedule testing as the final phase of implementation. Tests validate com
 
 ### 8. Verify Build Success After Each Phase
 
-At the end of each phase, run `npm run build` to ensure no build errors.
+At the end of each phase, run the project's build command to ensure no build errors. See `.claude/resources/core/tech-detection.md` for the language-specific command.
 
 ---
 
@@ -176,7 +176,7 @@ Tests should always be the last phase.
 
 ### 8. DON'T Skip Build Verification
 
-Add `npm run build` verification at the end of each phase.
+Add build verification at the end of each phase (use the detected build command per `tech-detection.md`).
 
 ---
 
