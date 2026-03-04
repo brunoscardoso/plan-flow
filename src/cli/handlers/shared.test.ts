@@ -255,6 +255,21 @@ describe('vault registration', () => {
     expect(featuresTarget).toBe(join(resolve(tempDir), 'flow', 'brain', 'features'));
   });
 
+  it('should create project index file linking to subdirectories', async () => {
+    await initShared(tempDir, { force: false }, ['claude']);
+
+    const projectName = tempDir.split('/').pop() || '';
+    const projectIndexPath = join(vaultDir, 'projects', projectName, `${projectName}.md`);
+    expect(existsSync(projectIndexPath)).toBe(true);
+
+    const content = readFileSync(projectIndexPath, 'utf-8');
+    expect(content).toContain(`# [[${projectName}]]`);
+    expect(content).toContain('[[features]]');
+    expect(content).toContain('[[errors]]');
+    expect(content).toContain('[[discovery]]');
+    expect(content).toContain('[[plans]]');
+  });
+
   it('should create vault index with project entry', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
@@ -330,6 +345,9 @@ describe('legacy artifact scanning', () => {
     expect(content).toContain('status: active');
     expect(content).toContain('[[user-auth]]');
     expect(content).toContain('[[plan_user_auth_v1]]');
+    // Should link back to project
+    const projectName = tempDir.split('/').pop() || '';
+    expect(content).toContain(`**Project**: [[${projectName}]]`);
   });
 
   it('should create brain entries from existing discovery docs', async () => {

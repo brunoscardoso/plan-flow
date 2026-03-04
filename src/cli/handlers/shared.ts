@@ -355,6 +355,25 @@ function registerVault(
       }
     }
 
+    // Create project index file (the project node in Obsidian's graph)
+    const projectIndexPath = join(projectDir, `${projectName}.md`);
+    if (!existsSync(projectIndexPath) || options.force) {
+      const linksList = VAULT_PROJECT_LINKS
+        .map((l) => `- [[${l.name}]]`)
+        .join('\n');
+      const projectIndexContent = [
+        `# [[${projectName}]]`,
+        '',
+        `**Path**: \`${resolve(target)}\``,
+        '',
+        '## Contents',
+        '',
+        linksList,
+        '',
+      ].join('\n');
+      writeFileSync(projectIndexPath, projectIndexContent, 'utf-8');
+    }
+
     if (createdCount > 0) {
       log.success(`Registered vault project: ${projectName} (${createdCount} links)`);
     } else if (result.updated.length > 0) {
@@ -405,7 +424,8 @@ function createBrainFeatureEntry(
   brainDir: string,
   featureName: string,
   artifacts: { path: string; type: string; title: string }[],
-  status: string
+  status: string,
+  projectName: string
 ): string | null {
   const featureFile = join(brainDir, 'features', `${featureName}.md`);
 
@@ -424,6 +444,7 @@ function createBrainFeatureEntry(
     '',
     `# [[${featureName}]]`,
     '',
+    `**Project**: [[${projectName}]]`,
     `**Status**: ${status}`,
     `**Created**: ${today}`,
     `**Last Updated**: ${today}`,
@@ -596,7 +617,8 @@ function scanLegacyArtifacts(
       brainDir,
       featureName,
       artifacts,
-      overallStatus
+      overallStatus,
+      getProjectName(target)
     );
 
     if (created) {
