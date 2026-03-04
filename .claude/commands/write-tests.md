@@ -69,6 +69,10 @@ RELATED COMMANDS:
 
 ---
 
+> **MODE: Dev**
+> Code first, test after. Prefer Edit/Write/Bash tools. Run build/test after changes.
+> Move efficiently. Verify with tests, not exploration.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |

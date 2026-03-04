@@ -51,6 +51,35 @@ Use these modifiers to calculate the complexity score for each phase:
 
 ---
 
+## Model Routing
+
+Map complexity scores to recommended models for cost-effective execution:
+
+| Score | Level | Recommended Model | Rationale |
+|-------|-------|-------------------|-----------|
+| 0-4 | Trivial/Low | Haiku | Fast, cost-effective for mechanical and straightforward changes |
+| 5-7 | Medium | Sonnet | Good balance of speed and reasoning for moderate complexity |
+| 8-10 | High/Very High | Opus | Deep reasoning needed for complex decisions and multi-system work |
+
+**This is advisory only** — display the recommended model before each phase or phase group. The user decides whether to switch models.
+
+### Phase Format with Model Hint
+
+When creating plans, include an optional Model field for phases with clear routing:
+
+```markdown
+### Phase 3: Auth Middleware
+
+**Scope**: Implement authentication middleware
+**Complexity**: 8/10
+**Model**: Opus (recommended)
+
+- [ ] Task 1
+- [ ] Task 2
+```
+
+---
+
 ## Aggregation Rules
 
 1. **Can aggregate** phases when their combined complexity ≤ 6

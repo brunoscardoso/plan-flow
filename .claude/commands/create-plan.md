@@ -64,6 +64,10 @@ RELATED COMMANDS:
 > - **If YES**: Autopilot is ON. After creating the plan and getting user approval, **auto-proceed** to `/execute-plan` with the plan output. Do NOT wait for manual invocation.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -292,6 +296,16 @@ When executing this command:
 | `complexity-scoring.md`    | Complexity scoring system         |
 | `/discovery-plan` command   | Run discovery first               |
 | `/execute-plan` command     | Execute the created plan          |
+
+---
+
+## Compaction Suggestion
+
+After plan creation completes, suggest context cleanup:
+
+> Plan created. Consider running `/compact` before execution to maximize available context for the implementation phases.
+
+Only suggest if the plan has > 3 phases. Skip if autopilot is ON.
 
 ---
 

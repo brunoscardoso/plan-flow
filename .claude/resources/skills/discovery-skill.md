@@ -96,6 +96,20 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 
 ---
 
+### Step 1.5: Search for Existing Solutions
+
+**Before asking questions**, check if the problem is already solved:
+
+1. **Project code search**: Use Grep/Glob to find existing implementations, similar patterns, or reusable code in the codebase
+2. **Package registry search**: Use WebSearch to check npm/PyPI for established libraries that address the need
+3. **Document findings**: Include an "Existing Solutions Analysis" section in the discovery document
+
+**Decision rule**: If an existing library covers >80% of the need, recommend using it. If <80%, note coverage and gaps.
+
+**If WebSearch unavailable**: Skip registry search, note limitation, proceed with project code search only.
+
+---
+
 ### Step 2: Ask Clarifying Questions
 
 Ask questions about gaps identified in documents and unclear requirements.

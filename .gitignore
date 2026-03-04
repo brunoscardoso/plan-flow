@@ -36,3 +36,10 @@ flow/reviewed-pr/
 
 # Local settings (keep template)
 .claude/settings.local.json
+
+# >>> plan-flow
+flow/
+.plan-flow.yml
+.plan.flow.env
+.cursor/
+# <<< plan-flow

@@ -96,12 +96,15 @@ Create phases following these guidelines:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
+**Model**: [Haiku/Sonnet/Opus] (recommended)
 
 - [ ] Task 1
 - [ ] Task 2
 
 **Build Verification**: Run `npm run build`
 ```
+
+**Model Routing**: Assign recommended models per phase based on complexity (see `.claude/resources/core/complexity-scoring.md` Model Routing section). This is advisory — 0-4 → Haiku, 5-7 → Sonnet, 8-10 → Opus.
 
 **Standard Phase Order**:
 

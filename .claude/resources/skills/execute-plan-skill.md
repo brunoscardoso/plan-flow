@@ -230,7 +230,22 @@ Mark completed tasks in the plan file:
 - [x] Task 2
 ```
 
+**Phase Checkpoint (Opt-In)**: After marking tasks complete, offer:
+
+> Phase N verified. Create a checkpoint commit? This enables rollback via `git reset --hard <sha>` if needed.
+
+- If user accepts: `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
+- Log to `flow/state/checkpoints.log`: `timestamp | phase N | sha | tests-status`
+- If user declines: continue without committing
+- **Never auto-commit** — always ask first
+
 Then continue to the next phase (NO BUILD HERE).
+
+**Compaction Boundary**: If the **next** phase has complexity >= 7, suggest:
+
+> Phase N complete. The next phase (complexity: X/10) is high-complexity. Consider running `/compact` to free context before proceeding.
+
+**Never** suggest compaction during active phase execution — only between phases. Skip if autopilot is ON.
 
 ---
 
@@ -253,22 +268,51 @@ The Tests phase is **always executed separately**, regardless of complexity scor
 
 After ALL phases are complete (including Tests phase):
 
-1. **Run final verification**:
+1. **Run each verification check independently** (a build failure should NOT skip type/test checks):
 
 ```bash
-npm run build && npm run test
+npm run build
+npm run test
 ```
 
-2. **Handle failures**:
+2. **Output structured verification report**:
+
+```
+VERIFICATION: [PASS/FAIL]
+Build:    [OK/FAIL - details]
+Types:    [OK/X errors]
+Tests:    [X/Y passed]
+Ready for PR: [YES/NO]
+```
+
+3. **Append to plan file** under a `## Verification Report` section with the structured output above.
+
+4. **Handle failures**:
    - If build fails: Fix the issue, re-run verification
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes
 
-3. **Present summary** of completed work
+---
 
-4. **List all key changes** made
+### Step 7.5: Cleanup Pass (De-Sloppify)
 
-5. **Ask if the plan should be archived**:
+After build/tests pass, run an automatic cleanup pass:
+
+1. **Remove only these patterns**: debug console.logs, commented-out code, language-behavior tests, redundant type checks, unused imports
+2. **Run full test suite** after cleanup
+3. **If ANY test fails** → revert ALL cleanup changes
+4. **Report** cleanup results: items removed by category
+5. **Skip** if user requests it
+
+---
+
+### Step 8: Archive and Complete
+
+1. **Present summary** of completed work
+
+2. **List all key changes** made
+
+3. **Ask if the plan should be archived**:
 
 ```bash
 mv flow/plans/plan_feature_name_v1.md flow/archive/

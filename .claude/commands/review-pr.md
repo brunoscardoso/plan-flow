@@ -65,6 +65,10 @@ RELATED COMMANDS:
 
 ---
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -96,6 +100,13 @@ The skill will:
 3. Load review patterns
 4. Analyze code changes
 5. Generate review document
+
+**Confidence-Based Filtering Rules**:
+- Each finding must include a **Confidence** percentage (e.g., 85%)
+- **Only include findings with >80% confidence** in the main Findings section
+- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
+- Findings below 80% confidence go in a collapsed "Low-Confidence Notes" section
+- Include an **Approval Recommendation**: APPROVE (no critical/major), WARNING (major only), BLOCK (critical found)
 
 See: `.claude/resources/skills/review-pr-skill.md`
 

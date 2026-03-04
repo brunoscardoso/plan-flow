@@ -79,6 +79,10 @@ RELATED COMMANDS:
 > - **If YES**: Autopilot is ON. After completing execution (build + test pass), **auto-proceed** to `/review-code`. Do NOT stop and wait.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
+> **MODE: Dev**
+> Code first, test after. Prefer Edit/Write/Bash tools. Run build/test after changes.
+> Move efficiently. Verify with tests, not exploration.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -137,6 +141,18 @@ Please run this command and let me know when it's complete.
 **DO NOT run `npm run build` after each phase or group.**
 
 **`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+
+**Structured Verification Format**: When running final verification, output:
+
+```
+VERIFICATION: [PASS/FAIL]
+Build:    [OK/FAIL - details]
+Types:    [OK/X errors]
+Tests:    [X/Y passed]
+Ready for PR: [YES/NO]
+```
+
+Append this to the plan file under `## Verification Report`.
 
 ---
 
@@ -310,6 +326,31 @@ When executing this command:
 | `plan-mode-tool.md`       | Plan mode switching instructions  |
 | `/create-plan` command     | Create a plan first               |
 | `/discovery-plan` command  | Run discovery before planning     |
+
+---
+
+## Cleanup Pass (De-Sloppify)
+
+After ALL phases complete and build/tests pass, run an automatic cleanup pass to remove development artifacts. This runs before code review (in autopilot) or before archive.
+
+### Target Patterns (ONLY remove these)
+
+1. **Debug statements**: `console.log`, `console.debug`, `console.warn` used for debugging (not intentional application logging)
+2. **Commented-out code**: Code blocks that are commented out (not documentation comments or TODO/FIXME markers)
+3. **Language-behavior tests**: Test assertions that verify language or framework behavior rather than business logic (e.g., testing that `typeof` returns expected values, testing that `Array.map` works)
+4. **Redundant type checks**: Runtime type checks that duplicate compile-time TypeScript guarantees (e.g., `if (typeof x === 'string')` when `x` is already typed as `string`)
+5. **Unused imports**: Import statements added during development that are no longer referenced
+
+### Safety Protocol
+
+1. Make all cleanup changes
+2. Run the full test suite (`npm run test`)
+3. **If ANY test fails** → revert ALL cleanup changes and report: "Cleanup reverted — {N} test(s) failed after removing {description}"
+4. **If all tests pass** → report: "Cleanup: removed {X} debug statements, {Y} commented blocks, {Z} redundant tests. All tests passing."
+
+### Skip Option
+
+The cleanup pass runs by default but can be skipped. If the user requests skipping, proceed directly to archive/review.
 
 ---
 

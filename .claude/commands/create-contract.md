@@ -55,6 +55,10 @@ RELATED COMMANDS:
 
 ---
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -241,6 +245,16 @@ When executing this command:
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/discovery-plan` command      | Create discovery from contract         |
 | `/create-plan` command         | Create plan from discovery             |
+
+---
+
+## Compaction Suggestion
+
+After contract creation completes, suggest context cleanup if the contract was complex (> 5 endpoints):
+
+> Contract created. Consider running `/compact` to free context before the next task.
+
+Skip if autopilot is ON.
 
 ---
 
