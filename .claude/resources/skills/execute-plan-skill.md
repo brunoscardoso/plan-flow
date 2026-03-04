@@ -242,14 +242,15 @@ Mark completed tasks in the plan file:
 - [x] Task 2
 ```
 
-**Phase Checkpoint (Opt-In)**: After marking tasks complete, offer:
+**Phase Checkpoint**: After marking tasks complete, create a checkpoint commit:
 
-> Phase N verified. Create a checkpoint commit? This enables rollback via `git reset --hard <sha>` if needed.
-
-- If user accepts: `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
+- **Autopilot mode ON** (`flow/.autopilot` exists): Auto-commit without asking:
+  `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
+- **Autopilot mode OFF**: Ask the user first:
+  > Phase N verified. Create a checkpoint commit? This enables rollback via `git reset --hard <sha>` if needed.
+  - If user accepts: commit as above
+  - If user declines: continue without committing
 - Log to `flow/state/checkpoints.log`: `timestamp | phase N | sha | tests-status`
-- If user declines: continue without committing
-- **Never auto-commit** — always ask first
 
 Then continue to the next phase (NO BUILD HERE).
 

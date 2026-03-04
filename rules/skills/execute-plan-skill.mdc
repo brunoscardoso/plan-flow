@@ -236,6 +236,13 @@ Mark completed tasks in the plan file:
 - [x] Task 2
 ```
 
+**Phase Checkpoint**: After marking tasks complete, create a checkpoint commit:
+
+- **Autopilot mode ON** (`flow/.autopilot` exists): Auto-commit without asking:
+  `git add -A && git commit -m "planflow: phase N - [phase-name] [VERIFIED]"`
+- **Autopilot mode OFF**: Ask the user first before committing
+- Log to `flow/state/checkpoints.log`: `timestamp | phase N | sha | tests-status`
+
 Then continue to the next phase (NO BUILD HERE).
 
 ---
