@@ -35,6 +35,8 @@ Creates: `flow/discovery/discovery_<topic>_v<version>.md`
 ```markdown
 # Discovery: [Topic]
 
+**Project**: [[{project-name}]]
+
 ## Context
 Why this discovery is needed
 

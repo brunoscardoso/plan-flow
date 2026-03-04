@@ -216,15 +216,20 @@ describe('vault registration', () => {
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(8);
-    expect(config.colorGroups[0].query).toBe('path:patterns');
-    expect(config.colorGroups[1].query).toBe('path:features');
-    expect(config.colorGroups[2].query).toBe('path:errors');
-    expect(config.colorGroups[3].query).toBe('path:decisions');
-    expect(config.colorGroups[4].query).toBe('path:sessions');
-    expect(config.colorGroups[5].query).toBe('path:discovery');
-    expect(config.colorGroups[6].query).toBe('path:plans');
-    expect(config.colorGroups[7].query).toBe('path:contracts');
+    expect(config.colorGroups).toHaveLength(12);
+    const queries = config.colorGroups.map((g: { query: string }) => g.query);
+    expect(queries).toContain('path:patterns');
+    expect(queries).toContain('path:features');
+    expect(queries).toContain('path:errors');
+    expect(queries).toContain('path:decisions');
+    expect(queries).toContain('path:sessions');
+    expect(queries).toContain('path:discovery');
+    expect(queries).toContain('path:plans');
+    expect(queries).toContain('path:contracts');
+    expect(queries).toContain('path:archive');
+    expect(queries).toContain('path:reviewed-code');
+    expect(queries).toContain('path:reviewed-pr');
+    expect(queries).toContain('path:references');
     expect(config['collapse-color']).toBe(false);
     expect(config['collapse-filter']).toBe(true);
   });
@@ -242,7 +247,7 @@ describe('vault registration', () => {
     expect(stat.isSymbolicLink()).toBe(false);
 
     // Check individual symlinks
-    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts'];
+    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references'];
     for (const linkName of expectedLinks) {
       const linkPath = join(projectDir, linkName);
       expect(existsSync(linkPath)).toBe(true);

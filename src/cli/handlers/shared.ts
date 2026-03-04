@@ -142,6 +142,9 @@ const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'plans', subpath: 'plans' },
   { name: 'archive', subpath: 'archive' },
   { name: 'contracts', subpath: 'contracts' },
+  { name: 'reviewed-code', subpath: 'reviewed-code' },
+  { name: 'reviewed-pr', subpath: 'reviewed-pr' },
+  { name: 'references', subpath: 'references' },
 ];
 
 /**
@@ -266,14 +269,18 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
     'showOrphans': true,
     'collapse-color': false,
     'colorGroups': [
-      { query: 'path:patterns', color: { a: 1, rgb: 16771584 } },    // yellow
-      { query: 'path:features', color: { a: 1, rgb: 10040217 } },    // purple
-      { query: 'path:errors', color: { a: 1, rgb: 16007990 } },      // red
-      { query: 'path:decisions', color: { a: 1, rgb: 2201331 } },    // blue
-      { query: 'path:sessions', color: { a: 1, rgb: 10395294 } },    // gray
-      { query: 'path:discovery', color: { a: 1, rgb: 16747520 } },   // orange
-      { query: 'path:plans', color: { a: 1, rgb: 5025616 } },        // green
-      { query: 'path:contracts', color: { a: 1, rgb: 52428 } },      // teal
+      { query: 'path:patterns', color: { a: 1, rgb: 16771584 } },       // yellow
+      { query: 'path:features', color: { a: 1, rgb: 10040217 } },       // purple
+      { query: 'path:errors', color: { a: 1, rgb: 16007990 } },         // red
+      { query: 'path:decisions', color: { a: 1, rgb: 2201331 } },       // blue
+      { query: 'path:sessions', color: { a: 1, rgb: 10395294 } },       // gray
+      { query: 'path:discovery', color: { a: 1, rgb: 16747520 } },      // orange
+      { query: 'path:plans', color: { a: 1, rgb: 5025616 } },           // green
+      { query: 'path:contracts', color: { a: 1, rgb: 52428 } },         // teal
+      { query: 'path:archive', color: { a: 1, rgb: 8421504 } },         // dark gray
+      { query: 'path:reviewed-code', color: { a: 1, rgb: 16761035 } },  // pink
+      { query: 'path:reviewed-pr', color: { a: 1, rgb: 14381056 } },    // coral
+      { query: 'path:references', color: { a: 1, rgb: 9868950 } },      // sage
     ],
     'collapse-display': true,
     'collapse-forces': false,
@@ -544,11 +551,19 @@ function scanLegacyArtifacts(
   const result: CopyResult = { created: [], skipped: [], updated: [] };
   const brainDir = join(target, 'flow', 'brain');
 
-  // Directories to scan
+  // Directories to scan for brain feature extraction
   const scanDirs = [
     { dir: join(target, 'flow', 'archive'), status: 'archived' },
     { dir: join(target, 'flow', 'discovery'), status: 'active' },
     { dir: join(target, 'flow', 'plans'), status: 'active' },
+  ];
+
+  // All directories to inject [[project-name]] into existing .md files
+  const tagDirs = [
+    ...scanDirs.map((s) => s.dir),
+    join(target, 'flow', 'contracts'),
+    join(target, 'flow', 'reviewed-code'),
+    join(target, 'flow', 'reviewed-pr'),
   ];
 
   // Collect artifacts grouped by feature
@@ -592,7 +607,7 @@ function scanLegacyArtifacts(
   const projectName = getProjectName(target);
   const projectTag = `**Project**: [[${projectName}]]`;
 
-  for (const { dir } of scanDirs) {
+  for (const dir of tagDirs) {
     if (!existsSync(dir)) continue;
     try {
       const files = readdirSync(dir).filter((f) => f.endsWith('.md') && f !== '.gitkeep');

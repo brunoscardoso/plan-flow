@@ -35,6 +35,7 @@ Creates: `flow/contracts/<service>_contract.md`
 ```markdown
 # Contract: [Service Name]
 
+**Project**: [[{project-name}]]
 Source: [URL]
 
 ## Overview

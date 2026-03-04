@@ -46,6 +46,8 @@ Creates: `flow/reviewed-code/review_<scope>.md`
 ```markdown
 # Code Review: [Scope]
 
+**Project**: [[{project-name}]]
+
 ## Review Information
 | Field | Value |
 |-------|-------|
