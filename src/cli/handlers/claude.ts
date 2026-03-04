@@ -104,7 +104,8 @@ function escapeRegExp(str: string): string {
 
 export async function initClaude(
   target: string,
-  options: CopyOptions
+  options: CopyOptions,
+  stackProfile?: import('../utils/detect-stack.js').StackProfile
 ): Promise<CopyResult> {
   const result: CopyResult = { created: [], skipped: [], updated: [] };
   const packageRoot = getPackageRoot();
@@ -211,12 +212,28 @@ export async function initClaude(
   }
 
   // 4. Copy .claude/resources/ (on-demand reference files)
+  //    Filter language patterns based on detected stack
   const resourcesSrc = join(packageRoot, '.claude', 'resources');
   const resourcesDest = join(target, '.claude', 'resources');
 
   if (existsSync(resourcesSrc)) {
     ensureDir(resourcesDest);
-    const resourcesResult = copyDir(resourcesSrc, resourcesDest, options);
+    const resourceCopyOptions = { ...options };
+    if (stackProfile) {
+      const { getRelevantLanguagePatterns } = await import('../utils/detect-stack.js');
+      const relevant = getRelevantLanguagePatterns(stackProfile);
+      if (relevant) {
+        // Build exclude list for language files NOT in detected stack
+        const allLangPrefixes = ['typescript', 'python', 'go', 'rust'];
+        const excludePatterns = allLangPrefixes
+          .filter((p) => !relevant.includes(p))
+          .map((p) => `${p}-patterns`);
+        if (excludePatterns.length > 0) {
+          resourceCopyOptions.exclude = excludePatterns;
+        }
+      }
+    }
+    const resourcesResult = copyDir(resourcesSrc, resourcesDest, resourceCopyOptions);
     result.created.push(...resourcesResult.created);
     result.skipped.push(...resourcesResult.skipped);
     result.updated.push(...resourcesResult.updated);

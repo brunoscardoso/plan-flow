@@ -63,9 +63,10 @@ data:
 
 ### Sessions (`flow/brain/sessions/`)
 
-- File naming: `YYYY-MM-DD.md`
-- Append-only daily log of activities
-- Auto-created on first brain entry of the day
+- File naming: `{YYYY-MM-DD}_{HH-MM}_{6-char-hex}.md` (per-session, not per-day)
+- Find current session: read `flow/state/last-session.json` for `sessionId`, or find most recent `.md` in `flow/brain/sessions/`
+- Append skills run entries to the current session file
+- Session files are auto-created by the `session-end` hook with YAML frontmatter
 
 ---
 

@@ -100,7 +100,7 @@ describe('mergeHooks', () => {
       'echo "user hook"'
     );
     expect(result.hooks!.PreCompact[1].hooks[0].command).toContain(
-      'pre-compact.js'
+      'pre-compact.cjs'
     );
   });
 

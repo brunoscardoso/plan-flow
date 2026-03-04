@@ -193,9 +193,11 @@ Wait for user confirmation before proceeding.
 1. **Auto-switch to Plan mode** - Call `SwitchMode` tool
 2. **Present phase details** - Show scope, tasks, and approach
 3. **Wait for approval** - Get user confirmation
-4. **Implement** - Execute the phase following approved approach
-5. **Update progress** - Mark tasks complete in plan file
-6. **Continue to next phase** - NO BUILD between phases
+4. **Run pre-phase hooks** - If `flow/hooks.json` exists, run pre-phase hooks (see Phase Lifecycle Hooks section)
+5. **Implement** - Execute the phase following approved approach
+6. **Update progress** - Mark tasks complete in plan file
+7. **Run post-phase hooks** - If `flow/hooks.json` exists, run post-phase hooks
+8. **Continue to next phase** - NO BUILD between phases
 
 **Phase Presentation Template**:
 
@@ -238,6 +240,28 @@ Then continue to the next phase (NO BUILD HERE).
 
 ---
 
+### Phase Lifecycle Hooks
+
+Users can define custom shell commands that run at phase boundaries by creating `flow/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "pre-phase": [{ "command": "echo 'Starting phase $PLANFLOW_PHASE'" }],
+    "post-phase": [{ "command": "npm run lint", "fatal": true }],
+    "on-verification-fail": [{ "command": "npm run lint:fix" }]
+  }
+}
+```
+
+**Hook Events**: `pre-phase` (before implementation), `post-phase` (after completion), `on-verification-fail` (when build/tests fail).
+
+**How to invoke**: `runPhaseHooks(event, context)` from `src/cli/utils/phase-hooks.ts`. If `flow/hooks.json` doesn't exist, hooks are silently skipped. Non-fatal hooks warn on failure; `"fatal": true` hooks stop execution. 30s default timeout. Results logged to `flow/state/hooks.log`.
+
+**Env vars**: `PLANFLOW_PHASE`, `PLANFLOW_PHASE_NAME`, `PLANFLOW_PLAN`, `PLANFLOW_TARGET_DIR`, `PLANFLOW_EVENT`, `PLANFLOW_TOTAL_PHASES`.
+
+---
+
 ### Step 6: Handle Tests Phase
 
 The Tests phase is **always executed separately**, regardless of complexity score:
@@ -264,6 +288,7 @@ npm run build && npm run test
 ```
 
 2. **Handle failures**:
+   - Run `on-verification-fail` hooks (if `flow/hooks.json` exists) before attempting fixes
    - If build fails: Fix the issue, re-run verification
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes

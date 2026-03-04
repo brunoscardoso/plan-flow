@@ -89,4 +89,88 @@ program
     await runValidate(options);
   });
 
+const sessions = program
+  .command('sessions')
+  .description('Manage session history (list, search, show, prune)');
+
+sessions
+  .command('list')
+  .description('List sessions with optional filters')
+  .option('--limit <n>', 'Max results per page', '10')
+  .option('--offset <n>', 'Skip first N results', '0')
+  .option('--feature <name>', 'Filter by feature name')
+  .option('--skill <name>', 'Filter by skill name')
+  .option('--from <date>', 'Filter from date (YYYY-MM-DD)')
+  .option('--to <date>', 'Filter to date (YYYY-MM-DD)')
+  .option('--json', 'Output as JSON')
+  .option(
+    '--target <dir>',
+    'Target directory',
+    process.cwd()
+  )
+  .action(async (options) => {
+    const { runSessionsList } = await import('./commands/sessions.js');
+    await runSessionsList({
+      target: options.target,
+      limit: parseInt(options.limit, 10),
+      offset: parseInt(options.offset, 10),
+      feature: options.feature,
+      skill: options.skill,
+      from: options.from,
+      to: options.to,
+      json: options.json,
+    });
+  });
+
+sessions
+  .command('search <query>')
+  .description('Full-text search across session content')
+  .option('--limit <n>', 'Max results', '10')
+  .option('--json', 'Output as JSON')
+  .option(
+    '--target <dir>',
+    'Target directory',
+    process.cwd()
+  )
+  .action(async (query, options) => {
+    const { runSessionsSearch } = await import('./commands/sessions.js');
+    await runSessionsSearch(query, {
+      target: options.target,
+      limit: parseInt(options.limit, 10),
+      json: options.json,
+    });
+  });
+
+sessions
+  .command('show <session-id>')
+  .description('Display full content of a session')
+  .option(
+    '--target <dir>',
+    'Target directory',
+    process.cwd()
+  )
+  .action(async (sessionId, options) => {
+    const { runSessionsShow } = await import('./commands/sessions.js');
+    await runSessionsShow(sessionId, { target: options.target });
+  });
+
+sessions
+  .command('prune')
+  .description('Remove sessions before a date')
+  .requiredOption('--before <date>', 'Delete sessions before this date (YYYY-MM-DD)')
+  .option('--dry-run', 'Show what would be deleted without deleting')
+  .option(
+    '--target <dir>',
+    'Target directory',
+    process.cwd()
+  )
+  .action(async (options) => {
+    const { runSessionsPrune } = await import('./commands/sessions.js');
+    await runSessionsPrune({
+      target: options.target,
+      before: options.before,
+      dryRun: options.dryRun,
+    });
+  });
+
 program.parse();

@@ -150,9 +150,9 @@ describe('initClaude', () => {
 
     const hooksDir = join(tempDir, 'scripts', 'hooks');
     expect(existsSync(hooksDir)).toBe(true);
-    expect(existsSync(join(hooksDir, 'pre-compact.js'))).toBe(true);
-    expect(existsSync(join(hooksDir, 'session-start.js'))).toBe(true);
-    expect(existsSync(join(hooksDir, 'session-end.js'))).toBe(true);
+    expect(existsSync(join(hooksDir, 'pre-compact.cjs'))).toBe(true);
+    expect(existsSync(join(hooksDir, 'session-start.cjs'))).toBe(true);
+    expect(existsSync(join(hooksDir, 'session-end.cjs'))).toBe(true);
   });
 
   it('should install hooks in .claude/settings.json', async () => {

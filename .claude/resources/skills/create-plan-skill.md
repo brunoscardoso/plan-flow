@@ -165,7 +165,7 @@ Create the plan markdown file:
 
 After completing the plan document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`create-plan`), feature name, status, and files changed count
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`create-plan`), feature name, status, and files changed count
 2. **Feature file** (`flow/brain/features/{feature-name}.md`): Create if new feature (use feature template), or append Timeline entry if exists
 3. **Decisions** (`flow/brain/decisions/{decision-name}.md`): Create if the user chose between alternative approaches or architectures during planning
 4. **Index** (`flow/brain/index.md`): Add new feature/decision entries. Enforce caps (5 errors, 3 decisions)

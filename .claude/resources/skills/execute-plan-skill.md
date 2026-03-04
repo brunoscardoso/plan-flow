@@ -199,9 +199,11 @@ Wait for user confirmation before proceeding.
 1. **Auto-switch to Plan mode** - Call `SwitchMode` tool
 2. **Present phase details** - Show scope, tasks, and approach
 3. **Wait for approval** - Get user confirmation
-4. **Implement** - Execute the phase following approved approach
-5. **Update progress** - Mark tasks complete in plan file
-6. **Continue to next phase** - NO BUILD between phases
+4. **Run pre-phase hooks** - If `flow/hooks.json` exists, run pre-phase hooks (see Phase Lifecycle Hooks below)
+5. **Implement** - Execute the phase following approved approach
+6. **Update progress** - Mark tasks complete in plan file
+7. **Run post-phase hooks** - If `flow/hooks.json` exists, run post-phase hooks
+8. **Continue to next phase** - NO BUILD between phases
 
 **Phase Presentation Template**:
 
@@ -259,6 +261,55 @@ Then continue to the next phase (NO BUILD HERE).
 
 ---
 
+### Phase Lifecycle Hooks
+
+Users can define custom shell commands that run at phase boundaries by creating `flow/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "pre-phase": [
+      { "command": "echo 'Starting phase $PLANFLOW_PHASE'" }
+    ],
+    "post-phase": [
+      { "command": "npm run lint", "fatal": true }
+    ],
+    "on-verification-fail": [
+      { "command": "npm run lint:fix" }
+    ]
+  }
+}
+```
+
+**Hook Events**:
+- `pre-phase`: Runs after plan mode approval, before implementation begins
+- `post-phase`: Runs after phase tasks are completed and progress is updated
+- `on-verification-fail`: Runs when final build/test verification fails (Step 7)
+
+**How to invoke**: Import and call `runPhaseHooks` from `src/cli/utils/phase-hooks.ts`:
+```typescript
+import { runPhaseHooks } from '../utils/phase-hooks.js';
+
+runPhaseHooks('pre-phase', {
+  phase: currentPhaseNumber,
+  phaseName: 'Phase Name',
+  plan: 'plan_feature_v1',
+  targetDir: target,
+  totalPhases: totalPhaseCount,
+});
+```
+
+**Behavior**:
+- If `flow/hooks.json` doesn't exist, hooks are silently skipped (no error)
+- Non-fatal hooks (default) log a warning on failure but don't block execution
+- Hooks with `"fatal": true` throw an error on failure, stopping execution
+- Each hook has a 30s default timeout (configurable via `"timeout": 60000`)
+- Hook results are logged to `flow/state/hooks.log`
+
+**Environment variables** passed to hook commands: `PLANFLOW_PHASE`, `PLANFLOW_PHASE_NAME`, `PLANFLOW_PLAN`, `PLANFLOW_TARGET_DIR`, `PLANFLOW_EVENT`, `PLANFLOW_TOTAL_PHASES`
+
+---
+
 ### Step 6: Handle Tests Phase
 
 The Tests phase is **always executed separately**, regardless of complexity score:
@@ -293,6 +344,7 @@ Ready for PR: [YES/NO]
 3. **Append to plan file** under a `## Verification Report` section with the structured output above.
 
 4. **Handle failures**:
+   - Run `on-verification-fail` hooks (if `flow/hooks.json` exists) before attempting fixes
    - If build fails: Fix the issue, re-run verification
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes
@@ -329,7 +381,7 @@ mv flow/plans/plan_feature_name_v1.md flow/archive/
 
 After all phases complete and verification passes, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`execute-plan`), feature name, status, and files changed count
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`execute-plan`), feature name, status, and files changed count
 2. **Feature file** (`flow/brain/features/{feature-name}.md`): Create if new feature (use feature template), or append Timeline entry if exists
 3. **Errors** (`flow/brain/errors/{error-name}.md`): Create for each non-trivial error encountered during build/test failures and how it was resolved
 4. **Decisions** (`flow/brain/decisions/{decision-name}.md`): Create if significant implementation decisions were made during execution

@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "pre-phase": [],
+    "post-phase": [],
+    "on-verification-fail": []
+  }
+}

@@ -9,11 +9,13 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { CopyOptions, CopyResult } from '../types.js';
 import { copyDir, getPackageRoot, ensureDir } from '../utils/files.js';
+import { generateWrapperScripts } from '../utils/platform-hooks.js';
 import * as log from '../utils/logger.js';
 
 export async function initCursor(
   target: string,
-  options: CopyOptions
+  options: CopyOptions,
+  stackProfile?: import('../utils/detect-stack.js').StackProfile
 ): Promise<CopyResult> {
   const result: CopyResult = { created: [], skipped: [], updated: [] };
   const packageRoot = getPackageRoot();
@@ -43,12 +45,27 @@ export async function initCursor(
   }
 
   // 2. Copy rules to .cursor/rules/
+  //    Filter language patterns based on detected stack
   const rulesSrc = join(packageRoot, 'rules');
   const rulesDest = join(target, '.cursor', 'rules');
 
   if (existsSync(rulesSrc)) {
     ensureDir(rulesDest);
-    const rulesResult = copyDir(rulesSrc, rulesDest, options);
+    const rulesCopyOptions = { ...options };
+    if (stackProfile) {
+      const { getRelevantLanguagePatterns } = await import('../utils/detect-stack.js');
+      const relevant = getRelevantLanguagePatterns(stackProfile);
+      if (relevant) {
+        const allLangPrefixes = ['typescript', 'python', 'go', 'rust'];
+        const excludePatterns = allLangPrefixes
+          .filter((p) => !relevant.includes(p))
+          .map((p) => `${p}-patterns`);
+        if (excludePatterns.length > 0) {
+          rulesCopyOptions.exclude = excludePatterns;
+        }
+      }
+    }
+    const rulesResult = copyDir(rulesSrc, rulesDest, rulesCopyOptions);
     result.created.push(...rulesResult.created);
     result.skipped.push(...rulesResult.skipped);
     result.updated.push(...rulesResult.updated);
@@ -64,6 +81,18 @@ export async function initCursor(
     }
   } else {
     log.warn('No rules found in package. Skipping rules setup.');
+  }
+
+  // 3. Generate wrapper scripts for session hooks (manual fallback)
+  const wrapperResult = generateWrapperScripts(target);
+  result.created.push(...wrapperResult.created);
+  result.skipped.push(...wrapperResult.skipped);
+
+  for (const f of wrapperResult.created) {
+    log.success(`Created ${f.replace(target + '/', '')}`);
+  }
+  if (wrapperResult.created.length > 0) {
+    log.info('Session hook scripts installed. Run manually: bash scripts/plan-flow/start-session.sh');
   }
 
   return result;

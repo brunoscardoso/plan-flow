@@ -13,6 +13,7 @@ import { initOpenClaw } from '../handlers/openclaw.js';
 import { initClawHub } from '../handlers/clawhub.js';
 import { initCodex } from '../handlers/codex.js';
 import { initShared } from '../handlers/shared.js';
+import { detectStack, formatStackSummary } from '../utils/detect-stack.js';
 
 function printBanner(): void {
   log.header('Plan-Flow Setup');
@@ -141,6 +142,14 @@ export async function runInit(options: InitOptions): Promise<void> {
 
   validateTarget(target);
 
+  // Detect tech stack
+  const stackProfile = detectStack(target);
+  if (stackProfile.languages.length > 0) {
+    log.success(formatStackSummary(stackProfile));
+  } else {
+    log.warn('No languages detected. All language patterns will be installed.');
+  }
+
   // Detect platforms from flags or prompt interactively
   let platforms = detectPlatforms(options);
   if (!platforms) {
@@ -163,10 +172,10 @@ export async function runInit(options: InitOptions): Promise<void> {
     let result;
     switch (platform) {
       case 'claude':
-        result = await initClaude(target, { force });
+        result = await initClaude(target, { force }, stackProfile);
         break;
       case 'cursor':
-        result = await initCursor(target, { force });
+        result = await initCursor(target, { force }, stackProfile);
         break;
       case 'openclaw':
         result = await initOpenClaw(target, { force });
@@ -182,7 +191,7 @@ export async function runInit(options: InitOptions): Promise<void> {
     results.push({ platform, result });
   }
 
-  // Run shared handler (flow directories, .gitignore)
+  // Run shared handler (flow directories, .gitignore, tech-foundation)
   log.header('Setting up shared resources...');
   const sharedResult = await initShared(target, { force }, platforms);
   results.push({ platform: 'shared', result: sharedResult });

@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import type { CopyOptions, CopyResult } from '../types.js';
 import { copyDir, getPackageRoot, ensureDir } from '../utils/files.js';
+import { generateWrapperScripts } from '../utils/platform-hooks.js';
 import * as log from '../utils/logger.js';
 
 const MARKER_START = '<!-- plan-flow-start -->';
@@ -125,6 +126,18 @@ export async function initCodex(
   result.created.push(...mdResult.created);
   result.skipped.push(...mdResult.skipped);
   result.updated.push(...mdResult.updated);
+
+  // 3. Generate wrapper scripts for session hooks (manual fallback)
+  const wrapperResult = generateWrapperScripts(target);
+  result.created.push(...wrapperResult.created);
+  result.skipped.push(...wrapperResult.skipped);
+
+  for (const f of wrapperResult.created) {
+    log.success(`Created ${f.replace(target + '/', '')}`);
+  }
+  if (wrapperResult.created.length > 0) {
+    log.info('Session hook scripts installed. Run manually: bash scripts/plan-flow/start-session.sh');
+  }
 
   return result;
 }

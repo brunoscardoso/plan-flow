@@ -79,6 +79,11 @@ export function copyDir(
   const entries = readdirSync(src);
 
   for (const entry of entries) {
+    // Skip entries matching exclude patterns
+    if (options.exclude?.some((pattern) => entry.includes(pattern))) {
+      continue;
+    }
+
     const srcPath = join(src, entry);
     const destPath = join(dest, entry);
     const stat = statSync(srcPath);

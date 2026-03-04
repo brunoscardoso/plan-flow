@@ -15,6 +15,7 @@ export interface InitOptions {
 
 export interface CopyOptions {
   force: boolean;
+  exclude?: string[];
 }
 
 export interface CopyResult {

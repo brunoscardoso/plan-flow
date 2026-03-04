@@ -181,7 +181,7 @@ flow/reviewed-code/code-review-2026-01-14-user-authentication.md
 
 After generating the review document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`review-code`), scope reviewed, status, and finding count
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`review-code`), scope reviewed, status, and finding count
 2. **Feature file** (`flow/brain/features/{feature-name}.md`): If the reviewed changes relate to a known feature, append Timeline entry
 3. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- review-code: {scope} — {finding_count} findings ({critical}/{major}/{minor})`
 

@@ -12,6 +12,7 @@ import {
   ensureDir,
   getVaultDir,
   getProjectName,
+  getPackageRoot,
   createSymlink,
   readSymlinkTarget,
 } from '../utils/files.js';
@@ -1638,6 +1639,50 @@ export async function initShared(
   result.created.push(...legacyResult.created);
   result.skipped.push(...legacyResult.skipped);
   result.updated.push(...legacyResult.updated);
+
+  // 9. Copy hooks.json.example to flow/ (phase lifecycle hooks template)
+  const hooksExampleDest = join(flowDir, 'hooks.json.example');
+  if (!existsSync(hooksExampleDest)) {
+    const hooksExampleSrc = join(
+      getPackageRoot(),
+      'templates',
+      'shared',
+      'hooks.json.example'
+    );
+    if (existsSync(hooksExampleSrc)) {
+      writeFileSync(
+        hooksExampleDest,
+        readFileSync(hooksExampleSrc, 'utf-8'),
+        'utf-8'
+      );
+      result.created.push(hooksExampleDest);
+      log.success('Created flow/hooks.json.example');
+    }
+  } else {
+    result.skipped.push(hooksExampleDest);
+    log.skip('flow/hooks.json.example already exists');
+  }
+
+  // 10. Copy session-hooks-instructions.md for non-Claude platforms
+  const hasNonClaude = platforms.some((p) => p !== 'claude');
+  if (hasNonClaude) {
+    const instrDest = join(flowDir, 'references', 'session-hooks-instructions.md');
+    if (!existsSync(instrDest)) {
+      const instrSrc = join(
+        getPackageRoot(),
+        'templates',
+        'shared',
+        'session-hooks-instructions.md'
+      );
+      if (existsSync(instrSrc)) {
+        writeFileSync(instrDest, readFileSync(instrSrc, 'utf-8'), 'utf-8');
+        result.created.push(instrDest);
+        log.success('Created flow/references/session-hooks-instructions.md');
+      }
+    } else {
+      result.skipped.push(instrDest);
+    }
+  }
 
   return result;
 }

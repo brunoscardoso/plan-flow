@@ -168,7 +168,7 @@ Verify all files meet the target coverage.
 
 After achieving the coverage target, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`write-tests`), files tested, status, and coverage achieved
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`write-tests`), files tested, status, and coverage achieved
 2. **Feature file** (`flow/brain/features/{feature-name}.md`): If tests relate to a known feature, append Timeline entry
 3. **Errors** (`flow/brain/errors/{error-name}.md`): Create for each non-trivial test framework issue encountered (e.g., ESM mocking quirks, configuration issues, flaky test patterns)
 4. **Index** (`flow/brain/index.md`): Add new error entries if created. Enforce caps (5 errors, 3 decisions)

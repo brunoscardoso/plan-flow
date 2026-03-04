@@ -34,6 +34,17 @@ try {
     }
   }
 
+  // Preserve session start timestamp across compactions
+  const sessionStartPath = path.join(STATE_DIR, 'session-start.json');
+  if (!state.sessionStart && fs.existsSync(sessionStartPath)) {
+    try {
+      const startData = JSON.parse(fs.readFileSync(sessionStartPath, 'utf-8'));
+      if (startData.start) state.sessionStart = startData.start;
+    } catch {
+      // Non-critical
+    }
+  }
+
   // Update state with compaction marker
   const now = new Date().toISOString();
   state.lastCompaction = now;

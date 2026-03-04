@@ -15,10 +15,18 @@ const path = require('path');
 
 const STATE_DIR = path.join(process.cwd(), 'flow', 'state');
 const STATE_JSON = path.join(STATE_DIR, 'current.json');
+const SESSION_START_JSON = path.join(STATE_DIR, 'session-start.json');
 const AUTOPILOT = path.join(process.cwd(), 'flow', '.autopilot');
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 try {
+  // Persist session start timestamp for duration calculation in session-end hook
+  if (!fs.existsSync(STATE_DIR)) {
+    fs.mkdirSync(STATE_DIR, { recursive: true });
+  }
+  const startData = JSON.stringify({ start: new Date().toISOString() });
+  fs.writeFileSync(SESSION_START_JSON, startData + '\n');
+
   const lines = [];
 
   // Check for active execution state

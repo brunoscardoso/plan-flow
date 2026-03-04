@@ -185,9 +185,13 @@ feature: {feature-name}
 - Errors: [[{error-name}]]
 ```
 
-### 4. Session Files (`flow/brain/sessions/{YYYY-MM-DD}.md`)
+### 4. Session Files (`flow/brain/sessions/{session-id}.md`)
 
-**When**: Every brain-capture block appends to the daily session file.
+**When**: Every brain-capture block appends to the current session file.
+
+**Finding the current session file**: Read `flow/state/last-session.json` for the `sessionId`, then open `flow/brain/sessions/{sessionId}.md`. If `last-session.json` doesn't exist, find the most recent `.md` file in `flow/brain/sessions/`. If no session file exists yet, create a new one using the naming convention below.
+
+**Session ID format**: `{YYYY-MM-DD}_{HH-MM}_{6-char-hex}` (e.g., `2026-03-04_11-30_a1b2c3`)
 
 **If file exists**: Append new entry to Skills Run section.
 
@@ -195,10 +199,18 @@ feature: {feature-name}
 
 ```markdown
 ---
+id: {session-id}
 date: {YYYY-MM-DD}
+start: {ISO-timestamp}
+end: {ISO-timestamp}
+duration_min: {number}
+messages: {number}
+skills: [{skill-names}]
+features: [{feature-names}]
+files_changed: {number}
 ---
 
-# Session: {YYYY-MM-DD}
+# Session: [[{session-id}]]
 
 **Project**: [[{project-name}]]
 
@@ -266,7 +278,7 @@ All brain files use **kebab-case** names that match their `[[wiki-link]]` refere
 - Feature: `flow/brain/features/contact-enrichment.md` → `[[contact-enrichment]]`
 - Error: `flow/brain/errors/prisma-connection-pooling.md` → `[[prisma-connection-pooling]]`
 - Decision: `flow/brain/decisions/jwt-over-sessions.md` → `[[jwt-over-sessions]]`
-- Session: `flow/brain/sessions/2026-03-03.md` → `[[2026-03-03]]`
+- Session: `flow/brain/sessions/2026-03-04_11-30_a1b2c3.md` → `[[2026-03-04_11-30_a1b2c3]]`
 
 ---
 

@@ -30,15 +30,15 @@ const PLANFLOW_MARKER = '# planflow';
 const PLANFLOW_HOOKS: Record<string, HookEntry> = {
   PreCompact: {
     type: 'command',
-    command: `node scripts/hooks/pre-compact.js ${PLANFLOW_MARKER}`,
+    command: `node scripts/hooks/pre-compact.cjs ${PLANFLOW_MARKER}`,
   },
   SessionStart: {
     type: 'command',
-    command: `node scripts/hooks/session-start.js ${PLANFLOW_MARKER}`,
+    command: `node scripts/hooks/session-start.cjs ${PLANFLOW_MARKER}`,
   },
   Stop: {
     type: 'command',
-    command: `node scripts/hooks/session-end.js ${PLANFLOW_MARKER}`,
+    command: `node scripts/hooks/session-end.cjs ${PLANFLOW_MARKER}`,
   },
 };
 

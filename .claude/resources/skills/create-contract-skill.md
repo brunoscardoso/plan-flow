@@ -140,7 +140,7 @@ Create the contract with all gathered information:
 
 After completing the contract document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`create-contract`), service name, status, and endpoint count
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`create-contract`), service name, status, and endpoint count
 2. **Feature file** (`flow/brain/features/{service-name}.md`): Create or update feature entry for the integration service
 3. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- create-contract: {service-name} — {endpoint_count} endpoints documented`
 

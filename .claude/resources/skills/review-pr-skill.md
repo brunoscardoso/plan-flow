@@ -217,7 +217,7 @@ flow/reviewed-pr/pr-notes-add-user-authentication-flow.md
 
 After generating the review document, capture minimal knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 
-1. **Session file** (`flow/brain/sessions/YYYY-MM-DD.md`): Append entry with time, skill name (`review-pr`), PR title, status, and finding count
+1. **Session file** (most recent `.md` in `flow/brain/sessions/`, or create new per-session file): Append entry with time, skill name (`review-pr`), PR title, status, and finding count
 2. **Log** (`flow/log.md`): Under today's date heading (create if absent), append: `- review-pr: PR #{number} {title} — {finding_count} findings`
 
 > **Note**: Review-pr uses the lightest capture — session and log only. No feature/error/decision files unless the PR reveals a critical cross-project pattern.

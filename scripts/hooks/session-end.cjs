@@ -12,11 +12,14 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const STATE_DIR = path.join(process.cwd(), 'flow', 'state');
 const LAST_JSON = path.join(STATE_DIR, 'last-session.json');
 const LAST_MD = path.join(STATE_DIR, 'last-session.md');
 const CURRENT_JSON = path.join(STATE_DIR, 'current.json');
+const SESSION_START_JSON = path.join(STATE_DIR, 'session-start.json');
+const SESSIONS_DIR = path.join(process.cwd(), 'flow', 'brain', 'sessions');
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -162,6 +165,102 @@ async function main() {
     }
 
     fs.writeFileSync(LAST_MD, md.join('\n') + '\n');
+
+    // Create per-session brain file (only if meaningful activity)
+    if (summary.totalMessages > 0 && fs.existsSync(SESSIONS_DIR)) {
+      const now = new Date(summary.date);
+      const dateStr = now.toISOString().slice(0, 10);
+      const timeStr = now.toISOString().slice(11, 16).replace(':', '-');
+      const shortHash = crypto.randomBytes(3).toString('hex');
+      const sessionId = `${dateStr}_${timeStr}_${shortHash}`;
+
+      // Read start timestamp if available
+      let startIso = summary.date;
+      try {
+        if (fs.existsSync(SESSION_START_JSON)) {
+          const startData = JSON.parse(fs.readFileSync(SESSION_START_JSON, 'utf-8'));
+          if (startData.start) startIso = startData.start;
+        }
+      } catch {
+        // Use end time as fallback
+      }
+
+      const endIso = summary.date;
+      const startMs = new Date(startIso).getTime();
+      const endMs = new Date(endIso).getTime();
+      const durationMin = Math.max(0, Math.round((endMs - startMs) / 60000));
+      const timeDisplay = now.toISOString().slice(11, 16);
+
+      // Build frontmatter
+      const frontmatter = [
+        '---',
+        `id: ${sessionId}`,
+        `date: ${dateStr}`,
+        `start: ${startIso}`,
+        `end: ${endIso}`,
+        `duration_min: ${durationMin}`,
+        `messages: ${summary.totalMessages}`,
+        `skills: []`,
+        `features: []`,
+        `files_changed: ${summary.filesModified.length}`,
+        '---',
+      ];
+
+      // Build body
+      const body = [
+        '',
+        `# Session: ${dateStr} ${timeDisplay}`,
+        '',
+        '**Project**: [[cli]]',
+        '',
+        '## Activity',
+        '',
+        `- **Messages**: ${summary.totalMessages}`,
+        `- **Duration**: ${durationMin} min`,
+        `- **Tools Used**: ${summary.toolsUsed.length > 0 ? summary.toolsUsed.join(', ') : 'none'}`,
+        `- **Files Changed**: ${summary.filesModified.length}`,
+        '',
+      ];
+
+      if (summary.filesModified.length > 0) {
+        body.push('## Files');
+        body.push('');
+        for (const f of summary.filesModified.slice(0, 20)) {
+          body.push(`- ${f}`);
+        }
+        body.push('');
+      }
+
+      if (summary.userMessages.length > 0) {
+        body.push('## User Messages');
+        body.push('');
+        for (const msg of summary.userMessages.slice(-5)) {
+          body.push(`- ${msg.slice(0, 150)}${msg.length > 150 ? '...' : ''}`);
+        }
+        body.push('');
+      }
+
+      const sessionContent = frontmatter.join('\n') + body.join('\n') + '\n';
+      const sessionFile = path.join(SESSIONS_DIR, `${sessionId}.md`);
+      const tmpSession = sessionFile + '.tmp';
+      fs.writeFileSync(tmpSession, sessionContent);
+      fs.renameSync(tmpSession, sessionFile);
+
+      // Store session ID in last-session.json for brain-capture to find
+      summary.sessionId = sessionId;
+      const tmpJson2 = LAST_JSON + '.tmp';
+      fs.writeFileSync(tmpJson2, JSON.stringify(summary, null, 2) + '\n');
+      fs.renameSync(tmpJson2, LAST_JSON);
+
+      // Clean up session-start.json
+      try {
+        if (fs.existsSync(SESSION_START_JSON)) {
+          fs.unlinkSync(SESSION_START_JSON);
+        }
+      } catch {
+        // Non-critical
+      }
+    }
 
     // Update current.json with latest timestamp if it exists
     if (fs.existsSync(CURRENT_JSON)) {
