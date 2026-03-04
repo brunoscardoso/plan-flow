@@ -305,6 +305,19 @@ mv flow/plans/plan_feature_name_v1.md flow/archive/
 
 ---
 
+### Step 7.5: Extract Instincts
+
+After verification passes, automatically extract reusable instincts from execution data:
+
+1. **Review brain-capture data** from all completed phases — look at `errors_hit` and `user_corrections`
+2. **Identify patterns** worth preserving: errors resolved, user corrections, workarounds discovered
+3. **Filter criteria**: only from errors/corrections, max 3 per execution, skip trivial fixes
+4. **Write instincts** via `writeInstinct()` from `src/cli/utils/ledger.ts`
+5. **Present summary** to user (skip confirmation in autopilot)
+6. **If no meaningful patterns**: skip silently
+
+---
+
 ## Execution Flow Within a Group
 
 ```

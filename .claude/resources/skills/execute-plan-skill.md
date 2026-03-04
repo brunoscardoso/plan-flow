@@ -363,6 +363,45 @@ After build/tests pass, run an automatic cleanup pass:
 
 ---
 
+### Step 7.75: Extract Instincts
+
+After cleanup pass, automatically extract reusable instincts from execution data:
+
+1. **Review brain-capture data** from all completed phases — look at `errors_hit` and `user_corrections` fields
+2. **Identify patterns** worth preserving as instincts:
+   - Errors that were hit and resolved (trigger: the situation, action: the fix)
+   - User corrections to AI behavior (trigger: what was done wrong, action: what to do instead)
+   - Workarounds discovered during implementation
+3. **Filter criteria** — only extract from errors and corrections, NOT routine work:
+   - Skip trivial fixes (typos, import order, formatting)
+   - Skip patterns already in the ledger (check with `readLedger()`)
+   - Maximum **3 instincts per execution**
+4. **Write instincts** using the ledger utility:
+   ```typescript
+   import { readLedger, writeInstinct, Instinct } from '../utils/ledger.js';
+
+   const instinct: Instinct = {
+     id: 'kebab-case-descriptive-id',
+     confidence: 0.3,
+     trigger: 'When [specific situation]',
+     action: '[What to do]',
+     evidence: '[What confirmed this — reference the phase/error]',
+     lastUpdated: 'YYYY-MM-DD',
+   };
+   const result = writeInstinct(targetDir, instinct);
+   // result is 'created' or 'updated' (if duplicate, confidence bumped +0.1)
+   ```
+5. **Present summary** to user:
+   ```
+   Instincts extracted: X
+   - instinct-id-1 [0.3] — brief description (created)
+   - instinct-id-2 [0.4] — brief description (updated, confidence bumped)
+   ```
+6. **In autopilot mode**: Skip user confirmation, write directly
+7. **If no meaningful patterns found**: Skip silently — not every execution produces instincts
+
+---
+
 ### Step 8: Archive and Complete
 
 1. **Present summary** of completed work
