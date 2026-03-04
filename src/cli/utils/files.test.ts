@@ -217,9 +217,26 @@ describe('copyDir', () => {
 });
 
 describe('getVaultDir', () => {
-  it('should return a path ending with plan-flow/brain', () => {
+  const originalEnv = process.env.PLAN_FLOW_VAULT_DIR;
+
+  afterEach(() => {
+    if (originalEnv === undefined) {
+      delete process.env.PLAN_FLOW_VAULT_DIR;
+    } else {
+      process.env.PLAN_FLOW_VAULT_DIR = originalEnv;
+    }
+  });
+
+  it('should return a path ending with plan-flow/brain when env var is not set', () => {
+    delete process.env.PLAN_FLOW_VAULT_DIR;
     const dir = getVaultDir();
     expect(dir).toMatch(/plan-flow[/\\]brain$/);
+  });
+
+  it('should return env var value when PLAN_FLOW_VAULT_DIR is set', () => {
+    process.env.PLAN_FLOW_VAULT_DIR = '/tmp/custom-vault';
+    const dir = getVaultDir();
+    expect(dir).toBe('/tmp/custom-vault');
   });
 });
 

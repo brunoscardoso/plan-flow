@@ -10,6 +10,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { afterAll, beforeAll } from '@jest/globals';
 import { jest } from '@jest/globals';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -34,6 +35,20 @@ function createTempDir(): string {
 function cleanup(dir: string): void {
   rmSync(dir, { recursive: true, force: true });
 }
+
+// Redirect vault to temp dir to avoid polluting real vault
+let initTestVaultDir: string;
+
+beforeAll(() => {
+  initTestVaultDir = join(tmpdir(), `plan-flow-vault-initcmd-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  mkdirSync(initTestVaultDir, { recursive: true });
+  process.env.PLAN_FLOW_VAULT_DIR = initTestVaultDir;
+});
+
+afterAll(() => {
+  rmSync(initTestVaultDir, { recursive: true, force: true });
+  delete process.env.PLAN_FLOW_VAULT_DIR;
+});
 
 // Suppress console output during tests
 beforeEach(() => {

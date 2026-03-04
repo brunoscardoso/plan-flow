@@ -298,22 +298,31 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 ### Global Brain Structure (Central Vault)
 
-The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project's entire `flow/` directory is symlinked into `projects/`, so opening this directory as an Obsidian vault shows all projects with their brain entries, plans, discoveries, and archives — and wiki-links between them resolve correctly.
+The global brain at `~/plan-flow/brain/` doubles as the central Obsidian vault. Each project gets a real directory in `projects/` with individual symlinks for each flow subdirectory. This avoids nested "brain inside brain" confusion and lets wiki-links to discovery/plans resolve correctly.
 
 ```
-~/plan-flow/brain/                          ← Open this as Obsidian vault
-├── .obsidian/                               # Pre-configured graph color groups
-│   └── graph.json
-├── index.md                                 # Lists all registered projects
-├── patterns/                                # Shared engineering patterns
+~/plan-flow/brain/                                    ← Open this as Obsidian vault
+├── .obsidian/                                         # Pre-configured graph color groups
+│   └── graph.json                                     # Uses path-based queries (path:features, etc.)
+├── index.md                                           # Lists all registered projects
+├── patterns/                                          # Shared engineering patterns
 │   └── retry-with-backoff.md
 └── projects/
-    ├── my-app/ → /home/user/my-app/flow/    ← symlink to entire flow/
-    ├── api/    → /home/user/api/flow/        ← symlink
-    └── webapp/ → /home/user/webapp/flow/     ← symlink
+    ├── my-app/                                        ← real directory (not a symlink)
+    │   ├── features/  → /home/user/my-app/flow/brain/features/
+    │   ├── errors/    → /home/user/my-app/flow/brain/errors/
+    │   ├── decisions/ → /home/user/my-app/flow/brain/decisions/
+    │   ├── sessions/  → /home/user/my-app/flow/brain/sessions/
+    │   ├── discovery/ → /home/user/my-app/flow/discovery/
+    │   ├── plans/     → /home/user/my-app/flow/plans/
+    │   ├── archive/   → /home/user/my-app/flow/archive/
+    │   └── contracts/ → /home/user/my-app/flow/contracts/
+    └── api/                                           ← another project
+        ├── features/  → /home/user/api/flow/brain/features/
+        └── ...
 ```
 
-Symlinks are created automatically by `plan-flow init`. Each init registers the project and links its `flow/` directory.
+Symlinks are created automatically by `plan-flow init`. Each init registers the project with individual links per subdirectory.
 
 ---
 

@@ -10,9 +10,10 @@ import {
   writeFileSync,
   lstatSync,
   readlinkSync,
+  symlinkSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { tmpdir, homedir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { initShared } from './shared';
 
 function createTempDir(): string {
@@ -42,13 +43,19 @@ const EXPECTED_SUBDIRS = [
 
 describe('initShared', () => {
   let tempDir: string;
+  let vaultDir: string;
 
   beforeEach(() => {
     tempDir = createTempDir();
+    vaultDir = join(tmpdir(), `plan-flow-vault-init-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(vaultDir, { recursive: true });
+    process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
   });
 
   afterEach(() => {
     cleanup(tempDir);
+    cleanup(vaultDir);
+    delete process.env.PLAN_FLOW_VAULT_DIR;
   });
 
   it('should create full flow/ directory structure with .gitkeep files', async () => {
@@ -81,13 +88,19 @@ describe('initShared', () => {
 
 describe('gitignore management', () => {
   let tempDir: string;
+  let vaultDir: string;
 
   beforeEach(() => {
     tempDir = createTempDir();
+    vaultDir = join(tmpdir(), `plan-flow-vault-gi-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(vaultDir, { recursive: true });
+    process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
   });
 
   afterEach(() => {
     cleanup(tempDir);
+    cleanup(vaultDir);
+    delete process.env.PLAN_FLOW_VAULT_DIR;
   });
 
   it('should create .gitignore with plan-flow entries when none exists', async () => {
@@ -173,22 +186,19 @@ describe('gitignore management', () => {
 
 describe('vault registration', () => {
   let tempDir: string;
-  const vaultDir = join(homedir(), 'plan-flow', 'brain');
+  let vaultDir: string;
 
   beforeEach(() => {
     tempDir = createTempDir();
+    vaultDir = join(tmpdir(), `plan-flow-vault-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(vaultDir, { recursive: true });
+    process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
   });
 
   afterEach(() => {
     cleanup(tempDir);
-    // Clean up vault symlink for this temp project
-    const projectName = tempDir.split('/').pop() || '';
-    const linkPath = join(vaultDir, 'projects', projectName);
-    try {
-      rmSync(linkPath, { force: true });
-    } catch {
-      // Ignore
-    }
+    cleanup(vaultDir);
+    delete process.env.PLAN_FLOW_VAULT_DIR;
   });
 
   it('should create vault directory structure', async () => {
@@ -199,32 +209,48 @@ describe('vault registration', () => {
     expect(existsSync(join(vaultDir, 'projects'))).toBe(true);
   });
 
-  it('should create Obsidian config with graph color groups', async () => {
+  it('should create Obsidian config with path-based color groups', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
     const graphPath = join(vaultDir, '.obsidian', 'graph.json');
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(4);
-    expect(config.colorGroups[0].query).toBe('tag:#feature');
-    expect(config.colorGroups[1].query).toBe('tag:#error');
-    expect(config.colorGroups[2].query).toBe('tag:#decision');
-    expect(config.colorGroups[3].query).toBe('tag:#session');
+    expect(config.colorGroups).toHaveLength(6);
+    expect(config.colorGroups[0].query).toBe('path:features');
+    expect(config.colorGroups[1].query).toBe('path:errors');
+    expect(config.colorGroups[2].query).toBe('path:decisions');
+    expect(config.colorGroups[3].query).toBe('path:sessions');
+    expect(config.colorGroups[4].query).toBe('path:discovery');
+    expect(config.colorGroups[5].query).toBe('path:plans');
+    expect(config['collapse-color']).toBe(false);
+    expect(config['collapse-filter']).toBe(true);
   });
 
-  it('should create symlink from vault to project brain', async () => {
+  it('should create project directory with individual symlinks', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
     const projectName = tempDir.split('/').pop() || '';
-    const linkPath = join(vaultDir, 'projects', projectName);
+    const projectDir = join(vaultDir, 'projects', projectName);
 
-    expect(existsSync(linkPath)).toBe(true);
-    const stat = lstatSync(linkPath);
-    expect(stat.isSymbolicLink()).toBe(true);
+    // Project dir should be a real directory, not a symlink
+    expect(existsSync(projectDir)).toBe(true);
+    const stat = lstatSync(projectDir);
+    expect(stat.isDirectory()).toBe(true);
+    expect(stat.isSymbolicLink()).toBe(false);
 
-    const target = readlinkSync(linkPath, 'utf-8');
-    expect(target).toBe(join(resolve(tempDir), 'flow'));
+    // Check individual symlinks
+    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts'];
+    for (const linkName of expectedLinks) {
+      const linkPath = join(projectDir, linkName);
+      expect(existsSync(linkPath)).toBe(true);
+      const linkStat = lstatSync(linkPath);
+      expect(linkStat.isSymbolicLink()).toBe(true);
+    }
+
+    // Verify features symlink points to the right place
+    const featuresTarget = readlinkSync(join(projectDir, 'features'), 'utf-8');
+    expect(featuresTarget).toBe(join(resolve(tempDir), 'flow', 'brain', 'features'));
   });
 
   it('should create vault index with project entry', async () => {
@@ -238,34 +264,49 @@ describe('vault registration', () => {
     expect(content).toContain(`[[${projectName}]]`);
   });
 
-  it('should skip symlink on second install', async () => {
+  it('should skip symlinks on second install', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
     const result = await initShared(tempDir, { force: false }, ['claude']);
 
     const projectName = tempDir.split('/').pop() || '';
-    const linkPath = join(vaultDir, 'projects', projectName);
-    expect(result.skipped).toContain(linkPath);
+    const featuresLink = join(vaultDir, 'projects', projectName, 'features');
+    expect(result.skipped).toContain(featuresLink);
+  });
+
+  it('should clean old-format single symlinks during registration', async () => {
+    // Create an old-format single symlink
+    const projectsDir = join(vaultDir, 'projects');
+    mkdirSync(projectsDir, { recursive: true });
+    const oldTarget = join(tempDir, 'flow');
+    mkdirSync(oldTarget, { recursive: true });
+    symlinkSync(oldTarget, join(projectsDir, 'old-project'));
+
+    // Also create a broken symlink
+    symlinkSync('/nonexistent/path', join(projectsDir, 'broken-project'));
+
+    await initShared(tempDir, { force: false }, ['claude']);
+
+    // Old-format symlinks should be cleaned
+    expect(existsSync(join(projectsDir, 'old-project'))).toBe(false);
+    expect(existsSync(join(projectsDir, 'broken-project'))).toBe(false);
   });
 });
 
 describe('legacy artifact scanning', () => {
   let tempDir: string;
+  let vaultDir: string;
 
   beforeEach(() => {
     tempDir = createTempDir();
+    vaultDir = join(tmpdir(), `plan-flow-vault-legacy-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(vaultDir, { recursive: true });
+    process.env.PLAN_FLOW_VAULT_DIR = vaultDir;
   });
 
   afterEach(() => {
     cleanup(tempDir);
-    // Clean up vault symlink
-    const vaultDir = join(homedir(), 'plan-flow', 'brain');
-    const projectName = tempDir.split('/').pop() || '';
-    const linkPath = join(vaultDir, 'projects', projectName);
-    try {
-      rmSync(linkPath, { force: true });
-    } catch {
-      // Ignore
-    }
+    cleanup(vaultDir);
+    delete process.env.PLAN_FLOW_VAULT_DIR;
   });
 
   it('should create brain entries from existing plans', async () => {

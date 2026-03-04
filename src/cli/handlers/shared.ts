@@ -6,7 +6,7 @@
  */
 
 import { join, resolve } from 'node:path';
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, lstatSync, unlinkSync, rmSync } from 'node:fs';
 import type { CopyOptions, CopyResult, Platform } from '../types.js';
 import {
   ensureDir,
@@ -130,6 +130,88 @@ function escapeRegExp(str: string): string {
 const VAULT_SUBDIRS = ['patterns', 'projects'];
 
 /**
+ * Symlinks created per project in the vault.
+ * Each maps a subdirectory name to its relative path inside the project's flow/ dir.
+ */
+const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
+  { name: 'features', subpath: 'brain/features' },
+  { name: 'errors', subpath: 'brain/errors' },
+  { name: 'decisions', subpath: 'brain/decisions' },
+  { name: 'sessions', subpath: 'brain/sessions' },
+  { name: 'discovery', subpath: 'discovery' },
+  { name: 'plans', subpath: 'plans' },
+  { name: 'archive', subpath: 'archive' },
+  { name: 'contracts', subpath: 'contracts' },
+];
+
+/**
+ * Cleans broken symlinks and old-format single symlinks from the vault projects/ dir.
+ * Old format: projects/{name} → /path/flow (single symlink to entire flow/).
+ * New format: projects/{name}/ is a real directory with individual symlinks inside.
+ */
+function cleanBrokenSymlinks(vaultDir: string): void {
+  const projectsDir = join(vaultDir, 'projects');
+  if (!existsSync(projectsDir)) return;
+
+  let entries: string[];
+  try {
+    entries = readdirSync(projectsDir);
+  } catch {
+    return;
+  }
+
+  const indexPath = join(vaultDir, 'index.md');
+  let indexContent = existsSync(indexPath) ? readFileSync(indexPath, 'utf-8') : null;
+  let indexModified = false;
+
+  for (const entry of entries) {
+    const entryPath = join(projectsDir, entry);
+    let shouldRemove = false;
+
+    try {
+      const stat = lstatSync(entryPath);
+
+      if (stat.isSymbolicLink()) {
+        // Old-format single symlink or broken symlink — remove it
+        shouldRemove = true;
+      }
+    } catch {
+      // Can't stat — broken entry, remove it
+      shouldRemove = true;
+    }
+
+    if (shouldRemove) {
+      try {
+        unlinkSync(entryPath);
+      } catch {
+        try {
+          rmSync(entryPath, { force: true });
+        } catch {
+          // Can't remove — skip
+          continue;
+        }
+      }
+
+      // Remove corresponding index.md entry
+      if (indexContent) {
+        const pattern = new RegExp(`^- \\[\\[${escapeRegExp(entry)}\\]\\].*\\n?`, 'gm');
+        const cleaned = indexContent.replace(pattern, '');
+        if (cleaned !== indexContent) {
+          indexContent = cleaned;
+          indexModified = true;
+        }
+      }
+    }
+  }
+
+  if (indexModified && indexContent) {
+    // Clean up any double blank lines left behind
+    indexContent = indexContent.replace(/\n{3,}/g, '\n\n');
+    writeFileSync(indexPath, indexContent, 'utf-8');
+  }
+}
+
+/**
  * Updates the global vault index at ~/plan-flow/brain/index.md
  * with the project entry.
  */
@@ -165,29 +247,45 @@ function updateVaultIndex(vaultDir: string, projectName: string, target: string)
 
 /**
  * Creates the .obsidian/ config in the vault with pre-configured
- * graph color groups for tags (feature, error, decision, session).
+ * graph color groups using path-based queries.
+ * Pass force=true to regenerate the config even if it exists.
  */
-function ensureObsidianConfig(vaultDir: string): void {
+function ensureObsidianConfig(vaultDir: string, force = false): void {
   const obsidianDir = join(vaultDir, '.obsidian');
   const graphPath = join(obsidianDir, 'graph.json');
 
-  // Don't overwrite existing config
-  if (existsSync(graphPath)) return;
+  // Don't overwrite existing config unless forced
+  if (existsSync(graphPath) && !force) return;
 
   ensureDir(obsidianDir);
 
   const graphConfig = {
-    collapse: false,
-    search: '',
-    showTags: true,
-    showAttachments: false,
-    showOrphans: true,
-    colorGroups: [
-      { query: 'tag:#feature', color: { a: 1, rgb: 5025616 } },
-      { query: 'tag:#error', color: { a: 1, rgb: 16007990 } },
-      { query: 'tag:#decision', color: { a: 1, rgb: 2201331 } },
-      { query: 'tag:#session', color: { a: 1, rgb: 10395294 } },
+    'collapse-filter': true,
+    'showTags': false,
+    'showAttachments': false,
+    'showOrphans': true,
+    'collapse-color': false,
+    'colorGroups': [
+      { query: 'path:features', color: { a: 1, rgb: 5025616 } },    // green
+      { query: 'path:errors', color: { a: 1, rgb: 16007990 } },      // red
+      { query: 'path:decisions', color: { a: 1, rgb: 2201331 } },    // blue
+      { query: 'path:sessions', color: { a: 1, rgb: 10395294 } },    // gray
+      { query: 'path:discovery', color: { a: 1, rgb: 16747520 } },   // orange
+      { query: 'path:plans', color: { a: 1, rgb: 10040217 } },       // purple
     ],
+    'collapse-display': true,
+    'collapse-forces': false,
+    'search': '',
+    'showArrow': false,
+    'textFadeMultiplier': 0,
+    'nodeSizeMultiplier': 1,
+    'lineSizeMultiplier': 1,
+    'centerStrength': 0.518713,
+    'repelStrength': 10,
+    'linkStrength': 1,
+    'linkDistance': 250,
+    'scale': 1,
+    'close': true,
   };
 
   writeFileSync(graphPath, JSON.stringify(graphConfig, null, 2), 'utf-8');
@@ -195,8 +293,9 @@ function ensureObsidianConfig(vaultDir: string): void {
 
 /**
  * Registers the project in the central vault at ~/plan-flow/brain/
- * by creating a symlink from the vault to the project's flow/ directory.
- * This makes all flow artifacts (brain, plans, discovery, archive) accessible in Obsidian.
+ * by creating a real directory per project with individual symlinks
+ * for each flow subdirectory (features, errors, decisions, sessions,
+ * discovery, plans, archive, contracts).
  */
 function registerVault(
   target: string,
@@ -206,7 +305,7 @@ function registerVault(
   const vaultDir = getVaultDir();
   const projectName = getProjectName(target);
   const flowDir = join(resolve(target), 'flow');
-  const linkPath = join(vaultDir, 'projects', projectName);
+  const projectDir = join(vaultDir, 'projects', projectName);
 
   try {
     // Create vault structure if it doesn't exist
@@ -215,44 +314,55 @@ function registerVault(
       ensureDir(join(vaultDir, sub));
     }
 
+    // Clean broken/old-format symlinks
+    cleanBrokenSymlinks(vaultDir);
+
     // Set up Obsidian config with graph color groups
-    ensureObsidianConfig(vaultDir);
+    ensureObsidianConfig(vaultDir, options.force);
 
-    // Check existing symlink
-    const existingTarget = readSymlinkTarget(linkPath);
+    // Create real project directory
+    ensureDir(projectDir);
 
-    if (existingTarget !== null) {
-      const resolvedExisting = resolve(join(vaultDir, 'projects'), existingTarget);
-      const resolvedFlow = resolve(flowDir);
+    // Create individual symlinks for each subdirectory
+    let createdCount = 0;
+    for (const link of VAULT_PROJECT_LINKS) {
+      const linkPath = join(projectDir, link.name);
+      const linkTarget = join(flowDir, link.subpath);
 
-      if (resolvedExisting === resolvedFlow) {
-        result.skipped.push(linkPath);
-        log.skip(`Vault symlink already exists for ${projectName}`);
-      } else if (options.force) {
-        createSymlink(flowDir, linkPath);
-        result.updated.push(linkPath);
-        log.warn(`Updated vault symlink for ${projectName}`);
+      // Ensure the source directory exists in the project
+      ensureDir(linkTarget);
+
+      const existingTarget = readSymlinkTarget(linkPath);
+
+      if (existingTarget !== null) {
+        const resolvedExisting = resolve(projectDir, existingTarget);
+        const resolvedTarget = resolve(linkTarget);
+
+        if (resolvedExisting === resolvedTarget) {
+          result.skipped.push(linkPath);
+        } else if (options.force) {
+          createSymlink(linkTarget, linkPath);
+          result.updated.push(linkPath);
+        } else {
+          result.skipped.push(linkPath);
+        }
       } else {
-        result.skipped.push(linkPath);
-        log.skip(`Vault symlink exists for ${projectName} (points elsewhere, use --force to update)`);
-      }
-    } else {
-      // Handle name collision with a non-symlink entry
-      if (existsSync(linkPath)) {
-        const hashSuffix = resolve(target).split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) & 0xffff, 0).toString(16);
-        const altName = `${projectName}-${hashSuffix}`;
-        const altPath = join(vaultDir, 'projects', altName);
-        createSymlink(flowDir, altPath);
-        result.created.push(altPath);
-        log.success(`Created vault symlink: ${altName} (name collision avoided)`);
-        updateVaultIndex(vaultDir, altName, target);
-      } else {
-        createSymlink(flowDir, linkPath);
+        createSymlink(linkTarget, linkPath);
         result.created.push(linkPath);
-        log.success(`Created vault symlink: ${projectName}`);
-        updateVaultIndex(vaultDir, projectName, target);
+        createdCount++;
       }
     }
+
+    if (createdCount > 0) {
+      log.success(`Registered vault project: ${projectName} (${createdCount} links)`);
+    } else if (result.updated.length > 0) {
+      log.warn(`Updated vault links for ${projectName}`);
+    } else {
+      log.skip(`Vault links already exist for ${projectName}`);
+    }
+
+    // Update vault index
+    updateVaultIndex(vaultDir, projectName, target);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     log.warn(`Could not register vault (non-fatal): ${msg}`);
