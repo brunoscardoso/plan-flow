@@ -74,6 +74,7 @@ Every plan must be divided into implementation phases with clear scope boundarie
 
 - **Scope**: What this phase covers
 - **Complexity**: Score from 0-10
+- **Evals**: Optional testable assertions (see `plans-templates.md` Eval Format section)
 - **Tasks**: Checkboxes for tracking
 - **Build Verification**: Command to verify
 
@@ -156,7 +157,25 @@ Always include a "Key Changes" section at the end of the plan.
 
 ---
 
-### 5. DON'T Ignore Cursor Rules During Implementation
+### 5. DON'T Write Vague Evals
+
+**Problem**: Vague eval assertions like "code works correctly" or "feature is implemented" cannot be verified.
+
+**Fix**: Write concrete, testable assertions with specific values, status codes, or observable outcomes.
+
+```markdown
+# BAD - Vague evals
+- [EVAL-1]: The API works correctly
+- [EVAL-2]: Users can authenticate
+
+# GOOD - Concrete evals
+- [EVAL-1]: POST /api/users returns 201 with { id, name, email } in response body
+- [EVAL-2]: Login with invalid credentials returns 401 with error message
+```
+
+---
+
+### 6. DON'T Ignore Cursor Rules During Implementation
 
 Review and follow all cursor rules during each phase.
 

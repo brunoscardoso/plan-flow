@@ -274,7 +274,50 @@ AskUserQuestion({
   - If user selects "No": continue without committing
 - Log to `flow/state/checkpoints.log`: `timestamp | phase N | sha | tests-status`
 
-Then continue to the next phase (NO BUILD HERE).
+Then continue to Step 5.5 (eval verification).
+
+---
+
+### Step 5.5: Run Phase Evals
+
+After updating progress (Step 5), check if the phase defines `**Evals**`:
+
+1. **No evals defined**: Skip this step entirely (backward compatible)
+2. **Evals defined**: Verify each eval assertion against the implemented code
+
+**Eval Execution Flow**:
+
+1. Parse `**Evals**` from the phase definition
+2. For each eval, verify the assertion against the current codebase (read files, check behavior)
+3. Record pass/fail for each eval
+
+**If all evals pass (attempt k=1)**:
+- Update plan file with results: `- [EVAL-N]: ✅ (k=1) <assertion>`
+- Add pass@k summary to phase heading: `### Phase N: [Name] ✅ (pass@1.0)`
+- Continue to next phase
+
+**If any eval fails**:
+- Fix the failing implementation (retry the specific code that caused the failure)
+- Re-run all evals (increment k for retried evals)
+- **Maximum 3 attempts** per phase. After 3 failures:
+
+```typescript
+AskUserQuestion({
+  questions: [{
+    question: "Phase N evals still failing after 3 attempts. How to proceed?",
+    header: "Evals",
+    options: [
+      { label: "Proceed anyway", description: "Continue to next phase despite failing evals" },
+      { label: "Stop execution", description: "Stop here to investigate manually" }
+    ],
+    multiSelect: false
+  }]
+})
+```
+
+- If user proceeds: mark failing evals as `- [EVAL-N]: ❌ (k=3) <assertion>`
+- Log `eval_result` events to audit trail:
+  `{"ts":"...","event":"eval_result","phase":<N>,"eval_id":"EVAL-N","attempt":<k>,"passed":<bool>}`
 
 **Compaction Boundary**: If the **next** phase has complexity >= 7, suggest:
 
@@ -361,6 +404,7 @@ VERIFICATION: [PASS/FAIL]
 Build:    [OK/FAIL - details]
 Types:    [OK/X errors]
 Tests:    [X/Y passed]
+Evals:    [X/Y passed, avg pass@k: N.N] (or "N/A" if no evals defined)
 Ready for PR: [YES/NO]
 ```
 
@@ -612,7 +656,8 @@ Append structured JSONL entries to `flow/audit.log` during execution. See `.clau
 5. **verification**: After build/test — `{"ts":"...","event":"verification","build":"pass/fail","tests":"pass/fail","test_count":"<passed>/<total>"}`
 6. **checkpoint**: After git commits — `{"ts":"...","event":"checkpoint","sha":"<short-sha>","message":"<msg>"}`
 7. **error**: On errors — `{"ts":"...","event":"error","message":"<desc>","phase":<N>,"recoverable":<bool>}`
-8. **command_end**: At completion — `{"ts":"...","event":"command_end","command":"execute-plan","status":"completed","summary":"<X> phases completed"}`
+8. **eval_result**: After each eval — `{"ts":"...","event":"eval_result","phase":<N>,"eval_id":"EVAL-N","attempt":<k>,"passed":<bool>}`
+9. **command_end**: At completion — `{"ts":"...","event":"command_end","command":"execute-plan","status":"completed","summary":"<X> phases completed"}`
 
 **Rules**: Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
 

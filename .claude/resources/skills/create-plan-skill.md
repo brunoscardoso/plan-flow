@@ -79,6 +79,13 @@ Create phases following these guidelines:
 
 **Model Routing**: Assign recommended models per phase based on complexity (see `.claude/resources/core/complexity-scoring.md` Model Routing section). This is advisory — 0-4 → Haiku, 5-7 → Sonnet, 8-10 → Opus.
 
+**Evals**: Generate 1-5 testable eval assertions per phase based on the phase's requirements. Link AC- acceptance criteria from the discovery document to phase evals where applicable. See `.claude/resources/patterns/plans-templates.md` (Eval Format section) for the format.
+
+- **Skip evals** for trivial phases (complexity <= 2) and the Tests phase
+- Each eval must be a concrete, verifiable assertion (no vague "works correctly" evals)
+- Higher complexity phases should have more evals (3-5 for complexity 7+)
+- If a discovery AC- maps to a specific phase, include it as an eval
+
 **Standard Phase Order**:
 
 1. Types and Schemas (usually low complexity)

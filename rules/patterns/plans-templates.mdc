@@ -62,6 +62,9 @@ Use this template when creating new implementation plans:
 **Scope**: [What this phase covers]
 **Complexity**: X/10
 **Access**: full-access
+**Evals**:
+- [EVAL-1]: [Concrete testable assertion about phase output]
+- [EVAL-2]: [Another verifiable assertion]
 
 - [ ] Task 1
 - [ ] Task 2
@@ -73,6 +76,8 @@ Use this template when creating new implementation plans:
 **Scope**: [What this phase covers]
 **Complexity**: X/10
 **Access**: full-access
+**Evals**:
+- [EVAL-1]: [Concrete testable assertion about phase output]
 
 - [ ] Task 1
 - [ ] Task 2
@@ -224,6 +229,41 @@ Use this template when creating new implementation plans:
 **Average Complexity**: 5/10
 **Highest Complexity**: Phase 2 at 7/10
 ```
+
+---
+
+## Eval Format
+
+### Eval Definition (in plan creation)
+
+```markdown
+**Evals**:
+- [EVAL-1]: POST /api/users returns 201 with valid body
+- [EVAL-2]: Invalid input returns 400 with validation errors
+- [EVAL-3]: Auth middleware rejects unauthenticated requests
+```
+
+Evals are **optional** per phase. Phases without evals work as before. Skip evals for trivial phases (complexity <= 2) and the Tests phase.
+
+### Completed Eval Format (after execution)
+
+```markdown
+### Phase 2: API Implementation ✅ (pass@1.33)
+
+**Evals**:
+- [EVAL-1]: ✅ (k=2) POST /api/users returns 201
+- [EVAL-2]: ✅ (k=1) Invalid input returns 400
+- [EVAL-3]: ✅ (k=1) Auth middleware rejects unauthenticated
+```
+
+**Markers**: `✅` for passed, `❌` for failed. `k=N` indicates the attempt number on which the eval passed.
+
+### Eval Writing Guidelines
+
+- Each eval must be a **concrete, verifiable assertion** about code behavior
+- Use specific values, status codes, or observable outcomes
+- 1-5 evals per phase (more for higher complexity)
+- Avoid vague evals like "code works correctly" or "feature is implemented"
 
 ---
 

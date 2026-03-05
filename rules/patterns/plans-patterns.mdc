@@ -88,6 +88,7 @@ Every plan must be divided into implementation phases with clear scope boundarie
 - **Complexity**: Score from 0-10
 - **Tasks**: Checkboxes for tracking
 - **Build Verification**: Command to verify
+- **Evals**: Optional testable assertions (see `plans-templates.mdc` Eval Format section)
 
 ---
 
@@ -168,55 +169,73 @@ Always include a "Key Changes" section at the end of the plan.
 
 ---
 
-### 5. DON'T Ignore Cursor Rules During Implementation
+### 5. DON'T Write Vague Evals
+
+**Problem**: Vague eval assertions like "code works correctly" or "feature is implemented" cannot be verified.
+
+**Fix**: Write concrete, testable assertions with specific values, status codes, or observable outcomes.
+
+```markdown
+# BAD - Vague evals
+- [EVAL-1]: The API works correctly
+- [EVAL-2]: Users can authenticate
+
+# GOOD - Concrete evals
+- [EVAL-1]: POST /api/users returns 201 with { id, name, email } in response body
+- [EVAL-2]: Login with invalid credentials returns 401 with error message
+```
+
+---
+
+### 6. DON'T Ignore Cursor Rules During Implementation
 
 Review and follow all cursor rules during each phase.
 
 ---
 
-### 6. DON'T Create Monolithic Plans Without Phases
+### 7. DON'T Create Monolithic Plans Without Phases
 
 Break down plans into logical, scoped phases.
 
 ---
 
-### 7. DON'T Write Tests Before Implementation
+### 8. DON'T Write Tests Before Implementation
 
 Tests should always be the last phase.
 
 ---
 
-### 8. DON'T Skip Build Verification
+### 9. DON'T Skip Build Verification
 
 Add `npm run build` verification at the end of each phase.
 
 ---
 
-### 9. DON'T Include Full Implementation Code in Plans
+### 10. DON'T Include Full Implementation Code in Plans
 
 Describe what to implement; let the actual code live in source files.
 
 ---
 
-### 10. DON'T Skip Complexity Scores
+### 11. DON'T Skip Complexity Scores
 
 Always include a complexity score for each phase.
 
 ---
 
-### 11. DON'T Assign Arbitrary Complexity Scores
+### 12. DON'T Assign Arbitrary Complexity Scores
 
 Use the scoring criteria consistently. When in doubt, score higher.
 
 ---
 
-### 12. DON'T Execute Phases Without Plan Mode
+### 13. DON'T Execute Phases Without Plan Mode
 
 Always switch to Plan mode before executing each phase group. Use the [Plan Mode Tool](.cursor/rules/tools/plan-mode-tool.mdc) to ensure proper switching.
 
 ---
 
-### 13. DON'T Mix Discovery and Plans
+### 14. DON'T Mix Discovery and Plans
 
 Keep discovery documents in `flow/discovery/` and plans in `flow/plans/`.
 

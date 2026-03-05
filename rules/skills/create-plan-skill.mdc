@@ -99,6 +99,13 @@ Create phases following these guidelines:
 | 7-8   | High      | Complex, multiple considerations |
 | 9-10  | Very High | Significant complexity/risk      |
 
+**Evals**: Generate 1-5 testable eval assertions per phase based on the phase's requirements. Link AC- acceptance criteria from the discovery document to phase evals where applicable. See `rules/patterns/plans-templates.mdc` (Eval Format section) for the format.
+
+- **Skip evals** for trivial phases (complexity <= 2) and the Tests phase
+- Each eval must be a concrete, verifiable assertion (no vague "works correctly" evals)
+- Higher complexity phases should have more evals (3-5 for complexity 7+)
+- If a discovery AC- maps to a specific phase, include it as an eval
+
 ---
 
 ### Step 4: Add Key Changes Summary

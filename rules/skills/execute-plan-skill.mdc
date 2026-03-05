@@ -272,6 +272,33 @@ Then continue to the next phase (NO BUILD HERE).
 
 ---
 
+### Step 5.5: Run Phase Evals
+
+After updating progress (Step 5), check if the phase defines `**Evals**`:
+
+1. **No evals defined**: Skip this step entirely (backward compatible)
+2. **Evals defined**: Verify each eval assertion against the implemented code
+
+**Eval Execution Flow**:
+
+1. Parse `**Evals**` from the phase definition
+2. For each eval, verify the assertion against the current codebase (read files, check behavior)
+3. Record pass/fail for each eval
+
+**If all evals pass (attempt k=1)**:
+- Update plan file with results: `- [EVAL-N]: ✅ (k=1) <assertion>`
+- Add pass@k summary to phase heading: `### Phase N: [Name] ✅ (pass@1.0)`
+- Continue to next phase
+
+**If any eval fails**:
+- Fix the failing implementation (retry the specific code that caused the failure)
+- Re-run all evals (increment k for retried evals)
+- **Maximum 3 attempts** per phase. After 3 failures, ask user whether to proceed anyway or stop.
+- Mark failing evals as `- [EVAL-N]: ❌ (k=3) <assertion>`
+- Log `eval_result` events to audit trail
+
+---
+
 ### Phase Lifecycle Hooks
 
 Users can define custom shell commands that run at phase boundaries by creating `flow/hooks.json`:
@@ -375,6 +402,7 @@ VERIFICATION: [PASS/FAIL]
 Build:    [OK/FAIL]
 Types:    [OK/X errors]
 Tests:    [X/Y passed]
+Evals:    [X/Y passed, avg pass@k: N.N] (or "N/A" if no evals defined)
 Security: [PASS/WARN — N findings]
 Ready for PR: [YES/NO/CONDITIONAL]
 ```
@@ -507,7 +535,8 @@ Append structured JSONL entries to `flow/audit.log` during execution. See `rules
 5. **verification**: After build/test — `{"ts":"...","event":"verification","build":"pass/fail","tests":"pass/fail","test_count":"<passed>/<total>"}`
 6. **checkpoint**: After git commits — `{"ts":"...","event":"checkpoint","sha":"<short-sha>","message":"<msg>"}`
 7. **error**: On errors — `{"ts":"...","event":"error","message":"<desc>","phase":<N>,"recoverable":<bool>}`
-8. **command_end**: At completion — `{"ts":"...","event":"command_end","command":"execute-plan","status":"completed","summary":"<X> phases completed"}`
+8. **eval_result**: After running phase evals — `{"ts":"...","event":"eval_result","phase":<N>,"eval":"<EVAL-ID>","status":"pass/fail","k":<attempt>,"assertion":"<description>"}`
+9. **command_end**: At completion — `{"ts":"...","event":"command_end","command":"execute-plan","status":"completed","summary":"<X> phases completed"}`
 
 **Rules**: Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
 
