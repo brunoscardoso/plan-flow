@@ -233,6 +233,50 @@ When comparing new code with reference implementations:
 
 ---
 
+## Parallel Review Mode
+
+When the changeset contains **8 or more changed files**, activate parallel review mode for faster execution. See `parallel-review-patterns.md` [PTN-PRV-1, PTN-PRV-2] for full details.
+
+### Activation
+
+After Step 1 (Identify Changed Files), check the file count:
+
+```
+if changed_files >= 8 → parallel mode
+if changed_files < 8  → standard single-pass (skip this section)
+```
+
+### Parallel Workflow
+
+1. **Group files** by top-level directory under `src/` (PTN-PRV-1):
+   - Maximum 4 groups, minimum 2 files per group
+   - Test files grouped with their source files
+   - Root-level files form their own group
+
+2. **Spawn read-only agents** — one per file group:
+   - Each agent receives: file list, forbidden/allowed patterns, language patterns
+   - Each agent performs Steps 2-5 (Load Patterns → Identify Conflicts) on its files only
+   - Agents run in parallel using the Agent tool with `run_in_background`
+   - All agents use the **read-only** profile — no Edit/Write/Bash(write)
+
+3. **Collect findings** — wait for all agents to complete:
+   - Each agent returns structured findings (severity, file, line, description, suggested fix)
+   - If an agent fails or times out, include its files in the coordinator's own review
+
+4. **Aggregate** findings into the single review document:
+   - Sort by severity (Critical → Major → Minor → Suggestion)
+   - Deduplicate cross-cutting concerns (same pattern violation across groups)
+   - Perform cross-group consistency analysis
+   - Calculate aggregate metrics
+
+5. **Generate review document** — proceed to Step 6 with aggregated findings
+
+### Brain Capture
+
+**Critical**: Only the coordinator writes to brain files. Parallel agents must NOT write to `flow/brain/` or `flow/log.md`. The coordinator performs a single brain-capture after aggregation.
+
+---
+
 ## Quick Reference Commands
 
 ```bash

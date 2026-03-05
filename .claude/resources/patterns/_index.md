@@ -111,6 +111,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-APR-1 | Progress file format, template, step status values, checkpoint recording | autopilot-progress-patterns.md | 14-85 |
 | PTN-APR-2 | Lifecycle rules (creation, updates, deletion, resumption, backward compat) | autopilot-progress-patterns.md | 87-140 |
 
+### Parallel Review Patterns (`parallel-review-patterns.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-PRV-1 | Directory-based file grouping strategy (threshold, rules, examples) | parallel-review-patterns.md | 30-75 |
+| PTN-PRV-2 | Agent spawn, structured findings format, aggregation rules, coordinator | parallel-review-patterns.md | 77-140 |
+
 ### PR Review Patterns (`review-pr-patterns.md`)
 
 | Code | Description | Source | Lines |
@@ -176,6 +183,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-HND-1 | Need handoff document template or naming convention |
 | PTN-HND-2 | Need per-workflow handoff points |
 
+### Parallel Reviews
+
+| Code | Expand When |
+|------|-------------|
+| PTN-PRV-1 | Need file grouping strategy for parallel reviews |
+| PTN-PRV-2 | Need agent spawn and aggregation rules |
+
 ### Code Review
 
 | Code | Expand When |
@@ -214,6 +228,9 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 
 ### Handoffs
 - **PTN-HND-***: Handoff document patterns and per-workflow handoff points
+
+### Parallel Reviews
+- **PTN-PRV-***: Parallel review agent patterns (threshold, grouping, aggregation)
 
 ### Reviews
 - **PTN-REV-***: Code review templates
