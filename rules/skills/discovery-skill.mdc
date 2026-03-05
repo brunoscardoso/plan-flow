@@ -254,6 +254,26 @@ Before completing discovery, verify:
 
 ---
 
+## Handoff Production
+
+After discovery completes, produce a handoff document for the planning step. See `rules/patterns/handoff-patterns.mdc` [PTN-HND-1] for the template.
+
+**Output**: `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+
+**Content to include**:
+- Feature name and workflow type
+- Requirements summary: count of FR, NFR, and Constraints gathered
+- Key decisions made during discovery Q&A
+- Top risks identified
+- Discovery document path
+- Focus guidance for planning: what the plan should prioritize based on discovery findings
+
+**When to produce**: After the discovery document is saved and validated, before auto-proceeding to create-plan.
+
+**Backward compatibility**: If `flow/handoffs/` doesn't exist, create it.
+
+---
+
 ## Related Files
 
 | File                                              | Purpose                           |

@@ -393,3 +393,14 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Handoff Production
+
+After discovery completes, produce a handoff document for the next step. See `.claude/resources/patterns/handoff-patterns.md` [PTN-HND-1] for the template.
+
+**Output**: `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+
+Include: feature name, workflow type, requirements summary (FR/NFR/C counts), key decisions from Q&A, top risks, discovery doc path, and focus guidance for planning.
+
+Create the `flow/handoffs/` directory if it doesn't exist.

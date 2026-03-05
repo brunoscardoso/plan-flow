@@ -220,3 +220,18 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Handoff
+
+### Consumption — Plan-Aware Review
+
+Before starting the review, check for `flow/handoffs/handoff_<feature>_execute_to_review.md`. If it exists, enable **plan-aware review** — read the Plan Alignment Data and add a "Plan Alignment" section to the review output showing scope drift (unplanned file changes) and missing changes (planned files not modified). If it doesn't exist, proceed with standard review (backward compatible).
+
+### Production — Review Variants
+
+When review-code runs as a workflow's **first step** (bugfix diagnostic, refactor baseline, security audit), produce a handoff for the next step:
+- Bugfix: `flow/handoffs/handoff_<feature>_review_to_plan.md`
+- Refactor/Security: `flow/handoffs/handoff_<feature>_review_to_discovery.md`
+
+Include: feature name, workflow type, review variant, key findings, affected files, and focus guidance.

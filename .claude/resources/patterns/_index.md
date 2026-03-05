@@ -97,6 +97,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-REV-3 | Rule update recommendation example | review-code-templates.md | 234-284 |
 | PTN-REV-4 | Finding example | review-code-templates.md | 286-316 |
 
+### Handoff Patterns (`handoff-patterns.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-HND-1 | Handoff document structure, naming, plan-aware review fields | handoff-patterns.md | 14-90 |
+| PTN-HND-2 | Per-workflow handoff points (feature, bugfix, refactor, security) | handoff-patterns.md | 92-155 |
+
 ### PR Review Patterns (`review-pr-patterns.md`)
 
 | Code | Description | Source | Lines |
@@ -148,6 +155,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-PYTEST-3 | Need mocking examples |
 | PTN-PYTEST-4 | Need parametrized test examples |
 
+### Handoff
+
+| Code | Expand When |
+|------|-------------|
+| PTN-HND-1 | Need handoff document template or naming convention |
+| PTN-HND-2 | Need per-workflow handoff points |
+
 ### Code Review
 
 | Code | Expand When |
@@ -180,6 +194,9 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 ### Testing
 - **PTN-JEST-***: Jest testing patterns (JS/TS)
 - **PTN-PYTEST-***: Pytest testing patterns (Python)
+
+### Handoffs
+- **PTN-HND-***: Handoff document patterns and per-workflow handoff points
 
 ### Reviews
 - **PTN-REV-***: Code review templates

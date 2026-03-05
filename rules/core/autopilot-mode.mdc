@@ -89,29 +89,36 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 2. Execute the discovery skill
 3. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
 4. Produce discovery document in `flow/discovery/`
-5. **Auto-proceed** to Step 3
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+6. **Auto-proceed** to Step 3
 
 #### Step 3: Create Plan
 **GATE CHECK**: Verify discovery document exists in `flow/discovery/`. If not, go back to Step 2.
-1. **Read** `.cursor/commands/create-plan.md`
-2. Execute with discovery document as input
-3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
-4. **Auto-proceed** to Step 4
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_discovery_to_plan.md` if it exists
+2. **Read** `.cursor/commands/create-plan.md`
+3. Execute with discovery document as input
+4. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+6. **Auto-proceed** to Step 4
 
 #### Step 4: Execute Plan
-1. **Read** `.cursor/commands/execute-plan.md`
-2. Execute following complexity-based grouping
-3. Run build + test verification at the end
-4. **Auto-proceed** to Step 5
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_plan_to_execute.md` if it exists
+2. **Read** `.cursor/commands/execute-plan.md`
+3. Execute following complexity-based grouping
+4. Run build + test verification at the end
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_execute_to_review.md` (with plan alignment data)
+6. **Auto-proceed** to Step 5
 
 #### Step 5: Review Code
-1. **Read** `.cursor/commands/review-code.md`
-2. Review all uncommitted changes
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_execute_to_review.md` if it exists (enables plan-aware review)
+2. **Read** `.cursor/commands/review-code.md`
+3. Review all uncommitted changes (with plan alignment check if handoff exists)
 
 #### Step 6: Archive and Complete
 1. Move discovery + plan to `flow/archive/`
-2. Present completion summary
-3. **Prompt for context cleanup** (see below)
+2. Move handoff files for this feature from `flow/handoffs/` to `flow/archive/`
+3. Present completion summary
+4. **Prompt for context cleanup** (see below)
 
 ---
 
@@ -123,28 +130,35 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 1. **Read** `.cursor/commands/review-code.md`
 2. Review current code state with focus on **diagnosing the bug** — identify root cause, affected files, and broken behavior
 3. Summarize findings for the planning step
+4. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_review_to_plan.md`
 
 #### Step 2: Create Plan
-1. **Read** `.cursor/commands/create-plan.md`
-2. Create fix plan based on user's bug description + diagnostic review findings
-3. **Note**: No discovery document required for bugfix — the bug report + diagnostic review serve as input
-4. **PAUSE**: Present plan for user approval (mandatory checkpoint)
-5. **Auto-proceed** to Step 3
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_review_to_plan.md` if it exists
+2. **Read** `.cursor/commands/create-plan.md`
+3. Create fix plan based on user's bug description + diagnostic review findings
+4. **Note**: No discovery document required for bugfix — the bug report + diagnostic review serve as input
+5. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+6. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+7. **Auto-proceed** to Step 3
 
 #### Step 3: Execute Plan
-1. **Read** `.cursor/commands/execute-plan.md`
-2. Execute the fix plan
-3. Run build + test verification at the end
-4. **Auto-proceed** to Step 4
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_plan_to_execute.md` if it exists
+2. **Read** `.cursor/commands/execute-plan.md`
+3. Execute the fix plan
+4. Run build + test verification at the end
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_execute_to_review.md` (with plan alignment data)
+6. **Auto-proceed** to Step 4
 
 #### Step 4: Verification Review
-1. **Read** `.cursor/commands/review-code.md`
-2. Review all uncommitted changes with focus on **verifying the fix** — confirm root cause addressed, no regressions
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_execute_to_review.md` if it exists (enables plan-aware review)
+2. **Read** `.cursor/commands/review-code.md`
+3. Review all uncommitted changes with focus on **verifying the fix** — confirm root cause addressed, no regressions
 
 #### Step 5: Archive and Complete
 1. Move plan to `flow/archive/`
-2. Present completion summary
-3. **Prompt for context cleanup**
+2. Move handoff files for this feature from `flow/handoffs/` to `flow/archive/`
+3. Present completion summary
+4. **Prompt for context cleanup**
 
 ---
 
@@ -156,36 +170,45 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 1. **Read** `.cursor/commands/review-code.md`
 2. Review current code with focus on **baselining quality** — document patterns, code smells, metrics
 3. Summarize findings for the discovery step
+4. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_review_to_discovery.md`
 
 #### Step 2: Discovery
-1. **Read** `.cursor/commands/discovery-plan.md`
-2. Focus discovery on **refactoring scope**: what to change, target patterns, success criteria
-3. Include baseline review findings as input context
-4. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
-5. Produce discovery document in `flow/discovery/`
-6. **Auto-proceed** to Step 3
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_review_to_discovery.md` if it exists
+2. **Read** `.cursor/commands/discovery-plan.md`
+3. Focus discovery on **refactoring scope**: what to change, target patterns, success criteria
+4. Include baseline review findings as input context
+5. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
+6. Produce discovery document in `flow/discovery/`
+7. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+8. **Auto-proceed** to Step 3
 
 #### Step 3: Create Plan
 **GATE CHECK**: Verify discovery document exists.
-1. **Read** `.cursor/commands/create-plan.md`
-2. Create refactoring plan with before/after pattern descriptions
-3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
-4. **Auto-proceed** to Step 4
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_discovery_to_plan.md` if it exists
+2. **Read** `.cursor/commands/create-plan.md`
+3. Create refactoring plan with before/after pattern descriptions
+4. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+6. **Auto-proceed** to Step 4
 
 #### Step 4: Execute Plan
-1. **Read** `.cursor/commands/execute-plan.md`
-2. Execute the refactoring plan
-3. Run build + test verification at the end
-4. **Auto-proceed** to Step 5
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_plan_to_execute.md` if it exists
+2. **Read** `.cursor/commands/execute-plan.md`
+3. Execute the refactoring plan
+4. Run build + test verification at the end
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_execute_to_review.md` (with plan alignment data)
+6. **Auto-proceed** to Step 5
 
 #### Step 5: Comparison Review
-1. **Read** `.cursor/commands/review-code.md`
-2. Review all changes with focus on **comparing against baseline** — verify patterns improved, no quality regressions
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_execute_to_review.md` if it exists (enables plan-aware review)
+2. **Read** `.cursor/commands/review-code.md`
+3. Review all changes with focus on **comparing against baseline** — verify patterns improved, no quality regressions
 
 #### Step 6: Archive and Complete
 1. Move discovery + plan to `flow/archive/`
-2. Present completion summary with before/after comparison
-3. **Prompt for context cleanup**
+2. Move handoff files for this feature from `flow/handoffs/` to `flow/archive/`
+3. Present completion summary with before/after comparison
+4. **Prompt for context cleanup**
 
 ---
 
@@ -197,38 +220,47 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 1. **Read** `.cursor/commands/review-code.md`
 2. Review current code with **security focus** — vulnerabilities, auth flows, data handling, input validation
 3. Summarize findings for the discovery step
+4. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_review_to_discovery.md`
 
 #### Step 2: Discovery
-1. **Read** `.cursor/commands/discovery-plan.md`
-2. Focus discovery on **security requirements**: threat model, attack surface, compliance needs
-3. Include security audit findings as input context
-4. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
-5. Produce discovery document in `flow/discovery/`
-6. **Auto-proceed** to Step 3
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_review_to_discovery.md` if it exists
+2. **Read** `.cursor/commands/discovery-plan.md`
+3. Focus discovery on **security requirements**: threat model, attack surface, compliance needs
+4. Include security audit findings as input context
+5. **PAUSE**: Use `SwitchMode` + `AskQuestion` for clarifying questions (mandatory checkpoint)
+6. Produce discovery document in `flow/discovery/`
+7. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+8. **Auto-proceed** to Step 3
 
 #### Step 3: Create Plan
 **GATE CHECK**: Verify discovery document exists.
-1. **Read** `.cursor/commands/create-plan.md`
-2. Create security hardening plan
-3. **PAUSE**: Present plan for user approval (mandatory checkpoint)
-4. **Auto-proceed** to Step 4
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_discovery_to_plan.md` if it exists
+2. **Read** `.cursor/commands/create-plan.md`
+3. Create security hardening plan
+4. **PAUSE**: Present plan for user approval (mandatory checkpoint)
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+6. **Auto-proceed** to Step 4
 
 #### Step 4: Execute Plan
-1. **Read** `.cursor/commands/execute-plan.md`
-2. Execute the security plan
-3. Run build + test verification at the end
-4. **Auto-proceed** to Step 5
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_plan_to_execute.md` if it exists
+2. **Read** `.cursor/commands/execute-plan.md`
+3. Execute the security plan
+4. Run build + test verification at the end
+5. **Produce handoff**: Write `flow/handoffs/handoff_<feature>_execute_to_review.md` (with plan alignment data)
+6. **Auto-proceed** to Step 5
 
 #### Step 5: Security Verification Review
-1. **Read** `.cursor/commands/review-code.md`
-2. Review all changes with **security focus** — verify vulnerabilities addressed, no new attack surface
-3. **PAUSE**: Present security review for user approval (extra mandatory checkpoint)
-4. Wait for user to approve before archiving
+1. **Consume handoff**: Read `flow/handoffs/handoff_<feature>_execute_to_review.md` if it exists (enables plan-aware review)
+2. **Read** `.cursor/commands/review-code.md`
+3. Review all changes with **security focus** — verify vulnerabilities addressed, no new attack surface
+4. **PAUSE**: Present security review for user approval (extra mandatory checkpoint)
+5. Wait for user to approve before archiving
 
 #### Step 6: Archive and Complete
 1. Move discovery + plan to `flow/archive/`
-2. Present completion summary with security findings resolved
-3. **Prompt for context cleanup**
+2. Move handoff files for this feature from `flow/handoffs/` to `flow/archive/`
+3. Present completion summary with security findings resolved
+4. **Prompt for context cleanup**
 
 ---
 

@@ -404,3 +404,18 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Handoff
+
+### Consumption
+
+Before starting execution, check for `flow/handoffs/handoff_<feature>_plan_to_execute.md`. If it exists, read it silently and use its focus guidance to prioritize execution. If it doesn't exist, proceed normally (backward compatible).
+
+### Production
+
+After ALL phases complete and build/test verification passes, produce a handoff for the review step.
+
+**Output**: `flow/handoffs/handoff_<feature>_execute_to_review.md`
+
+Include: feature name, workflow type, phases completed, build/test status, plan path, and **Plan Alignment Data** — list of planned files (from plan tasks) vs actually modified files (from `git diff --name-only`), noting scope drift and missing changes.

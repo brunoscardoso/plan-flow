@@ -1,0 +1,138 @@
+
+# Handoff Patterns
+
+## Overview
+
+Handoff documents formalize context transfer between plan-flow commands. Each command produces a handoff at completion, and the next command consumes it. Handoffs are lightweight structured summaries persisted to `flow/handoffs/`.
+
+**Reference Codes**: PTN-HND-1 (handoff structure), PTN-HND-2 (per-workflow handoff points)
+
+---
+
+## PTN-HND-1: Handoff Document Structure
+
+### Template
+
+```markdown
+# Handoff: [source_step] → [target_step]
+
+**Feature**: [feature name]
+**Workflow**: [feature/bugfix/refactor/security]
+**Timestamp**: [ISO timestamp]
+
+## Completed Step
+
+**Step**: [step name and number]
+**Artifacts**:
+- [artifact type]: `[path]`
+
+## Key Outputs
+
+- [1-3 bullet points summarizing what was produced/decided]
+
+## Focus Guidance
+
+[1-2 sentences telling the next step what to prioritize]
+
+## Context References
+
+- Discovery: `[path or N/A]`
+- Plan: `[path or N/A]`
+- Contracts: `[paths or none]`
+```
+
+### File Naming Convention
+
+`handoff_<feature>_<source>_to_<target>.md`
+
+**Examples**:
+- `handoff_user_auth_discovery_to_plan.md`
+- `handoff_user_auth_plan_to_execute.md`
+- `handoff_user_auth_execute_to_review.md`
+- `handoff_user_auth_review_to_plan.md` (bugfix: diagnostic review → plan)
+
+### Storage
+
+- **Active handoffs**: `flow/handoffs/`
+- **On flow completion**: Auto-archive all handoffs for the feature to `flow/archive/` alongside plan and discovery
+
+### Plan-Aware Review Fields
+
+The `execute → review` handoff includes extra fields for plan-aware review:
+
+```markdown
+## Plan Alignment Data
+
+**Plan file**: `flow/plans/plan_<feature>_v1.md`
+**Phases completed**: [X of Y]
+
+### Planned Files
+[List of files expected to change based on plan tasks]
+
+### Actually Modified Files
+[List of files from git diff --name-only]
+
+### Scope Notes
+- Files changed but not in plan: [list or "none"]
+- Planned files not modified: [list or "none"]
+```
+
+---
+
+## PTN-HND-2: Per-Workflow Handoff Points
+
+### Feature Workflow
+
+| Step Boundary | Handoff File | Key Content |
+|---------------|-------------|-------------|
+| discovery → plan | `handoff_<f>_discovery_to_plan.md` | FR/NFR/C counts, key decisions, risks, discovery path |
+| plan → execute | `handoff_<f>_plan_to_execute.md` | Phase count, complexity summary, plan path, discovery path |
+| execute → review | `handoff_<f>_execute_to_review.md` | Phases completed, files changed, build/test status, plan alignment data |
+
+### Bugfix Workflow
+
+| Step Boundary | Handoff File | Key Content |
+|---------------|-------------|-------------|
+| diagnostic review → plan | `handoff_<f>_review_to_plan.md` | Root cause analysis, affected files, broken behavior summary |
+| plan → execute | `handoff_<f>_plan_to_execute.md` | Fix plan summary, targeted files |
+| execute → verification review | `handoff_<f>_execute_to_review.md` | Fix applied, files changed, build/test status, plan alignment data |
+
+### Refactor Workflow
+
+| Step Boundary | Handoff File | Key Content |
+|---------------|-------------|-------------|
+| baseline review → discovery | `handoff_<f>_review_to_discovery.md` | Current patterns, code smells, quality metrics |
+| discovery → plan | `handoff_<f>_discovery_to_plan.md` | Refactoring scope, target patterns, success criteria |
+| plan → execute | `handoff_<f>_plan_to_execute.md` | Refactoring phases, before/after pattern descriptions |
+| execute → comparison review | `handoff_<f>_execute_to_review.md` | Changes applied, files changed, plan alignment data |
+
+### Security Workflow
+
+| Step Boundary | Handoff File | Key Content |
+|---------------|-------------|-------------|
+| security audit → discovery | `handoff_<f>_review_to_discovery.md` | Vulnerabilities found, threat surface, auth flow analysis |
+| discovery → plan | `handoff_<f>_discovery_to_plan.md` | Security requirements, threat model, compliance needs |
+| plan → execute | `handoff_<f>_plan_to_execute.md` | Security hardening phases |
+| execute → security review | `handoff_<f>_execute_to_review.md` | Changes applied, files changed, plan alignment data |
+
+---
+
+## Rules
+
+### Production Rules
+
+1. **Always produce**: Every command that completes a workflow step MUST produce a handoff document
+2. **Structured summary**: Keep handoffs lightweight — key outputs, not full context dumps
+3. **Plan alignment**: The execute→review handoff MUST include planned vs actual file lists
+
+### Consumption Rules
+
+1. **Backward compatible**: If no handoff file exists, the consuming command proceeds normally without it
+2. **Read silently**: Consume handoffs without prompting the user — they're internal context transfer
+3. **Don't duplicate**: Don't repeat handoff content in full — reference it and build on it
+
+### Lifecycle Rules
+
+1. **Auto-archive**: When the flow completes, move all `flow/handoffs/` files for the feature to `flow/archive/`
+2. **One per boundary**: Each step boundary produces exactly one handoff file (overwrites if re-run)
+3. **Feature-scoped**: Handoff filenames include the feature name to avoid conflicts

@@ -246,6 +246,57 @@ review-code --language typescript
 
 ---
 
+## Handoff Consumption — Plan-Aware Review
+
+Before starting the review, check for a handoff document from the execution step.
+
+**Input**: `flow/handoffs/handoff_<feature>_execute_to_review.md`
+
+**Behavior**:
+- If handoff exists: enable **plan-aware review mode**
+  - Read the Plan Alignment Data section
+  - Check for scope drift: flag files that were changed but not listed in the plan
+  - Check for missing changes: flag files that were planned but not modified
+  - Add a **Plan Alignment** section to the review output:
+    ```markdown
+    ## Plan Alignment
+
+    **Plan**: `[plan path]`
+    **Phases completed**: [X of Y]
+
+    ### Scope Drift
+    [Files changed but not in plan, or "None — all changes align with plan"]
+
+    ### Missing Changes
+    [Planned files not modified, or "None — all planned changes implemented"]
+
+    ### Verdict
+    [ALIGNED / MINOR DRIFT / SIGNIFICANT DRIFT]
+    ```
+  - Use the handoff's focus guidance to prioritize review attention
+- If handoff doesn't exist: proceed with standard review (backward compatible)
+
+---
+
+## Handoff Production — Review Variants
+
+For workflows where review-code runs as the **first step** (bugfix diagnostic, refactor baseline, security audit), produce a handoff for the next step.
+
+**Output**:
+- Bugfix: `flow/handoffs/handoff_<feature>_review_to_plan.md`
+- Refactor/Security: `flow/handoffs/handoff_<feature>_review_to_discovery.md`
+
+**Content to include**:
+- Feature name and workflow type
+- Review variant (diagnostic/baseline/security audit)
+- Key findings summary (top issues, root cause for bugfix, patterns for refactor, vulnerabilities for security)
+- Affected files list
+- Focus guidance for the next step
+
+**When to produce**: After the review document is generated, when review-code is used as a workflow's first step (not the final review).
+
+---
+
 ## Related Files
 
 | File                                               | Purpose                              |

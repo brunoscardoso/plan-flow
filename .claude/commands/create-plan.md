@@ -344,3 +344,18 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Handoff
+
+### Consumption
+
+Before creating the plan, check for `flow/handoffs/handoff_<feature>_discovery_to_plan.md` (or `handoff_<feature>_review_to_plan.md` for bugfix workflow). If it exists, read it silently and use its focus guidance to inform plan structure. If it doesn't exist, proceed normally (backward compatible).
+
+### Production
+
+After the plan is created, produce a handoff for the execution step.
+
+**Output**: `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+
+Include: feature name, workflow type, phase count, total complexity, highest complexity phase, plan and discovery paths, and focus guidance for execution.

@@ -540,6 +540,40 @@ If the user wants to stop execution:
 
 ---
 
+## Handoff Consumption
+
+Before starting execution, check for a handoff document from the planning step.
+
+**Input**: `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+
+**Behavior**:
+- If handoff exists: read it silently and use its focus guidance to inform execution priorities
+- If handoff doesn't exist: proceed normally using the plan file directly (backward compatible)
+
+---
+
+## Handoff Production
+
+After ALL phases complete and build/test verification passes, produce a handoff document for the review step.
+
+**Output**: `flow/handoffs/handoff_<feature>_execute_to_review.md`
+
+**Content to include**:
+- Feature name and workflow type
+- Phases completed (X of Y)
+- Build and test verification status
+- Plan document path
+- **Plan Alignment Data** (for plan-aware review):
+  - List of files expected to change (extracted from plan phase tasks)
+  - List of files actually modified (from `git diff --name-only`)
+  - Files changed but not in plan (scope drift)
+  - Planned files not modified (missing changes)
+- Focus guidance for review: areas that had high complexity or required workarounds
+
+**When to produce**: After build/test verification passes, before auto-proceeding to review-code.
+
+---
+
 ## Summary of Key Rules
 
 | Rule                         | Description                                                 |

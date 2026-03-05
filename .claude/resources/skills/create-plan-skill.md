@@ -245,6 +245,36 @@ Before completing the plan, verify:
 
 ---
 
+## Handoff Consumption
+
+Before creating the plan, check for a handoff document from the previous step.
+
+**Input**: `flow/handoffs/handoff_<feature>_discovery_to_plan.md` (or `handoff_<feature>_review_to_plan.md` for bugfix workflow)
+
+**Behavior**:
+- If handoff exists: read it silently and use its key outputs and focus guidance to inform plan structure
+- If handoff doesn't exist: proceed normally using the discovery document directly (backward compatible)
+- Don't duplicate handoff content — reference and build on it
+
+---
+
+## Handoff Production
+
+After the plan is created, produce a handoff document for the execution step.
+
+**Output**: `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+
+**Content to include**:
+- Feature name and workflow type
+- Phase count and total complexity score
+- Highest complexity phase name and score
+- Plan document path and discovery document path
+- Focus guidance for execution: which phases need most care, any special sequencing notes
+
+**When to produce**: After the plan file is saved and validated, before auto-proceeding to execute-plan.
+
+---
+
 ## Related Files
 
 | File                                           | Purpose                          |
