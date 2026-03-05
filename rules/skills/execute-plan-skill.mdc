@@ -500,6 +500,46 @@ After ALL phases complete and build/test verification passes, produce a handoff 
 
 ---
 
+## Phase Access Enforcement
+
+When executing each phase, check the `**Access**` field:
+
+1. **Parse**: Look for `**Access**: full-access` or `**Access**: read-only` in the phase header
+2. **Default**: If no `**Access**` field exists, use `full-access` (backward compatible)
+3. **Enforce**:
+   - **full-access**: No restrictions — use all tools as normal
+   - **read-only**: Restrict to Read, Grep, Glob tools only. Do NOT use Edit, Write, or Bash (write commands). Output only to `flow/` directories.
+4. **Display**: When presenting phase details in Plan mode, include the access level:
+   ```
+   Phase 3: Security Audit
+   Complexity: 4/10
+   Access: read-only (Read/Grep/Glob only)
+   ```
+5. **Phase boundary**: Access level resets at each phase boundary — each phase uses its own access level
+
+---
+
+## High-Complexity Verification Check
+
+After completing any phase with complexity ≥ 7, perform a brief read-only scope check:
+
+1. **Compare planned vs actual files**:
+   - Extract file paths mentioned in the phase tasks
+   - Run `git diff --name-only` to get actually modified files
+   - Identify: scope drift (unexpected files), missing changes (planned but not modified)
+2. **Report findings** as a brief note:
+   ```
+   Scope check (Phase 3, complexity 7):
+   - Planned: src/api/routes.ts, src/types/user.ts
+   - Modified: src/api/routes.ts, src/types/user.ts, src/utils/auth.ts
+   - Note: src/utils/auth.ts not in plan (minor scope drift)
+   ```
+3. **Do NOT block execution** — this is informational only
+4. **Append to brain-capture** data for the phase (include in `files_changed` and add a `scope_drift` field if any)
+5. **Skip** if the phase access is already `read-only` (nothing to verify)
+
+---
+
 ## Related Files
 
 | File                                        | Purpose                          |

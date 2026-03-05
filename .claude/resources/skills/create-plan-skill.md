@@ -288,6 +288,34 @@ After the plan is created, produce a handoff document for the execution step.
 
 ---
 
+## Phase Access Level Assignment
+
+When creating plan phases, assign an `**Access**` field to each phase:
+
+### Auto-Assignment Rules
+
+1. **Default**: All phases get `**Access**: full-access`
+2. **Read-only exceptions**: Assign `**Access**: read-only` when the phase name or scope contains any of:
+   - "review", "audit", "analysis", "documentation", "baseline", "comparison", "verification"
+3. **Always include**: The `**Access**` line after `**Complexity**` in every phase
+
+### Example
+
+```markdown
+### Phase 3: Security Audit
+
+**Scope**: Review authentication flows and data handling
+**Complexity**: 4/10
+**Access**: read-only
+
+- [ ] Analyze auth middleware
+- [ ] Check input validation patterns
+```
+
+See `.claude/resources/patterns/plans-templates.md` for the full phase template and `.claude/resources/core/agent-profiles.md` for phase-level access definitions.
+
+---
+
 ## Related Files
 
 | File                                           | Purpose                          |

@@ -82,6 +82,25 @@ Agent profiles define tool access boundaries for each plan-flow skill. Every com
 
 ---
 
+## Phase-Level Access
+
+Within the execute-plan skill, individual phases can override the command-level `full-access` profile using the `**Access**` field in the plan:
+
+| Phase Access | Tool Access | When Used |
+|-------------|-------------|-----------|
+| `full-access` | All tools (default) | Implementation phases — types, backend, frontend, tests |
+| `read-only` | Read, Grep, Glob only; output to `flow/` dirs | Review, audit, analysis, documentation-only phases |
+
+**Rules**:
+- If a phase has no `**Access**` field, it defaults to `full-access` (backward compatible)
+- Phase access is enforced for the duration of that phase only — the next phase reverts to its own access level
+- High-complexity phases (7+) get an automatic read-only verification check after implementation (scope drift detection)
+- The create-plan skill auto-assigns access levels based on phase name and scope
+
+See `rules/patterns/plans-templates.mdc` for the phase template with the `Access` field.
+
+---
+
 ## Enforcement
 
 Profiles are enforced by convention — the `AGENT_PROFILE` header in each command file and the `## Tool Access` section in each skill file reference this document. The LLM must respect the boundaries defined here.

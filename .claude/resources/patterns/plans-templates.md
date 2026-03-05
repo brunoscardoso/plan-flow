@@ -51,6 +51,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
+**Access**: full-access
 
 - [ ] Task 1
 - [ ] Task 2
@@ -61,6 +62,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
+**Access**: full-access
 
 - [ ] Task 1
 - [ ] Task 2
@@ -248,6 +250,21 @@ Use this template when creating new implementation plans:
 **Average Complexity**: 5/10
 **Highest Complexity**: Phase 2 at 7/10
 ```
+
+---
+
+## Phase Access Levels
+
+Each phase can specify an `**Access**` field to control tool access during execution:
+
+| Access Level | When Used | Tool Access |
+|-------------|-----------|-------------|
+| `full-access` | Implementation phases (default) | All tools — Edit, Write, Bash, Read, Grep, Glob |
+| `read-only` | Review, audit, analysis, documentation-only phases | Read, Grep, Glob only — output to `flow/` dirs |
+
+**Default**: If `**Access**` is omitted, the phase uses `full-access`. This ensures backward compatibility with existing plans.
+
+**Auto-assignment by create-plan**: The create-plan skill auto-assigns access levels based on phase content. Phases with "review", "audit", "analysis", or "documentation" in their name/scope get `read-only`. All other phases get `full-access`.
 
 ---
 
