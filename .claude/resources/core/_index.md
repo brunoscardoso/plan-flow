@@ -87,6 +87,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-OW-1 | Workflow type definitions (feature, bugfix, refactor, security) | orchestration-workflows.md | 14-130 |
 | COR-OW-2 | Workflow selection guide, priority order, complexity thresholds | orchestration-workflows.md | 132-170 |
 
+### Audit Trail (`audit-trail.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AUD-1 | Event type definitions (command, phase, file, verification, error, checkpoint) | audit-trail.md | 14-120 |
+| COR-AUD-2 | Integration rules (when to log, file change detection, lifecycle) | audit-trail.md | 122-170 |
+
 ---
 
 ## When to Expand
@@ -116,6 +123,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AG-2 | Need command-to-profile mapping |
 | COR-OW-1 | Need workflow type definitions and step sequences |
 | COR-OW-2 | Need workflow selection guide and complexity thresholds |
+| COR-AUD-1 | Need audit trail event type definitions |
+| COR-AUD-2 | Need audit trail integration rules and lifecycle |
 
 ---
 
@@ -154,3 +163,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
 - `agent-profiles.md` is loaded on-demand - defines tool access boundaries per skill profile
 - `orchestration-workflows.md` is loaded on-demand - defines workflow step sequences for autopilot mode
+- `audit-trail.md` is loaded on-demand - defines structured JSONL audit logging for workflow events

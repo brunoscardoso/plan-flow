@@ -278,6 +278,19 @@ Before completing discovery, verify:
 
 ---
 
+## Audit Trail
+
+Append structured JSONL entries to `flow/audit.log`. See `.claude/resources/core/audit-trail.md` [COR-AUD-1] for event type definitions.
+
+**Events to log**:
+1. **command_start**: `{"ts":"...","event":"command_start","command":"discovery","feature":"<feature>","workflow":"<type>"}`
+2. **file_created**: For the discovery document — `{"ts":"...","event":"file_created","path":"flow/discovery/discovery_<feature>_v1.md"}`
+3. **command_end**: `{"ts":"...","event":"command_end","command":"discovery","status":"completed","summary":"<X> requirements gathered"}`
+
+Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
+
+---
+
 ## Handoff Production
 
 After discovery completes, produce a handoff document for the planning step. See `.claude/resources/patterns/handoff-patterns.md` [PTN-HND-1] for the template.

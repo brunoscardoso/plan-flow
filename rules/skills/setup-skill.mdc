@@ -921,6 +921,19 @@ Before completing setup, verify each pattern file:
 
 ---
 
+## Audit Trail
+
+Append structured JSONL entries to `flow/audit.log`. See `rules/core/audit-trail.mdc` [COR-AUD-1] for event type definitions.
+
+**Events to log**:
+1. **command_start**: `{"ts":"...","event":"command_start","command":"setup","feature":"project_setup","workflow":"manual"}`
+2. **file_created**: For each generated pattern/rule file
+3. **command_end**: `{"ts":"...","event":"command_end","command":"setup","status":"completed","summary":"<project> initialized"}`
+
+Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
+
+---
+
 ## Related Files
 
 | File                                           | Purpose                           |

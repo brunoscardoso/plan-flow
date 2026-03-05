@@ -435,6 +435,25 @@ If the user wants to stop execution:
 
 ---
 
+## Audit Trail
+
+Append structured JSONL entries to `flow/audit.log` during execution. See `rules/core/audit-trail.mdc` [COR-AUD-1] for event type definitions.
+
+**Events to log**:
+
+1. **command_start**: At execution begin — `{"ts":"...","event":"command_start","command":"execute-plan","feature":"<feature>","workflow":"<type>"}`
+2. **phase_start**: Before each phase — `{"ts":"...","event":"phase_start","phase":<N>,"name":"<name>","complexity":<score>}`
+3. **file_created/file_modified/file_deleted**: After each phase, run `git diff --name-only --diff-filter=A/M/D` to detect changes. Log one entry per source file (skip `flow/` directory files).
+4. **phase_end**: After each phase — `{"ts":"...","event":"phase_end","phase":<N>,"name":"<name>","status":"completed","files_changed":<count>}`
+5. **verification**: After build/test — `{"ts":"...","event":"verification","build":"pass/fail","tests":"pass/fail","test_count":"<passed>/<total>"}`
+6. **checkpoint**: After git commits — `{"ts":"...","event":"checkpoint","sha":"<short-sha>","message":"<msg>"}`
+7. **error**: On errors — `{"ts":"...","event":"error","message":"<desc>","phase":<N>,"recoverable":<bool>}`
+8. **command_end**: At completion — `{"ts":"...","event":"command_end","command":"execute-plan","status":"completed","summary":"<X> phases completed"}`
+
+**Rules**: Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
+
+---
+
 ## Handoff Consumption
 
 Before starting execution, check for a handoff document from the planning step.

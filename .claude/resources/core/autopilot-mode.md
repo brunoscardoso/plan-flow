@@ -336,6 +336,14 @@ These rules remain fully active when autopilot is OFF.
 
 ---
 
+## Audit Trail
+
+Audit logging happens automatically during each workflow step — skills log `command_start`, `command_end`, and step-specific events (phase transitions, file changes, verification results) to `flow/audit.log`. See `.claude/resources/core/audit-trail.md` [COR-AUD-1] for event types.
+
+**Important**: `flow/audit.log` is a running log across features. It is **NOT** archived during Step 6 (Archive and Complete). Only plans, discovery docs, and handoff files are moved to `flow/archive/`.
+
+---
+
 ## Error Handling
 
 If any step fails:

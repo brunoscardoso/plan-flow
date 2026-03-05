@@ -84,6 +84,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-OW-1 | Workflow type definitions (feature, bugfix, refactor, security) | orchestration-workflows.mdc | 18-115 |
 | COR-OW-2 | Workflow selection guide, priority order, complexity thresholds | orchestration-workflows.mdc | 117-145 |
 
+### Audit Trail (`audit-trail.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AUD-1 | Event type definitions (command, phase, file, verification, error, checkpoint) | audit-trail.mdc | 14-100 |
+| COR-AUD-2 | Integration rules (when to log, file change detection, lifecycle) | audit-trail.mdc | 102-145 |
+
 ---
 
 ## When to Expand
@@ -113,6 +120,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AG-2 | Need command-to-profile mapping |
 | COR-OW-1 | Need workflow type definitions and step sequences |
 | COR-OW-2 | Need workflow selection guide and complexity thresholds |
+| COR-AUD-1 | Need audit trail event type definitions |
+| COR-AUD-2 | Need audit trail integration rules and lifecycle |
 
 ---
 
@@ -151,3 +160,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `resource-capture.mdc` has `alwaysApply: false` - loaded during skill execution to watch for valuable reference materials
 - `agent-profiles.mdc` has `alwaysApply: false` - defines tool access boundaries per skill profile
 - `orchestration-workflows.mdc` has `alwaysApply: false` - defines workflow step sequences for autopilot mode
+- `audit-trail.mdc` has `alwaysApply: false` - defines structured JSONL audit logging for workflow events

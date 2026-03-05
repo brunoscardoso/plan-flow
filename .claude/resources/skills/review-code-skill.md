@@ -254,6 +254,19 @@ review-code --language typescript
 
 ---
 
+## Audit Trail
+
+Append structured JSONL entries to `flow/audit.log`. See `.claude/resources/core/audit-trail.md` [COR-AUD-1] for event type definitions.
+
+**Events to log**:
+1. **command_start**: `{"ts":"...","event":"command_start","command":"review-code","feature":"<feature>","workflow":"<type>"}`
+2. **file_created**: For the review document — `{"ts":"...","event":"file_created","path":"flow/reviewed-code/review_<scope>.md"}`
+3. **command_end**: `{"ts":"...","event":"command_end","command":"review-code","status":"completed","summary":"<X> findings (<critical>/<major>/<minor>)"}`
+
+Create `flow/audit.log` if it doesn't exist. Always append, never truncate.
+
+---
+
 ## Handoff Consumption — Plan-Aware Review
 
 Before starting the review, check for a handoff document from the execution step.

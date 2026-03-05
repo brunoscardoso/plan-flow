@@ -25,7 +25,7 @@ Agent profiles define tool access boundaries for each plan-flow skill. Every com
 | **Bash (read)** | `git status`, `git diff`, `git log`, `git show`, `gh pr view`, `gh api` (GET only) |
 | **Bash (forbidden)** | `git commit`, `git add`, `git checkout`, `git reset`, `npm run build`, `npm run test`, any write command |
 | **Edit/Write** | Forbidden on source code |
-| **Writable dirs** | `flow/{skill-output}/` (e.g., `flow/reviewed-code/`, `flow/reviewed-pr/`, `flow/discovery/`, `flow/plans/`, `flow/contracts/`), `flow/brain/`, `flow/log.md` |
+| **Writable dirs** | `flow/{skill-output}/` (e.g., `flow/reviewed-code/`, `flow/reviewed-pr/`, `flow/discovery/`, `flow/plans/`, `flow/contracts/`), `flow/brain/`, `flow/log.md`, `flow/audit.log` |
 
 **Commands**: discovery-plan, create-plan, create-contract, review-code, review-pr
 
@@ -41,7 +41,7 @@ Agent profiles define tool access boundaries for each plan-flow skill. Every com
 | **Bash (read)** | `git status`, `git diff`, `git log` |
 | **Bash (write)** | Only within `flow/` directories |
 | **Edit/Write** | Only files within `flow/` |
-| **Writable dirs** | `flow/brain/`, `flow/resources/`, `flow/.autopilot`, `flow/log.md` |
+| **Writable dirs** | `flow/brain/`, `flow/resources/`, `flow/.autopilot`, `flow/log.md`, `flow/audit.log` |
 
 **Commands**: brain, learn, flow
 
