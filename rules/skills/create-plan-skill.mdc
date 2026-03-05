@@ -303,6 +303,28 @@ See `rules/patterns/plans-templates.mdc` for the full phase template and `rules/
 
 ---
 
+## ADR References
+
+When creating a plan, check `flow/brain/decisions/` for ADR files related to the feature:
+
+1. Search for ADR files where the feature name matches (check YAML frontmatter `feature` field or Related section)
+2. If relevant ADRs are found, add an "Architectural Decisions" subsection to the plan output:
+
+```markdown
+## Architectural Decisions
+
+The following ADRs inform this plan:
+
+- [[ADR: jwt-over-sessions]] (api-design) — Stateless auth via JWT tokens
+- [[ADR: event-sourcing]] (data-model) — Event-sourced audit trail
+
+See `flow/brain/decisions/` for full decision context.
+```
+
+3. If no relevant ADRs exist, skip this section (do not add an empty section)
+
+---
+
 ## Related Files
 
 | File                                           | Purpose                          |

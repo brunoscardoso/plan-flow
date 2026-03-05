@@ -25,6 +25,7 @@ flow/brain/
 | Feature | `features/{kebab-case}.md` | `features/contact-enrichment.md` | `[[contact-enrichment]]` |
 | Error | `errors/{kebab-case}.md` | `errors/prisma-connection-pooling.md` | `[[prisma-connection-pooling]]` |
 | Decision | `decisions/{kebab-case}.md` | `decisions/jwt-over-sessions.md` | `[[jwt-over-sessions]]` |
+| ADR | `decisions/adr-{kebab-case}.md` | `decisions/adr-jwt-over-sessions.md` | `[[ADR: jwt-over-sessions]]` |
 | Session | `sessions/{YYYY-MM-DD}.md` | `sessions/2026-03-03.md` | `[[2026-03-03]]` |
 
 **Rules**:
@@ -33,6 +34,8 @@ flow/brain/
 - Derive feature names from discovery/plan file names: `discovery_contact_enrichment_v1.md` → `contact-enrichment`
 - Derive error names from the error description: "Prisma connection pooling timeout" → `prisma-connection-pooling`
 - Derive decision names from the choice: "Chose JWT over sessions" → `jwt-over-sessions`
+- ADR files use `adr-` prefix: "Chose JWT over sessions" → `adr-jwt-over-sessions`
+- ADR scope tags: `api-design`, `data-model`, `architecture`, `infrastructure`, `security`, `integration`
 
 ---
 

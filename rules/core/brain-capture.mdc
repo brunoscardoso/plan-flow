@@ -61,6 +61,16 @@ data:
 - File naming: `{decision-name}.md` (kebab-case)
 - Record: context, options considered, choice made, rationale
 
+### Architecture Decision Records (`flow/brain/decisions/adr-{decision-name}.md`)
+
+- File naming: `adr-{kebab-case}.md` prefix distinguishes ADRs from regular decisions
+- Example: `adr-jwt-over-sessions.md`
+- **Detection criteria**: Generate ADRs only for **architectural significance** — choices between 2+ alternatives affecting system structure, API design, data models, security, or infrastructure
+- Do NOT generate ADRs for tactical/implementation choices (variable naming, library minor versions)
+- **Status values**: `proposed`, `accepted`, `superseded`, `deprecated`
+- **Scope tags**: `api-design`, `data-model`, `architecture`, `infrastructure`, `security`, `integration`
+- **Index tracking**: ADRs tracked in "Recent Decisions" of `flow/brain/index.md` alongside regular decisions (same cap of 3). Entry format: `[[ADR: jwt-over-sessions]] (api-design) - Chose JWT for stateless API`
+
 ### Sessions (`flow/brain/sessions/`)
 
 - File naming: `{YYYY-MM-DD}_{HH-MM}_{6-char-hex}.md` (per-session, not per-day)

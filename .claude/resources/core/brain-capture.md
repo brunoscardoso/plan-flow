@@ -185,6 +185,82 @@ feature: {feature-name}
 - Errors: [[{error-name}]]
 ```
 
+### 3b. Architecture Decision Records (`flow/brain/decisions/adr-{decision-name}.md`)
+
+**When**: Brain-capture block contains decisions with **architectural significance** — choices between 2+ alternatives that affect system structure, API design, data models, security, or infrastructure.
+
+**File naming**: `adr-{kebab-case}.md` — the `adr-` prefix distinguishes ADRs from regular tactical decisions. Example: `adr-jwt-over-sessions.md`
+
+**Detection criteria** — generate an ADR when:
+- User chose between 2+ architectural alternatives during discovery Q&A
+- Referenced documents describe competing approaches with trade-offs
+- Decision affects system structure, API contracts, data models, or security posture
+- Do NOT generate ADRs for tactical/implementation choices (e.g., variable naming, library minor version)
+
+**Template**:
+
+```markdown
+---
+date: {YYYY-MM-DD}
+feature: {feature-name}
+status: accepted
+scope: {api-design|data-model|architecture|infrastructure|security|integration}
+---
+
+# [[ADR: {decision-name}]]
+
+**Project**: [[{project-name}]]
+**Date**: {YYYY-MM-DD}
+**Feature**: [[{feature-name}]]
+**Status**: {proposed|accepted|superseded|deprecated}
+**Scope**: {api-design|data-model|architecture|infrastructure|security|integration}
+
+## Context
+
+{Why this decision was needed — the problem or trade-off that prompted the choice}
+
+## Options Considered
+
+| Option | Pros | Cons |
+|--------|------|------|
+| {Option A} | {pros} | {cons} |
+| {Option B} | {pros} | {cons} |
+
+## Decision
+
+{What was chosen and why — include the reasoning}
+
+## Consequences
+
+- {Positive consequence 1}
+- {Positive consequence 2}
+- {Negative consequence or trade-off}
+
+## Related
+
+- Feature: [[{feature-name}]]
+- Plan: [[{plan-name}]]
+- Discovery: [[{discovery-name}]]
+```
+
+**Status values**:
+- `proposed` — Decision identified but not yet confirmed by user
+- `accepted` — User confirmed during Q&A or approved in plan
+- `superseded` — Replaced by a newer ADR (link to the replacement)
+- `deprecated` — No longer relevant
+
+**Scope tags**:
+- `api-design` — API structure, endpoints, protocols
+- `data-model` — Database schema, data relationships
+- `architecture` — System structure, patterns, layers
+- `infrastructure` — Deployment, CI/CD, hosting
+- `security` — Auth, encryption, access control
+- `integration` — Third-party services, external APIs
+
+**Index tracking**: ADRs are tracked in the "Recent Decisions" section of `flow/brain/index.md` alongside regular decisions (same cap of 3). ADR entries show the scope tag: `[[ADR: jwt-over-sessions]] (api-design) - Chose JWT for stateless API`.
+
+---
+
 ### 4. Session Files (`flow/brain/sessions/{session-id}.md`)
 
 **When**: Every brain-capture block appends to the current session file.

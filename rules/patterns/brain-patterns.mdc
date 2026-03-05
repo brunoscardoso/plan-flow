@@ -26,6 +26,8 @@ flow/brain/
 - Feature files match the feature name from discovery/plans
 - Error files describe the error pattern, not the instance
 - Decision files describe the decision topic
+- ADR files use `adr-` prefix: "Chose JWT over sessions" → `adr-jwt-over-sessions.md`
+- ADR scope tags: `api-design`, `data-model`, `architecture`, `infrastructure`, `security`, `integration`
 - Session files use ISO date format
 
 ## Wiki-Link Patterns
