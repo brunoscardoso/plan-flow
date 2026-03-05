@@ -115,6 +115,28 @@ The `execute → review` handoff includes extra fields for plan-aware review:
 | plan → execute | `handoff_<f>_plan_to_execute.md` | Security hardening phases |
 | execute → security review | `handoff_<f>_execute_to_review.md` | Changes applied, files changed, plan alignment data |
 
+### Auto Security Scan Results
+
+The `execute → review` handoff may include an additional section with auto security scan findings (from execute-plan Step 7.8):
+
+```markdown
+## Auto Security Scan Results
+
+**Status**: [PASS|WARN]
+**Files Scanned**: [count]
+
+### Findings
+| File | Pattern | Severity |
+|------|---------|----------|
+| `src/config.ts` | API key | Major |
+
+> Values are NOT shown — only file locations and pattern types.
+```
+
+- **If PASS**: Section is omitted or shows "No findings"
+- **If WARN**: Review-code should prioritize reviewing the flagged files for security concerns
+- **If no auto scan ran**: Section is absent (backward compatible)
+
 ---
 
 ## Rules

@@ -117,6 +117,13 @@ The active workflow type is stored in `flow/.autopilot`. If the file is empty or
 - Discovery includes threat modeling
 - Extra checkpoint after execution — user must approve the security review
 - Lower complexity threshold (security changes always warrant scrutiny)
+- Auto security scan (Step 7.8 in execute-plan) findings feed into Step 5 security verification
+
+**Auto security scan** (all workflows):
+- Execute-plan Step 7.8 runs an automatic lightweight security scan on changed files after every execution
+- Uses PTN-SEC-1 secret detection patterns on files modified during execution only
+- Results are non-blocking (informational) and included in the execute→review handoff
+- In security workflows, these findings inform the Step 5 mandatory security verification checkpoint
 
 **Input signals**: "security", "vulnerability", "auth", "authentication", "authorization", "XSS", "injection", "CSRF", "encrypt", "permissions", "access control"
 

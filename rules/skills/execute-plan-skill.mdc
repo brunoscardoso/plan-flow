@@ -350,6 +350,65 @@ After verification passes, automatically extract reusable instincts from executi
 
 ---
 
+### Step 7.8: Auto Security Scan
+
+After instinct extraction, run an automatic lightweight security scan on files changed during execution. See `security-scan-patterns.mdc` [PTN-SEC-1] for pattern details.
+
+#### Scan Scope
+
+Only scan files modified during execution (from `git diff --name-only` against the pre-execution state). Do NOT scan the entire codebase.
+
+#### What to Check
+
+1. **Hardcoded secrets** (PTN-SEC-1): Apply secret detection patterns to changed files:
+   - API keys, tokens, passwords as string literals
+   - AWS Access Key IDs, PEM private keys
+   - Bearer tokens in source code
+2. **Exclusions** (PTN-SEC-1): Skip environment variable references, test fixtures with fake values, example files
+
+#### Reporting
+
+Add a **Security** line to the verification report:
+
+```
+VERIFICATION: [PASS/FAIL]
+Build:    [OK/FAIL]
+Types:    [OK/X errors]
+Tests:    [X/Y passed]
+Security: [PASS/WARN — N findings]
+Ready for PR: [YES/NO/CONDITIONAL]
+```
+
+- **PASS**: No security findings in changed files
+- **WARN**: Findings detected (list file paths and pattern types, never show actual values)
+
+#### Non-Blocking Behavior
+
+Security scan results are **informational by default**:
+- WARN does not prevent archiving or completion
+- Findings are included in the handoff to review-code for human attention
+- In security workflows, findings feed into the Step 5 security verification checkpoint
+
+#### Handoff Integration
+
+If findings exist, append to the execute-to-review handoff document:
+
+```markdown
+## Auto Security Scan Results
+
+**Status**: [PASS|WARN]
+**Files Scanned**: [count of changed files]
+
+### Findings
+| File | Pattern | Severity |
+|------|---------|----------|
+| `src/config.ts` | API key | Major |
+
+> Values are NOT shown — only file locations and pattern types.
+```
+
+---
+
 ## Execution Flow Within a Group
 
 ```
