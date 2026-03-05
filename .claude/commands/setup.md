@@ -50,6 +50,7 @@ WORKFLOW:
   1. Scans project structure and dependency files
   2. Deep dependency analysis (all libraries, versions, purposes)
   3. Deep code analysis (samples files, extracts real patterns)
+  3.5. Security scan (detects secrets, .env hygiene, security libraries)
   4. Researches best practices for detected stack
   5. Checks for existing cursor rules
   6. Presents analysis summary
@@ -72,6 +73,7 @@ DETECTS:
   Languages:    JavaScript, TypeScript, Python, Go, Rust, Java, Ruby, C#
   Frameworks:   Next.js, React, Vue, Angular, FastAPI, Django, Express, NestJS
   Libraries:    Zod, Prisma, Zustand, Redux, TailwindCSS, React Query, and 50+
+  Security:     Hardcoded secrets, .env hygiene, auth/encryption/validation libraries
 
 RECOMMENDED MODEL:
   Claude Opus 4.6 or Sonnet 4.5 for best results

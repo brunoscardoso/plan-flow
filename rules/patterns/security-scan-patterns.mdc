@@ -1,0 +1,141 @@
+---
+description: "Security scan patterns for /setup - secret detection, library inventory, posture levels"
+alwaysApply: false
+---
+
+# Security Scan Patterns
+
+## Overview
+
+During `/setup`, a security scan step detects hardcoded secrets, checks `.env` hygiene, and inventories security-related libraries. The scan produces a security baseline section in the project analysis document.
+
+---
+
+## PTN-SEC-1: Secret Detection Patterns
+
+### Hardcoded Secret Patterns
+
+Grep source files (excluding `node_modules/`, `.git/`, `dist/`, `build/`, `*.lock`) for these patterns:
+
+| Pattern | Description | Example Match |
+|---------|-------------|---------------|
+| `API_KEY\s*=\s*['"][A-Za-z0-9]` | API key assignment | `API_KEY = "sk-abc123"` |
+| `api[_-]?key\s*[:=]\s*['"][A-Za-z0-9]` | API key (camelCase/kebab) | `apiKey: "abc123"` |
+| `SECRET\s*=\s*['"][A-Za-z0-9]` | Secret assignment | `SECRET = "mysecret"` |
+| `password\s*[:=]\s*['"][^'"]+['"]` | Hardcoded password | `password: "admin123"` |
+| `PRIVATE_KEY\s*=` | Private key assignment | `PRIVATE_KEY = "..."` |
+| `-----BEGIN (RSA\|EC\|DSA) PRIVATE KEY-----` | PEM private key in source | Embedded key block |
+| `AKIA[0-9A-Z]{16}` | AWS Access Key ID | `AKIAIOSFODNN7EXAMPLE` |
+| `Bearer\s+[A-Za-z0-9\-._~+/]+=*` | Hardcoded bearer token | `Bearer eyJhbGci...` |
+
+### Exclusions (Reduce False Positives)
+
+Skip matches in:
+- Environment variable **references** (e.g., `process.env.API_KEY`, `os.environ['SECRET']`)
+- Example/template files (`.example`, `.template`, `.sample`)
+- Test fixtures with obviously fake values (e.g., `"test-key"`, `"dummy"`, `"placeholder"`)
+- Comments explaining environment variables
+- Lock files (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`)
+
+### .env Hygiene Checks
+
+| Check | Pass Condition | Fail Condition |
+|-------|---------------|----------------|
+| `.env` exists | N/A (informational) | N/A |
+| `.env` in `.gitignore` | `.gitignore` contains `.env` | `.env` exists but not gitignored |
+| `.env.example` exists | Template file present | No template for environment variables |
+
+**Critical**: Never read `.env` file contents — only check file existence and gitignore status.
+
+---
+
+## PTN-SEC-2: Security Library Inventory
+
+### Library Categories
+
+Scan dependency files (`package.json`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, `go.mod`) for security-related libraries:
+
+| Category | JavaScript/TypeScript | Python | Go | Rust |
+|----------|----------------------|--------|----|------|
+| **Authentication** | `next-auth`, `clerk`, `lucia`, `passport`, `@auth/core` | `django.contrib.auth`, `python-jose`, `authlib` | `golang.org/x/oauth2` | `jsonwebtoken` |
+| **Password Hashing** | `bcryptjs`, `bcrypt`, `argon2` | `bcrypt`, `argon2-cffi`, `passlib` | `golang.org/x/crypto/bcrypt` | `bcrypt`, `argon2` |
+| **Encryption** | `jose`, `jsonwebtoken`, `crypto-js` | `cryptography`, `pynacl` | `crypto` (stdlib) | `ring`, `aes-gcm` |
+| **Input Validation** | `zod`, `yup`, `joi`, `class-validator` | `pydantic`, `cerberus`, `marshmallow` | `go-playground/validator` | `validator` |
+| **Security Headers** | `helmet`, `cors`, `csurf`, `csrf` | `django-cors-headers`, `flask-cors` | `rs/cors` | `tower-http` |
+| **Rate Limiting** | `express-rate-limit`, `rate-limiter-flexible` | `django-ratelimit`, `slowapi` | `golang.org/x/time/rate` | `governor` |
+
+### Inventory Output
+
+For each detected library, record:
+- Library name and version
+- Category (auth, encryption, validation, headers, rate-limiting)
+- Whether it's a production or dev dependency
+
+For each missing category (no library detected), note it as a gap.
+
+---
+
+## PTN-SEC-3: Security Posture Levels
+
+### Posture Assessment
+
+Based on scan results, assign one of three posture levels:
+
+| Level | Criteria | Action |
+|-------|----------|--------|
+| **Good** | No hardcoded secrets found, `.env` is gitignored, auth + validation + headers libraries detected | Informational — no action needed |
+| **Caution** | No hardcoded secrets but missing security library categories (e.g., no validation, no headers) | Suggest adding missing libraries |
+| **Risk** | Hardcoded secrets found in source files OR `.env` not gitignored | **Warn the user immediately** — do not continue setup until addressed |
+
+### Warning Format (Risk Level)
+
+When secrets are detected, display:
+
+```markdown
+## Security Warning
+
+Hardcoded secrets detected in source files:
+
+| File | Line | Pattern |
+|------|------|---------|
+| `src/config.ts` | 12 | API key |
+| `src/db.ts` | 5 | Database password |
+
+**Action Required**:
+1. Move secrets to environment variables
+2. Add `.env` to `.gitignore`
+3. Rotate any exposed credentials
+4. Check git history for committed secrets
+
+> Values are NOT displayed for security — only file locations and pattern types.
+```
+
+---
+
+## Security Baseline Output Format
+
+Include this section in `flow/references/project_analysis.md` (Step 9 of setup):
+
+```markdown
+## Security Baseline
+
+**Posture**: {Good|Caution|Risk}
+**Scanned**: {date}
+
+### Secrets Scan
+- [{PASS|WARN}] Hardcoded secrets in source files: {count found or "none"}
+- [{PASS|WARN}] `.env` file gitignored: {yes|no|no .env file}
+- [{PASS|INFO}] `.env.example` template: {exists|missing}
+
+### Security Libraries
+| Category | Library | Version | Status |
+|----------|---------|---------|--------|
+| Authentication | {lib} | {ver} | Detected |
+| Password Hashing | — | — | Not detected |
+| Input Validation | {lib} | {ver} | Detected |
+| Security Headers | — | — | Not detected |
+| Rate Limiting | — | — | Not detected |
+
+### Recommendations
+- {actionable suggestion based on gaps}
+```

@@ -205,6 +205,66 @@ For each library, document:
 
 ---
 
+### Step 3.5: Security Scan
+
+**Automatic security scan of sampled files.** See `security-scan-patterns.md` [PTN-SEC-1, PTN-SEC-2, PTN-SEC-3] for full pattern details.
+
+#### 3.5.1 Secret Detection
+
+Grep the files sampled in Step 3 for hardcoded secret patterns (PTN-SEC-1):
+
+- API keys, tokens, passwords hardcoded as string literals
+- AWS Access Key IDs (`AKIA...`)
+- PEM private keys embedded in source
+- Bearer tokens in source code
+
+**Exclusions** (reduce false positives):
+- Environment variable references (`process.env.X`, `os.environ['X']`)
+- Example/template files
+- Test fixtures with fake values (`"test-key"`, `"dummy"`)
+- Lock files
+
+**If secrets found**: Display a security warning with file paths and pattern types. **Never display the actual secret values.** Recommend moving to environment variables.
+
+#### 3.5.2 .env Hygiene
+
+1. Check if `.env` file exists
+2. If it exists, verify `.env` is listed in `.gitignore`
+3. Check if `.env.example` or `.env.template` exists (best practice)
+
+**Never read `.env` file contents** — only check existence and gitignore status.
+
+#### 3.5.3 Security Library Inventory
+
+Scan dependency files (already parsed in Step 2) for security-related libraries (PTN-SEC-2):
+
+| Category | Look For |
+|----------|----------|
+| Authentication | next-auth, clerk, lucia, passport, @auth/core |
+| Password Hashing | bcryptjs, bcrypt, argon2 |
+| Encryption | jose, jsonwebtoken, crypto-js |
+| Input Validation | zod, yup, joi, class-validator |
+| Security Headers | helmet, cors, csurf |
+| Rate Limiting | express-rate-limit, rate-limiter-flexible |
+
+Record detected libraries and note missing categories as gaps.
+
+#### 3.5.4 Posture Assessment
+
+Assign a security posture level (PTN-SEC-3):
+
+| Level | Criteria |
+|-------|----------|
+| **Good** | No secrets found, .env gitignored, auth + validation detected |
+| **Caution** | No secrets but missing security library categories |
+| **Risk** | Hardcoded secrets found OR .env not gitignored |
+
+**If Risk**: Warn the user immediately before continuing setup.
+
+The security baseline will be included in the project analysis document (Step 9).
+
+---
+
 ### Step 4: Research Best Practices
 
 **Use web search to get current best practices for detected stack.**

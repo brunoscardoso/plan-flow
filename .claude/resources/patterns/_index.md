@@ -111,6 +111,14 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-APR-1 | Progress file format, template, step status values, checkpoint recording | autopilot-progress-patterns.md | 14-85 |
 | PTN-APR-2 | Lifecycle rules (creation, updates, deletion, resumption, backward compat) | autopilot-progress-patterns.md | 87-140 |
 
+### Security Scan Patterns (`security-scan-patterns.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-SEC-1 | Secret detection patterns, exclusions, .env hygiene checks | security-scan-patterns.md | 12-55 |
+| PTN-SEC-2 | Security library inventory by category and language | security-scan-patterns.md | 57-85 |
+| PTN-SEC-3 | Security posture levels (Good/Caution/Risk), warning format, baseline output | security-scan-patterns.md | 87-140 |
+
 ### Parallel Review Patterns (`parallel-review-patterns.md`)
 
 | Code | Description | Source | Lines |
@@ -183,6 +191,14 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-HND-1 | Need handoff document template or naming convention |
 | PTN-HND-2 | Need per-workflow handoff points |
 
+### Security Scan
+
+| Code | Expand When |
+|------|-------------|
+| PTN-SEC-1 | Need secret detection patterns or .env hygiene checks |
+| PTN-SEC-2 | Need security library inventory categories |
+| PTN-SEC-3 | Need posture assessment criteria or baseline output format |
+
 ### Parallel Reviews
 
 | Code | Expand When |
@@ -228,6 +244,9 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 
 ### Handoffs
 - **PTN-HND-***: Handoff document patterns and per-workflow handoff points
+
+### Security Scan
+- **PTN-SEC-***: Security scan patterns (secret detection, library inventory, posture)
 
 ### Parallel Reviews
 - **PTN-PRV-***: Parallel review agent patterns (threshold, grouping, aggregation)
