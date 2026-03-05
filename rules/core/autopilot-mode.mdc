@@ -73,6 +73,36 @@ If the input doesn't clearly fit a category, **CALL** `AskQuestion` to ask:
 
 ---
 
+## Progress Tracking
+
+When autopilot mode triggers a workflow, maintain a persistent progress file at `flow/state/autopilot-progress.md`. See `rules/patterns/autopilot-progress-patterns.mdc` [PTN-APR-1] for the file format.
+
+### When to Write
+
+1. **Workflow start**: Create the progress file with the feature name, workflow type, timestamp, and step table (all steps `pending`)
+2. **Step start**: Mark the current step as `in-progress`, update Current Context
+3. **Step complete**: Mark the step as `done`, record artifact path and brief notes
+4. **Checkpoint decisions**: Record user approval/rejection in the Checkpoints section
+5. **During execute-plan**: Update Current Context with phase progress (e.g., "Phase 2 of 4")
+
+### When to Delete
+
+- **Archive step complete**: Delete the progress file (workflow is done)
+- **`/flow -disable`**: Delete the progress file (autopilot turned off)
+
+### Resumption
+
+At session start, if `flow/state/autopilot-progress.md` exists:
+1. Read it to understand current workflow state
+2. Find the step marked `in-progress` or the first `pending` step
+3. Resume from that step (the session-start hook will output resume context)
+
+### Backward Compatibility
+
+If the progress file does not exist, autopilot works normally. The file is informational — it records state but does not control workflow logic.
+
+---
+
 ## Flow Execution — Workflow Dispatch
 
 When an actionable request is detected, execute the step sequence for the **active workflow type**. At each step, **Read the relevant command file** to load its context, then follow its instructions.

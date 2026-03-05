@@ -104,6 +104,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-HND-1 | Handoff document structure, naming, plan-aware review fields | handoff-patterns.md | 14-90 |
 | PTN-HND-2 | Per-workflow handoff points (feature, bugfix, refactor, security) | handoff-patterns.md | 92-155 |
 
+### Autopilot Progress Patterns (`autopilot-progress-patterns.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-APR-1 | Progress file format, template, step status values, checkpoint recording | autopilot-progress-patterns.md | 14-85 |
+| PTN-APR-2 | Lifecycle rules (creation, updates, deletion, resumption, backward compat) | autopilot-progress-patterns.md | 87-140 |
+
 ### PR Review Patterns (`review-pr-patterns.md`)
 
 | Code | Description | Source | Lines |
@@ -155,6 +162,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-PYTEST-3 | Need mocking examples |
 | PTN-PYTEST-4 | Need parametrized test examples |
 
+### Autopilot Progress
+
+| Code | Expand When |
+|------|-------------|
+| PTN-APR-1 | Need autopilot progress file format or template |
+| PTN-APR-2 | Need progress file lifecycle rules (create, update, delete) |
+
 ### Handoff
 
 | Code | Expand When |
@@ -194,6 +208,9 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 ### Testing
 - **PTN-JEST-***: Jest testing patterns (JS/TS)
 - **PTN-PYTEST-***: Pytest testing patterns (Python)
+
+### Autopilot Progress
+- **PTN-APR-***: Autopilot progress file format and lifecycle rules
 
 ### Handoffs
 - **PTN-HND-***: Handoff document patterns and per-workflow handoff points

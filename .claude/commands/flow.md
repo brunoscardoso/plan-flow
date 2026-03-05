@@ -94,7 +94,8 @@ Use `/flow -enable <type>` to switch workflow, `/flow -disable` to turn off, or 
 ### When invoked with `-disable`
 
 1. Delete the file `flow/.autopilot` (if it exists)
-2. Confirm to the user:
+2. Delete `flow/state/autopilot-progress.md` (if it exists — cleans up any in-progress workflow tracking)
+3. Confirm to the user:
 
 ```markdown
 Autopilot flow mode **disabled**.
@@ -107,7 +108,8 @@ Commands will no longer auto-chain. Use individual slash commands as before:
 
 1. Check if `flow/.autopilot` exists
 2. If exists, read its content to determine active workflow type
-3. Report:
+3. Check if `flow/state/autopilot-progress.md` exists — if so, read it to show workflow progress
+4. Report:
 
 ```markdown
 Autopilot flow mode: **[ENABLED/DISABLED]**
@@ -116,6 +118,12 @@ Autopilot flow mode: **[ENABLED/DISABLED]**
 - **Workflow type**: [feature/bugfix/refactor/security]
 - **Steps**: [step sequence for active workflow]
 - Actionable requests will automatically run the [type] workflow.
+
+[If enabled AND autopilot-progress.md exists]:
+- **Active workflow**: [feature name]
+- **Progress**: Step [N] of [total] ([step name])
+- **Completed**: [list of done steps]
+- **Next**: [description of current/next step]
 
 [If disabled]: Use individual slash commands to run each step manually.
 ```
