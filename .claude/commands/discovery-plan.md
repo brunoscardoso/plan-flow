@@ -73,8 +73,9 @@ WORKFLOW:
   4. Documents requirements (FR, NFR, Constraints)
   5. Proposes high-level approach (no code)
   6. Creates discovery document for review
-  7. Asks user if they want to proceed to /create-plan
-  8. Waits for user confirmation before proceeding
+  7. Asks user if they want to proceed, refine, or stop
+  8. Supports iterative refinement (max 3 rounds)
+  9. Waits for user confirmation before proceeding
 
 RECOMMENDED MODEL:
   Claude Opus 4.6 or Sonnet 4.5 for best results
@@ -180,8 +181,9 @@ The skill will:
 7. Propose high-level approach
 8. Document risks and unknowns
 9. Generate discovery document
-10. Ask user if they want to proceed to /create-plan
-11. Wait for user confirmation before proceeding
+10. Support iterative refinement (max 3 rounds) if user requests it
+11. Ask user if they want to proceed to /create-plan
+12. Wait for user confirmation before proceeding
 
 See: `.claude/resources/skills/discovery-skill.md`
 
@@ -218,7 +220,7 @@ AskUserQuestion({
     options: [
       { label: "Yes, create plan", description: "I'll invoke /create-plan with the discovery document" },
       { label: "No, review first", description: "You can review the discovery and invoke /create-plan when ready" },
-      { label: "Refine discovery", description: "Let me know what needs to be adjusted in the discovery" }
+      { label: "Refine discovery", description: "Iteratively refine the discovery document (max 3 rounds)" }
     ],
     multiSelect: false
   }]
@@ -228,6 +230,31 @@ AskUserQuestion({
 ⚠️ **WAIT for user response before proceeding**
 
 Do NOT auto-invoke `/create-plan` without user confirmation.
+
+#### Refinement Loop (when "Refine discovery" is selected)
+
+When the user selects "Refine discovery", invoke the discovery skill's **Step 9: Refinement Loop**:
+
+1. **Accept feedback**: Ask user what areas need adjustment (requirements, approach, scope, risks)
+2. **Follow-up questions**: Ask 1-3 targeted questions about the refinement areas only
+3. **Update document**: Modify the discovery document in-place, add/update Refinement History section
+4. **Re-present**: Show the updated document and offer the same 3 options again
+5. **Round tracking**: Track refinement round count (max 3). After 3 rounds, only offer "Yes, create plan" and "No, review first" — the "Refine discovery" option is removed
+
+```typescript
+// After 3 refinement rounds, remove the refine option:
+AskUserQuestion({
+  questions: [{
+    question: "Discovery refined 3 times (maximum). Would you like to proceed?",
+    header: "Next step",
+    options: [
+      { label: "Yes, create plan", description: "I'll invoke /create-plan with the discovery document" },
+      { label: "No, stop here", description: "You can review and invoke /create-plan manually when ready" }
+    ],
+    multiSelect: false
+  }]
+})
+```
 
 ---
 

@@ -234,7 +234,65 @@ Create the discovery markdown file:
 
 ---
 
-### Step 9: Knowledge Capture
+### Step 9: Refinement Loop
+
+After generating the discovery document, support iterative refinement when the user requests it.
+
+**Trigger**: The `/discovery-plan` command presents a "Refine discovery" option after Step 8. When selected, this step activates.
+
+**In autopilot mode**: Skip this step entirely — auto-proceed to plan creation.
+
+#### 9.1 Accept Refinement Feedback
+
+Ask the user what needs adjustment using `AskUserQuestion`:
+
+```
+What areas of the discovery need refinement?
+
+Options:
+- Requirements (add, change, or remove FR/NFR/Constraints)
+- Technical approach (different architecture or technology choices)
+- Scope (too broad or too narrow)
+- Risks (missing risks or incorrect assessments)
+```
+
+The user may also provide free-text feedback describing specific changes.
+
+#### 9.2 Ask Follow-Up Questions
+
+Based on the identified areas, ask **1-3 targeted follow-up questions** using the Interactive Questions Tool (same as Step 3). Only re-ask about the refinement areas — do not repeat the full Q&A.
+
+Mark re-asked questions in the question tracking table with status `[Refined]`.
+
+#### 9.3 Update Discovery Document
+
+Update the existing discovery document **in-place** (same file, same version):
+
+1. Modify the relevant sections based on new answers
+2. Append a "Refinement History" section (or update if it already exists):
+
+```markdown
+## Refinement History
+
+| Round | Date | Areas Refined | Changes Made |
+|-------|------|---------------|--------------|
+| 1 | {YYYY-MM-DD} | Requirements, Scope | Added FR-7, narrowed scope to exclude X |
+| 2 | {YYYY-MM-DD} | Technical approach | Changed from REST to GraphQL |
+```
+
+3. Update the question tracking table with refined answers
+
+#### 9.4 Re-Present Document
+
+After updating, return control to the command to re-present the updated document with the same 3 options (proceed/refine/stop).
+
+#### 9.5 Round Limit
+
+**Maximum 3 refinement rounds**. After 3 rounds, only offer "Proceed to plan" or "Stop" — the "Refine" option is no longer available. This prevents infinite refinement loops.
+
+---
+
+### Step 10: Knowledge Capture
 
 After completing the discovery document, capture knowledge for the project brain. See `.claude/resources/core/brain-capture.md` for file templates and index cap rules.
 

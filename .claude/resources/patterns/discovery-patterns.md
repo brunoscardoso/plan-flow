@@ -274,7 +274,39 @@ Implementation details belong in the plan, not discovery.
 
 ---
 
-### 7. Link Discovery to Plan
+### 7. Refinement Loop Rules
+
+When iteratively refining a discovery document:
+
+**Allowed**:
+- Accept user feedback on specific sections (requirements, approach, scope, risks)
+- Ask 1-3 targeted follow-up questions about refinement areas only
+- Update the discovery document in-place (same file, same version)
+- Append/update a "Refinement History" section tracking changes per round
+- Mark re-asked questions with `[Refined]` status in the question tracking table
+- Re-present the updated document with proceed/refine/stop options
+
+**Forbidden**:
+- Full re-run of discovery (only update affected sections)
+- Creating a new version file for refinement changes
+- Re-asking all questions (only targeted follow-ups)
+- More than 3 refinement rounds (enforce round limit)
+- Refinement in autopilot mode (skip entirely, auto-proceed to plan)
+
+**Refinement History Template**:
+
+```markdown
+## Refinement History
+
+| Round | Date | Areas Refined | Changes Made |
+|-------|------|---------------|--------------|
+| 1 | {YYYY-MM-DD} | Requirements, Scope | Added FR-7, narrowed scope to exclude X |
+| 2 | {YYYY-MM-DD} | Technical approach | Changed from REST to GraphQL |
+```
+
+---
+
+### 8. Link Discovery to Plan
 
 When discovery is complete:
 
@@ -361,7 +393,31 @@ This plan implements the feature described in the discovery document:
 
 ---
 
-### 8. DON'T Create Discovery for Trivial Features
+### 8. DON'T Exceed Refinement Round Limit
+
+**Problem**: Infinite refinement loops waste time and prevent progress.
+
+**Fix**: Maximum 3 refinement rounds per discovery. After 3 rounds, only offer "Proceed to plan" or "Stop".
+
+---
+
+### 9. DON'T Create New Versions for Refinements
+
+**Problem**: Creating a new version file for each minor refinement causes file bloat and confusion.
+
+**Fix**: Update the discovery document in-place during refinement. Only increment version when doing a full re-discovery.
+
+---
+
+### 10. DON'T Re-Ask All Questions During Refinement
+
+**Problem**: Repeating the full Q&A wastes time and annoys the user.
+
+**Fix**: Only ask 1-3 targeted follow-up questions about the specific areas the user wants to refine. Mark re-asked questions with `[Refined]` status.
+
+---
+
+### 11. DON'T Create Discovery for Trivial Features
 
 **Problem**: Overhead without value for simple changes.
 
