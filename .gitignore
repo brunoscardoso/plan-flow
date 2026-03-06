@@ -26,13 +26,9 @@ coverage/
 npm-debug.log*
 
 # Plan-Flow development flow artifacts
-flow/archive/
-flow/contracts/
-flow/discovery/
-flow/plans/
-flow/references/
-flow/reviewed-code/
-flow/reviewed-pr/
+flow
 
 # Local settings (keep template)
 .claude/settings.local.json
+
+.cursor
