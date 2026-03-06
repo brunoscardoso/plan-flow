@@ -9,11 +9,11 @@ description: Extract reusable patterns from the current session, or learn about 
 This command has two modes:
 
 1. **Pattern Extraction** (`/learn`): Analyzes the current session for reusable patterns and saves them to `flow/resources/`.
-2. **Teaching Mode** (`/learn about <topic>`): Creates a structured step-by-step curriculum to teach you about a topic, contextualized to your project's tech stack.
+2. **Teaching Mode** (`/learn about <topic>`): Creates a structured step-by-step curriculum to teach you about a topic, contextualized to your project's tech stack. Curricula are stored **globally** at `~/plan-flow/brain/learns/` so they can be shared across projects.
 
 **Output**:
 - Pattern mode: `flow/resources/learned-{pattern-name}.md`
-- Teaching mode: `flow/brain/learning/{topic-kebab}.md`
+- Teaching mode: `~/plan-flow/brain/learns/{topic-kebab}.md` (global, indexed with `LRN-*` codes)
 
 ---
 
@@ -62,9 +62,11 @@ PATTERN EXTRACTION MODE (/learn):
 TEACHING MODE (/learn about <topic>):
   Creates a structured curriculum (3-7 steps) contextualized
   to your project's tech stack. Each step is confirmed before
-  proceeding. Completed curricula are saved to the brain.
+  proceeding. Completed curricula are saved globally so they
+  can be reused across all projects.
 
-  Output: flow/brain/learning/{topic-kebab}.md
+  Output: ~/plan-flow/brain/learns/{topic-kebab}.md (global)
+  Index:  ~/plan-flow/brain/learns/_index.md (LRN-* codes)
 
 RELATED COMMANDS:
   /brain           Capture meeting notes, ideas, brainstorms
@@ -189,30 +191,34 @@ When the user invokes `/learn about <topic>`, switch to teaching mode:
 |------|-------------|
 | **Project Context** | Contextualize all examples to the project's actual tech stack |
 | **Step Confirmation** | Wait for user confirmation before proceeding to the next step |
-| **Brain Storage** | Save the curriculum to `flow/brain/learning/{topic-kebab}.md` |
+| **Global Storage** | Save the curriculum to `~/plan-flow/brain/learns/{topic-kebab}.md` (shared across projects) |
+| **Auto-Index** | After saving, automatically update `~/plan-flow/brain/learns/_index.md` with `LRN-*` reference codes (no user action needed) |
 | **No Code Changes** | Teaching mode does NOT write source code or modify configs |
 | **Complete and Stop** | After all steps are confirmed, STOP and wait for user input |
 
 ### Teaching Workflow
 
-1. **Analyze Context**: Read `flow/brain/index.md` and `flow/references/tech-foundation.md` to understand the project's stack
-2. **Generate Curriculum**: Create a 3-7 step curriculum for the topic, contextualized to the project
-3. **Present Overview**: Show the full curriculum outline to the user for approval
-4. **Step-by-Step Teaching**: For each step:
+1. **Check Existing Learns**: Read `~/plan-flow/brain/learns/_index.md` (if exists) to check if a curriculum for the topic already exists. If it does, offer to resume or present the existing curriculum.
+2. **Analyze Context**: Read `flow/brain/index.md` and `flow/references/tech-foundation.md` to understand the project's stack
+3. **Generate Curriculum**: Create a 3-7 step curriculum for the topic, contextualized to the project
+4. **Present Overview**: Show the full curriculum outline to the user for approval
+5. **Step-by-Step Teaching**: For each step:
    - Present the step content with explanations and examples
    - Wait for user confirmation (`next`, `done`, or questions)
    - Mark the step as completed in the curriculum file
    - If the user asks questions, answer them before proceeding
-5. **Save Curriculum**: Write the completed curriculum to `flow/brain/learning/{topic-kebab}.md`
+6. **Save Curriculum**: Write the completed curriculum to `~/plan-flow/brain/learns/{topic-kebab}.md`
+7. **Auto-Index** (under the hood): Immediately read the saved file, extract section boundaries, generate `LRN-*` reference codes, and update `~/plan-flow/brain/learns/_index.md`. The user does NOT need to run `/pattern-validate` — indexing happens automatically.
+8. **Link to Project**: If `flow/brain/index.md` exists, add or update a `## Global Learns` section referencing the new curriculum with its `LRN-*` codes
 
 ### Curriculum Template
 
 ```markdown
 # Learning: {Topic}
 
-**Project**: [[{project-name}]]
 **Started**: {YYYY-MM-DD}
 **Status**: {in-progress|completed}
+**Projects**: [[{project-name}]]
 
 ## Curriculum
 
@@ -229,14 +235,70 @@ When the user invokes `/learn about <topic>`, switch to teaching mode:
 ## Notes
 
 {Any additional notes, questions asked, or insights gained during learning}
+
+## Projects Using This
+- [[{project-name}]]
 ```
+
+### Learns Index Template (`~/plan-flow/brain/learns/_index.md`)
+
+```markdown
+# Global Learns Index
+
+## Overview
+
+Shared learning curricula accumulated across all projects. Use reference codes to load specific sections on-demand.
+
+**Total Files**: X files
+**Reference Codes**: LRN-{ABBR}-1 through LRN-{ABBR}-N
+**Last Updated**: YYYY-MM-DD
+
+---
+
+## Reference Codes
+
+### MCP (`mcp.md`)
+
+| Code | Description | Lines |
+|------|-------------|-------|
+| LRN-MCP-1 | What is MCP and why it matters | 10-35 |
+| LRN-MCP-2 | MCP server architecture | 36-70 |
+| LRN-MCP-3 | Building your first MCP server | 71-120 |
+
+---
+
+## When to Expand
+
+| Code | Expand When |
+|------|-------------|
+| LRN-MCP-1 | Need to understand MCP fundamentals |
+| LRN-MCP-2 | Designing an MCP server |
+
+---
+
+## Projects Using Learns
+
+| Learn | Projects |
+|-------|----------|
+| mcp | [[project-1]], [[project-2]] |
+```
+
+### Reference Code Convention for Learns
+
+| Learn File | Code Prefix | Example Codes |
+|---|---|---|
+| `mcp.md` | `LRN-MCP` | LRN-MCP-1, LRN-MCP-2, LRN-MCP-3 |
+| `docker.md` | `LRN-DK` | LRN-DK-1, LRN-DK-2 |
+| `graphql.md` | `LRN-GQ` | LRN-GQ-1, LRN-GQ-2 |
+| Other `<name>.md` | `LRN-XX` | Use first 2-3 consonants or unique abbreviation |
 
 ### Reference Codes for Teaching
 
 | Code | Description | When to Expand |
 |------|-------------|----------------|
 | SKL-LRN-3 | Teaching mode restrictions and workflow | Starting teaching mode |
-| SKL-LRN-4 | Curriculum template and brain storage | Generating curriculum |
+| SKL-LRN-4 | Curriculum template and global storage | Generating curriculum |
+| SKL-LRN-5 | Learns index template and LRN-* code convention | Updating learns index |
 
 ---
 

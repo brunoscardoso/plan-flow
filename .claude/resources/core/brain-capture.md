@@ -21,7 +21,8 @@ Automatic knowledge capture that builds a secondary brain during plan-flow skill
 5. When a user request relates to an indexed entry, read the specific brain file for targeted context (e.g., `flow/brain/features/{feature}.md`)
 6. If `flow/brain/index.md` contains a `## Global Patterns` section, note the available GLB-* codes and their pattern names — do NOT load the full pattern files
 7. **Only indexed patterns are eligible**: If a global pattern file exists in `~/plan-flow/brain/patterns/` but does NOT have GLB-* codes in the brain index or `flow/brain/patterns-index.md`, it MUST NOT be loaded. Run `/pattern-validate` first to index it.
-8. During work, when a task relates to an indexed pattern, expand only the relevant GLB-* code by reading the specific line range from `~/plan-flow/brain/patterns/<name>.md`. Never read the entire file.
+8. **Only indexed learns are eligible**: If a learn file exists in `~/plan-flow/brain/learns/` but does NOT have LRN-* codes in the brain index, it MUST NOT be loaded. Run `/pattern-validate` first to index it.
+9. During work, when a task relates to an indexed pattern or learn, expand only the relevant reference code by reading the specific line range. Never read the entire file.
 
 ### After Any Plan-Flow Skill Completes
 
@@ -246,6 +247,7 @@ After processing a brain-capture block, sync relevant entries to the global brai
 | Framework patterns | Yes | Generic, reusable across projects with same framework |
 | Language patterns | Yes | Generic, reusable across projects with same language |
 | Library patterns | Yes | Generic, reusable across projects using same library |
+| Learning curricula | Yes | Generic, reusable across all projects (stored globally in ~/plan-flow/brain/learns/) |
 | Cross-project patterns | Yes | By definition cross-project |
 | Project-specific patterns | No | Contains project-specific paths, conventions |
 | Error patterns | No | Project-specific, kept in flow/brain/errors/ |
@@ -315,6 +317,10 @@ The global brain at `~/plan-flow/brain/` is the Obsidian vault root. Each projec
 │   ├── _index.md                                      # Pattern index with reference codes
 │   ├── typescript.md
 │   └── nextjs.md
+├── learns/                                            # Shared learning curricula (LRN-* indexed)
+│   ├── _index.md                                      # Learns index with reference codes
+│   ├── mcp.md
+│   └── docker.md
 ├── daily/                                             # Daily session logs (cross-project)
 │   ├── 2026-03-05.md
 │   └── 2026-03-06.md

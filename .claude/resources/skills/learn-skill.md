@@ -146,19 +146,24 @@ When `/learn about <topic>` is invoked, the skill switches to teaching mode. Thi
 | Action | Allowed |
 |--------|---------|
 | Read project context (brain index, tech foundation) | Yes |
-| Generate curriculum in `flow/brain/learning/` | Yes |
+| Read existing learns index (`~/plan-flow/brain/learns/_index.md`) | Yes |
+| Generate curriculum in `~/plan-flow/brain/learns/` | Yes |
+| Update learns index with `LRN-*` reference codes | Yes |
+| Update project brain index with learns section | Yes |
 | Present step-by-step content | Yes |
 | Write source code | No |
 | Modify configuration files | No |
-| Write outside `flow/brain/learning/` | No |
+| Write outside `~/plan-flow/brain/learns/` and `flow/brain/` | No |
 
 ### Curriculum Generation
 
-1. Read `flow/brain/index.md` for project context
-2. Read `flow/references/tech-foundation.md` for stack details
-3. Design 3-7 steps progressing from fundamentals to advanced
-4. Contextualize examples to the project's actual technologies
-5. Present the full outline for user approval before starting
+1. Read `~/plan-flow/brain/learns/_index.md` to check if the topic already exists
+2. If it exists, offer to resume the existing curriculum or start fresh
+3. Read `flow/brain/index.md` for project context
+4. Read `flow/references/tech-foundation.md` for stack details
+5. Design 3-7 steps progressing from fundamentals to advanced
+6. Contextualize examples to the project's actual technologies
+7. Present the full outline for user approval before starting
 
 ### Step Confirmation Flow
 
@@ -172,10 +177,24 @@ For each curriculum step:
 
 ### Storage
 
-- **Location**: `flow/brain/learning/{topic-kebab}.md`
+- **Location**: `~/plan-flow/brain/learns/{topic-kebab}.md` (global, shared across projects)
+- **Index**: `~/plan-flow/brain/learns/_index.md` (indexed with `LRN-*` reference codes)
 - **Directory**: Created automatically if it doesn't exist
 - **Format**: Uses the curriculum template from the command definition
-- **Wiki-links**: Links to project name and related brain entries
+- **Wiki-links**: Links to project name(s) and related brain entries
+- **Cross-project**: When a learn is created from project A and later accessed from project B, the `## Projects Using This` section is updated to include both projects
+
+### Index Mechanism
+
+Learns follow the same index pattern as global brain patterns (`GLB-*`):
+
+1. Each learn file gets `LRN-{ABBR}-N` reference codes based on curriculum steps
+2. The learns index (`~/plan-flow/brain/learns/_index.md`) maps codes to line ranges
+3. **Auto-indexing**: After saving a learn, the `/learn` command automatically indexes it — the user does NOT need to run `/pattern-validate`. The command reads the saved file, extracts section boundaries, generates `LRN-*` codes, and updates `~/plan-flow/brain/learns/_index.md` and `flow/brain/index.md` in one step.
+4. `/pattern-validate` can still re-index all learns in bulk (useful after manual edits or importing learns from another machine)
+5. At session start, only the index is read — full learn files are loaded on-demand
+6. **Gate rule**: A learn file that exists but is NOT indexed MUST NOT be loaded until indexed (either by `/learn` auto-indexing or `/pattern-validate`)
+7. During work, when a task relates to a learn topic, expand only the relevant `LRN-*` code by reading the specific line range
 
 ---
 
@@ -185,5 +204,7 @@ For each curriculum step:
 |------|---------|
 | `.claude/commands/learn.md` | Command definition |
 | `flow/resources/` | Where learned patterns are saved |
-| `flow/brain/learning/` | Where teaching curricula are saved |
+| `~/plan-flow/brain/learns/` | Where teaching curricula are saved (global) |
+| `~/plan-flow/brain/learns/_index.md` | Learns index with LRN-* reference codes |
 | `flow/brain/index.md` | Brain index for wiki-link context |
+| `.claude/commands/pattern-validate.md` | Also indexes learns alongside patterns |

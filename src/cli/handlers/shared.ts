@@ -127,7 +127,7 @@ function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const VAULT_SUBDIRS = ['patterns', 'projects', 'daily'];
+const VAULT_SUBDIRS = ['patterns', 'projects', 'daily', 'learns'];
 
 /**
  * Maps detected stack values (lowercase) to brain pattern file names (without .md).
@@ -326,6 +326,7 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
       { query: 'path:reviewed-pr', color: { a: 1, rgb: 14381056 } },    // coral
       { query: 'path:references', color: { a: 1, rgb: 9868950 } },      // sage
       { query: 'path:resources', color: { a: 1, rgb: 6724044 } },       // olive
+      { query: 'path:learns', color: { a: 1, rgb: 3381759 } },          // blue
     ],
     'collapse-display': true,
     'collapse-forces': false,

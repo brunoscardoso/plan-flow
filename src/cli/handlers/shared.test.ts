@@ -229,7 +229,7 @@ describe('vault registration', () => {
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(12);
+    expect(config.colorGroups).toHaveLength(13);
     const queries = config.colorGroups.map((g: { query: string }) => g.query);
     expect(queries).toContain('path:patterns');
     expect(queries).toContain('path:features');
@@ -243,6 +243,7 @@ describe('vault registration', () => {
     expect(queries).toContain('path:reviewed-pr');
     expect(queries).toContain('path:references');
     expect(queries).toContain('path:resources');
+    expect(queries).toContain('path:learns');
     expect(config['collapse-color']).toBe(false);
     expect(config['collapse-filter']).toBe(true);
   });
