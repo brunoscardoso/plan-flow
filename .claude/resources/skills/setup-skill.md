@@ -603,7 +603,56 @@ Add detected anti-patterns specific to the project's stack.
 
 ---
 
-### Step 9: Create Project Analysis Document
+### Step 9: Sync Generic Patterns to Global Brain
+
+**Sync reusable patterns to `~/plan-flow/brain/patterns/` so they are available to all projects.**
+
+For each framework and library pattern file generated in Steps 7.1 and 7.2:
+
+#### 9.1 Determine If Pattern Is Generic
+
+| Pattern Type | Generic? | Reason |
+|---|---|---|
+| Framework patterns (`.claude/resources/frameworks/`) | Yes | Best practices apply to any project using the framework |
+| Library patterns (`.claude/resources/libraries/`) | Yes | Import styles, naming, anti-patterns are universal |
+| Project patterns (`.claude/resources/project/`) | No | Contains project-specific paths and structure |
+
+#### 9.2 Sync Each Generic Pattern
+
+For each generic pattern file:
+
+1. Derive the global file name: strip `-patterns` suffix, use kebab-case → `~/plan-flow/brain/patterns/<name>.md`
+   - `nextjs-patterns.md` → `nextjs.md`
+   - `zod-patterns.md` → `zod.md`
+   - `react-query-patterns.md` → `react-query.md`
+
+2. **If global file does NOT exist**:
+   - Create it from the local pattern file
+   - Remove project-specific file paths from code examples (e.g., `// From: src/schemas/user.schema.ts`)
+   - Keep generic best practices, allowed/forbidden patterns, and guidelines
+   - Add `## Projects Using This` section at the bottom with `- [[project-name]]`
+
+3. **If global file ALREADY exists**:
+   - Read the existing global file
+   - Compare sections — append any NEW patterns or best practices not already present
+   - Do NOT overwrite or duplicate existing content
+   - Add `[[project-name]]` to `## Projects Using This` if not already listed
+
+#### 9.3 Report Synced Patterns
+
+```markdown
+## Global Brain Patterns Synced
+
+| Pattern | Global Path | Action |
+|---------|-------------|--------|
+| [Next.js] | `~/plan-flow/brain/patterns/nextjs.md` | Created |
+| [Zod] | `~/plan-flow/brain/patterns/zod.md` | Updated (added project link) |
+| [Zustand] | `~/plan-flow/brain/patterns/zustand.md` | Created |
+```
+
+---
+
+### Step 10: Create Project Analysis Document
 
 **Location**: `flow/references/project_analysis.md`
 
@@ -676,7 +725,7 @@ Generated: [Date]
 
 ---
 
-### Step 10: Index Documentation Files
+### Step 11: Index Documentation Files
 
 **Automatically index markdown documentation files in the project.**
 
@@ -765,7 +814,7 @@ Project documentation files. Use reference codes to access specific documents.
 
 ---
 
-### Step 11: Create Flow Folder Structure
+### Step 12: Create Flow Folder Structure
 
 **Create the `flow/` directory structure for plan-flow artifacts.**
 
@@ -809,7 +858,7 @@ touch flow/reviewed-pr/.gitkeep
 
 ---
 
-### Step 12: Present Setup Summary
+### Step 13: Present Setup Summary
 
 ```markdown
 Setup Complete!
@@ -852,6 +901,15 @@ flow/
 - X schema patterns documented
 - X API patterns captured
 - X naming conventions identified
+
+## Global Brain Patterns Synced
+
+| Pattern | Action |
+|---------|--------|
+| `~/plan-flow/brain/patterns/[fw].md` | Created/Updated |
+| `~/plan-flow/brain/patterns/[lib].md` | Created/Updated |
+
+*Generic patterns are shared across all projects via the central vault.*
 
 ## Documentation Indexed
 

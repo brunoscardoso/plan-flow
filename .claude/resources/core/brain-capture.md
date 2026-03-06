@@ -282,8 +282,12 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 | Content | Synced? | Why |
 |---------|---------|-----|
-| Error patterns | No | Project-specific, kept in flow/brain/errors/ |
+| Framework patterns | Yes | Generic, reusable across projects with same framework |
+| Language patterns | Yes | Generic, reusable across projects with same language |
+| Library patterns | Yes | Generic, reusable across projects using same library |
 | Cross-project patterns | Yes | By definition cross-project |
+| Project-specific patterns | No | Contains project-specific paths, conventions |
+| Error patterns | No | Project-specific, kept in flow/brain/errors/ |
 | Feature history | No | Project-specific |
 | Session logs | No | Project-specific |
 | Decisions | Only if pattern | When same decision type recurs |
@@ -292,6 +296,51 @@ After processing a brain-capture block, sync relevant entries to the global brai
 
 1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`
 2. Update `~/plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
+3. **After `/setup` generates pattern files**: Sync generic patterns (framework, language, library) to `~/plan-flow/brain/patterns/`. See the Global Pattern Sync section below.
+
+### Global Pattern Sync (after /setup)
+
+When `/setup` generates pattern files, sync **generic** patterns to `~/plan-flow/brain/patterns/`:
+
+**What qualifies as generic (sync these)**:
+- Framework patterns (`.claude/resources/frameworks/<fw>-patterns.md`) — best practices, conventions, and anti-patterns that apply to ANY project using that framework
+- Language patterns — TypeScript strict mode, Python PEP 8, etc.
+- Library patterns (`.claude/resources/libraries/<lib>-patterns.md`) — import styles, naming conventions, and best practices for the library itself
+
+**What is NOT generic (do NOT sync)**:
+- Project patterns (`.claude/resources/project/project-patterns.md`) — contains project-specific directory structure, file paths, import aliases
+- Patterns that reference project-specific file paths (e.g., `src/schemas/`, `@/lib/prisma`)
+
+**Sync rules**:
+1. Target: `~/plan-flow/brain/patterns/<name>.md` (e.g., `nextjs.md`, `typescript.md`, `zod.md`)
+2. Use kebab-case file names matching the framework/library name (not `<fw>-patterns.md`, just `<fw>.md`)
+3. **If pattern file already exists in global brain**: Merge by appending new sections that don't already exist. Do NOT overwrite — the global file may contain accumulated knowledge from multiple projects
+4. **If pattern file does not exist**: Copy it, removing project-specific file paths and examples. Keep only the generic best practices, conventions, and anti-patterns
+5. Add a `## Projects Using This` section at the bottom with `[[project-name]]` wiki-links
+6. Strip project-specific code examples (paths like `src/schemas/user.schema.ts`). Keep generic examples that show the pattern without referencing specific project files
+
+**Template for global pattern file**:
+
+```markdown
+# [Framework/Library] Patterns
+
+## Best Practices
+
+[Generic best practices from setup analysis]
+
+## Allowed Patterns
+
+[Generic allowed patterns]
+
+## Forbidden Patterns
+
+[Generic anti-patterns]
+
+## Projects Using This
+
+- [[project-name-1]]
+- [[project-name-2]]
+```
 
 ### Global Brain Structure (Central Vault)
 

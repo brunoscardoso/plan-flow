@@ -711,6 +711,39 @@ When executing this command:
 
 ---
 
+## Global Pattern Sync
+
+After generating pattern files in Step 8, sync **generic** patterns to the global brain at `~/plan-flow/brain/patterns/`.
+
+### What to Sync
+
+| Local Pattern File | Global Target | Sync? |
+|---|---|---|
+| `.claude/resources/frameworks/<fw>-patterns.md` | `~/plan-flow/brain/patterns/<fw>.md` | Yes — framework best practices are generic |
+| `.claude/resources/libraries/<lib>-patterns.md` | `~/plan-flow/brain/patterns/<lib>.md` | Yes — library patterns are generic |
+| `.claude/resources/project/project-patterns.md` | — | No — project-specific paths and structure |
+
+### Sync Process
+
+For each framework and library pattern file generated:
+
+1. Check if `~/plan-flow/brain/patterns/<name>.md` already exists
+2. **If it does NOT exist**:
+   - Copy the pattern file, but strip project-specific file paths and code examples that reference specific project directories
+   - Keep generic best practices, conventions, allowed/forbidden patterns
+   - Add a `## Projects Using This` section at the bottom: `- [[project-name]]`
+3. **If it ALREADY exists**:
+   - Read the existing global file
+   - Append any NEW sections or patterns not already present (do NOT overwrite existing content — it may contain knowledge from other projects)
+   - Add `[[project-name]]` to the `## Projects Using This` section if not already listed
+4. Use kebab-case for file names: `nextjs.md`, `typescript.md`, `zod.md`, `react-query.md`
+
+### Example
+
+If setup generates `.claude/resources/frameworks/nextjs-patterns.md`, create or update `~/plan-flow/brain/patterns/nextjs.md` with the generic patterns, linked to the project via `[[project-name]]`.
+
+---
+
 ## Brain Capture
 
 After setup completes successfully, append a brain-capture block to the session file. See `.claude/resources/core/brain-capture.md` for processing rules.
@@ -726,6 +759,7 @@ data:
   project_name: [detected project name]
   stack: [language + framework]
   patterns_generated: [count of pattern files created]
+  patterns_synced_to_global: [list of global pattern files created/updated]
   files_created: [list of generated files]
 -->
 ```

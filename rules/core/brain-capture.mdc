@@ -92,6 +92,17 @@ Both coexist - ledger captures wisdom, brain captures facts.
 
 ---
 
+## Global Pattern Sync (after /setup)
+
+After `/setup` generates framework/library pattern files, sync **generic** patterns to `~/plan-flow/brain/patterns/`:
+- Framework patterns → `~/plan-flow/brain/patterns/<fw>.md` (Yes, sync)
+- Library patterns → `~/plan-flow/brain/patterns/<lib>.md` (Yes, sync)
+- Project patterns → Not synced (project-specific)
+
+Rules: If global file exists, merge new sections (don't overwrite). Add `[[project-name]]` to `## Projects Using This`. Strip project-specific paths from examples.
+
+---
+
 ## Rules
 
 1. **Silent by default**: Never tell the user "I updated the brain" unless asked
@@ -99,3 +110,4 @@ Both coexist - ledger captures wisdom, brain captures facts.
 3. **Wiki-links always**: Use `[[kebab-case-name]]` for all cross-references
 4. **Index caps enforced**: Rotate oldest entries when limits exceeded
 5. **No bulk loading**: Only load specific brain files when relevant to current work
+6. **Global pattern sync**: After /setup, sync generic patterns to `~/plan-flow/brain/patterns/`
