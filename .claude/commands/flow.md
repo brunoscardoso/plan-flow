@@ -1,5 +1,5 @@
 ---
-description: Toggle autopilot flow mode - automatically orchestrates discovery, planning, execution, and review for feature requests
+description: Toggle autopilot flow mode or start the full workflow with a feature request. Use '/flow <prompt>' to enable autopilot and begin immediately.
 ---
 
 # Flow: Autopilot Mode Toggle
@@ -26,11 +26,17 @@ DESCRIPTION:
   automatically run the full plan-flow workflow without manual command invocation.
 
 USAGE:
+  /flow <prompt>      Enable autopilot and start the flow with the given feature request
   /flow -enable       Enable autopilot mode (persists across sessions)
   /flow -disable      Disable autopilot mode
   /flow -status       Show current autopilot state
   /flow               Same as -status
   /flow -help         Show this help
+
+EXAMPLES:
+  /flow add dark mode support
+  /flow implement user authentication with OAuth2
+  /flow fix the login page loading issue
 
 BEHAVIOR WHEN ENABLED:
   - Feature requests → full flow (discovery → plan → execute → review → archive)
@@ -81,6 +87,22 @@ Autopilot flow mode **disabled**.
 Commands will no longer auto-chain. Use individual slash commands as before:
 `/discovery-plan` → `/create-plan` → `/execute-plan` → `/review-code`
 ```
+
+### When invoked with a prompt (e.g., `/flow add gemini support`)
+
+If the user provides text that is NOT a flag (`-enable`, `-disable`, `-status`, `-help`), treat it as a **feature request with autopilot**:
+
+1. Create the file `flow/.autopilot` if it doesn't already exist
+2. Confirm autopilot is enabled (brief, one line)
+3. **Immediately start the flow** by invoking `/discovery-plan` with the user's prompt as the feature description
+
+**Example**: `/flow add dark mode support` →
+1. Enable autopilot (`flow/.autopilot`)
+2. Run `/discovery-plan "add dark mode support"`
+
+This is the most common usage pattern — the user wants to describe a feature and have the full flow run automatically.
+
+---
 
 ### When invoked with `-status` or no arguments
 
