@@ -305,39 +305,3 @@ Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 | `discovery-templates.md`      | Document templates                     |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/create-plan` command         | Creates plan from discovery document   |
-
----
-
-## Brain Capture
-
-After discovery completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
-
-**Capture the following**:
-
-```
-<!-- brain-capture
-skill: discovery
-feature: [feature name from discovery]
-status: completed
-data:
-  user_prompt: [original user request]
-  questions_asked: [count]
-  questions_answered: [count]
-  requirements_fr: [count of functional requirements]
-  requirements_nfr: [count of non-functional requirements]
-  discovery_doc: [path to discovery document]
--->
-```
-
-Write/update `flow/brain/features/[feature-name].md` with discovery context and update `flow/brain/index.md`.
-
----
-
-## Resource Capture
-
-During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
-
-At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
-
-Only save if the user approves. Do not re-ask if declined.
-

@@ -246,37 +246,3 @@ When executing this command:
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/discovery-plan` command      | Create discovery from contract         |
 | `/create-plan` command         | Create plan from discovery             |
-
----
-
-## Brain Capture
-
-After contract creation completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
-
-**Capture the following**:
-
-```
-<!-- brain-capture
-skill: create-contract
-feature: [service name]
-status: completed
-data:
-  service_name: [API/service name]
-  endpoints_documented: [count]
-  auth_type: [detected auth type]
-  contract_doc: [path to contract document]
--->
-```
-
-Update `flow/brain/features/[service-name].md` with contract context and update `flow/brain/index.md`.
-
----
-
-## Resource Capture
-
-During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
-
-At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
-
-Only save if the user approves. Do not re-ask if declined.
-
