@@ -19,6 +19,9 @@ Automatic knowledge capture that builds a secondary brain during plan-flow skill
 3. Apply awareness of active features, recent errors, and recent decisions naturally during work
 4. Do NOT announce that you read the brain index
 5. When a user request relates to an indexed entry, read the specific brain file for targeted context (e.g., `flow/brain/features/{feature}.md` or `flow/brain/errors/{error}.md`)
+6. If `flow/brain/index.md` contains a `## Global Patterns` section, note the available GLB-* codes and their pattern names — do NOT load the full pattern files
+7. **Only indexed patterns are eligible**: If a global pattern file exists in `~/plan-flow/brain/patterns/` but does NOT have GLB-* codes in the brain index or `flow/brain/patterns-index.md`, it MUST NOT be loaded. Run `/pattern-validate` first to index it.
+8. During work, when a task relates to an indexed pattern, expand only the relevant GLB-* code by reading the specific line range from `~/plan-flow/brain/patterns/<name>.md`. Never read the entire file.
 
 ### After Any Plan-Flow Skill Completes
 

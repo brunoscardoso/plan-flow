@@ -20,7 +20,10 @@ Automatic knowledge capture that builds a secondary brain during skill execution
    - Active features and their status
    - Recent errors (reusable patterns)
    - Recent decisions (context for new work)
+   - Global Patterns section (note GLB-* codes, do NOT load full files)
 3. Apply context naturally - never announce "I read the brain"
+4. **Only indexed patterns are eligible**: If a pattern exists in `~/plan-flow/brain/patterns/` but has no GLB-* codes in the index, do NOT load it. Run `/pattern-validate` first.
+5. During work, expand GLB-* codes on-demand by reading specific line ranges from `~/plan-flow/brain/patterns/<name>.md`. Never read the entire file.
 
 ---
 

@@ -18,6 +18,7 @@ Use slash commands to invoke skills:
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
+| `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Workflow
