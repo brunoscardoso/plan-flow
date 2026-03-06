@@ -5,7 +5,7 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 9 files, ~1450 lines
+**Total Files**: 10 files, ~1560 lines
 **Reference Codes**: COR-AP-1 through COR-RC-2
 
 ---
@@ -73,6 +73,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-TL-1 | Tasklist session start behavior and task format | project-tasklist.md | 10-45 |
 | COR-TL-2 | Brain integration and maintenance rules | project-tasklist.md | 47-65 |
 
+### Heartbeat (`heartbeat.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-HB-1 | Heartbeat file format and schedule syntax | heartbeat.md | 10-55 |
+| COR-HB-2 | Daemon architecture, CLI commands, and rules | heartbeat.md | 57-110 |
+
 ### Resource Capture (`resource-capture.md`)
 
 | Code | Description | Source | Lines |
@@ -107,6 +114,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-MEM-2 | Need memory field descriptions and maintenance rules |
 | COR-TL-1 | Need tasklist session start behavior and task format |
 | COR-TL-2 | Need tasklist brain integration and maintenance rules |
+| COR-HB-1 | Need heartbeat file format and schedule syntax |
+| COR-HB-2 | Need daemon architecture and CLI commands |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
 

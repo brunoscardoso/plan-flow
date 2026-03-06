@@ -19,6 +19,7 @@ Use slash commands to invoke skills:
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
+| `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Workflow
@@ -64,6 +65,8 @@ flow/
 ├── reviewed-code/     # Local code review documents
 ├── reviewed-pr/       # PR review documents
 ├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── memory.md          # Persistent artifact tracker (completed skill executions)
+├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
 ├── log.md             # Heartbeat log of important events
 └── ledger.md          # Persistent project learning journal
 ```
@@ -167,6 +170,7 @@ npm run test
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow
