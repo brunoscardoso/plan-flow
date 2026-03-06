@@ -12,12 +12,11 @@ flow/brain/
 ├── index.md        # Brain index (loaded at session start)
 ├── features/       # Feature history and context
 │   └── {feature-name}.md
-├── errors/         # Reusable error patterns
-│   └── {error-name}.md
-├── decisions/      # Decision records
-│   └── {decision-name}.md
-└── sessions/       # Daily activity logs
-    └── YYYY-MM-DD.md
+└── errors/         # Reusable error patterns
+    └── {error-name}.md
+
+~/plan-flow/brain/daily/               # Global daily logs (cross-project)
+└── YYYY-MM-DD.md
 ```
 
 ## File Naming
@@ -25,7 +24,6 @@ flow/brain/
 - All files use **kebab-case**: `user-authentication.md`, `api-rate-limit.md`
 - Feature files match the feature name from discovery/plans
 - Error files describe the error pattern, not the instance
-- Decision files describe the decision topic
 - Session files use ISO date format
 
 ## Wiki-Link Patterns
@@ -35,8 +33,7 @@ Use `[[kebab-case-name]]` to link between brain files:
 ```markdown
 ## Feature: [[user-authentication]]
 
-During implementation, we hit [[api-timeout-error]] which led to
-the decision in [[use-retry-with-backoff]].
+During implementation, we hit [[api-timeout-error]].
 
 See today's session: [[2025-01-15]]
 ```
@@ -69,9 +66,7 @@ Update `flow/brain/index.md` when:
 - New feature discovered or created
 - Feature status changes
 - New error pattern identified
-- New decision recorded
 
 Enforce caps:
 - 5 recent errors (rotate oldest)
-- 3 recent decisions (rotate oldest)
 - 3 cross-project patterns (rotate oldest)

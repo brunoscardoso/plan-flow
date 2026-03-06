@@ -46,9 +46,7 @@ flow/
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
-│   ├── errors/        # Reusable error patterns
-│   ├── decisions/     # Decision records
-│   └── sessions/      # Daily activity logs
+│   └── errors/        # Reusable error patterns
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans

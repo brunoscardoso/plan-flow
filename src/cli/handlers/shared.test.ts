@@ -45,8 +45,6 @@ const EXPECTED_SUBDIRS = [
   'brain',
   'brain/features',
   'brain/errors',
-  'brain/decisions',
-  'brain/sessions',
   'contracts',
   'discovery',
   'plans',
@@ -231,13 +229,12 @@ describe('vault registration', () => {
     expect(existsSync(graphPath)).toBe(true);
 
     const config = JSON.parse(readFileSync(graphPath, 'utf-8'));
-    expect(config.colorGroups).toHaveLength(13);
+    expect(config.colorGroups).toHaveLength(12);
     const queries = config.colorGroups.map((g: { query: string }) => g.query);
     expect(queries).toContain('path:patterns');
     expect(queries).toContain('path:features');
     expect(queries).toContain('path:errors');
-    expect(queries).toContain('path:decisions');
-    expect(queries).toContain('path:sessions');
+    expect(queries).toContain('path:daily');
     expect(queries).toContain('path:discovery');
     expect(queries).toContain('path:plans');
     expect(queries).toContain('path:contracts');
@@ -263,7 +260,7 @@ describe('vault registration', () => {
     expect(stat.isSymbolicLink()).toBe(false);
 
     // Check individual symlinks
-    const expectedLinks = ['features', 'errors', 'decisions', 'sessions', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources'];
+    const expectedLinks = ['features', 'errors', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources'];
     for (const linkName of expectedLinks) {
       const linkPath = join(projectDir, linkName);
       expect(existsSync(linkPath)).toBe(true);

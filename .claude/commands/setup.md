@@ -399,7 +399,7 @@ See: `.claude/resources/skills/setup-skill.md`
 If the `flow/` folder doesn't exist, create it:
 
 ```bash
-mkdir -p flow/archive flow/brain/features flow/brain/errors flow/brain/decisions flow/brain/sessions flow/contracts flow/discovery flow/plans flow/references flow/reviewed-code flow/reviewed-pr
+mkdir -p flow/archive flow/brain/features flow/brain/errors flow/contracts flow/discovery flow/plans flow/references flow/reviewed-code flow/reviewed-pr
 ```
 
 **Add `.gitkeep` files**:
@@ -416,7 +416,6 @@ flow/
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── features/      # Feature history and context
 │   ├── errors/        # Reusable error patterns
-│   ├── decisions/     # Decision records
 │   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
@@ -454,7 +453,6 @@ flow/
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── features/      # Feature history and context
 │   ├── errors/        # Reusable error patterns
-│   ├── decisions/     # Decision records
 │   └── sessions/      # Daily activity logs
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
@@ -764,7 +762,7 @@ data:
 -->
 ```
 
-Write to `flow/brain/sessions/YYYY-MM-DD.md` and update `flow/brain/index.md` if this is a new project setup.
+Write to `~/plan-flow/brain/daily/YYYY-MM-DD.md` and update `flow/brain/index.md` if this is a new project setup.
 
 ---
 

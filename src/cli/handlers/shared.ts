@@ -23,8 +23,6 @@ const FLOW_SUBDIRS = [
   'brain',
   'brain/features',
   'brain/errors',
-  'brain/decisions',
-  'brain/sessions',
   'contracts',
   'discovery',
   'plans',
@@ -129,7 +127,7 @@ function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const VAULT_SUBDIRS = ['patterns', 'projects'];
+const VAULT_SUBDIRS = ['patterns', 'projects', 'daily'];
 
 /**
  * Maps detected stack values (lowercase) to brain pattern file names (without .md).
@@ -184,8 +182,6 @@ const STACK_TO_PATTERN: Record<string, string> = {
 const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'features', subpath: 'brain/features' },
   { name: 'errors', subpath: 'brain/errors' },
-  { name: 'decisions', subpath: 'brain/decisions' },
-  { name: 'sessions', subpath: 'brain/sessions' },
   { name: 'discovery', subpath: 'discovery' },
   { name: 'plans', subpath: 'plans' },
   { name: 'archive', subpath: 'archive' },
@@ -321,8 +317,7 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
       { query: 'path:patterns', color: { a: 1, rgb: 16771584 } },       // yellow
       { query: 'path:features', color: { a: 1, rgb: 10040217 } },       // purple
       { query: 'path:errors', color: { a: 1, rgb: 16007990 } },         // red
-      { query: 'path:decisions', color: { a: 1, rgb: 2201331 } },       // blue
-      { query: 'path:sessions', color: { a: 1, rgb: 10395294 } },       // gray
+      { query: 'path:daily', color: { a: 1, rgb: 10395294 } },           // gray
       { query: 'path:discovery', color: { a: 1, rgb: 16747520 } },      // orange
       { query: 'path:plans', color: { a: 1, rgb: 5025616 } },           // green
       { query: 'path:contracts', color: { a: 1, rgb: 52428 } },         // teal
@@ -435,7 +430,7 @@ function detectMatchingPatterns(target: string, vaultDir: string): string[] {
 /**
  * Registers the project in the central vault at ~/plan-flow/brain/
  * by creating a real directory per project with individual symlinks
- * for each flow subdirectory (features, errors, decisions, sessions,
+ * for each flow subdirectory (features, errors,
  * discovery, plans, archive, contracts).
  */
 function registerVault(

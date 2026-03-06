@@ -31,8 +31,6 @@ flow
 # Local settings (keep template)
 .claude/settings.local.json
 
-.cursor
-
 # >>> plan-flow
 flow/
 .plan-flow.yml

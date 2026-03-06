@@ -4,16 +4,16 @@
 ## Brain Directory Structure
 
 ```
-flow/brain/
-├── index.md                    # L1 cache - always loaded (~30 lines)
-├── features/                   # Feature history and context
+flow/brain/                            # Per-project brain
+├── index.md                           # L1 cache - always loaded (~30 lines)
+├── patterns-index.md                  # Matched global patterns (GLB-* codes)
+├── features/                          # Feature history and context
 │   └── {feature-name}.md
-├── errors/                     # Reusable error patterns
-│   └── {error-name}.md
-├── decisions/                  # Decision records
-│   └── {decision-name}.md
-└── sessions/                   # Daily activity logs
-    └── {YYYY-MM-DD}.md
+└── errors/                            # Reusable error patterns
+    └── {error-name}.md
+
+~/plan-flow/brain/daily/               # Global daily logs (cross-project)
+└── {YYYY-MM-DD}.md
 ```
 
 ---
@@ -24,15 +24,13 @@ flow/brain/
 |-----------|---------|---------|-----------|
 | Feature | `features/{kebab-case}.md` | `features/contact-enrichment.md` | `[[contact-enrichment]]` |
 | Error | `errors/{kebab-case}.md` | `errors/prisma-connection-pooling.md` | `[[prisma-connection-pooling]]` |
-| Decision | `decisions/{kebab-case}.md` | `decisions/jwt-over-sessions.md` | `[[jwt-over-sessions]]` |
-| Session | `sessions/{YYYY-MM-DD}.md` | `sessions/2026-03-03.md` | `[[2026-03-03]]` |
+| Daily | `~/plan-flow/brain/daily/{YYYY-MM-DD}.md` | `daily/2026-03-03.md` | `[[2026-03-03]]` |
 
 **Rules**:
 - Always use kebab-case for file names
 - File name must match the `[[wiki-link]]` reference exactly (without path)
 - Derive feature names from discovery/plan file names: `discovery_contact_enrichment_v1.md` → `contact-enrichment`
 - Derive error names from the error description: "Prisma connection pooling timeout" → `prisma-connection-pooling`
-- Derive decision names from the choice: "Chose JWT over sessions" → `jwt-over-sessions`
 
 ---
 
@@ -43,7 +41,6 @@ flow/brain/
 ```markdown
 Feature: [[contact-enrichment]]
 Error: [[prisma-connection-pooling]]
-Decision: [[jwt-over-sessions]]
 Session: [[2026-03-03]]
 ```
 
@@ -235,12 +232,6 @@ When a feature status changes to `discarded`, always include the reason:
 1. Add to "Recent Errors" section with fix summary
 2. If section has 5 entries, remove the oldest
 3. Create/update the full error file in `errors/`
-
-### Adding a Decision
-
-1. Add to "Recent Decisions" section with choice summary
-2. If section has 3 entries, remove the oldest
-3. Create the full decision file in `decisions/`
 
 ### Cross-Project Pattern
 

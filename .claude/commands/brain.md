@@ -48,12 +48,13 @@ MODES:
   Guided:     Asks structured questions about work, insights, meetings, decisions
 
 BRAIN STRUCTURE:
-  flow/brain/
-  ├── index.md        # Brain index (always loaded at session start)
-  ├── features/       # Feature history and context
-  ├── errors/         # Reusable error patterns
-  ├── decisions/      # Decision records
-  └── sessions/       # Daily activity logs
+  flow/brain/                          # Per-project brain
+  ├── index.md                         # Brain index (loaded at session start)
+  ├── features/                        # Feature history and context
+  └── errors/                          # Reusable error patterns
+
+  ~/plan-flow/brain/daily/             # Global daily logs (cross-project)
+  └── YYYY-MM-DD.md
 
 RELATED COMMANDS:
   /setup             Creates brain directory structure
@@ -69,7 +70,7 @@ RELATED COMMANDS:
 | ------------------------ | -------------------------------------------------------- |
 | **Brain Only**           | ONLY write to `flow/brain/` - no source code, no config  |
 | **Wiki-Links**           | All cross-references use `[[kebab-case-name]]` format    |
-| **Index Caps**           | Max 5 errors, 3 decisions, 3 cross-project in index      |
+| **Index Caps**           | Max 5 errors, 3 cross-project in index                    |
 | **No Code**              | Brain is for knowledge capture, never write source code   |
 | **Complete and Stop**    | After writing entry, STOP and wait for user               |
 
@@ -99,7 +100,7 @@ What would you like to capture? You can:
 Check if `flow/brain/` exists. If not, create:
 
 ```bash
-mkdir -p flow/brain/features flow/brain/errors flow/brain/decisions flow/brain/sessions
+mkdir -p flow/brain/features flow/brain/errors
 ```
 
 Check if `flow/brain/index.md` exists. If not, create initial index:
@@ -112,9 +113,6 @@ _No features tracked yet._
 
 ## Recent Errors
 _No errors captured yet._
-
-## Recent Decisions
-_No decisions recorded yet._
 
 ## Cross-Project Patterns
 _No cross-project patterns yet._

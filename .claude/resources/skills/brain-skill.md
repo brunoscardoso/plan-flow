@@ -23,8 +23,7 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 | Read `flow/brain/index.md` | Understand current brain state |
 | Read any `flow/brain/` file | Context for linking |
 | Write to `flow/brain/features/` | Feature-related entries |
-| Write to `flow/brain/decisions/` | Decision records |
-| Write to `flow/brain/sessions/` | Session log entries |
+| Write to `~/plan-flow/brain/daily/` | Daily session log entries |
 | Update `flow/brain/index.md` | Keep index current |
 
 ### Forbidden Actions
@@ -58,10 +57,8 @@ When user runs `/brain {free text}`:
    - Technologies mentioned → create `[[tech-name]]` links
    - People mentioned → note in entry
    - Error patterns → create/link error files
-   - Decisions → create decision files
 3. **Categorize** - Determine primary category:
    - Feature-related → write to `flow/brain/features/{feature}.md`
-   - Decision → write to `flow/brain/decisions/{decision}.md`
    - General insight → append to today's session file
 4. **Write** - Create/update the appropriate brain file with `[[wiki-links]]`
 5. **Update index** - Update `flow/brain/index.md` if needed (new feature, error, or decision)
@@ -111,7 +108,7 @@ Options:
 ```markdown
 Brain entry captured!
 
-**Written to**: flow/brain/features/{feature}.md (or sessions/{date}.md)
+**Written to**: flow/brain/features/{feature}.md (or ~/plan-flow/brain/daily/{date}.md)
 **Links created**: [[feature-1]], [[error-name]]
 **Index updated**: Yes/No
 ```
@@ -135,8 +132,8 @@ Brain entry captured!
 
 - [ ] Entry written to appropriate `flow/brain/` subdirectory
 - [ ] All `[[wiki-links]]` reference valid file names (kebab-case)
-- [ ] `flow/brain/index.md` updated if new feature, error, or decision added
-- [ ] Index caps enforced (5 errors, 3 decisions, 3 cross-project)
+- [ ] `flow/brain/index.md` updated if new feature or error added
+- [ ] Index caps enforced (5 errors, 3 cross-project)
 - [ ] No files created outside `flow/brain/`
 - [ ] No source code written
 

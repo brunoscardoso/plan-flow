@@ -26,7 +26,7 @@
 ## Session Start Behaviors
 
 - **Project Ledger**: If `flow/ledger.md` exists, read it silently and internalize learnings. Update it when you learn project-specific lessons. See `.claude/resources/core/project-ledger.md` for full rules.
-- **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features, recent errors, and recent decisions. See `.claude/resources/core/brain-capture.md` for full rules.
+- **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Critical Rules
@@ -44,9 +44,7 @@ flow/
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
-│   ├── errors/        # Reusable error patterns
-│   ├── decisions/     # Decision records
-│   └── sessions/      # Daily activity logs
+│   └── errors/        # Reusable error patterns
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
@@ -58,7 +56,7 @@ flow/
 
 ## Central Vault
 
-All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, sessions, discovery, plans, archive, contracts). Open `~/plan-flow/brain/` as your Obsidian vault to see all projects in one graph with path-based color-coded groups.
+All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, discovery, plans, archive, contracts). Daily session logs live globally at `~/plan-flow/brain/daily/`. Open `~/plan-flow/brain/` as your Obsidian vault to see all projects in one graph with path-based color-coded groups.
 
 ## Complexity Scoring
 
