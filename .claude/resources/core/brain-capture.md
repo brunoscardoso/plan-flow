@@ -30,7 +30,8 @@ When any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute
 1. **Parse** the brain-capture block
 2. **Write** to the appropriate brain files
 3. **Update** `flow/brain/index.md` (enforce caps)
-4. **Sync** relevant patterns to `~/plan-flow/brain/` (central vault)
+4. **Append** a memory entry to `flow/memory.md` (see `.claude/resources/core/project-memory.md`)
+5. **Sync** relevant patterns to `~/plan-flow/brain/` (central vault)
 
 ---
 

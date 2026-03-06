@@ -27,7 +27,7 @@ jest.unstable_mockModule('../utils/prompts.js', () => ({
   selectPlatforms: jest.fn(),
 }));
 
-const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog } = await import('./shared.js');
+const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog, generateMemory } = await import('./shared.js');
 const { askBusinessContext } = await import('../utils/prompts.js') as { askBusinessContext: jest.Mock };
 
 function createTempDir(): string {
