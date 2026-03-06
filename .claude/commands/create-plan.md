@@ -70,6 +70,7 @@ RELATED COMMANDS:
 | ------------------------ | -------------------------------------------------------- |
 | **Discovery Required**   | NEVER create a plan without a discovery document. If none exists, run `/discovery-plan` first. No exceptions. |
 | **No Auto-Chaining**     | NEVER auto-invoke /execute-plan - user must invoke it (unless autopilot ON) |
+| **File Only**            | Save the `.md` file and report its path. Do NOT show full content in chat. |
 | **Complete and Stop**    | After presenting results, STOP and wait for user (unless autopilot ON) |
 
 ---
@@ -134,50 +135,31 @@ See: `.claude/resources/skills/create-plan-skill.md`
 
 ---
 
-### Step 5: Present Results
+### Step 5: Save File and Stop
 
-After the skill completes, confirm file creation and summarize:
+After the skill completes:
 
-```markdown
-Plan Created!
+1. **Save the plan document** to `flow/plans/plan_<feature>_v<version>.md`
+2. **Report only the file path** — do NOT display the full plan content in chat
+3. **STOP** — do NOT execute the plan, do NOT offer to build
 
-**Deliverable**: `flow/plans/plan_<feature>_v<version>.md`
-
-**Summary**:
-- X phases created
-- Total complexity: XX/XX
-- Highest complexity: Phase X at Y/10
-```
-
-**CRITICAL — Check autopilot mode BEFORE presenting next steps:**
-
-1. **Check if `flow/.autopilot` exists**
-2. **If autopilot is ON**: Do NOT show "Next Steps" or "invoke manually". Instead, use `AskUserQuestion` to ask for plan approval, then **immediately auto-proceed** to `/execute-plan` with the plan file. Do NOT stop. Do NOT wait for the user to manually invoke `/execute-plan`.
-
-```typescript
-// When autopilot is ON, ask for approval then auto-proceed:
-AskUserQuestion({
-  questions: [{
-    question: "Plan is ready. Approve to proceed with execution?",
-    header: "Plan",
-    options: [
-      { label: "Approve and execute", description: "Start executing the plan now" },
-      { label: "Refine first", description: "Let me suggest changes to the plan before executing" }
-    ],
-    multiSelect: false
-  }]
-})
-// If approved → immediately invoke /execute-plan (do NOT stop)
-```
-
-3. **If autopilot is OFF**: Show next steps and stop:
+**Output to the user** (this is the ONLY thing to show):
 
 ```markdown
-**Next Steps**:
-1. Review the plan above
-2. Request any refinements
-3. When ready, invoke `/execute-plan @flow/plans/plan_<feature>_v<version>.md`
+Plan created.
+
+**Created**: `flow/plans/plan_<feature>_v<version>.md`
+
+Next: review the file, then run `/execute-plan` when ready.
 ```
+
+⚠️ **CRITICAL**: After saving the file, the command is DONE. Do NOT:
+- Show the full plan content in chat
+- Auto-invoke `/execute-plan`
+- Offer to start building or implementing
+- Show implementation steps or code
+
+The user will read the `.md` file themselves and decide when to proceed.
 
 ---
 
@@ -217,9 +199,10 @@ AskUserQuestion({
                     |
                     v
 +------------------------------------------+
-| Step 5: Present Results                  |
-| - Show summary                           |
-| - Link to /execute-plan command          |
+| Step 5: Save File and Stop               |
+| - Save .md file to flow/plans/           |
+| - Report file path only                  |
+| - STOP (no execute, no build)            |
 +------------------------------------------+
 ```
 

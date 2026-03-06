@@ -60,6 +60,7 @@ RELATED COMMANDS:
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
 | **No Auto-Chaining**     | NEVER auto-invoke /discovery-plan - user must invoke it  |
+| **File Only**            | Save the `.md` file and report its path. Do NOT show full content in chat. |
 | **Complete and Stop**    | After presenting results, STOP and wait for user         |
 
 ---
@@ -115,27 +116,30 @@ See: `.claude/resources/skills/create-contract-skill.md`
 
 ---
 
-### Step 4: Present Results
+### Step 4: Save File and Stop
 
-After the skill completes, confirm file creation:
+After the skill completes:
+
+1. **Save the contract document** to `flow/contracts/<service_name>_contract.md`
+2. **Report only the file path** — do NOT display the full contract content in chat
+3. **STOP** — do NOT auto-invoke `/discovery-plan`
+
+**Output to the user** (this is the ONLY thing to show):
 
 ```markdown
-Contract Created!
+Contract created.
 
-**Deliverable**: `flow/contracts/<service_name>_contract.md`
+**Created**: `flow/contracts/<service_name>_contract.md`
 
-**Summary**:
-- X endpoints documented
-- Authentication: [method]
-- Error handling documented
-
-**Next Steps** (user must invoke manually):
-1. Review the contract above
-2. Request any refinements
-3. When ready, invoke `/discovery-plan @flow/contracts/<service_name>_contract.md`
+Next: review the file, then run `/discovery-plan` when ready.
 ```
 
-**CRITICAL**: This command is now complete. Do NOT auto-invoke `/discovery-plan`. Wait for the user to explicitly invoke it.
+⚠️ **CRITICAL**: After saving the file, the command is DONE. Do NOT:
+- Show the full contract content in chat
+- Auto-invoke `/discovery-plan`
+- Offer to start discovery or planning
+
+The user will read the `.md` file themselves and decide when to proceed.
 
 ---
 
@@ -168,9 +172,10 @@ Contract Created!
                     |
                     v
 +------------------------------------------+
-| Step 4: Present Results                  |
-| - Show summary                           |
-| - Link to /discovery-plan command        |
+| Step 4: Save File and Stop               |
+| - Save .md file to flow/contracts/       |
+| - Report file path only                  |
+| - STOP (no discovery, no plan)           |
 +------------------------------------------+
 ```
 
