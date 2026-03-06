@@ -16,9 +16,42 @@ This skill **only produces a markdown file** in `flow/plans/`. It does NOT:
 
 ## Tool Access
 
-This skill uses the **read-only** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
+This skill uses the **read-only** agent profile.
 
-**Quick reference**: Read/Grep/Glob/WebSearch allowed. Edit/Write/Bash(write) forbidden. Output to `flow/plans/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
+## Restrictions - PLANNING ONLY
+
+This skill is **strictly for creating plan documents**. The process:
+
+1. **Reads** the discovery document or gathers requirements
+2. **Analyzes** complexity and scope
+3. **Structures** phases with complexity scores
+4. **Generates** a plan markdown file
+
+**No code, no implementation, no source file modifications.**
+
+### NEVER Do These Actions
+
+| Forbidden Action                    | Reason                           |
+| ----------------------------------- | -------------------------------- |
+| Create/edit source code files       | Planning only, no implementation |
+| Write implementation code           | Plans describe what, not how     |
+| Execute any plan phases             | Use /execute-plan for that       |
+| Run build or test commands          | No execution commands            |
+| Create files outside `flow/plans/`  | Only write plan documents        |
+
+### Allowed Actions
+
+| Allowed Action                         | Purpose                           |
+| -------------------------------------- | --------------------------------- |
+| Read discovery documents               | Extract requirements              |
+| Read any project file                  | Understand existing codebase      |
+| Search codebase (grep, glob, semantic) | Find existing patterns            |
+| Write to `flow/plans/`                 | Save plan document                |
+| Write to `flow/brain/`                 | Knowledge capture                 |
+| Write to `flow/log.md`                 | Activity logging                  |
+| Read project rule files                | Understand patterns to follow     |
+
+> **Important**: The ONLY writable locations are `flow/plans/`, `flow/brain/`, and `flow/log.md`. No source code or other files should be modified.
 
 ---
 

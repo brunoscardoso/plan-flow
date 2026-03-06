@@ -15,9 +15,47 @@ This skill **only produces a markdown file** with findings. It does NOT:
 
 ## Tool Access
 
-This skill uses the **read-only** agent profile. See `agent-profiles.md` [COR-AG-1] for full details.
+This skill uses the **read-only** agent profile.
 
-**Quick reference**: Read/Grep/Glob allowed. Edit/Write/Bash(write) forbidden. Bash read commands allowed: `git status`, `git diff`, `git log`. Output to `flow/reviewed-code/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
+## Restrictions - READ ONLY
+
+This skill is **strictly read-only analysis**. The review process:
+
+1. **Reads** the local diff (staged and unstaged changes)
+2. **Searches** the codebase for similar implementations as reference
+3. **Analyzes** changes against patterns and guidelines
+4. **Generates** a markdown file with findings and recommendations
+
+**No code modification, no commits, no builds.**
+
+### NEVER Do These Actions
+
+| Forbidden Action                      | Reason                                     |
+| ------------------------------------- | ------------------------------------------ |
+| Edit/modify any source code           | No code changes - review produces findings |
+| `git commit`                          | No commits                                 |
+| `git add`                             | No staging changes                         |
+| `git checkout`                        | No discarding changes                      |
+| `git reset`                           | No resetting changes                       |
+| Create files outside `flow/`          | Only write to `flow/reviewed-code/`        |
+
+### Allowed Actions
+
+| Allowed Action                         | Purpose                         |
+| -------------------------------------- | ------------------------------- |
+| `git status`                           | List changed files              |
+| `git diff`                             | View uncommitted changes        |
+| `git diff --cached`                    | View staged changes             |
+| `git diff --name-only`                 | List changed file names         |
+| `git log` (read only)                  | View commit history for context |
+| Read any project file                  | Find similar implementations    |
+| Search codebase (grep, glob, semantic) | Find reference patterns         |
+| Write to `flow/reviewed-code/`         | Save review notes locally       |
+| Write to `flow/brain/`                 | Knowledge capture               |
+| Write to `flow/log.md`                 | Activity logging                |
+| Read project rule files                | Load patterns for analysis      |
+
+> **Important**: The ONLY writable locations are `flow/reviewed-code/`, `flow/brain/`, and `flow/log.md`. No source code, configuration files, or any other project files should be modified.
 
 ---
 

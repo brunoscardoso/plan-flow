@@ -20,9 +20,41 @@ This skill **only produces a markdown file** with findings. It does NOT:
 
 ## Tool Access
 
-This skill uses the **read-only** agent profile. See `agent-profiles.mdc` [COR-AG-1] for full details.
+This skill uses the **read-only** agent profile.
 
-**Quick reference**: Read/Grep/Glob allowed. Edit/Write/Bash(write) forbidden. Output to `flow/reviewed-pr/` only (plus `flow/brain/` and `flow/log.md` for knowledge capture).
+## Restrictions - READ ONLY
+
+This skill is **strictly read-only analysis**. The review process:
+
+1. **Reads** the PR diff and files
+2. **Analyzes** against patterns and guidelines
+3. **Generates** a markdown file with findings
+
+**No code execution, no code modification, no builds.**
+
+### NEVER Do These Actions
+
+| Forbidden Action                         | Reason                                         |
+| ---------------------------------------- | ---------------------------------------------- |
+| `npm run build`                          | No build commands - analysis only              |
+| `npm run test`                           | No test commands - analysis only               |
+| `npm install`                            | No dependency installation                     |
+| Edit/modify any source code              | No code changes - review produces findings     |
+| Create/edit files outside `flow/`        | Only write to `flow/reviewed-pr/`              |
+| `git commit`                             | No commits to any repository                   |
+
+### Allowed Actions
+
+| Allowed Action                         | Purpose                         |
+| -------------------------------------- | ------------------------------- |
+| Read any project file                  | Find similar implementations    |
+| Search codebase (grep, glob, semantic) | Find reference patterns         |
+| Write to `flow/reviewed-pr/`           | Save review document            |
+| Write to `flow/brain/`                 | Knowledge capture               |
+| Write to `flow/log.md`                 | Activity logging                |
+| Read project rule files                | Load patterns for analysis      |
+
+> **Important**: The ONLY writable locations are `flow/reviewed-pr/`, `flow/brain/`, and `flow/log.md`. No source code, configuration files, or any other project files should be modified.
 
 ### Platform-Specific Commands
 
