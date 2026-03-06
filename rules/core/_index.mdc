@@ -156,7 +156,7 @@ Core rules define the foundational coding standards that apply across the entire
 - `project-ledger.mdc` has `alwaysApply: false` - loaded when `flow/ledger.md` exists or when learnings are produced
 - `brain-capture.mdc` has `alwaysApply: false` - loaded when `flow/brain/index.md` exists or when brain-capture blocks need processing
 - `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
-- `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)
+- `autopilot-mode.mdc` has `alwaysApply: true` - always loaded; self-disables when `flow/.autopilot` does not exist
 - `resource-capture.mdc` has `alwaysApply: false` - loaded during skill execution to watch for valuable reference materials
 - `agent-profiles.mdc` has `alwaysApply: false` - defines tool access boundaries per skill profile
 - `orchestration-workflows.mdc` has `alwaysApply: false` - defines workflow step sequences for autopilot mode

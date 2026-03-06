@@ -1,6 +1,6 @@
 ---
 description: "Autopilot flow mode - when flow/.autopilot exists, automatically orchestrates discovery → plan → execute → review for feature requests. Include when autopilot mode is active."
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Autopilot Flow Mode
