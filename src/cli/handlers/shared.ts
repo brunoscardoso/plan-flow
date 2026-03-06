@@ -132,6 +132,52 @@ function escapeRegExp(str: string): string {
 const VAULT_SUBDIRS = ['patterns', 'projects'];
 
 /**
+ * Maps detected stack values (lowercase) to brain pattern file names (without .md).
+ * Keys are matched against detected language, framework label, and dependency names.
+ */
+const STACK_TO_PATTERN: Record<string, string> = {
+  // Languages
+  'typescript': 'typescript',
+  'javascript': 'typescript',
+  'python': 'python',
+  'rust': 'rust',
+  'go': 'go',
+  'ruby': 'ruby',
+  'c#': 'csharp',
+  'java': 'java',
+  // Frameworks
+  'next.js': 'nextjs',
+  'react': 'react',
+  'react native': 'react-native',
+  'vue': 'vue',
+  'vue.js': 'vue',
+  'nuxt': 'nuxt',
+  'angular': 'angular',
+  'svelte': 'svelte',
+  'express': 'express',
+  'fastify': 'fastify',
+  'hono': 'hono',
+  'nestjs': 'nestjs',
+  'fastapi': 'fastapi',
+  'django': 'django',
+  'flask': 'flask',
+  'remix': 'remix',
+  'gatsby': 'gatsby',
+  'astro': 'astro',
+  'solidjs': 'solidjs',
+  'starlette': 'starlette',
+  // Libraries
+  'langchain': 'langchain',
+  'langgraph': 'langgraph',
+  'prisma': 'prisma',
+  'drizzle-orm': 'drizzle',
+  'tailwindcss': 'tailwind',
+  'zustand': 'zustand',
+  'redux': 'redux',
+  'expo': 'react-native',
+};
+
+/**
  * Symlinks created per project in the vault.
  * Each maps a subdirectory name to its relative path inside the project's flow/ dir.
  */
@@ -305,6 +351,88 @@ function ensureObsidianConfig(vaultDir: string, force = false): void {
 }
 
 /**
+ * Detects the project's stack and returns matching brain pattern names
+ * that exist in ~/plan-flow/brain/patterns/.
+ */
+function detectMatchingPatterns(target: string, vaultDir: string): string[] {
+  const patternsDir = join(vaultDir, 'patterns');
+  if (!existsSync(patternsDir)) return [];
+
+  // Get available pattern files (without .md extension)
+  let availablePatterns: Set<string>;
+  try {
+    availablePatterns = new Set(
+      readdirSync(patternsDir)
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => f.replace(/\.md$/, ''))
+    );
+  } catch {
+    return [];
+  }
+
+  if (availablePatterns.size === 0) return [];
+
+  // Collect stack identifiers from the project
+  const stackKeys: string[] = [];
+
+  const pkgParsed = parsePackageJson(target);
+  if (pkgParsed) {
+    stackKeys.push(pkgParsed.language.toLowerCase());
+    if (pkgParsed.framework !== 'None') {
+      // Extract framework label without version: "Next.js 14.2.0" → "next.js"
+      const fwLabel = pkgParsed.framework.replace(/\s+[\d.]+$/, '').toLowerCase();
+      stackKeys.push(fwLabel);
+    }
+    // Add dependency names for library-level matching
+    for (const dep of [...pkgParsed.prodDeps, ...pkgParsed.devDeps]) {
+      stackKeys.push(dep.name.toLowerCase());
+    }
+  }
+
+  const pyParsed = parsePyprojectToml(target);
+  if (pyParsed) {
+    stackKeys.push(pyParsed.language.toLowerCase());
+    if (pyParsed.framework !== 'None') {
+      stackKeys.push(pyParsed.framework.toLowerCase());
+    }
+    for (const dep of pyParsed.prodDeps) {
+      stackKeys.push(dep.name.toLowerCase());
+    }
+  }
+
+  // Also check for other language indicators
+  for (const depFile of DEP_FILES) {
+    if (existsSync(join(target, depFile.file))) {
+      stackKeys.push(depFile.language.toLowerCase());
+    }
+  }
+
+  // Check for React Native (expo or react-native dep)
+  if (stackKeys.includes('react-native') || stackKeys.includes('expo')) {
+    stackKeys.push('react native');
+  }
+
+  // Match stack keys against pattern map, then filter by available patterns
+  const matched = new Set<string>();
+  for (const key of stackKeys) {
+    const patternName = STACK_TO_PATTERN[key];
+    if (patternName && availablePatterns.has(patternName)) {
+      matched.add(patternName);
+    }
+  }
+
+  // Also include global patterns that always apply (e.g., global-rules, engineering)
+  const alwaysLink = ['global-rules', 'engineering'];
+  for (const p of alwaysLink) {
+    if (availablePatterns.has(p)) {
+      matched.add(p);
+    }
+  }
+
+  return [...matched];
+}
+
+/**
  * Registers the project in the central vault at ~/plan-flow/brain/
  * by creating a real directory per project with individual symlinks
  * for each flow subdirectory (features, errors, decisions, sessions,
@@ -366,16 +494,48 @@ function registerVault(
       }
     }
 
+    // Detect matching brain patterns for this project's stack
+    const matchedPatterns = detectMatchingPatterns(target, vaultDir);
+
     // Create project index file (the project node in Obsidian's graph)
     const projectIndexPath = join(projectDir, `${projectName}.md`);
     if (!existsSync(projectIndexPath) || options.force) {
-      const projectIndexContent = [
+      const indexLines = [
         `# [[${projectName}]]`,
         '',
         `**Path**: \`${resolve(target)}\``,
-        '',
-      ].join('\n');
-      writeFileSync(projectIndexPath, projectIndexContent, 'utf-8');
+      ];
+
+      if (matchedPatterns.length > 0) {
+        indexLines.push('');
+        indexLines.push('## Patterns');
+        indexLines.push('');
+        for (const pattern of matchedPatterns) {
+          indexLines.push(`- [[${pattern}]]`);
+        }
+      }
+
+      indexLines.push('');
+      writeFileSync(projectIndexPath, indexLines.join('\n'), 'utf-8');
+
+      if (matchedPatterns.length > 0) {
+        log.success(`Linked ${matchedPatterns.length} brain pattern(s): ${matchedPatterns.join(', ')}`);
+      }
+    } else {
+      // File exists — check if we need to add/update pattern links
+      const existing = readFileSync(projectIndexPath, 'utf-8');
+      if (matchedPatterns.length > 0 && !existing.includes('## Patterns')) {
+        const patternSection = [
+          '',
+          '## Patterns',
+          '',
+          ...matchedPatterns.map((p) => `- [[${p}]]`),
+          '',
+        ].join('\n');
+        writeFileSync(projectIndexPath, existing.trimEnd() + '\n' + patternSection, 'utf-8');
+        result.updated.push(projectIndexPath);
+        log.success(`Linked ${matchedPatterns.length} brain pattern(s): ${matchedPatterns.join(', ')}`);
+      }
     }
 
     if (createdCount > 0) {

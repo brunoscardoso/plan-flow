@@ -32,3 +32,17 @@ flow
 .claude/settings.local.json
 
 .cursor
+
+# >>> plan-flow
+flow/
+.plan-flow.yml
+.plan.flow.env
+.claude/
+CLAUDE.md
+.cursor/
+skills/plan-flow/
+skills/plan-flow/
+.clawdhub/
+.agents/
+AGENTS.md
+# <<< plan-flow

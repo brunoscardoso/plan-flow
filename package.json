@@ -27,7 +27,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "install-local": "npm run build && node dist/cli/index.js"
   },
   "files": [
     "dist/",
