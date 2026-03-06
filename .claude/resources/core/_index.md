@@ -6,7 +6,7 @@
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
 **Total Files**: 10 files, ~1560 lines
-**Reference Codes**: COR-AP-1 through COR-RC-2
+**Reference Codes**: COR-AP-1 through COR-HB-2
 
 ---
 
@@ -154,3 +154,6 @@ Core rules define the foundational coding standards that apply across the entire
 - `autopilot-mode.md` has `alwaysApply: true` - detects and orchestrates autopilot flow mode
 - `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
+- `project-tasklist.md` is loaded on-demand - session start tasklist behavior
+- `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
+- `heartbeat.md` is loaded on-demand - scheduled task daemon configuration

@@ -5,7 +5,7 @@
 
 Pattern files provide templates, examples, and guidelines for specific workflows. This is the largest category covering discovery, planning, testing, code review, and contracts.
 
-**Total Files**: 10 files, ~3,300 lines
+**Total Files**: 10 files, ~3,320 lines
 **Reference Codes**: PTN-BR-1 through PTN-PR-6
 
 ---
