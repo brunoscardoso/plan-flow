@@ -5,7 +5,7 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 7 files, ~1300 lines
+**Total Files**: 8 files, ~1370 lines
 **Reference Codes**: COR-AP-1 through COR-RC-2
 
 ---
@@ -59,6 +59,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-BR-2 | File templates (feature, error, decision, session) and naming conventions | brain-capture.md | 52-170 |
 | COR-BR-3 | Index management (caps, rotation) and global brain sync | brain-capture.md | 172-240 |
 
+### Project Tasklist (`project-tasklist.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-TL-1 | Tasklist session start behavior and task format | project-tasklist.md | 10-45 |
+| COR-TL-2 | Brain integration and maintenance rules | project-tasklist.md | 47-65 |
+
 ### Resource Capture (`resource-capture.md`)
 
 | Code | Description | Source | Lines |
@@ -89,6 +96,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-BR-1 | Need brain session start behavior and processing rules |
 | COR-BR-2 | Need brain file templates and naming conventions |
 | COR-BR-3 | Need index management caps and global sync rules |
+| COR-TL-1 | Need tasklist session start behavior and task format |
+| COR-TL-2 | Need tasklist brain integration and maintenance rules |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
 

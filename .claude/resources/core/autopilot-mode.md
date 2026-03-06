@@ -11,6 +11,7 @@ When `flow/.autopilot` exists, this rule is active. It automatically orchestrate
 1. Check if `flow/.autopilot` exists
 2. If it exists: autopilot mode is **ON** - follow the rules below for every user input
 3. If it does not exist: autopilot mode is **OFF** - ignore this rule entirely, normal behavior applies
+4. Load `flow/tasklist.md` if it exists — summarize active tasks and ask if the user wants to pick one
 
 ---
 
@@ -105,8 +106,9 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 
 1. Move the discovery document to `flow/archive/`
 2. Move the plan document to `flow/archive/`
-3. Present completion summary
-4. **Prompt for context cleanup** (see below)
+3. Update `flow/tasklist.md` — mark the completed task as **Done** with today's date
+4. Present completion summary
+5. **Prompt for context cleanup** (see below)
 
 ---
 
