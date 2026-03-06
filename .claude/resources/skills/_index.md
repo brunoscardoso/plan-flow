@@ -55,6 +55,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 |------|-------------|--------|-------|
 | SKL-LRN-1 | Purpose, restrictions, and extraction criteria | learn-skill.md | 1-55 |
 | SKL-LRN-2 | Workflow, output format, and validation | learn-skill.md | 57-115 |
+| SKL-LRN-3 | Teaching mode restrictions and curriculum generation | learn-skill.md | 140-175 |
+| SKL-LRN-4 | Step confirmation flow and storage rules | learn-skill.md | 177-210 |
 
 ### Execute Plan Skill (`execute-plan-skill.md`)
 
@@ -163,7 +165,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
 | `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
-| `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-2 |
+| `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-4 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |
 | `/create-plan` | create-plan-skill | SKL-PLN-1 through SKL-PLN-4 |
 | `/execute-plan` | execute-plan-skill | SKL-EXEC-1 through SKL-EXEC-6 |
@@ -186,5 +188,5 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | discovery-skill | 295 | 4 | Medium - requirements gathering |
 | write-tests-skill | 294 | 5 | Medium - iterative testing |
 | create-plan-skill | 271 | 4 | Low - plan structuring |
-| learn-skill | 115 | 2 | Low - session pattern extraction |
+| learn-skill | 185 | 4 | Medium - pattern extraction + teaching mode |
 | create-contract-skill | 239 | 4 | Low - contract generation |

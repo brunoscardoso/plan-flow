@@ -19,6 +19,7 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-BR-1 | Brain directory structure and file naming conventions | brain-patterns.md | 5-45 |
 | PTN-BR-2 | Wiki-link patterns and brain-capture block per skill | brain-patterns.md | 47-160 |
 | PTN-BR-3 | Feature status lifecycle and index update rules | brain-patterns.md | 162-210 |
+| PTN-BR-4 | Learning subdirectory for teaching curricula | brain-patterns.md | 12-14 |
 
 ### Contract Patterns (`contract-patterns.md`)
 

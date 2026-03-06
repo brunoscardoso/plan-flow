@@ -1,34 +1,50 @@
 ---
-description: Extract reusable patterns from the current session and save them to the project
+description: Extract reusable patterns from the current session, or learn about a topic with step-by-step teaching
 ---
 
-# Learn: Session Pattern Extraction
+# Learn: Session Pattern Extraction & Teaching Mode
 
 ## Command Description
 
-This command analyzes the current session for reusable patterns — error resolutions, debugging techniques, workarounds, project-specific conventions — and saves them to `flow/resources/` as learned pattern files with `[[wiki-links]]` for Obsidian compatibility.
+This command has two modes:
 
-**Output**: Pattern files in `flow/resources/learned-{pattern-name}.md`.
+1. **Pattern Extraction** (`/learn`): Analyzes the current session for reusable patterns and saves them to `flow/resources/`.
+2. **Teaching Mode** (`/learn about <topic>`): Creates a structured step-by-step curriculum to teach you about a topic, contextualized to your project's tech stack.
+
+**Output**:
+- Pattern mode: `flow/resources/learned-{pattern-name}.md`
+- Teaching mode: `flow/brain/learning/{topic-kebab}.md`
 
 ---
 
+## Mode Detection
+
+Determine the mode based on user input:
+
+- `/learn` → **Pattern Extraction Mode** (existing behavior, see Steps 1-4 below)
+- `/learn about <topic>` → **Teaching Mode** (see Teaching Mode section below)
+- `/learn -help` → Show help and stop
+
+---
 
 ## Help
 
 **If the user invokes this command with `-help`, display only this section and stop:**
 
 ```
-/learn - Extract Reusable Patterns
+/learn - Extract Patterns & Teaching Mode
 
 DESCRIPTION:
-  Analyzes the current session for reusable patterns and saves them
-  to flow/resources/ as learned pattern files with [[wiki-links]].
+  Two modes: extract reusable patterns from the current session,
+  or learn about a topic with step-by-step teaching.
 
 USAGE:
   /learn                  Analyze session and suggest patterns
+  /learn about <topic>    Start teaching mode for a topic
   /learn -help            Show this help
 
-WHAT GETS EXTRACTED:
+PATTERN EXTRACTION MODE (/learn):
+  Extracts:
   - Error resolutions (how you fixed a tricky bug)
   - Debugging techniques (steps to diagnose an issue)
   - Workarounds (non-obvious solutions to platform/tool limitations)
@@ -36,16 +52,19 @@ WHAT GETS EXTRACTED:
   - Architecture insights (structural decisions made during work)
   - Integration patterns (how services/APIs were connected)
 
-WHAT DOES NOT GET EXTRACTED:
+  Does NOT extract:
   - Trivial fixes (typos, missing imports, obvious syntax errors)
   - One-time issues unlikely to recur
   - Generic knowledge available in documentation
-  - Patterns already captured in existing learned files
 
-OUTPUT:
-  - Saves to flow/resources/learned-{pattern-name}.md
-  - Creates [[wiki-links]] to related brain entries
-  - One pattern per file
+  Output: flow/resources/learned-{pattern-name}.md
+
+TEACHING MODE (/learn about <topic>):
+  Creates a structured curriculum (3-7 steps) contextualized
+  to your project's tech stack. Each step is confirmed before
+  proceeding. Completed curricula are saved to the brain.
+
+  Output: flow/brain/learning/{topic-kebab}.md
 
 RELATED COMMANDS:
   /brain           Capture meeting notes, ideas, brainstorms
@@ -157,6 +176,67 @@ Pattern saved!
 ```
 
 If multiple patterns were found, repeat Steps 3-4 for each one.
+
+---
+
+## Teaching Mode (`/learn about <topic>`)
+
+When the user invokes `/learn about <topic>`, switch to teaching mode:
+
+### Teaching Restrictions
+
+| Rule | Description |
+|------|-------------|
+| **Project Context** | Contextualize all examples to the project's actual tech stack |
+| **Step Confirmation** | Wait for user confirmation before proceeding to the next step |
+| **Brain Storage** | Save the curriculum to `flow/brain/learning/{topic-kebab}.md` |
+| **No Code Changes** | Teaching mode does NOT write source code or modify configs |
+| **Complete and Stop** | After all steps are confirmed, STOP and wait for user input |
+
+### Teaching Workflow
+
+1. **Analyze Context**: Read `flow/brain/index.md` and `flow/references/tech-foundation.md` to understand the project's stack
+2. **Generate Curriculum**: Create a 3-7 step curriculum for the topic, contextualized to the project
+3. **Present Overview**: Show the full curriculum outline to the user for approval
+4. **Step-by-Step Teaching**: For each step:
+   - Present the step content with explanations and examples
+   - Wait for user confirmation (`next`, `done`, or questions)
+   - Mark the step as completed in the curriculum file
+   - If the user asks questions, answer them before proceeding
+5. **Save Curriculum**: Write the completed curriculum to `flow/brain/learning/{topic-kebab}.md`
+
+### Curriculum Template
+
+```markdown
+# Learning: {Topic}
+
+**Project**: [[{project-name}]]
+**Started**: {YYYY-MM-DD}
+**Status**: {in-progress|completed}
+
+## Curriculum
+
+### Step 1: {Title}
+- **Status**: {pending|completed}
+- **Content**: {explanation with project-contextualized examples}
+
+### Step 2: {Title}
+- **Status**: {pending|completed}
+- **Content**: {explanation}
+
+...
+
+## Notes
+
+{Any additional notes, questions asked, or insights gained during learning}
+```
+
+### Reference Codes for Teaching
+
+| Code | Description | When to Expand |
+|------|-------------|----------------|
+| SKL-LRN-3 | Teaching mode restrictions and workflow | Starting teaching mode |
+| SKL-LRN-4 | Curriculum template and brain storage | Generating curriculum |
 
 ---
 

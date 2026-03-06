@@ -9,8 +9,10 @@ flow/brain/                            # Per-project brain
 ├── patterns-index.md                  # Matched global patterns (GLB-* codes)
 ├── features/                          # Feature history and context
 │   └── {feature-name}.md
-└── errors/                            # Reusable error patterns
-    └── {error-name}.md
+├── errors/                            # Reusable error patterns
+│   └── {error-name}.md
+└── learning/                          # Teaching curricula from /learn about
+    └── {topic-kebab}.md
 
 ~/plan-flow/brain/daily/               # Global daily logs (cross-project)
 └── {YYYY-MM-DD}.md

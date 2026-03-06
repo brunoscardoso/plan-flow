@@ -137,10 +137,53 @@ Write approved patterns to `flow/resources/learned-{kebab-case-name}.md`.
 
 ---
 
+## Teaching Mode
+
+When `/learn about <topic>` is invoked, the skill switches to teaching mode. This mode creates structured curricula stored in the brain.
+
+### Restrictions
+
+| Action | Allowed |
+|--------|---------|
+| Read project context (brain index, tech foundation) | Yes |
+| Generate curriculum in `flow/brain/learning/` | Yes |
+| Present step-by-step content | Yes |
+| Write source code | No |
+| Modify configuration files | No |
+| Write outside `flow/brain/learning/` | No |
+
+### Curriculum Generation
+
+1. Read `flow/brain/index.md` for project context
+2. Read `flow/references/tech-foundation.md` for stack details
+3. Design 3-7 steps progressing from fundamentals to advanced
+4. Contextualize examples to the project's actual technologies
+5. Present the full outline for user approval before starting
+
+### Step Confirmation Flow
+
+For each curriculum step:
+
+1. Present the step content with clear explanations
+2. Include code examples contextualized to the project stack
+3. Wait for user to confirm with `next`, `done`, or ask questions
+4. Update the step status to `completed` in the curriculum file
+5. If the user asks questions, answer them inline before proceeding
+
+### Storage
+
+- **Location**: `flow/brain/learning/{topic-kebab}.md`
+- **Directory**: Created automatically if it doesn't exist
+- **Format**: Uses the curriculum template from the command definition
+- **Wiki-links**: Links to project name and related brain entries
+
+---
+
 ## Related Files
 
 | File | Purpose |
 |------|---------|
 | `.claude/commands/learn.md` | Command definition |
 | `flow/resources/` | Where learned patterns are saved |
+| `flow/brain/learning/` | Where teaching curricula are saved |
 | `flow/brain/index.md` | Brain index for wiki-link context |
