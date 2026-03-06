@@ -1621,6 +1621,59 @@ export function generateMemory(
 }
 
 /**
+ * Generates flow/heartbeat.md — a scheduled task definitions file
+ * for the heartbeat daemon.
+ */
+export function generateHeartbeat(
+  target: string,
+  options: CopyOptions
+): CopyResult {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const filePath = join(target, 'flow', 'heartbeat.md');
+
+  if (existsSync(filePath) && !options.force) {
+    result.skipped.push(filePath);
+    log.skip('Heartbeat already exists');
+    return result;
+  }
+
+  const projectName = getProjectName(target);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const content = [
+    '# Heartbeat',
+    '',
+    `**Project**: [[${projectName}]]`,
+    `**Last Updated**: ${today}`,
+    '',
+    '## Tasks',
+    '',
+    '<!-- Add tasks below using the format:',
+    '### task-name',
+    '- **Schedule**: daily at 10:00 PM',
+    '- **Command**: research about topic X and add to brain',
+    '- **Enabled**: true',
+    '- **Description**: What this task does',
+    '-->',
+    '',
+  ].join('\n');
+
+  const isUpdate = existsSync(filePath);
+  ensureDir(join(target, 'flow'));
+  writeFileSync(filePath, content, 'utf-8');
+
+  if (isUpdate) {
+    result.updated.push(filePath);
+    log.warn('Updated heartbeat');
+  } else {
+    result.created.push(filePath);
+    log.success('Generated heartbeat config');
+  }
+
+  return result;
+}
+
+/**
  * Generates flow/log.md — an append-only heartbeat log
  * of important events during project execution.
  */
@@ -1721,25 +1774,31 @@ export async function initShared(
   result.skipped.push(...memoryResult.skipped);
   result.updated.push(...memoryResult.updated);
 
-  // 6. Generate project log
+  // 6. Generate heartbeat config
+  const heartbeatResult = generateHeartbeat(target, options);
+  result.created.push(...heartbeatResult.created);
+  result.skipped.push(...heartbeatResult.skipped);
+  result.updated.push(...heartbeatResult.updated);
+
+  // 7. Generate project log
   const logResult = generateLog(target, options);
   result.created.push(...logResult.created);
   result.skipped.push(...logResult.skipped);
   result.updated.push(...logResult.updated);
 
-  // 7. Update .gitignore with plan-flow entries
+  // 8. Update .gitignore with plan-flow entries
   const giResult = updateGitignore(target, platforms, options);
   result.created.push(...giResult.created);
   result.skipped.push(...giResult.skipped);
   result.updated.push(...giResult.updated);
 
-  // 8. Register project in central vault (~/plan-flow/brain/)
+  // 9. Register project in central vault (~/plan-flow/brain/)
   const vaultResult = registerVault(target, options);
   result.created.push(...vaultResult.created);
   result.skipped.push(...vaultResult.skipped);
   result.updated.push(...vaultResult.updated);
 
-  // 9. Scan legacy artifacts to populate brain
+  // 10. Scan legacy artifacts to populate brain
   const legacyResult = scanLegacyArtifacts(target, options);
   result.created.push(...legacyResult.created);
   result.skipped.push(...legacyResult.skipped);

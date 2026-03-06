@@ -75,4 +75,19 @@ program
     await runUpdate(options);
   });
 
+program
+  .command('heartbeat <action>')
+  .description(
+    'Manage the heartbeat daemon (start, stop, status)'
+  )
+  .option(
+    '--target <dir>',
+    'Target directory (defaults to current directory)',
+    process.cwd()
+  )
+  .action(async (action: string, options: { target: string }) => {
+    const { runHeartbeat } = await import('./commands/heartbeat.js');
+    await runHeartbeat(action, options);
+  });
+
 program.parse();
