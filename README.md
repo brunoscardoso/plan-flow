@@ -101,6 +101,10 @@ Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Generate tests for coverage target |
 | `/flow` | Toggle autopilot mode on/off |
+| `/brain` | Capture meeting notes, ideas, brainstorms |
+| `/learn` | Extract reusable patterns or learn a topic step-by-step |
+| `/pattern-validate` | Scan and index global brain patterns |
+| `/heartbeat` | Manage scheduled automated tasks |
 
 ## Workflow
 
@@ -162,14 +166,56 @@ All artifacts are stored in `flow/`:
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+├── brain/             # Automatic knowledge capture (Obsidian-compatible)
+│   ├── index.md       # Brain index (loaded at session start)
+│   ├── features/      # Feature history and context
+│   └── errors/        # Reusable error patterns
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
 ├── references/        # Reference materials
+├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
+├── tasklist.md        # Project task list (loaded on session start)
+├── memory.md          # Persistent artifact tracker (completed work)
+├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
+├── log.md             # Heartbeat event log
 └── ledger.md          # Persistent project learning journal
 ```
+
+## Session Start Behaviors
+
+When a session starts, plan-flow automatically loads context from your project:
+
+- **Tasklist** (`flow/tasklist.md`) — Presents active tasks and lets you pick one to work on
+- **Memory** (`flow/memory.md`) — Loads the last 7 days of completed work so context is never lost
+- **Brain** (`flow/brain/index.md`) — Internalizes active features and recent error patterns
+- **Ledger** (`flow/ledger.md`) — Internalizes project-specific lessons learned
+
+## Intelligent Learn Skill
+
+The `/learn` skill supports step-by-step teaching. When you run `/learn about <topic>`, it creates a structured curriculum stored as a brain `.md` file. Each step requires your confirmation before progressing, and confirmed steps become learned patterns.
+
+## Project Tasklist
+
+Each project can have a `flow/tasklist.md` with pending tasks. On session start, the tasklist is loaded and you're asked if you want to pick a task. Completed tasks are tracked in project memory.
+
+## Project Memory
+
+`flow/memory.md` tracks everything completed across sessions. Each entry includes a timestamp, project link, artifact type, file path, and a short summary (max 6 lines). The last 7 days of memory are loaded on every session start, ensuring plan-flow never loses knowledge.
+
+## Heartbeat (Scheduled Automation)
+
+The `flow/heartbeat.md` file works as a cronjob system. Define scheduled tasks and the heartbeat daemon will execute them automatically:
+
+```
+do
+  daily at 10:00 PM - research about topic X, create md files and add to brain
+  daily at 11:00 AM - using flow --enabled, create feature Y, execute, and push to repo
+```
+
+Manage the daemon with `/heartbeat start`, `/heartbeat stop`, and `/heartbeat status`.
 
 ## Requirements
 
