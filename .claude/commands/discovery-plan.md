@@ -86,7 +86,7 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/re
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
 | **No Code**              | NEVER write, edit, or generate code during discovery     |
-| **Only Markdown Output** | The ONLY deliverable is the discovery markdown file      |
+| **Only Markdown Output** | The ONLY deliverable is the discovery markdown file. Do NOT display it in chat. |
 | **Ask Questions**        | When in doubt, ask - don't assume                        |
 | **Read First**           | Read all referenced documents before asking questions    |
 | **High-Level Only**      | Technical considerations are conceptual, not code        |
@@ -95,6 +95,7 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/re
 | **No Auto-Execution**    | Do NOT auto-invoke commands without user confirmation (unless autopilot ON) |
 | **NO PLANNING**          | Do NOT create implementation plans during discovery      |
 | **NO EXECUTION**         | Do NOT execute any implementation steps                  |
+| **File Only**            | Save the `.md` file and report its path. Do NOT show full content in chat. |
 
 ---
 
@@ -154,55 +155,37 @@ The skill will:
 6. Identify technical considerations
 7. Propose high-level approach
 8. Document risks and unknowns
-9. Generate discovery document
-10. Ask user if they want to proceed to /create-plan
-11. Wait for user confirmation before proceeding
+9. Generate discovery document and save to `flow/discovery/`
 
 See: `.claude/resources/skills/discovery-skill.md`
 
 ---
 
-### Step 5: Present Results
+### Step 5: Save File and Stop
 
-After the skill completes, present the discovery document to the user:
+After the skill completes:
+
+1. **Save the discovery document** to `flow/discovery/discovery_<feature>_v<version>.md`
+2. **Report only the file path** — do NOT display the full document content in chat
+3. **STOP** — do NOT create a plan, do NOT offer to build, do NOT show implementation steps
+
+**Output to the user** (this is the ONLY thing to show):
 
 ```markdown
-Discovery Complete!
+Discovery complete.
 
-**Summary**:
-- X functional requirements gathered
-- X non-functional requirements identified
-- X risks documented
-- X questions resolved
+**Created**: `flow/discovery/discovery_<feature>_v1.md`
 
-**Deliverable Created**: `flow/discovery/discovery_<feature>_v1.md`
-
-**Next Steps**:
-1. Review the discovery document above
-2. Request any refinements or additions (if needed)
-3. Proceed to planning when ready
+Next: review the file, then run `/create-plan` when ready.
 ```
 
-**Now ask the user using the `AskUserQuestion` tool**:
+⚠️ **CRITICAL**: After saving the file, the command is DONE. Do NOT:
+- Show the full discovery document content in chat
+- Create or suggest an implementation plan
+- Offer to build or execute anything
+- Auto-invoke `/create-plan`
 
-```typescript
-AskUserQuestion({
-  questions: [{
-    question: "Would you like me to proceed with creating the implementation plan?",
-    header: "Next step",
-    options: [
-      { label: "Yes, create plan", description: "I'll invoke /create-plan with the discovery document" },
-      { label: "No, review first", description: "You can review the discovery and invoke /create-plan when ready" },
-      { label: "Refine discovery", description: "Let me know what needs to be adjusted in the discovery" }
-    ],
-    multiSelect: false
-  }]
-})
-```
-
-⚠️ **WAIT for user response before proceeding**
-
-Do NOT auto-invoke `/create-plan` without user confirmation.
+The user will read the `.md` file themselves and decide when to proceed.
 
 ---
 
@@ -236,10 +219,10 @@ Do NOT auto-invoke `/create-plan` without user confirmation.
                     |
                     v
 +------------------------------------------+
-| Step 5: Present Results                  |
-| - Show summary to user                   |
-| - Allow refinement                       |
-| - Link to /create-plan command           |
+| Step 5: Save File and Stop               |
+| - Save .md file to flow/discovery/       |
+| - Report file path only                  |
+| - STOP (no plan, no build)               |
 +------------------------------------------+
 ```
 
