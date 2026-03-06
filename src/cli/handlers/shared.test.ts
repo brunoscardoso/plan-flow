@@ -27,7 +27,7 @@ jest.unstable_mockModule('../utils/prompts.js', () => ({
   selectPlatforms: jest.fn(),
 }));
 
-const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog, generateMemory } = await import('./shared.js');
+const { initShared, generateTechFoundation, generateBusinessContext, generateTasklist, generateLog, generateMemory, generateHeartbeat } = await import('./shared.js');
 const { askBusinessContext } = await import('../utils/prompts.js') as { askBusinessContext: jest.Mock };
 
 function createTempDir(): string {
@@ -793,5 +793,100 @@ describe('generateLog', () => {
     expect(result.updated).toContain(filePath);
     const content = readFileSync(filePath, 'utf-8');
     expect(content).toContain('# Project Log');
+  });
+});
+
+describe('generateMemory', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    mkdirSync(join(tempDir, 'flow'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create memory.md with table template', () => {
+    const result = generateMemory(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'memory.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Project Memory');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('| Date | Skill | Feature | Artifact | Summary |');
+    expect(content).toContain('|------|-------|---------|----------|---------|');
+  });
+
+  it('should skip if file exists and no force', () => {
+    const filePath = join(tempDir, 'flow', 'memory.md');
+    writeFileSync(filePath, 'existing memory', 'utf-8');
+
+    const result = generateMemory(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing memory');
+  });
+
+  it('should overwrite with --force', () => {
+    const filePath = join(tempDir, 'flow', 'memory.md');
+    writeFileSync(filePath, 'old memory', 'utf-8');
+
+    const result = generateMemory(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Project Memory');
+  });
+});
+
+describe('generateHeartbeat', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    mkdirSync(join(tempDir, 'flow'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should create heartbeat.md with template', () => {
+    const result = generateHeartbeat(tempDir, { force: false });
+
+    const filePath = join(tempDir, 'flow', 'heartbeat.md');
+    expect(existsSync(filePath)).toBe(true);
+    expect(result.created).toContain(filePath);
+
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Heartbeat');
+    expect(content).toContain('**Project**:');
+    expect(content).toContain('## Tasks');
+  });
+
+  it('should skip if file exists and no force', () => {
+    const filePath = join(tempDir, 'flow', 'heartbeat.md');
+    writeFileSync(filePath, 'existing heartbeat', 'utf-8');
+
+    const result = generateHeartbeat(tempDir, { force: false });
+
+    expect(result.skipped).toContain(filePath);
+    expect(readFileSync(filePath, 'utf-8')).toBe('existing heartbeat');
+  });
+
+  it('should overwrite with --force', () => {
+    const filePath = join(tempDir, 'flow', 'heartbeat.md');
+    writeFileSync(filePath, 'old heartbeat', 'utf-8');
+
+    const result = generateHeartbeat(tempDir, { force: true });
+
+    expect(result.updated).toContain(filePath);
+    const content = readFileSync(filePath, 'utf-8');
+    expect(content).toContain('# Heartbeat');
   });
 });
