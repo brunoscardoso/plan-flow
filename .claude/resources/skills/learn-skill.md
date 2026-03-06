@@ -139,7 +139,7 @@ Write approved patterns to `flow/resources/learned-{kebab-case-name}.md`.
 
 ## Teaching Mode
 
-When `/learn about <topic>` is invoked, the skill switches to teaching mode. This mode creates structured curricula stored in the brain.
+When `/learn <topic>` is invoked (any text after `/learn`), the skill switches to teaching mode. This mode intelligently classifies the topic, asks the user about their preferred learning approach, and delivers an adaptive curriculum.
 
 ### Restrictions
 
@@ -147,6 +147,7 @@ When `/learn about <topic>` is invoked, the skill switches to teaching mode. Thi
 |--------|---------|
 | Read project context (brain index, tech foundation) | Yes |
 | Read existing learns index (`~/plan-flow/brain/learns/_index.md`) | Yes |
+| Use web search for up-to-date docs and info | Yes |
 | Generate curriculum in `~/plan-flow/brain/learns/` | Yes |
 | Update learns index with `LRN-*` reference codes | Yes |
 | Update project brain index with learns section | Yes |
@@ -155,34 +156,53 @@ When `/learn about <topic>` is invoked, the skill switches to teaching mode. Thi
 | Modify configuration files | No |
 | Write outside `~/plan-flow/brain/learns/` and `flow/brain/` | No |
 
+### Topic Classification
+
+Before designing the curriculum, classify the topic:
+
+- **Integrable tool/library** (Langfuse, Sentry, Prisma, Redis) → Ask: general knowledge, project implementation, or both?
+- **Platform/service** (AWS, Docker, Kubernetes) → Ask: general knowledge, project implementation, or both?
+- **Concept/pattern** (MCP, event sourcing, CQRS) → Teach as general knowledge with project-contextualized examples
+- **Language/framework feature** (TypeScript generics, React Server Components) → Teach with project examples
+
 ### Curriculum Generation
 
-1. Read `~/plan-flow/brain/learns/_index.md` to check if the topic already exists
-2. If it exists, offer to resume the existing curriculum or start fresh
-3. Read `flow/brain/index.md` for project context
-4. Read `flow/references/tech-foundation.md` for stack details
-5. Design 3-7 steps progressing from fundamentals to advanced
-6. Contextualize examples to the project's actual technologies
-7. Present the full outline for user approval before starting
+1. Classify the topic type (see above)
+2. For integrable topics: ask the user their preferred approach
+3. Read `~/plan-flow/brain/learns/_index.md` to check if the topic already exists
+4. If it exists, offer to resume, expand, or start fresh
+5. Use web search for official docs and up-to-date information
+6. Read `flow/brain/index.md` and `flow/references/tech-foundation.md` for project context
+7. Design 3-7 steps based on the chosen approach (general / implementation / hybrid)
+8. Present the full outline for user approval before starting
 
-### Step Confirmation Flow
+### Adaptive Teaching
 
-For each curriculum step:
+During teaching, respond dynamically to the user:
 
-1. Present the step content with clear explanations
-2. Include code examples contextualized to the project stack
-3. Wait for user to confirm with `next`, `done`, or ask questions
-4. Update the step status to `completed` in the curriculum file
-5. If the user asks questions, answer them inline before proceeding
+- **"I already know this"** → Skip step, offer to adjust remaining curriculum
+- **"Go deeper"** → Expand with more detail, edge cases, advanced examples
+- **"Show me in my project"** → Switch to project-contextualized explanation
+- **Tangent questions** → Answer, then offer to continue or explore further
+- **Confusion** → Rephrase simpler, add analogies, break into sub-steps
+- **"Done" / "That's enough"** → Save what's completed with `partial` status
 
 ### Storage
 
-- **Location**: `~/plan-flow/brain/learns/{topic-kebab}.md` (global, shared across projects)
-- **Index**: `~/plan-flow/brain/learns/_index.md` (indexed with `LRN-*` reference codes)
-- **Directory**: Created automatically if it doesn't exist
+Storage location depends on the user's chosen approach:
+
+| Approach | Location | Indexed? |
+|----------|----------|----------|
+| General knowledge | `~/plan-flow/brain/learns/{topic}.md` (global) | Yes, `LRN-*` codes |
+| Project implementation | `flow/brain/learning/{topic}.md` (project-local) | No (project-only) |
+| Both | Global + `flow/brain/learning/{topic}-implementation.md` | Global part only |
+| Concept/pattern | `~/plan-flow/brain/learns/{topic}.md` (global) | Yes, `LRN-*` codes |
+
+- **Directories**: Created automatically if they don't exist
 - **Format**: Uses the curriculum template from the command definition
 - **Wiki-links**: Links to project name(s) and related brain entries
-- **Cross-project**: When a learn is created from project A and later accessed from project B, the `## Projects Using This` section is updated to include both projects
+- **Cross-project**: Global learns track all projects using them in `## Projects Using This`
+- **Linked files**: "Both" approach creates two files linked via `[[wiki-links]]`
 
 ### Index Mechanism
 

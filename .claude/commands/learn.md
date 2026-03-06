@@ -13,7 +13,9 @@ This command has two modes:
 
 **Output**:
 - Pattern mode: `flow/resources/learned-{pattern-name}.md`
-- Teaching mode: `~/plan-flow/brain/learns/{topic-kebab}.md` (global, indexed with `LRN-*` codes)
+- Teaching (general knowledge): `~/plan-flow/brain/learns/{topic-kebab}.md` (global, indexed with `LRN-*` codes, reusable across projects)
+- Teaching (project implementation): `flow/brain/learning/{topic-kebab}.md` (project-local, specific to this project's stack)
+- Teaching (both): General part saved globally + implementation part saved locally
 
 ---
 
@@ -68,10 +70,12 @@ PATTERN EXTRACTION MODE (/learn):
   Output: flow/resources/learned-{pattern-name}.md
 
 TEACHING MODE (/learn about <topic>):
-  Creates a structured curriculum (3-7 steps) contextualized
-  to your project's tech stack. Each step is confirmed before
-  proceeding. Completed curricula are saved globally so they
-  can be reused across all projects.
+  Intelligently teaches you about a topic. For tools/libraries,
+  asks if you want general knowledge, project implementation,
+  or both. Adapts to your pace — skip what you know, go deeper
+  where you need it. Uses web search for up-to-date docs.
+
+  Completed curricula are saved globally and reused across projects.
 
   Output: ~/plan-flow/brain/learns/{topic-kebab}.md (global)
   Index:  ~/plan-flow/brain/learns/_index.md (LRN-* codes)
@@ -191,40 +195,144 @@ If multiple patterns were found, repeat Steps 3-4 for each one.
 
 ## Teaching Mode (`/learn about <topic>`)
 
-When the user provides a topic (e.g., `/learn about mcp`, `/learn docker`, `/learn graphql subscriptions`), you become a **teacher**. Your job is to:
-
-1. **Research** the topic (use web search if needed for up-to-date info)
-2. **Design** a structured curriculum (3-7 steps, beginner → advanced)
-3. **Teach** each step interactively, waiting for the user to confirm before moving on
-4. **Save** the completed curriculum globally for reuse across projects
+When the user provides a topic (e.g., `/learn about langfuse`, `/learn docker`, `/learn graphql subscriptions`), you become a **teacher**. Your job is to intelligently understand what the user wants to learn and deliver it interactively.
 
 **You are NOT extracting patterns. You are TEACHING the user something new.**
+
+### Step 0: Classify the Topic (CRITICAL — do this first)
+
+Before designing any curriculum, classify the topic to determine the right learning approach:
+
+| Topic Type | Examples | How to Detect |
+|------------|----------|---------------|
+| **Integrable tool/library** | Langfuse, Sentry, Stripe, Prisma, Redis | Has an SDK/package that could be installed in a project |
+| **Platform/service** | AWS, Vercel, Docker, Kubernetes | Infrastructure or deployment related |
+| **Concept/pattern** | MCP protocol, event sourcing, CQRS, microservices | Abstract idea, no single package to install |
+| **Language/framework feature** | TypeScript generics, React Server Components | Part of a language or framework the project may use |
+
+### Step 1: Ask the User What They Want (for integrable topics)
+
+**If the topic is an integrable tool/library/platform**, ask the user before proceeding:
+
+```markdown
+I can teach you about **{topic}** in different ways:
+
+1. **General knowledge** — What is {topic}? How does it work? Core concepts and architecture.
+   → Saved globally (reusable across all your projects)
+
+2. **Project implementation** — How to integrate {topic} into THIS project ({detected-stack}). Hands-on setup, configuration, and usage.
+   → Saved to this project only
+
+3. **Both** — Start with fundamentals, then apply to your project step by step.
+   → General part saved globally + implementation part saved to this project
+
+Which approach would you prefer?
+```
+
+**If the topic is a concept/pattern** (not directly integrable), skip this question and go straight to curriculum design — concepts are always taught as general knowledge (saved globally) contextualized with project examples.
+
+### Storage Rules Based on Approach
+
+| Approach | Where to Save | Why |
+|----------|---------------|-----|
+| **General knowledge** | `~/plan-flow/brain/learns/{topic}.md` (global) | Generic knowledge reusable across all projects |
+| **Project implementation** | `flow/brain/learning/{topic}.md` (project-local) | Contains project-specific paths, config, and stack details |
+| **Both** | Global file for general steps + project-local file for implementation steps | Separates reusable knowledge from project-specific setup |
+| **Concept/pattern** | `~/plan-flow/brain/learns/{topic}.md` (global) | Concepts are inherently cross-project |
+
+**For "both" approach**: Create two linked files:
+- `~/plan-flow/brain/learns/{topic}.md` — General knowledge steps (auto-indexed with `LRN-*`)
+- `flow/brain/learning/{topic}-implementation.md` — Project implementation steps (linked via `[[{topic}]]` wiki-link back to the global file)
+
+### Step 2: Research the Topic
+
+Before designing the curriculum:
+
+1. **Use web search** to get up-to-date information (official docs, latest version, recent changes)
+2. **Read the project's stack** from `flow/brain/index.md` and `flow/references/tech-foundation.md`
+3. **Check existing learns** at `~/plan-flow/brain/learns/_index.md` — if the topic already exists, offer to resume, expand, or start fresh
+
+### Step 3: Design an Adaptive Curriculum
+
+Design the curriculum based on the user's chosen approach:
+
+**For general knowledge:**
+- Focus on concepts, architecture, how it works under the hood
+- Use generic examples (not tied to the project)
+- Cover: what it is → why it matters → core concepts → how it works → advanced features → ecosystem
+
+**For project implementation:**
+- Focus on hands-on integration into the current project
+- Use the project's actual stack, file structure, and conventions
+- Cover: installation → configuration → basic usage → integration with existing code → testing → production considerations
+
+**For both (hybrid):**
+- Start with 2-3 conceptual steps (what + why + core concepts)
+- Transition to 3-4 implementation steps (setup + integrate + test + deploy)
+- Mark the transition clearly: "Now let's apply this to your project"
+
+**Curriculum rules:**
+- 3-7 steps, progressing from simple → complex
+- Each step should be self-contained and confirmable
+- Include code examples relevant to the chosen approach
+- Reference official docs with links when possible
+
+### Step 4: Present Overview and Teach
+
+1. **Present the full curriculum outline** for user approval
+2. **For each step:**
+   - Present clear explanations with examples
+   - For implementation steps: show actual code snippets for the project's stack
+   - Wait for user confirmation (`next`, `done`, or questions)
+   - **Be adaptive**: if the user asks a question, answer it thoroughly. If they want to go deeper on something, explore it. If they want to skip something they already know, skip it.
+   - Mark the step as completed
+
+### Step 5: Dynamic Teaching Behaviors
+
+During teaching, be smart about these situations:
+
+| Situation | What to Do |
+|-----------|------------|
+| User asks a tangent question | Answer it, then ask if they want to continue or explore further |
+| User says "I already know this" | Skip to the next step, offer to adjust remaining curriculum |
+| User asks for more depth | Expand the current step with more detail, examples, or edge cases |
+| User asks for a code example | Provide a concrete example using the project's actual stack and conventions |
+| User seems confused | Rephrase with simpler language, add an analogy, or break into smaller sub-steps |
+| User asks "how would this work in my project?" | Switch to project-contextualized explanation using the detected stack |
+| User says "done" or "that's enough" | Wrap up early — save what was completed so far with status `partial` |
+
+### Step 6: Save and Index
+
+After all steps are confirmed (or user stops early):
+
+**For general knowledge / concept:**
+1. Save to `~/plan-flow/brain/learns/{topic-kebab}.md`
+2. Auto-index with `LRN-*` codes in `~/plan-flow/brain/learns/_index.md`
+3. Update `flow/brain/index.md` with `## Global Learns` section
+
+**For project implementation:**
+1. Ensure `flow/brain/learning/` exists
+2. Save to `flow/brain/learning/{topic-kebab}.md`
+3. No global indexing (project-local only)
+4. Update `flow/brain/index.md` with a reference under `## Project Learns`
+
+**For both:**
+1. Save general steps to `~/plan-flow/brain/learns/{topic-kebab}.md` → auto-index with `LRN-*`
+2. Save implementation steps to `flow/brain/learning/{topic-kebab}-implementation.md`
+3. Add `[[{topic-kebab}]]` wiki-link in the project file pointing to the global file
+4. Update `flow/brain/index.md` with both global and project references
 
 ### Teaching Restrictions
 
 | Rule | Description |
 |------|-------------|
-| **Project Context** | Contextualize all examples to the project's actual tech stack |
-| **Step Confirmation** | Wait for user confirmation before proceeding to the next step |
-| **Global Storage** | Save the curriculum to `~/plan-flow/brain/learns/{topic-kebab}.md` (shared across projects) |
-| **Auto-Index** | After saving, automatically update `~/plan-flow/brain/learns/_index.md` with `LRN-*` reference codes (no user action needed) |
-| **No Code Changes** | Teaching mode does NOT write source code or modify configs |
-| **Complete and Stop** | After all steps are confirmed, STOP and wait for user input |
-
-### Teaching Workflow
-
-1. **Check Existing Learns**: Read `~/plan-flow/brain/learns/_index.md` (if exists) to check if a curriculum for the topic already exists. If it does, offer to resume or present the existing curriculum.
-2. **Analyze Context**: Read `flow/brain/index.md` and `flow/references/tech-foundation.md` to understand the project's stack
-3. **Generate Curriculum**: Create a 3-7 step curriculum for the topic, contextualized to the project
-4. **Present Overview**: Show the full curriculum outline to the user for approval
-5. **Step-by-Step Teaching**: For each step:
-   - Present the step content with explanations and examples
-   - Wait for user confirmation (`next`, `done`, or questions)
-   - Mark the step as completed in the curriculum file
-   - If the user asks questions, answer them before proceeding
-6. **Save Curriculum**: Write the completed curriculum to `~/plan-flow/brain/learns/{topic-kebab}.md`
-7. **Auto-Index** (under the hood): Immediately read the saved file, extract section boundaries, generate `LRN-*` reference codes, and update `~/plan-flow/brain/learns/_index.md`. The user does NOT need to run `/pattern-validate` — indexing happens automatically.
-8. **Link to Project**: If `flow/brain/index.md` exists, add or update a `## Global Learns` section referencing the new curriculum with its `LRN-*` codes
+| **Ask First** | For integrable topics, ask general vs implementation vs both BEFORE designing curriculum |
+| **Research First** | Use web search for up-to-date docs before teaching |
+| **Be Adaptive** | Adjust depth, pace, and focus based on user responses |
+| **Smart Storage** | General knowledge → global (`~/plan-flow/brain/learns/`). Project implementation → local (`flow/brain/learning/`). Both → split across both. |
+| **Auto-Index** | Global learns are automatically indexed with `LRN-*` codes (no user action needed) |
+| **No Code Changes** | Teaching mode does NOT write source code or modify project configs |
+| **Complete and Stop** | After teaching completes (or user stops), STOP and wait for user input |
 
 ### Curriculum Template
 
@@ -232,24 +340,33 @@ When the user provides a topic (e.g., `/learn about mcp`, `/learn docker`, `/lea
 # Learning: {Topic}
 
 **Started**: {YYYY-MM-DD}
-**Status**: {in-progress|completed}
+**Status**: {in-progress|completed|partial}
+**Approach**: {general|implementation|hybrid}
 **Projects**: [[{project-name}]]
+
+## Overview
+
+{Brief description of what this curriculum covers and at what level}
 
 ## Curriculum
 
 ### Step 1: {Title}
-- **Status**: {pending|completed}
-- **Content**: {explanation with project-contextualized examples}
+- **Status**: {pending|completed|skipped}
+- **Content**: {explanation with examples}
 
 ### Step 2: {Title}
-- **Status**: {pending|completed}
+- **Status**: {pending|completed|skipped}
 - **Content**: {explanation}
 
 ...
 
+## Key Takeaways
+
+{Summary of the most important things learned — filled after completion}
+
 ## Notes
 
-{Any additional notes, questions asked, or insights gained during learning}
+{Questions asked during learning, tangents explored, insights gained}
 
 ## Projects Using This
 - [[{project-name}]]
@@ -317,40 +434,43 @@ Shared learning curricula accumulated across all projects. Use reference codes t
 
 ---
 
-## Flow Diagram
+## Flow Diagrams
+
+### Pattern Extraction Flow (`/learn` with no args)
 
 ```
-+------------------------------------------+
-|           /learn COMMAND                 |
-+------------------------------------------+
-                    |
-                    v
-+------------------------------------------+
-| Step 1: Review Session                   |
-| - Scan conversation for patterns         |
-| - Categorize by priority                 |
-+------------------------------------------+
-                    |
-                    v
-+------------------------------------------+
-| Step 2: Filter Patterns                  |
-| - Skip trivial/one-time/generic          |
-| - Check existing learned files           |
-+------------------------------------------+
-                    |
-                    v
-+------------------------------------------+
-| Step 3: Draft Pattern File               |
-| - Use template with [[wiki-links]]       |
-| - Present to user for confirmation       |
-+------------------------------------------+
-                    |
-                    v
-+------------------------------------------+
-| Step 4: Save Approved Pattern            |
-| - Write to flow/resources/learned-*.md   |
-| - Show confirmation                      |
-+------------------------------------------+
+/learn (no args)
+    |
+    v
+Scan session for patterns → Filter trivial → Draft pattern → User confirms → Save to flow/resources/
+```
+
+### Teaching Flow (`/learn <topic>`)
+
+```
+/learn <topic>
+    |
+    v
+Classify topic type
+    |
+    ├── Integrable tool/library? ──→ Ask: general / implementation / both?
+    |                                       |
+    ├── Concept/pattern? ──────────→ Skip question, go to research
+    |
+    v
+Research (web search + project context + existing learns)
+    |
+    v
+Design adaptive curriculum (3-7 steps)
+    |
+    v
+Present overview → User approves
+    |
+    v
+Teach step by step (adaptive: skip / deep dive / tangent / rephrase)
+    |
+    v
+Save to ~/plan-flow/brain/learns/ → Auto-index LRN-* codes → Link to project
 ```
 
 ---

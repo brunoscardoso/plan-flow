@@ -23,6 +23,7 @@ const FLOW_SUBDIRS = [
   'brain',
   'brain/features',
   'brain/errors',
+  'brain/learning',
   'contracts',
   'discovery',
   'plans',
