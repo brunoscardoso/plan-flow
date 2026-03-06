@@ -122,6 +122,8 @@ Follow `.cursor/rules/tools/interactive-questions-tool.mdc`:
 3. Wait for responses
 4. Call `SwitchMode` tool to return to Agent mode
 
+⚠️ **After returning to Agent mode, do NOT trigger any planning or execution. Only save the discovery `.md` file and STOP.**
+
 **Skip Interactive Questions If**:
 
 - All questions answered in chat already
