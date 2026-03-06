@@ -337,27 +337,6 @@ Please add appropriate logging and user feedback. See `.claude/rules/core/allowe
 
 ---
 
-## Confidence-Based Filtering
-
-When generating review findings:
-
-- Each finding must include a **Confidence** percentage (e.g., 85%)
-- **Only report findings with >80% confidence** in the main Findings section
-- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
-- Below-threshold findings go in a collapsed "Low-Confidence Notes" section for reference
-- Skip stylistic preferences unless they violate documented conventions
-- Skip issues in unchanged code (unless CRITICAL security concern)
-
-## Approval Recommendation
-
-Include an approval recommendation based on findings:
-
-| Recommendation | Criteria |
-|---------------|----------|
-| **APPROVE** | No Critical or Major findings with >80% confidence |
-| **WARNING** | Major findings present — merge with caution |
-| **BLOCK** | Critical findings found — must fix before merging |
-
 ## PR Approval Criteria
 
 A PR should only be approved when:

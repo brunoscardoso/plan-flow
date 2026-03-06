@@ -319,12 +319,6 @@ AskUserQuestion({
 - Log `eval_result` events to audit trail:
   `{"ts":"...","event":"eval_result","phase":<N>,"eval_id":"EVAL-N","attempt":<k>,"passed":<bool>}`
 
-**Compaction Boundary**: If the **next** phase has complexity >= 7, suggest:
-
-> Phase N complete. The next phase (complexity: X/10) is high-complexity. Consider running `/compact` to free context before proceeding.
-
-**Never** suggest compaction during active phase execution — only between phases. Skip if autopilot is ON.
-
 ---
 
 ### Phase Lifecycle Hooks
@@ -395,22 +389,9 @@ The Tests phase is **always executed separately**, regardless of complexity scor
 
 After ALL phases are complete (including Tests phase):
 
-1. **Run each verification check independently** using the detected commands from Step 0 (a build failure should NOT skip type/test checks). Refer to `.claude/resources/core/tech-detection.md` for the language-specific commands.
+1. **Run final verification** using the detected commands from Step 0. Refer to `.claude/resources/core/tech-detection.md` for the language-specific commands.
 
-2. **Output structured verification report**:
-
-```
-VERIFICATION: [PASS/FAIL]
-Build:    [OK/FAIL - details]
-Types:    [OK/X errors]
-Tests:    [X/Y passed]
-Evals:    [X/Y passed, avg pass@k: N.N] (or "N/A" if no evals defined)
-Ready for PR: [YES/NO]
-```
-
-3. **Append to plan file** under a `## Verification Report` section with the structured output above.
-
-4. **Handle failures**:
+2. **Handle failures**:
    - Run `on-verification-fail` hooks (if `flow/hooks.json` exists) before attempting fixes
    - If build fails: Fix the issue, re-run verification
    - If tests fail: Fix the issue, re-run verification
@@ -418,21 +399,9 @@ Ready for PR: [YES/NO]
 
 ---
 
-### Step 7.5: Cleanup Pass (De-Sloppify)
-
-After build/tests pass, run an automatic cleanup pass:
-
-1. **Remove only these patterns**: debug console.logs, commented-out code, language-behavior tests, redundant type checks, unused imports
-2. **Run full test suite** after cleanup
-3. **If ANY test fails** → revert ALL cleanup changes
-4. **Report** cleanup results: items removed by category
-5. **Skip** if user requests it
-
----
-
 ### Step 7.75: Extract Instincts
 
-After cleanup pass, automatically extract reusable instincts from execution data:
+After build/tests pass, automatically extract reusable instincts from execution data:
 
 1. **Review brain-capture data** from all completed phases — look at `errors_hit` and `user_corrections` fields
 2. **Identify patterns** worth preserving as instincts:
@@ -494,6 +463,7 @@ VERIFICATION: [PASS/FAIL]
 Build:    [OK/FAIL]
 Types:    [OK/X errors]
 Tests:    [X/Y passed]
+Evals:    [X/Y passed, avg pass@k: N.N] (or "N/A" if no evals defined)
 Security: [PASS/WARN — N findings]
 Ready for PR: [YES/NO/CONDITIONAL]
 ```

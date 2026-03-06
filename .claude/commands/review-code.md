@@ -68,10 +68,6 @@ RELATED COMMANDS:
 > - **If YES**: Autopilot is ON. After completing the review, **auto-archive** the discovery and plan documents to `flow/archive/`, present the completion summary, and prompt for context cleanup (`/clear`).
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
-> **MODE: Research**
-> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
-> Ask clarifying questions when uncertain. Don't jump to implementation.
-
 > **AGENT_PROFILE: read-only**
 > See `.claude/resources/core/agent-profiles.md` for tool access rules.
 
@@ -106,13 +102,6 @@ The skill will:
 3. Find similar implementations in codebase
 4. Compare patterns against existing code
 5. Generate review document
-
-**Confidence-Based Filtering Rules**:
-- Each finding must include a **Confidence** percentage (e.g., 85%)
-- **Only include findings with >80% confidence** in the main Findings section
-- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
-- Findings below 80% confidence go in a collapsed "Low-Confidence Notes" section
-- Include an **Approval Recommendation**: APPROVE (no critical/major), WARNING (major only), BLOCK (critical found)
 
 See: `.claude/resources/skills/review-code-skill.md`
 

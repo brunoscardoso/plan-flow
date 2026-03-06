@@ -102,15 +102,12 @@ Create phases following these guidelines:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
-**Model**: [Haiku/Sonnet/Opus] (recommended)
 
 - [ ] Task 1
 - [ ] Task 2
 
 **Build Verification**: Run the project's build command (see `tech-detection.md`)
 ```
-
-**Model Routing**: Assign recommended models per phase based on complexity (see `.claude/resources/core/complexity-scoring.md` Model Routing section). This is advisory — 0-4 → Haiku, 5-7 → Sonnet, 8-10 → Opus.
 
 **Evals**: Generate 1-5 testable eval assertions per phase based on the phase's requirements. Link AC- acceptance criteria from the discovery document to phase evals where applicable. See `.claude/resources/patterns/plans-templates.md` (Eval Format section) for the format.
 

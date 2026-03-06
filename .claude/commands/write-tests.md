@@ -69,10 +69,6 @@ RELATED COMMANDS:
 
 ---
 
-> **MODE: Dev**
-> Code first, test after. Prefer Edit/Write/Bash tools. Run build/test after changes.
-> Move efficiently. Verify with tests, not exploration.
-
 > **AGENT_PROFILE: full-access**
 > See `.claude/resources/core/agent-profiles.md` for tool access rules.
 

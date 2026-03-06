@@ -70,7 +70,6 @@ For each changed file, similar implementations in the codebase:
 | File           | `{file_path}`                                    |
 | Line           | {line_number}                                    |
 | Severity       | {Critical/Major/Minor/Suggestion}                |
-| Confidence     | {85%}                                            |
 | Fix Complexity | {X/10} - {Level}                                 |
 | Pattern        | {Reference to pattern from rules, if applicable} |
 
@@ -169,16 +168,11 @@ List any particularly well-written code or good practices observed:
 
 ---
 
-## Approval Recommendation
+## Commit Readiness
 
-| Recommendation | {APPROVE / WARNING / BLOCK}                      |
-| -------------- | ------------------------------------------------ |
-| Reason         | {Brief explanation}                              |
-
-**Approval criteria**:
-- **APPROVE**: No Critical or Major findings with >80% confidence
-- **WARNING**: Major findings present (merge with caution)
-- **BLOCK**: Critical findings found — must fix before committing
+| Status | {Ready to Commit/Needs Changes/Needs Discussion} |
+| ------ | ------------------------------------------------ |
+| Reason | {Brief explanation}                              |
 
 ### Before Committing
 
@@ -186,17 +180,6 @@ List any particularly well-written code or good practices observed:
 - [ ] Address all Major findings
 - [ ] Review Pattern Conflicts and decide on resolution
 - [ ] Update rules files if new patterns should be documented
-
----
-
-## Low-Confidence Notes
-
-<details>
-<summary>Findings below 80% confidence (for reference only)</summary>
-
-{List any findings that didn't meet the 80% confidence threshold. These are informational and don't affect the approval recommendation.}
-
-</details>
 ```
 
 ---

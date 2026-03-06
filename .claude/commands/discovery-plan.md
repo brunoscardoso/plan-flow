@@ -18,10 +18,6 @@ This command creates a discovery document for gathering and clarifying requireme
 > - **If YES**: Autopilot is ON. After completing discovery and user Q&A, **auto-proceed** to `/create-plan` with the discovery output. Do NOT ask "Would you like to proceed?" - just continue.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
-> **MODE: Research**
-> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
-> Ask clarifying questions when uncertain. Don't jump to implementation.
-
 > **AGENT_PROFILE: read-only**
 > See `.claude/resources/core/agent-profiles.md` for tool access rules.
 
@@ -126,24 +122,6 @@ To start the discovery process, I need to understand:
 4. **What do you already know about the requirements?**
 5. **Are there any constraints I should be aware of?**
 ```
-
----
-
-### Step 1.5: Search for Existing Solutions
-
-**Before recommending implementation**, check if the problem is already solved:
-
-1. **Project code**: Use Grep/Glob to search for existing implementations, similar patterns, or utilities that already address part of the requirement
-2. **Package registries**: Use WebSearch to check npm (for JS/TS projects) or PyPI (for Python projects) for established libraries
-   - Search: `"{problem description} npm package"` or `"{problem description} python library"`
-   - Evaluate: maintenance status (last publish date), weekly downloads, compatibility with project stack
-3. **Document findings** in an "Existing Solutions Analysis" section in the discovery document
-
-**Decision criteria**:
-- If an existing library covers **>80%** of the need → recommend using it instead of building from scratch
-- If **<80%** → note what it covers and what custom work remains
-
-**Graceful degradation**: If WebSearch is unavailable, skip registry search and note "Package registry search skipped — WebSearch unavailable" in the discovery document. Always perform the project code search.
 
 ---
 
@@ -374,16 +352,6 @@ Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 | `discovery-templates.md`      | Document templates                     |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |
 | `/create-plan` command         | Creates plan from discovery document   |
-
----
-
-## Compaction Suggestion
-
-After discovery completes, suggest context cleanup:
-
-> Discovery complete. Consider running `/compact` before creating a plan to free context for the planning phase.
-
-Only suggest if the discovery was substantial (> 5 requirements gathered). Skip if autopilot is ON (context will be managed automatically).
 
 ---
 

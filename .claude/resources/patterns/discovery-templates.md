@@ -21,18 +21,6 @@ Use this template when creating discovery documents:
 | `flow/references/api-contracts.md` | [Summary of relevant content] |
 | `flow/references/sse-events.md`    | [Summary of relevant content] |
 
-## Existing Solutions Analysis
-
-[Results from search-first step — check before recommending implementation]
-
-| Solution | Type | Coverage | Gaps | Recommendation |
-|----------|------|----------|------|----------------|
-| `{name}` | {project code / npm package / PyPI} | {X%} | {what it doesn't cover} | {Use / Extend / Build custom} |
-
-**Summary**: {Build vs use recommendation based on coverage analysis}
-
----
-
 ## Code Context Analysis
 
 [Analysis of all code locations related to this feature]
