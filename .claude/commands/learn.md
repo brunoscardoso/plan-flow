@@ -8,8 +8,8 @@ description: Extract reusable patterns from the current session, or learn about 
 
 This command has two modes:
 
-1. **Pattern Extraction** (`/learn`): Analyzes the current session for reusable patterns and saves them to `flow/resources/`.
-2. **Teaching Mode** (`/learn about <topic>`): Creates a structured step-by-step curriculum to teach you about a topic, contextualized to your project's tech stack. Curricula are stored **globally** at `~/plan-flow/brain/learns/` so they can be shared across projects.
+1. **Pattern Extraction** (`/learn` with no arguments): Analyzes the current session for reusable patterns and saves them to `flow/resources/`.
+2. **Teaching Mode** (`/learn <topic>` or `/learn about <topic>`): **Teaches** the user about a topic with a structured step-by-step curriculum. The AI becomes a teacher — it researches the topic, designs a curriculum, and walks the user through each step interactively. Curricula are stored **globally** at `~/plan-flow/brain/learns/` so they can be reused across all projects.
 
 **Output**:
 - Pattern mode: `flow/resources/learned-{pattern-name}.md`
@@ -17,13 +17,20 @@ This command has two modes:
 
 ---
 
-## Mode Detection
+## Mode Detection (CRITICAL — read this first)
 
-Determine the mode based on user input:
+**IMPORTANT**: The user's input after `/learn` determines which mode to use. Get this right.
 
-- `/learn` → **Pattern Extraction Mode** (existing behavior, see Steps 1-4 below)
-- `/learn about <topic>` → **Teaching Mode** (see Teaching Mode section below)
-- `/learn -help` → Show help and stop
+| User Input | Mode | What To Do |
+|------------|------|------------|
+| `/learn` (no arguments) | **Pattern Extraction** | Scan session for reusable patterns (Steps 1-4 below) |
+| `/learn about <topic>` | **Teaching Mode** | Create a step-by-step curriculum to TEACH the user about `<topic>` |
+| `/learn <topic>` (any text after /learn) | **Teaching Mode** | Same as above — treat any argument as a topic to teach |
+| `/learn -help` | Help | Show help and stop |
+
+**Rule**: If the user provides ANY topic after `/learn`, you are in **Teaching Mode**. The ONLY way to trigger Pattern Extraction is `/learn` with no arguments.
+
+**Teaching Mode means**: You are a TEACHER. You create a structured curriculum and teach the user step by step. You do NOT extract patterns from the session. You do NOT create `learned-*.md` files. You CREATE a curriculum and TEACH.
 
 ---
 
@@ -39,8 +46,9 @@ DESCRIPTION:
   or learn about a topic with step-by-step teaching.
 
 USAGE:
-  /learn                  Analyze session and suggest patterns
-  /learn about <topic>    Start teaching mode for a topic
+  /learn                  Analyze session and suggest patterns to extract
+  /learn about <topic>    Teach me about <topic> step by step
+  /learn <topic>          Same as above — teach me about <topic>
   /learn -help            Show this help
 
 PATTERN EXTRACTION MODE (/learn):
@@ -183,7 +191,14 @@ If multiple patterns were found, repeat Steps 3-4 for each one.
 
 ## Teaching Mode (`/learn about <topic>`)
 
-When the user invokes `/learn about <topic>`, switch to teaching mode:
+When the user provides a topic (e.g., `/learn about mcp`, `/learn docker`, `/learn graphql subscriptions`), you become a **teacher**. Your job is to:
+
+1. **Research** the topic (use web search if needed for up-to-date info)
+2. **Design** a structured curriculum (3-7 steps, beginner → advanced)
+3. **Teach** each step interactively, waiting for the user to confirm before moving on
+4. **Save** the completed curriculum globally for reuse across projects
+
+**You are NOT extracting patterns. You are TEACHING the user something new.**
 
 ### Teaching Restrictions
 
