@@ -120,6 +120,17 @@ The daemon handles:
 - Stdout/stderr are logged to `flow/.heartbeat.log`
 - Tasks do not run concurrently — a task waits for the previous invocation to complete before starting again
 
+### Retry on Active Session
+
+When a task fails because a Claude Code session is already active (error: "cannot be launched inside another Claude Code session"), the daemon does **not** mark the task as permanently failed. Instead:
+
+1. **Deferred retry**: The task is rescheduled to retry after 60 seconds
+2. **Max retries**: Up to 5 retry attempts per task. After 5 failures, the task is logged as failed and retries stop
+3. **Mutex respected**: Retries still honor the `taskRunning` mutex — if another task is running when the retry fires, it is skipped (not counted as a retry attempt)
+4. **One-shot tasks**: Retry logic applies to one-shot tasks as well. The task is only disabled after successful execution, not after a session-active deferral
+5. **Retry reset**: The retry counter resets to zero after a successful execution
+6. **Logging**: Each deferral logs `Task "{name}" deferred — Claude Code session active. Will retry in 60s (attempt N/5)`
+
 ---
 
 ## One-Shot Tasks

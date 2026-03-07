@@ -20,6 +20,11 @@ const logPath = join(target, 'flow', '.heartbeat.log');
 const activeTimers: NodeJS.Timeout[] = [];
 let taskRunning = false;
 
+const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 60_000;
+const retryCountMap = new Map<string, number>();
+
 function log(message: string): void {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] ${message}\n`;
@@ -115,9 +120,12 @@ function executeTask(task: HeartbeatTask): void {
     taskRunning = false;
     if (code === 0) {
       log(`Task "${task.name}" completed successfully`);
+      retryCountMap.delete(task.name);
       if (task.oneShot) {
         disableOneShotTask(task.name);
       }
+    } else if (stderr.includes(ACTIVE_SESSION_ERROR)) {
+      scheduleRetry(task);
     } else {
       log(`Task "${task.name}" failed with code ${code}`);
       if (stderr) log(`  stderr: ${stderr.slice(0, 500)}`);
@@ -129,6 +137,21 @@ function executeTask(task: HeartbeatTask): void {
     taskRunning = false;
     log(`Task "${task.name}" error: ${err.message}`);
   });
+}
+
+function scheduleRetry(task: HeartbeatTask): void {
+  const count = (retryCountMap.get(task.name) ?? 0) + 1;
+  retryCountMap.set(task.name, count);
+
+  if (count > MAX_RETRIES) {
+    log(`Task "${task.name}" failed — exhausted ${MAX_RETRIES} retries (Claude Code session kept active)`);
+    retryCountMap.delete(task.name);
+    return;
+  }
+
+  log(`Task "${task.name}" deferred — Claude Code session active. Will retry in 60s (attempt ${count}/${MAX_RETRIES})`);
+  const timer = setTimeout(() => executeTask(task), RETRY_DELAY_MS);
+  activeTimers.push(timer);
 }
 
 function disableOneShotTask(taskName: string): void {
