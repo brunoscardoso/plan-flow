@@ -65,6 +65,13 @@ RELATED COMMANDS:
 
 ---
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -96,6 +103,13 @@ The skill will:
 3. Load review patterns
 4. Analyze code changes
 5. Generate review document
+
+**Confidence-Based Filtering Rules**:
+- Each finding must include a **Confidence** percentage (e.g., 85%)
+- **Only include findings with >80% confidence** in the main Findings section
+- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
+- Findings below 80% confidence go in a collapsed "Low-Confidence Notes" section
+- Include an **Approval Recommendation**: APPROVE (no critical/major), WARNING (major only), BLOCK (critical found)
 
 See: `.claude/resources/skills/review-pr-skill.md`
 
@@ -172,6 +186,41 @@ When executing this command:
 
 ---
 
+## Brain Capture
+
+After PR review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: review-pr
+feature: [PR title or scope]
+status: completed
+data:
+  pr_number: [PR number]
+  pr_platform: [github/azure-devops]
+  issues_found: [total count]
+  review_outcome: [approved/changes-requested/commented]
+  severity_critical: [count]
+  severity_warning: [count]
+-->
+```
+
+Log to `flow/brain/sessions/YYYY-MM-DD.md` with PR review summary.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.
+
+---
+
 ## Learn Recommendations
 
 After the PR review completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
@@ -194,3 +243,4 @@ The following new technologies/patterns were detected in this PR:
 
 Run any of these to build structured understanding before or after merging.
 ```
+

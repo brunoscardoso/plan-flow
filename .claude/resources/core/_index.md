@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 10 files, ~1560 lines
-**Reference Codes**: COR-AP-1 through COR-HB-2
+**Total Files**: 11 files, ~1730 lines
+**Reference Codes**: COR-AP-1 through COR-LR-2
 
 ---
 
@@ -87,6 +87,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-1 | Capture behavior, criteria, and what NOT to capture | resource-capture.md | 10-60 |
 | COR-RC-2 | File format, naming conventions, and rules | resource-capture.md | 62-110 |
 
+### Learn Recommendations (`learn-recommendations.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-LR-1 | Trigger conditions and detection logic | learn-recommendations.md | 10-62 |
+| COR-LR-2 | Recommendation format, rules, and integration points | learn-recommendations.md | 64-170 |
+
 ---
 
 ## When to Expand
@@ -118,6 +125,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-HB-2 | Need daemon architecture and CLI commands |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
+| COR-LR-1 | Need learn recommendation trigger conditions |
+| COR-LR-2 | Need learn recommendation format and integration rules |
 
 ---
 
@@ -154,6 +163,7 @@ Core rules define the foundational coding standards that apply across the entire
 - `autopilot-mode.md` has `alwaysApply: true` - detects and orchestrates autopilot flow mode
 - `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
+- `learn-recommendations.md` is loaded on-demand - detects learning opportunities and recommends `/learn`
 - `project-tasklist.md` is loaded on-demand - session start tasklist behavior
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration

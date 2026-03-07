@@ -18,6 +18,13 @@ This command creates a discovery document for gathering and clarifying requireme
 > - **If YES**: Autopilot is ON. After completing discovery and user Q&A, **auto-proceed** to `/create-plan` with the discovery output. Do NOT ask "Would you like to proceed?" - just continue.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 > ⚠️ **IMPORTANT - DISCOVERY ONLY**
 >
 > This command ONLY creates a discovery document. It does NOT:
@@ -43,18 +50,28 @@ DESCRIPTION:
   before creating an implementation plan. This is the recommended first step.
 
 USAGE:
-  /discovery-plan <reference_document>
-  /discovery-plan <feature_description>
+  /discovery-plan [flags] <reference_document>
+  /discovery-plan [flags] <feature_description>
   /discovery-plan -help
 
 ARGUMENTS:
   reference_document   Contract, spec, or any document to analyze
   feature_description  Description of what you want to build
 
+WORKFLOW FLAGS (optional):
+  -security   Focus on threat model, attack surface, compliance needs,
+              and security requirements gathering.
+  -refactor   Focus on refactoring scope, target patterns, success criteria,
+              and what to preserve during restructuring.
+
+  Without a flag, performs standard feature requirements gathering.
+
 EXAMPLES:
   /discovery-plan @flow/contracts/api_contract.md
   /discovery-plan "User authentication with OAuth2"
   /discovery-plan @docs/feature-spec.md "Focus on the payment flow"
+  /discovery-plan -security "Review payment system security"
+  /discovery-plan -refactor "Restructure the API layer"
 
 OUTPUT:
   Creates: flow/discovery/discovery_<feature_name>_v<version>.md
@@ -66,8 +83,9 @@ WORKFLOW:
   4. Documents requirements (FR, NFR, Constraints)
   5. Proposes high-level approach (no code)
   6. Creates discovery document for review
-  7. Asks user if they want to proceed to /create-plan
-  8. Waits for user confirmation before proceeding
+  7. Asks user if they want to proceed, refine, or stop
+  8. Supports iterative refinement (max 3 rounds)
+  9. Waits for user confirmation before proceeding
 
 RECOMMENDED MODEL:
   Claude Opus 4.6 or Sonnet 4.5 for best results
@@ -86,7 +104,7 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/re
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
 | **No Code**              | NEVER write, edit, or generate code during discovery     |
-| **Only Markdown Output** | The ONLY deliverable is the discovery markdown file. Do NOT display it in chat. |
+| **Only Markdown Output** | The ONLY deliverable is the discovery markdown file. Do NOT display it in chat. Save the `.md` file and report its path only. |
 | **Ask Questions**        | When in doubt, ask - don't assume                        |
 | **Read First**           | Read all referenced documents before asking questions    |
 | **High-Level Only**      | Technical considerations are conceptual, not code        |
@@ -95,11 +113,29 @@ These rules are mandatory. For detailed patterns and guidelines, see `.claude/re
 | **No Auto-Execution**    | Do NOT auto-invoke commands without user confirmation (unless autopilot ON) |
 | **NO PLANNING**          | Do NOT create implementation plans during discovery      |
 | **NO EXECUTION**         | Do NOT execute any implementation steps                  |
-| **File Only**            | Save the `.md` file and report its path. Do NOT show full content in chat. |
 
 ---
 
 ## Instructions
+
+### Step 0: Parse Workflow Flag
+
+Check if the user input starts with a workflow flag:
+
+| Flag | Discovery Focus |
+|------|----------------|
+| `-security` | **Threat model and security requirements**. Questions focus on: auth flows, data sensitivity, encryption needs, access control, vulnerability surface, compliance requirements (SOC2, GDPR, PCI), and trust boundaries. Discovery document includes a "Threat Model" section and "Security Requirements" subsection. |
+| `-refactor` | **Refactoring scope and target patterns**. Questions focus on: current pain points, desired patterns, migration strategy, backward compatibility, what to preserve, success criteria, and acceptable breakage. Discovery document includes a "Baseline Assessment" section and "Target Architecture" subsection. |
+| (none) | Standard feature requirements gathering |
+
+If a flag is found:
+1. Set the **discovery focus** for this execution
+2. Remove the flag from the input (the rest is the user's prompt/reference)
+3. The focus affects the questions asked in Step 4 and the structure of the output document
+
+If no flag is found: proceed with standard discovery (backward compatible).
+
+---
 
 ### Step 1: Validate Inputs
 
@@ -119,6 +155,24 @@ To start the discovery process, I need to understand:
 4. **What do you already know about the requirements?**
 5. **Are there any constraints I should be aware of?**
 ```
+
+---
+
+### Step 1.5: Search for Existing Solutions
+
+**Before recommending implementation**, check if the problem is already solved:
+
+1. **Project code**: Use Grep/Glob to search for existing implementations, similar patterns, or utilities that already address part of the requirement
+2. **Package registries**: Use WebSearch to check npm (for JS/TS projects) or PyPI (for Python projects) for established libraries
+   - Search: `"{problem description} npm package"` or `"{problem description} python library"`
+   - Evaluate: maintenance status (last publish date), weekly downloads, compatibility with project stack
+3. **Document findings** in an "Existing Solutions Analysis" section in the discovery document
+
+**Decision criteria**:
+- If an existing library covers **>80%** of the need → recommend using it instead of building from scratch
+- If **<80%** → note what it covers and what custom work remains
+
+**Graceful degradation**: If WebSearch is unavailable, skip registry search and note "Package registry search skipped — WebSearch unavailable" in the discovery document. Always perform the project code search.
 
 ---
 
@@ -155,7 +209,10 @@ The skill will:
 6. Identify technical considerations
 7. Propose high-level approach
 8. Document risks and unknowns
-9. Generate discovery document and save to `flow/discovery/`
+9. Generate discovery document
+10. Support iterative refinement (max 3 rounds) if user requests it
+11. Ask user if they want to proceed to /create-plan
+12. Wait for user confirmation before proceeding
 
 See: `.claude/resources/skills/discovery-skill.md`
 
@@ -166,7 +223,7 @@ See: `.claude/resources/skills/discovery-skill.md`
 After the skill completes:
 
 1. **Save the discovery document** to `flow/discovery/discovery_<feature>_v<version>.md`
-2. **Report only the file path** — do NOT display the full document content in chat
+2. **Report only the file path and a brief summary** — do NOT display the full document content in chat
 3. **STOP** — do NOT create a plan, do NOT offer to build, do NOT show implementation steps
 
 **Output to the user** (this is the ONLY thing to show):
@@ -174,18 +231,36 @@ After the skill completes:
 ```markdown
 Discovery complete.
 
+**Summary**:
+- X functional requirements gathered
+- X non-functional requirements identified
+- X risks documented
+- X questions resolved
+
 **Created**: `flow/discovery/discovery_<feature>_v1.md`
 
 Next: review the file, then run `/create-plan` when ready.
+If you want to refine the discovery first, just tell me what to adjust.
 ```
 
 ⚠️ **CRITICAL**: After saving the file, the command is DONE. Do NOT:
 - Show the full discovery document content in chat
 - Create or suggest an implementation plan
 - Offer to build or execute anything
-- Auto-invoke `/create-plan`
+- Auto-invoke `/create-plan` or trigger any planning mode
+- Enter Cursor's plan/execute mode
 
 The user will read the `.md` file themselves and decide when to proceed.
+
+#### Refinement (if user asks)
+
+If the user asks to refine after seeing the summary:
+
+1. **Accept feedback**: Ask what areas need adjustment (requirements, approach, scope, risks)
+2. **Follow-up questions**: Ask 1-3 targeted questions about the refinement areas only
+3. **Update document**: Modify the discovery document in-place
+4. **Re-present**: Show the updated summary and file path (NOT the full content)
+5. **Max 3 rounds**: After 3 refinement rounds, save and stop
 
 ---
 
@@ -219,10 +294,10 @@ The user will read the `.md` file themselves and decide when to proceed.
                     |
                     v
 +------------------------------------------+
-| Step 5: Save File and Stop               |
-| - Save .md file to flow/discovery/       |
-| - Report file path only                  |
-| - STOP (no plan, no build)               |
+| Step 5: Present Results                  |
+| - Show summary to user                   |
+| - Allow refinement                       |
+| - Link to /create-plan command           |
 +------------------------------------------+
 ```
 
@@ -335,3 +410,60 @@ These are optional but recommended to reduce implementation friction.
 **Detection**: Compare proposed technologies against `flow/references/tech-foundation.md` and existing `package.json` / `pyproject.toml` dependencies. If a technology is not in the current stack, flag it.
 
 **Presentation**: Include the section in the discovery document itself (not as a chat message). This ensures the learning suggestion persists and is visible when the user reviews the document.
+
+---
+
+## Compaction Suggestion
+
+After discovery completes, suggest context cleanup:
+
+> Discovery complete. Consider running `/compact` before creating a plan to free context for the planning phase.
+
+Only suggest if the discovery was substantial (> 5 requirements gathered). Skip if autopilot is ON (context will be managed automatically).
+
+---
+
+## Brain Capture
+
+After discovery completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: discovery
+feature: [feature name from discovery]
+status: completed
+data:
+  user_prompt: [original user request]
+  questions_asked: [count]
+  questions_answered: [count]
+  requirements_fr: [count of functional requirements]
+  requirements_nfr: [count of non-functional requirements]
+  discovery_doc: [path to discovery document]
+-->
+```
+
+Write/update `flow/brain/features/[feature-name].md` with discovery context and update `flow/brain/index.md`.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Handoff Production
+
+After discovery completes, produce a handoff document for the next step. See `.claude/resources/patterns/handoff-patterns.md` [PTN-HND-1] for the template.
+
+**Output**: `flow/handoffs/handoff_<feature>_discovery_to_plan.md`
+
+Include: feature name, workflow type, requirements summary (FR/NFR/C counts), key decisions from Q&A, top risks, discovery doc path, and focus guidance for planning.
+
+Create the `flow/handoffs/` directory if it doesn't exist.
