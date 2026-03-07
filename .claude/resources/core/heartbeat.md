@@ -33,6 +33,14 @@ The heartbeat file contains task entries in markdown format:
 - **Command**: {command-to-execute}
 - **Enabled**: {true|false}
 - **Description**: {what this task does}
+
+### {scheduled-tasklist-item}
+- **Schedule**: in 1 hour
+- **Command**: execute tasklist item "Feature xyz"
+- **Enabled**: true
+- **Description**: Scheduled from tasklist — Feature xyz
+- **One-Shot**: true
+- **Tasklist Link**: [[tasklist.md#Feature xyz]]
 ```
 
 ---
@@ -47,6 +55,8 @@ Human-readable schedule expressions:
 | `every {N} hours` | `every 6 hours` | Run every 6 hours from daemon start |
 | `every {N} minutes` | `every 30 minutes` | Run every 30 minutes from daemon start |
 | `weekly on {day} at {HH:MM}` | `weekly on Monday at 9:00 AM` | Run weekly on Monday at 9 AM |
+| `in {N} hours` | `in 2 hours` | Run once, N hours from now (one-shot) |
+| `in {N} minutes` | `in 30 minutes` | Run once, N minutes from now (one-shot) |
 
 ### Schedule Rules
 
@@ -107,6 +117,26 @@ The daemon handles:
 
 ---
 
+## One-Shot Tasks
+
+One-shot tasks run once and auto-disable. They are used for scheduled tasklist items.
+
+### Behavior
+
+1. **Detection**: If a task has `One-Shot: true` in its definition, it is a one-shot task
+2. **Execution**: After the task executes successfully, set `Enabled: false` in `flow/heartbeat.md`
+3. **Tasklist update**: If the task has a `Tasklist Link`, update the linked item in `flow/tasklist.md` — move from **To Do** to **Done** with today's date
+4. **Relative schedules**: `in {N} hours/minutes` schedules are calculated from the time the task was added, not from daemon start
+
+### Tasklist Integration
+
+Tasks created from the tasklist have a `Tasklist Link` field that points back to the tasklist item. This enables:
+- Bidirectional navigation in Obsidian via `[[]]` links
+- Automatic status sync between heartbeat and tasklist
+- Clean up after one-shot execution
+
+---
+
 ## Rules
 
 1. **No external dependencies**: Daemon uses only Node.js built-in modules
@@ -115,3 +145,4 @@ The daemon handles:
 4. **File-based config**: All configuration lives in `flow/heartbeat.md` — no CLI flags for task config
 5. **Hot reload**: Changes to `flow/heartbeat.md` are picked up automatically without restart
 6. **Log rotation**: Keep `flow/.heartbeat.log` under 1000 lines by truncating oldest entries
+7. **One-shot cleanup**: After a one-shot task executes, auto-disable it and update the linked tasklist item

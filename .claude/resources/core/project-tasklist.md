@@ -38,6 +38,7 @@ A persistent project todo list that tracks work items across sessions. The taskl
 ## To Do
 
 - [ ] Task description
+- [ ] Task description — scheduled [[heartbeat#task-name]] {YYYY-MM-DD HH:MM}
 
 ## Done
 
@@ -137,6 +138,66 @@ The global tasklist is regenerated:
 - Engineers can refresh it manually by re-running `plan-flow init`
 
 > **Note**: The global tasklist is a snapshot. Since each project's tasklist is symlinked into the vault, Obsidian users can navigate directly to any project's live tasklist via the `[[project/tasklist.md]]` link.
+
+---
+
+## Heartbeat Integration (Scheduled Tasks)
+
+When a user adds a task to the tasklist with a time expression (e.g., "in 1 hour", "at 3:00 PM", "tomorrow at 9 AM"), the task becomes a **scheduled task** that integrates with the heartbeat daemon.
+
+### How It Works
+
+1. **Detect schedule**: Parse time expressions from user input:
+   - `in {N} hours/minutes` → relative schedule
+   - `at {HH:MM AM/PM}` → absolute time today
+   - `tomorrow at {HH:MM}` → absolute time tomorrow
+   - `on {day} at {HH:MM}` → specific day and time
+2. **Add to tasklist**: Add the task to **To Do** in `flow/tasklist.md` with a schedule annotation:
+   ```markdown
+   - [ ] Feature xyz — scheduled [[heartbeat#task-feature-xyz]] {YYYY-MM-DD HH:MM}
+   ```
+3. **Add to heartbeat**: Create a one-shot task in `flow/heartbeat.md`:
+   ```markdown
+   ### task-feature-xyz
+   - **Schedule**: in 1 hour
+   - **Command**: execute tasklist item "Feature xyz"
+   - **Enabled**: true
+   - **Description**: Scheduled from tasklist — Feature xyz
+   - **One-Shot**: true
+   - **Tasklist Link**: [[tasklist.md#Feature xyz]]
+   ```
+4. **On execution**: When the heartbeat daemon fires the task, it opens a Claude Code session and executes the tasklist item via the appropriate flow command
+5. **On completion**: The heartbeat task is disabled (`Enabled: false`), and the tasklist item moves to **Done**
+
+### Schedule Conversion
+
+| User Input | Heartbeat Schedule |
+|---|---|
+| `in 1 hour` | `in 1 hour` (relative from now) |
+| `in 30 minutes` | `in 30 minutes` |
+| `at 3:00 PM` | `daily at 3:00 PM` (one-shot) |
+| `tomorrow at 9 AM` | `daily at 9:00 AM` (one-shot, starts tomorrow) |
+| `every day at 10 PM` | `daily at 10:00 PM` (recurring) |
+
+### One-Shot vs Recurring
+
+- **One-shot** (`One-Shot: true`): Executes once and auto-disables. Used for "in X hours" and specific time requests.
+- **Recurring** (no `One-Shot` field): Keeps running on schedule. Used when user explicitly says "every day", "every 6 hours", etc.
+
+### Linking
+
+Both files cross-reference each other:
+- Tasklist entry links to heartbeat: `[[heartbeat#task-name]]`
+- Heartbeat entry links to tasklist: `[[tasklist.md#Task description]]`
+
+This allows Obsidian users to navigate between scheduled tasks and their heartbeat definitions.
+
+### Rules
+
+1. **Always ask before scheduling**: If the user says "add to tasklist and execute in 1 hour", confirm the schedule before creating the heartbeat entry
+2. **One-shot by default**: Unless the user explicitly says "every" or "recurring", treat scheduled tasks as one-shot
+3. **Don't execute now**: Adding a scheduled task only creates the entries — the heartbeat daemon handles execution at the scheduled time
+4. **Clean up**: After a one-shot task completes, move it to Done in tasklist and disable it in heartbeat
 
 ---
 

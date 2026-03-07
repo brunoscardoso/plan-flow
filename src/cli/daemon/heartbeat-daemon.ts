@@ -77,6 +77,11 @@ function msUntilNextOccurrence(config: ScheduleConfig): number {
     return target.getTime() - now.getTime();
   }
 
+  // once — run after delay
+  if (config.type === 'once') {
+    return config.intervalMs!;
+  }
+
   // interval — start immediately
   return 0;
 }
@@ -110,6 +115,9 @@ function executeTask(task: HeartbeatTask): void {
     taskRunning = false;
     if (code === 0) {
       log(`Task "${task.name}" completed successfully`);
+      if (task.oneShot) {
+        disableOneShotTask(task.name);
+      }
     } else {
       log(`Task "${task.name}" failed with code ${code}`);
       if (stderr) log(`  stderr: ${stderr.slice(0, 500)}`);
@@ -123,6 +131,25 @@ function executeTask(task: HeartbeatTask): void {
   });
 }
 
+function disableOneShotTask(taskName: string): void {
+  try {
+    if (!existsSync(heartbeatPath)) return;
+    let content = readFileSync(heartbeatPath, 'utf-8');
+    // Find the task section and replace Enabled: true with Enabled: false
+    const taskPattern = new RegExp(
+      `(###\\s+${taskName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?\\*\\*Enabled\\*\\*:\\s*)true`,
+      'i'
+    );
+    const updated = content.replace(taskPattern, '$1false');
+    if (updated !== content) {
+      writeFileSync(heartbeatPath, updated, 'utf-8');
+      log(`One-shot task "${taskName}" disabled after execution`);
+    }
+  } catch (err) {
+    log(`Failed to disable one-shot task "${taskName}": ${(err as Error).message}`);
+  }
+}
+
 function scheduleTask(task: HeartbeatTask): void {
   if (!task.enabled) {
     log(`Task "${task.name}" is disabled, skipping`);
@@ -130,6 +157,14 @@ function scheduleTask(task: HeartbeatTask): void {
   }
 
   const config = task.scheduleConfig;
+
+  if (config.type === 'once') {
+    const ms = config.intervalMs!;
+    log(`Scheduling one-shot "${task.name}" — runs in ${Math.round(ms / 1000)}s`);
+    const timer = setTimeout(() => executeTask(task), ms);
+    activeTimers.push(timer);
+    return;
+  }
 
   if (config.type === 'interval') {
     log(`Scheduling "${task.name}" every ${config.intervalMs! / 1000}s`);
