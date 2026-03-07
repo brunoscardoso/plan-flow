@@ -156,6 +156,7 @@ When a task is completed:
 2. **Real-time updates**: Update tasklist immediately when status changes, don't batch
 3. **No duplicates**: Before adding a task, check if it already exists (check all sections)
 4. **Clean completed**: Keep **Done** section to last 10 items; older items can be removed
-5. **User-driven**: Only pick tasks when the user explicitly chooses one
+5. **User-driven**: Only pick/execute tasks when the user explicitly asks to. NEVER auto-execute a task just because it was added to the tasklist.
 6. **Always update**: Every command MUST update the tasklist — this is not optional
-7. **Ad-hoc tasks**: When the user asks for work outside a command, add it to In Progress immediately and mark Done when complete
+7. **Add vs Execute**: When the user says "add to tasklist" or "add a task for X", ONLY add it to **To Do**. Do NOT start working on it. Only execute when the user explicitly says "do this", "implement this", "work on X", or invokes a command.
+8. **Tasklist is a backlog**: The tasklist is a planning tool, not an execution trigger. Adding a task is separate from executing it.
