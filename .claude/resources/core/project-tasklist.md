@@ -88,6 +88,58 @@ Plan completes:
 
 ---
 
+## Global Tasklist Integration
+
+The project tasklist is linked into the central Obsidian vault at `~/plan-flow/brain/projects/{project}/tasklist.md` (symlink). A **global tasklist** at `~/plan-flow/brain/tasklist.md` aggregates all projects, showing task counts per project for a bird's-eye view.
+
+### How It Works
+
+1. During `plan-flow init`, the project's `flow/tasklist.md` is symlinked into the vault
+2. A global `~/plan-flow/brain/tasklist.md` is generated with per-project summaries
+3. Each project summary shows In Progress / To Do / Done counts
+4. Obsidian `[[project-name]]` links connect the global view to each project
+
+### Global Tasklist Format
+
+```markdown
+# Global Tasklist
+
+**Last Updated**: 2026-03-07
+**Projects**: 3
+
+---
+
+### [[my-app]]
+
+| Status | Count |
+|--------|-------|
+| In Progress | 2 |
+| To Do | 5 |
+| Done | 8 |
+
+> See: [[my-app/tasklist.md|Full Tasklist]]
+
+### [[api-service]]
+
+| Status | Count |
+|--------|-------|
+| In Progress | 1 |
+| To Do | 3 |
+| Done | 12 |
+
+> See: [[api-service/tasklist.md|Full Tasklist]]
+```
+
+### When Global Updates Happen
+
+The global tasklist is regenerated:
+- On `plan-flow init` (during vault registration)
+- Engineers can refresh it manually by re-running `plan-flow init`
+
+> **Note**: The global tasklist is a snapshot. Since each project's tasklist is symlinked into the vault, Obsidian users can navigate directly to any project's live tasklist via the `[[project/tasklist.md]]` link.
+
+---
+
 ## Brain Integration
 
 When a task is completed:
