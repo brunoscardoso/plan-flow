@@ -56,6 +56,37 @@ function cleanStalePid(target: string): void {
   }
 }
 
+/**
+ * Starts the heartbeat daemon if heartbeat.md exists and daemon is not already running.
+ * Called automatically during `plan-flow init`.
+ */
+export async function startHeartbeatIfNeeded(target: string): Promise<void> {
+  const heartbeatPath = join(target, 'flow', 'heartbeat.md');
+  if (!existsSync(heartbeatPath)) return;
+
+  const existingPid = readPid(target);
+  if (existingPid && isProcessRunning(existingPid)) {
+    log.info(`Heartbeat daemon already running (PID: ${existingPid})`);
+    return;
+  }
+
+  if (existingPid) cleanStalePid(target);
+
+  const daemonPath = getDaemonPath();
+  const child = spawn(process.execPath, [daemonPath, target], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  const pid = readPid(target);
+  if (pid) {
+    log.success(`Heartbeat daemon started in background (PID: ${pid})`);
+  }
+}
+
 export async function runHeartbeat(
   action: string,
   options: { target: string }

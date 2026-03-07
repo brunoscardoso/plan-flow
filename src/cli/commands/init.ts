@@ -13,6 +13,7 @@ import { initOpenClaw } from '../handlers/openclaw.js';
 import { initClawHub } from '../handlers/clawhub.js';
 import { initCodex } from '../handlers/codex.js';
 import { initShared } from '../handlers/shared.js';
+import { startHeartbeatIfNeeded } from './heartbeat.js';
 
 function printBanner(): void {
   log.header('Plan-Flow Setup');
@@ -126,6 +127,10 @@ function printNextSteps(platforms: Platform[]): void {
   }
 
   log.blank();
+  log.header('Heartbeat Daemon');
+  log.info('The heartbeat daemon runs in the background to execute scheduled tasks.');
+  log.info('Manage it with: npx plan-flow heartbeat start|stop|status');
+  log.blank();
   log.header('Brain & Obsidian Vault');
   log.info('Your project brain lives at flow/brain/ — features, errors, and decisions are tracked here.');
   log.info('All projects are linked in the central vault at ~/plan-flow/brain/');
@@ -186,6 +191,9 @@ export async function runInit(options: InitOptions): Promise<void> {
   log.header('Setting up shared resources...');
   const sharedResult = await initShared(target, { force }, platforms);
   results.push({ platform: 'shared', result: sharedResult });
+
+  // Start heartbeat daemon in background
+  await startHeartbeatIfNeeded(target);
 
   // Print summary and next steps
   printSummary(results, target);

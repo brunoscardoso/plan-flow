@@ -87,10 +87,15 @@ The heartbeat daemon is a detached Node.js process that:
 | `npx plan-flow heartbeat stop` | Stop the daemon (via PID file) |
 | `npx plan-flow heartbeat status` | Show daemon status (running/stopped, PID, uptime) |
 
+### Auto-Start on Init
+
+The daemon starts automatically when `plan-flow init` runs, if `flow/heartbeat.md` exists. This means scheduled tasks begin working immediately after installation — no manual `heartbeat start` needed.
+
 ### Process Management
 
 - **PID File**: `flow/.heartbeat.pid` stores the daemon PID
 - **Start**: Spawns a detached child process, writes PID file
+- **Auto-start**: Runs during `plan-flow init` if heartbeat.md exists
 - **Stop**: Reads PID file, sends SIGTERM, removes PID file
 - **Status**: Checks if PID in file is actually running
 - **Stale PID**: If PID file exists but process is not running, clean up and report stopped
