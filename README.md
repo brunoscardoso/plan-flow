@@ -7,7 +7,7 @@ Works with **Claude Code**, **Cursor**, **OpenClaw**, and **Codex CLI**.
 ## Quick Start
 
 ```bash
-npx plan-flow init
+npx planflow-ai init
 ```
 
 This interactive command installs plan-flow into your project for your chosen platform(s).
@@ -17,7 +17,7 @@ This interactive command installs plan-flow into your project for your chosen pl
 ### Claude Code
 
 ```bash
-npx plan-flow init --claude
+npx planflow-ai init --claude
 ```
 
 Installs slash commands (`.claude/commands/`), core rules (`.claude/rules/`), and reference docs (`.claude/resources/`) into your project. Creates or updates your `CLAUDE.md` with plan-flow instructions.
@@ -25,15 +25,15 @@ Installs slash commands (`.claude/commands/`), core rules (`.claude/rules/`), an
 ### Cursor
 
 ```bash
-npx plan-flow init --cursor
+npx planflow-ai init --cursor
 ```
 
-Copies Cursor-compatible rules (`rules/*.mdc`) into your project.
+Copies Cursor-compatible commands (`.cursor/commands/`) into your project.
 
 ### OpenClaw
 
 ```bash
-npx plan-flow init --openclaw
+npx planflow-ai init --openclaw
 ```
 
 Copies skill manifests to `skills/plan-flow/` in your project.
@@ -41,7 +41,7 @@ Copies skill manifests to `skills/plan-flow/` in your project.
 ### Codex CLI
 
 ```bash
-npx plan-flow init --codex
+npx planflow-ai init --codex
 ```
 
 Copies skills to `.agents/skills/plan-flow/` and creates or updates your `AGENTS.md` with plan-flow instructions.
@@ -49,7 +49,7 @@ Copies skills to `.agents/skills/plan-flow/` and creates or updates your `AGENTS
 ### All Platforms
 
 ```bash
-npx plan-flow init --all
+npx planflow-ai init --all
 ```
 
 Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
@@ -66,28 +66,6 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 | `--force` | Overwrite existing files |
 | `--target <dir>` | Target directory (defaults to current) |
 
-## Manual Installation
-
-### Claude Code (Manual)
-
-1. Copy `.claude/commands/*.md` to your project's `.claude/commands/`
-2. Copy `.claude/rules/` to your project's `.claude/rules/`
-3. Copy `.claude/resources/` to your project's `.claude/resources/`
-4. Add the plan-flow section from `templates/shared/CLAUDE.md.template` to your `CLAUDE.md`
-
-### Cursor (Manual)
-
-Copy `rules/` to your project's `rules/`
-
-### OpenClaw (Manual)
-
-Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
-
-### Codex CLI (Manual)
-
-1. Copy `skills/plan-flow/` to your project's `.agents/skills/plan-flow/`
-2. Add the plan-flow section from `templates/shared/AGENTS.md.template` to your `AGENTS.md`
-
 ## Commands
 
 | Command | Description |
@@ -100,7 +78,7 @@ Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Generate tests for coverage target |
-| `/flow` | Toggle autopilot mode on/off |
+| `/flow` | Configure plan-flow settings (autopilot, git control, runtime options) |
 | `/brain` | Capture meeting notes, ideas, brainstorms |
 | `/learn` | Extract reusable patterns or learn a topic step-by-step |
 | `/pattern-validate` | Scan and index global brain patterns |
@@ -120,7 +98,7 @@ Copy `skills/plan-flow/` to your project's `skills/plan-flow/`
 
 ### Autopilot Mode
 
-Enable autopilot with `/flow -enable` and the full workflow runs automatically for feature requests:
+Enable autopilot with `/flow autopilot=true` and the full workflow runs automatically for feature requests:
 
 ```
 You: "Add dark mode support"
@@ -135,17 +113,101 @@ You: "Add dark mode support"
 
 Autopilot classifies every input and only triggers the full flow for feature requests (complexity 3+). Questions, trivial tasks, and slash commands are handled normally.
 
-| Usage | Description |
-|-------|-------------|
-| `/flow -enable` | Enable autopilot mode |
-| `/flow -disable` | Disable autopilot mode |
-| `/flow -status` | Check current state |
-
 **Mandatory checkpoints** — even in autopilot, the flow always pauses for:
 - **Discovery Q&A**: You answer requirements questions
 - **Plan approval**: You review and approve the plan before execution
 
-State is persisted in `flow/.autopilot` (survives session restarts).
+## Flow Configuration (`/flow`)
+
+The `/flow` command is the central configuration hub. All settings use `key=value` syntax and persist in `flow/.flowconfig` (YAML).
+
+| Setting | Values | Default | Description |
+|---------|--------|---------|-------------|
+| `autopilot` | `true/false` | `false` | Enable/disable autopilot mode |
+| `commit` | `true/false` | `false` | Auto-commit after each completed phase |
+| `push` | `true/false` | `false` | Auto-push after all phases + build/test pass |
+| `branch` | any string | current branch | Target branch for git operations |
+
+### Examples
+
+```bash
+/flow autopilot=true                    # Enable autopilot
+/flow commit=true push=true             # Enable git control (works without autopilot)
+/flow autopilot=true commit=true        # Enable both
+/flow branch=development                # Set target branch
+/flow -status                           # Show current config
+/flow -reset                            # Reset everything
+
+# Shorthand: text without key=value enables autopilot and starts flow
+/flow add dark mode support             # autopilot=true + start discovery
+/flow commit=true add user auth         # autopilot=true + git + start discovery
+```
+
+### Git Control
+
+When `commit=true`, plan-flow auto-commits after each completed execution phase:
+
+```
+Phase 1: Setup types → git commit "Phase 1: Setup types — user-auth"
+Phase 2: API endpoints → git commit "Phase 2: API endpoints — user-auth"
+Phase 3: Tests → git commit "Phase 3: Tests — user-auth"
+Build + Test pass → git commit "Complete: user-auth — all phases done"
+                  → git push origin development (if push=true)
+```
+
+Git control works independently of autopilot — you can use `commit=true` with manual `/execute-plan` runs.
+
+## Project Tasklist
+
+Each project has a `flow/tasklist.md` that tracks work items across sessions. On session start, active tasks are summarized and you can pick one to work on.
+
+Every command automatically updates the tasklist:
+- On start: adds the task to **In Progress**
+- On complete: moves it to **Done** with the date
+- Next step: adds the logical follow-up to **To Do**
+
+### Scheduled Tasks
+
+Tasks can be scheduled for later execution by linking them to the heartbeat daemon:
+
+```
+/flow add to tasklist: implement feature X and execute in 1 hour
+```
+
+This creates a tasklist entry linked to a heartbeat one-shot task via `[[]]` references. Both files cross-reference each other for Obsidian navigation.
+
+## Heartbeat (Scheduled Automation)
+
+The heartbeat daemon is a background process that executes scheduled tasks defined in `flow/heartbeat.md`.
+
+### Schedule Syntax
+
+| Syntax | Example |
+|--------|---------|
+| `daily at {HH:MM AM/PM}` | `daily at 10:00 PM` |
+| `every {N} hours` | `every 6 hours` |
+| `every {N} minutes` | `every 30 minutes` |
+| `weekly on {day} at {HH:MM}` | `weekly on Monday at 9:00 AM` |
+| `in {N} hours` | `in 2 hours` (one-shot) |
+| `in {N} minutes` | `in 30 minutes` (one-shot) |
+
+### Daemon Management
+
+```bash
+npx planflow-ai heartbeat start    # Start the daemon
+npx planflow-ai heartbeat stop     # Stop the daemon
+npx planflow-ai heartbeat status   # Show daemon status
+```
+
+The daemon **auto-starts** during `planflow-ai init` if `flow/heartbeat.md` exists.
+
+### One-Shot Tasks
+
+Tasks with `in {N} hours/minutes` schedules run once and auto-disable after execution. These are used for scheduled tasklist items.
+
+### Retry on Active Session
+
+If a task fails because a Claude Code session is already active, the daemon retries up to 5 times at 60-second intervals instead of failing permanently.
 
 ## Complexity Scoring
 
@@ -177,11 +239,13 @@ flow/
 ├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
-├── tasklist.md        # Project task list (loaded on session start)
+├── tasklist.md        # Project task list (updated in real-time during execution)
 ├── memory.md          # Persistent artifact tracker (completed work)
 ├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
 ├── log.md             # Heartbeat event log
-└── ledger.md          # Persistent project learning journal
+├── ledger.md          # Persistent project learning journal
+├── .flowconfig        # Central config file (autopilot, git control, settings)
+└── .gitcontrol        # Git control settings (backward compat)
 ```
 
 ## Session Start Behaviors
@@ -192,30 +256,23 @@ When a session starts, plan-flow automatically loads context from your project:
 - **Memory** (`flow/memory.md`) — Loads the last 7 days of completed work so context is never lost
 - **Brain** (`flow/brain/index.md`) — Internalizes active features and recent error patterns
 - **Ledger** (`flow/ledger.md`) — Internalizes project-specific lessons learned
+- **Autopilot** (`flow/.flowconfig`) — If `autopilot: true`, activates automatic workflow orchestration
 
 ## Intelligent Learn Skill
 
 The `/learn` skill supports step-by-step teaching. When you run `/learn about <topic>`, it creates a structured curriculum stored as a brain `.md` file. Each step requires your confirmation before progressing, and confirmed steps become learned patterns.
 
-## Project Tasklist
+Commands also recommend `/learn` automatically when:
+- New dependencies are added during execution
+- Non-trivial errors are resolved (3+ attempts)
+- The user corrects the approach
+- A new technology or pattern is introduced
 
-Each project can have a `flow/tasklist.md` with pending tasks. On session start, the tasklist is loaded and you're asked if you want to pick a task. Completed tasks are tracked in project memory.
+## Central Obsidian Vault
 
-## Project Memory
+All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `planflow-ai init` creates a project directory in the vault with symlinks for brain subdirectories and the tasklist. A global tasklist at `~/plan-flow/brain/tasklist.md` aggregates task counts across all projects.
 
-`flow/memory.md` tracks everything completed across sessions. Each entry includes a timestamp, project link, artifact type, file path, and a short summary (max 6 lines). The last 7 days of memory are loaded on every session start, ensuring plan-flow never loses knowledge.
-
-## Heartbeat (Scheduled Automation)
-
-The `flow/heartbeat.md` file works as a cronjob system. Define scheduled tasks and the heartbeat daemon will execute them automatically:
-
-```
-do
-  daily at 10:00 PM - research about topic X, create md files and add to brain
-  daily at 11:00 AM - using flow --enabled, create feature Y, execute, and push to repo
-```
-
-Manage the daemon with `/heartbeat start`, `/heartbeat stop`, and `/heartbeat status`.
+Open `~/plan-flow/brain/` as an Obsidian vault to browse all projects in one graph.
 
 ## Requirements
 
