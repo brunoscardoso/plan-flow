@@ -308,6 +308,16 @@ Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
 
 ---
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
+
+1. **On start**: Add "Discovery: {feature}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Discovery: {feature}" to **Done** with today's date
+3. **Next step**: Add "Create plan for {feature}" to **To Do**
+
+---
+
 ## Learn Recommendations
 
 After discovery completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.

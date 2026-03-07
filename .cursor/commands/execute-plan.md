@@ -396,6 +396,16 @@ Update `flow/brain/features/[feature-name].md` with execution results. If errors
 
 ---
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
+
+1. **On start**: Add "Execute: {feature}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Execute: {feature}" to **Done** with today's date
+3. **Next step**: Add "Review code for {feature}" to **To Do**
+
+---
+
 ## Learn Recommendations
 
 After execution completes (or at the end of each phase), check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.

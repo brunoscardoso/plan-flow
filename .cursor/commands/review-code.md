@@ -260,6 +260,15 @@ Only save if the user approves. Do not re-ask if declined.
 
 ---
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
+
+1. **On start**: Add "Review: {scope}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Review: {scope}" to **Done** with today's date
+
+---
+
 ## Learn Recommendations
 
 After the review completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.

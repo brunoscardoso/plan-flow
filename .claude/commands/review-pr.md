@@ -172,6 +172,15 @@ When executing this command:
 
 ---
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
+
+1. **On start**: Add "Review PR: #{number}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Review PR: #{number}" to **Done** with today's date
+
+---
+
 ## Learn Recommendations
 
 After the PR review completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.

@@ -25,18 +25,25 @@ DESCRIPTION:
   and tasks based on a discovery document or user input.
 
 USAGE:
-  /create-plan <discovery_document>
-  /create-plan <feature_description>
+  /create-plan [flags] <discovery_document>
+  /create-plan [flags] <feature_description>
   /create-plan -help
 
 ARGUMENTS:
   discovery_document   Path to discovery document (recommended)
   feature_description  Direct description of feature to plan (if no discovery)
 
+WORKFLOW FLAGS (optional):
+  -bugfix    Skip the discovery gate requirement. The bug report and user
+             description serve as plan input instead of a discovery document.
+             Use when fixing a bug where formal discovery is unnecessary.
+
+  Without a flag, a discovery document is required (standard behavior).
+
 EXAMPLES:
   /create-plan @flow/discovery/discovery_user_auth_v1.md
   /create-plan "Add dark mode toggle to settings page"
-  /create-plan @flow/contracts/api_contract.md
+  /create-plan -bugfix "Fix login timeout after 30 seconds of inactivity"
 
 OUTPUT:
   Creates: flow/plans/plan_<feature_name>_v<version>.md
@@ -64,18 +71,42 @@ RELATED COMMANDS:
 > - **If YES**: Autopilot is ON. After creating the plan and getting user approval, **auto-proceed** to `/execute-plan` with the plan output. Do NOT wait for manual invocation.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
-| **Discovery Required**   | NEVER create a plan without a discovery document. If none exists, run `/discovery-plan` first. No exceptions. |
+| **Discovery Required**   | NEVER create a plan without a discovery document. If none exists, run `/discovery-plan` first. **Exception**: The `-bugfix` flag bypasses this requirement — the bug report serves as input. |
 | **No Auto-Chaining**     | NEVER auto-invoke /execute-plan - user must invoke it (unless autopilot ON) |
-| **File Only**            | Save the `.md` file and report its path. Do NOT show full content in chat. |
 | **Complete and Stop**    | After presenting results, STOP and wait for user (unless autopilot ON) |
 
 ---
 
 ## Instructions
+
+### Step 0: Parse Workflow Flag
+
+Check if the user input starts with a workflow flag:
+
+| Flag | Behavior Change |
+|------|----------------|
+| `-bugfix` | **Skip the discovery gate** (Step 2). The user's bug description + any diagnostic review serve as plan input. No discovery document required. The plan should focus on: root cause fix, regression prevention, and verification steps. |
+| (none) | Standard behavior — discovery document required |
+
+If a flag is found:
+1. Set the **workflow context** for this execution
+2. Remove the flag from the input (the rest is the user's prompt/reference)
+3. The `-bugfix` flag bypasses the discovery gate in Step 2
+
+If no flag is found: proceed with standard behavior (backward compatible).
+
+---
 
 ### Step 1: Validate Inputs
 
@@ -88,9 +119,13 @@ RELATED COMMANDS:
 
 ---
 
-### Step 2: Validate Discovery Phase Completion (HARD BLOCK)
+### Step 2: Validate Discovery Phase Completion (CONDITIONAL BLOCK)
 
-**A discovery document is REQUIRED before creating any plan. No exceptions.**
+**A discovery document is REQUIRED before creating any plan — unless the `-bugfix` flag is set.**
+
+**If `-bugfix` flag is present**: Skip this step entirely. The user's bug description and any diagnostic review findings serve as plan input. Proceed directly to Step 3.
+
+**If no `-bugfix` flag**:
 
 1. Check user input for a discovery document reference (`@flow/discovery/...`)
 2. If no reference provided, search `flow/discovery/` for a matching discovery document
@@ -108,7 +143,6 @@ RELATED COMMANDS:
 4. If a discovery document IS found: Proceed with plan creation using that document
 
 **Important**: NEVER read or reference files in `flow/archive/` - these are outdated.
-**Important**: NEVER create a plan without a discovery document. This rule has NO exceptions.
 
 ---
 
@@ -135,31 +169,50 @@ See: `.claude/resources/skills/create-plan-skill.md`
 
 ---
 
-### Step 5: Save File and Stop
+### Step 5: Present Results
 
-After the skill completes:
-
-1. **Save the plan document** to `flow/plans/plan_<feature>_v<version>.md`
-2. **Report only the file path** — do NOT display the full plan content in chat
-3. **STOP** — do NOT execute the plan, do NOT offer to build
-
-**Output to the user** (this is the ONLY thing to show):
+After the skill completes, confirm file creation and summarize:
 
 ```markdown
-Plan created.
+Plan Created!
 
-**Created**: `flow/plans/plan_<feature>_v<version>.md`
+**Deliverable**: `flow/plans/plan_<feature>_v<version>.md`
 
-Next: review the file, then run `/execute-plan` when ready.
+**Summary**:
+- X phases created
+- Total complexity: XX/XX
+- Highest complexity: Phase X at Y/10
 ```
 
-⚠️ **CRITICAL**: After saving the file, the command is DONE. Do NOT:
-- Show the full plan content in chat
-- Auto-invoke `/execute-plan`
-- Offer to start building or implementing
-- Show implementation steps or code
+**CRITICAL — Check autopilot mode BEFORE presenting next steps:**
 
-The user will read the `.md` file themselves and decide when to proceed.
+1. **Check if `flow/.autopilot` exists**
+2. **If autopilot is ON**: Do NOT show "Next Steps" or "invoke manually". Instead, use `AskUserQuestion` to ask for plan approval, then **immediately auto-proceed** to `/execute-plan` with the plan file. Do NOT stop. Do NOT wait for the user to manually invoke `/execute-plan`.
+
+```typescript
+// When autopilot is ON, ask for approval then auto-proceed:
+AskUserQuestion({
+  questions: [{
+    question: "Plan is ready. Approve to proceed with execution?",
+    header: "Plan",
+    options: [
+      { label: "Approve and execute", description: "Start executing the plan now" },
+      { label: "Refine first", description: "Let me suggest changes to the plan before executing" }
+    ],
+    multiSelect: false
+  }]
+})
+// If approved → immediately invoke /execute-plan (do NOT stop)
+```
+
+3. **If autopilot is OFF**: Show next steps and stop:
+
+```markdown
+**Next Steps**:
+1. Review the plan above
+2. Request any refinements
+3. When ready, invoke `/execute-plan @flow/plans/plan_<feature>_v<version>.md`
+```
 
 ---
 
@@ -199,10 +252,9 @@ The user will read the `.md` file themselves and decide when to proceed.
                     |
                     v
 +------------------------------------------+
-| Step 5: Save File and Stop               |
-| - Save .md file to flow/plans/           |
-| - Report file path only                  |
-| - STOP (no execute, no build)            |
+| Step 5: Present Results                  |
+| - Show summary                           |
+| - Link to /execute-plan command          |
 +------------------------------------------+
 ```
 
@@ -285,3 +337,63 @@ Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-t
 1. **On start**: Add "Plan: {feature}" to **In Progress** (or move it from To Do if it already exists)
 2. **On complete**: Move "Plan: {feature}" to **Done** with today's date
 3. **Next step**: Add "Execute plan for {feature}" to **To Do**
+
+---
+
+## Compaction Suggestion
+
+After plan creation completes, suggest context cleanup:
+
+> Plan created. Consider running `/compact` before execution to maximize available context for the implementation phases.
+
+Only suggest if the plan has > 3 phases. Skip if autopilot is ON.
+
+---
+
+## Brain Capture
+
+After plan creation completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: create-plan
+feature: [feature name]
+status: completed
+data:
+  phase_count: [number of phases]
+  total_complexity: [sum of complexity scores]
+  highest_phase: [phase name with highest score]
+  discovery_link: [[discovery-feature-name]]
+  plan_doc: [path to plan document]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` with plan details and link to discovery entry.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Handoff
+
+### Consumption
+
+Before creating the plan, check for `flow/handoffs/handoff_<feature>_discovery_to_plan.md` (or `handoff_<feature>_review_to_plan.md` for bugfix workflow). If it exists, read it silently and use its focus guidance to inform plan structure. If it doesn't exist, proceed normally (backward compatible).
+
+### Production
+
+After the plan is created, produce a handoff for the execution step.
+
+**Output**: `flow/handoffs/handoff_<feature>_plan_to_execute.md`
+
+Include: feature name, workflow type, phase count, total complexity, highest complexity phase, plan and discovery paths, and focus guidance for execution.
