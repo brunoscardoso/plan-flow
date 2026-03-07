@@ -140,6 +140,53 @@ Please run this command and let me know when it's complete.
 
 ---
 
+## Git Control
+
+On execution start, check if `flow/.gitcontrol` exists. If it does, read its settings and apply them during execution.
+
+### Git Control Settings
+
+```yaml
+# flow/.gitcontrol
+commit: true     # Auto-commit after each completed phase
+push: true       # Auto-push after all phases complete (requires commit: true)
+branch: develop  # Target branch (optional, defaults to current branch)
+```
+
+### Git Behavior During Execution
+
+| Setting | Behavior |
+|---------|----------|
+| `commit: true` | After each phase completes successfully, run `git add -A && git commit -m "Phase N: <phase name> — <feature>"` |
+| `commit: false` or no `.gitcontrol` | No automatic git operations (default behavior) |
+| `push: true` | After ALL phases complete AND build/test pass, run `git push origin <branch>` |
+| `push: false` or not set | No automatic push |
+| `branch: <name>` | Use this branch for push (default: current branch) |
+
+### Git Safety Rules
+
+| Rule | Description |
+|------|-------------|
+| **Commit only on success** | Only commit after a phase completes successfully. Never commit broken code. |
+| **Push only after build+test** | Push only after `npm run build && npm run test` pass at the very end. |
+| **No force push** | NEVER use `--force`. If push fails, stop and ask the user. |
+| **Commit message format** | `Phase N: <phase name> — <feature>` (e.g., "Phase 2: API endpoints — user-auth") |
+| **Final commit** | After build+test pass, make one final commit: `Complete: <feature> — all phases done, build passing` |
+| **Include flow artifacts** | Commits should include updated plan files with progress markers |
+
+### Example Flow with `commit=true push=true`
+
+```
+Phase 1: Setup types → completes → git commit "Phase 1: Setup types — user-auth"
+Phase 2: API endpoints → completes → git commit "Phase 2: API endpoints — user-auth"
+Phase 3: Frontend UI → completes → git commit "Phase 3: Frontend UI — user-auth"
+Phase 4: Tests → completes → git commit "Phase 4: Tests — user-auth"
+Build + Test → pass → git commit "Complete: user-auth — all phases done, build passing"
+                     → git push origin development
+```
+
+---
+
 ## Instructions
 
 ### Step 1: Validate Inputs

@@ -91,11 +91,14 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 ### Step 4: Execute Plan
 
 1. **Read** the file `.claude/commands/execute-plan.md` to load execution context
-2. Execute the plan following complexity-based grouping strategy
-3. Update the plan file with progress
-4. Run build + test verification at the end
-5. Write transition summary
-6. **Auto-proceed** to Step 5
+2. **Check** if `flow/.gitcontrol` exists — if yes, apply git control settings during execution
+3. Execute the plan following complexity-based grouping strategy
+4. Update the plan file with progress
+5. If `commit: true` in `.gitcontrol`: auto-commit after each completed phase
+6. Run build + test verification at the end
+7. If `push: true` in `.gitcontrol` and build+test pass: auto-push
+8. Write transition summary
+9. **Auto-proceed** to Step 5
 
 ### Step 5: Review Code
 

@@ -159,6 +159,41 @@ Append this to the plan file under `## Verification Report`.
 
 ---
 
+## Git Control
+
+On execution start, check if `flow/.gitcontrol` exists. If it does, read its settings and apply them during execution.
+
+### Git Control Settings
+
+```yaml
+# flow/.gitcontrol
+commit: true     # Auto-commit after each completed phase
+push: true       # Auto-push after all phases complete (requires commit: true)
+branch: develop  # Target branch (optional, defaults to current branch)
+```
+
+### Git Behavior During Execution
+
+| Setting | Behavior |
+|---------|----------|
+| `commit: true` | After each phase completes successfully, run `git add -A && git commit -m "Phase N: <phase name> — <feature>"` |
+| `commit: false` or no `.gitcontrol` | No automatic git operations (default behavior) |
+| `push: true` | After ALL phases complete AND build/test pass, run `git push origin <branch>` |
+| `push: false` or not set | No automatic push |
+| `branch: <name>` | Use this branch for push (default: current branch) |
+
+### Git Safety Rules
+
+| Rule | Description |
+|------|-------------|
+| **Commit only on success** | Only commit after a phase completes successfully. Never commit broken code. |
+| **Push only after build+test** | Push only after build and test pass at the very end. |
+| **No force push** | NEVER use `--force`. If push fails, stop and ask the user. |
+| **Commit message format** | `Phase N: <phase name> — <feature>` |
+| **Final commit** | After build+test pass: `Complete: <feature> — all phases done, build passing` |
+
+---
+
 ## Instructions
 
 ### Step 1: Validate Inputs
