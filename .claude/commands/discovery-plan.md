@@ -345,3 +345,38 @@ These are optional but recommended to reduce implementation friction.
 **Detection**: Compare proposed technologies against `flow/references/tech-foundation.md` and existing `package.json` / `pyproject.toml` dependencies. If a technology is not in the current stack, flag it.
 
 **Presentation**: Include the section in the discovery document itself (not as a chat message). This ensures the learning suggestion persists and is visible when the user reviews the document.
+
+---
+
+## Brain Capture
+
+After discovery completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: discovery
+feature: [feature name from discovery]
+status: completed
+data:
+  user_prompt: [original user request]
+  questions_asked: [count]
+  questions_answered: [count]
+  requirements_fr: [count of functional requirements]
+  requirements_nfr: [count of non-functional requirements]
+  discovery_doc: [path to discovery document]
+-->
+```
+
+Write/update `flow/brain/features/[feature-name].md` with discovery context and update `flow/brain/index.md`.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.

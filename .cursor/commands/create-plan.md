@@ -340,6 +340,19 @@ Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-t
 
 ---
 
+## Learn Recommendations
+
+After plan creation completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
+
+**Plan-specific checks**:
+- Does the plan introduce **new technologies** not in the current tech stack?
+- Are there phases that require **unfamiliar APIs or services**?
+- Did the discovery document flag any "Suggested Learning" topics?
+
+Present recommendations after the plan summary.
+
+---
+
 ## Compaction Suggestion
 
 After plan creation completes, suggest context cleanup:

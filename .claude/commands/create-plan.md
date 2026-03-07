@@ -285,3 +285,50 @@ Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-t
 1. **On start**: Add "Plan: {feature}" to **In Progress** (or move it from To Do if it already exists)
 2. **On complete**: Move "Plan: {feature}" to **Done** with today's date
 3. **Next step**: Add "Execute plan for {feature}" to **To Do**
+
+---
+
+## Learn Recommendations
+
+After plan creation completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
+
+**Plan-specific checks**:
+- Does the plan introduce **new technologies** not in the current tech stack?
+- Are there phases that require **unfamiliar APIs or services**?
+- Did the discovery document flag any "Suggested Learning" topics?
+
+Present recommendations after the plan summary.
+
+---
+
+## Brain Capture
+
+After plan creation completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: create-plan
+feature: [feature name]
+status: completed
+data:
+  phase_count: [number of phases]
+  total_complexity: [sum of complexity scores]
+  highest_phase: [phase name with highest score]
+  discovery_link: [[discovery-feature-name]]
+  plan_doc: [path to plan document]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` with plan details and link to discovery entry.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.

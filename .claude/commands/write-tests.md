@@ -268,6 +268,19 @@ Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-t
 
 ---
 
+## Learn Recommendations
+
+After test writing completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
+
+**Test-specific checks**:
+- Was a **new testing framework** or library introduced (e.g., switching from Jest to Vitest)?
+- Were **non-trivial test failures** resolved after 3+ attempts?
+- Were **new mocking patterns** or testing utilities added?
+
+Present recommendations at the end of the test writing summary.
+
+---
+
 ## Brain Capture
 
 After test writing completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.

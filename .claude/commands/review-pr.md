@@ -203,3 +203,38 @@ The following new technologies/patterns were detected in this PR:
 
 Run any of these to build structured understanding before or after merging.
 ```
+
+---
+
+## Brain Capture
+
+After PR review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: review-pr
+feature: [PR title or scope]
+status: completed
+data:
+  pr_number: [PR number]
+  pr_platform: [github/azure-devops]
+  issues_found: [total count]
+  review_outcome: [approved/changes-requested/commented]
+  severity_critical: [count]
+  severity_warning: [count]
+-->
+```
+
+Log to `flow/brain/sessions/YYYY-MM-DD.md` with PR review summary.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.
