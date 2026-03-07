@@ -33,6 +33,14 @@ The heartbeat file contains task entries in markdown format:
 - **Command**: {command-to-execute}
 - **Enabled**: {true|false}
 - **Description**: {what this task does}
+
+### {scheduled-tasklist-item}
+- **Schedule**: in 1 hour
+- **Command**: execute tasklist item "Feature xyz"
+- **Enabled**: true
+- **Description**: Scheduled from tasklist — Feature xyz
+- **One-Shot**: true
+- **Tasklist Link**: [[tasklist.md#Feature xyz]]
 ```
 
 ---
@@ -47,6 +55,8 @@ Human-readable schedule expressions:
 | `every {N} hours` | `every 6 hours` | Run every 6 hours from daemon start |
 | `every {N} minutes` | `every 30 minutes` | Run every 30 minutes from daemon start |
 | `weekly on {day} at {HH:MM}` | `weekly on Monday at 9:00 AM` | Run weekly on Monday at 9 AM |
+| `in {N} hours` | `in 2 hours` | Run once, N hours from now (one-shot) |
+| `in {N} minutes` | `in 30 minutes` | Run once, N minutes from now (one-shot) |
 
 ### Schedule Rules
 
@@ -77,10 +87,15 @@ The heartbeat daemon is a detached Node.js process that:
 | `npx plan-flow heartbeat stop` | Stop the daemon (via PID file) |
 | `npx plan-flow heartbeat status` | Show daemon status (running/stopped, PID, uptime) |
 
+### Auto-Start on Init
+
+The daemon starts automatically when `plan-flow init` runs, if `flow/heartbeat.md` exists. This means scheduled tasks begin working immediately after installation — no manual `heartbeat start` needed.
+
 ### Process Management
 
 - **PID File**: `flow/.heartbeat.pid` stores the daemon PID
 - **Start**: Spawns a detached child process, writes PID file
+- **Auto-start**: Runs during `plan-flow init` if heartbeat.md exists
 - **Stop**: Reads PID file, sends SIGTERM, removes PID file
 - **Status**: Checks if PID in file is actually running
 - **Stale PID**: If PID file exists but process is not running, clean up and report stopped
@@ -105,6 +120,37 @@ The daemon handles:
 - Stdout/stderr are logged to `flow/.heartbeat.log`
 - Tasks do not run concurrently — a task waits for the previous invocation to complete before starting again
 
+### Retry on Active Session
+
+When a task fails because a Claude Code session is already active (error: "cannot be launched inside another Claude Code session"), the daemon does **not** mark the task as permanently failed. Instead:
+
+1. **Deferred retry**: The task is rescheduled to retry after 60 seconds
+2. **Max retries**: Up to 5 retry attempts per task. After 5 failures, the task is logged as failed and retries stop
+3. **Mutex respected**: Retries still honor the `taskRunning` mutex — if another task is running when the retry fires, it is skipped (not counted as a retry attempt)
+4. **One-shot tasks**: Retry logic applies to one-shot tasks as well. The task is only disabled after successful execution, not after a session-active deferral
+5. **Retry reset**: The retry counter resets to zero after a successful execution
+6. **Logging**: Each deferral logs `Task "{name}" deferred — Claude Code session active. Will retry in 60s (attempt N/5)`
+
+---
+
+## One-Shot Tasks
+
+One-shot tasks run once and auto-disable. They are used for scheduled tasklist items.
+
+### Behavior
+
+1. **Detection**: If a task has `One-Shot: true` in its definition, it is a one-shot task
+2. **Execution**: After the task executes successfully, set `Enabled: false` in `flow/heartbeat.md`
+3. **Tasklist update**: If the task has a `Tasklist Link`, update the linked item in `flow/tasklist.md` — move from **To Do** to **Done** with today's date
+4. **Relative schedules**: `in {N} hours/minutes` schedules are calculated from the time the task was added, not from daemon start
+
+### Tasklist Integration
+
+Tasks created from the tasklist have a `Tasklist Link` field that points back to the tasklist item. This enables:
+- Bidirectional navigation in Obsidian via `[[]]` links
+- Automatic status sync between heartbeat and tasklist
+- Clean up after one-shot execution
+
 ---
 
 ## Rules
@@ -115,3 +161,4 @@ The daemon handles:
 4. **File-based config**: All configuration lives in `flow/heartbeat.md` — no CLI flags for task config
 5. **Hot reload**: Changes to `flow/heartbeat.md` are picked up automatically without restart
 6. **Log rotation**: Keep `flow/.heartbeat.log` under 1000 lines by truncating oldest entries
+7. **One-shot cleanup**: After a one-shot task executes, auto-disable it and update the linked tasklist item

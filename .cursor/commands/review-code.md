@@ -23,18 +23,30 @@ DESCRIPTION:
   practices. Generates a detailed review document.
 
 USAGE:
-  /review-code [file_path] [--scope <staged|unstaged>]
+  /review-code [flags] [file_path] [--scope <staged|unstaged>]
   /review-code -help
 
 ARGUMENTS:
   file_path   Optional. Specific file to review (reviews all if not provided)
   --scope     Optional. "staged" or "unstaged" (reviews both if not provided)
 
+WORKFLOW FLAGS (optional):
+  -bugfix     Diagnostic review: focus on root cause analysis, broken behavior,
+              affected files. Use when investigating a bug.
+  -security   Security audit: focus on vulnerabilities, auth flows, data handling,
+              input validation. Use for security assessments.
+  -refactor   Baseline review: focus on current patterns, code smells, quality
+              metrics. Use before refactoring to document the current state.
+
+  Without a flag, performs a standard review (general quality, pattern compliance).
+
 EXAMPLES:
-  /review-code                              # Review all changes
+  /review-code                              # Standard review of all changes
   /review-code --scope staged               # Review only staged changes
   /review-code src/services/userService.ts  # Review specific file
-  /review-code src/api --scope unstaged     # Review unstaged in directory
+  /review-code -bugfix login timeout issue  # Diagnostic review for a bug
+  /review-code -security auth module        # Security audit of auth code
+  /review-code -refactor src/utils          # Baseline review before refactoring
 
 OUTPUT:
   Creates: flow/reviewed-code/<filename>.md
@@ -68,6 +80,13 @@ RELATED COMMANDS:
 > - **If YES**: Autopilot is ON. After completing the review, **auto-archive** the discovery and plan documents to `flow/archive/`, present the completion summary, and prompt for context cleanup (`/clear`).
 > - **If NO**: Follow the standard rules below (stop and wait for user).
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -78,6 +97,26 @@ RELATED COMMANDS:
 ---
 
 ## Instructions
+
+### Step 0: Parse Workflow Flag
+
+Check if the user input starts with a workflow flag:
+
+| Flag | Review Variant | Focus |
+|------|---------------|-------|
+| `-bugfix` | Diagnostic | Diagnose root cause, identify broken behavior, affected files, reproduction steps |
+| `-security` | Security audit | Vulnerabilities, auth flows, data handling, input validation, secret exposure |
+| `-refactor` | Baseline | Current patterns, code smells, quality metrics, complexity hotspots |
+| (none) | Standard | General quality, pattern compliance |
+
+If a flag is found:
+1. Set the **review variant** for this execution
+2. Remove the flag from the input (the rest is the user's prompt/file path)
+3. The review variant affects the focus areas in Step 3
+
+If no flag is found: proceed with standard review (backward compatible).
+
+---
 
 ### Step 1: Validate Inputs
 
@@ -99,6 +138,19 @@ The skill will:
 3. Find similar implementations in codebase
 4. Compare patterns against existing code
 5. Generate review document
+
+**Review Variant Focus** (from Step 0):
+- **Diagnostic** (`-bugfix`): Prioritize identifying what's broken, root cause analysis, affected code paths, and potential regression points. The review output should include a "Root Cause Analysis" section.
+- **Security audit** (`-security`): Prioritize OWASP top 10 checks, auth flow analysis, data handling, input validation, secret exposure, and dependency vulnerabilities. The review output should include a "Security Findings" section with severity ratings.
+- **Baseline** (`-refactor`): Prioritize documenting current patterns, code smells, complexity metrics, duplication, and coupling. The review output should include a "Baseline Metrics" section for before/after comparison.
+- **Standard** (no flag): General quality, pattern compliance, potential bugs, performance concerns.
+
+**Confidence-Based Filtering Rules**:
+- Each finding must include a **Confidence** percentage (e.g., 85%)
+- **Only include findings with >80% confidence** in the main Findings section
+- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
+- Findings below 80% confidence go in a collapsed "Low-Confidence Notes" section
+- Include an **Approval Recommendation**: APPROVE (no critical/major), WARNING (major only), BLOCK (critical found)
 
 See: `.claude/resources/skills/review-code-skill.md`
 
@@ -173,6 +225,41 @@ When executing this command:
 
 ---
 
+## Brain Capture
+
+After code review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+
+**Capture the following**:
+
+```
+<!-- brain-capture
+skill: review-code
+feature: [feature or scope reviewed]
+status: completed
+data:
+  files_reviewed: [count]
+  issues_found: [total count]
+  severity_critical: [count]
+  severity_warning: [count]
+  severity_info: [count]
+  pattern_conflicts: [list of pattern conflicts found, if any]
+-->
+```
+
+Update `flow/brain/features/[feature-name].md` if reviewing a known feature. Log to `flow/brain/sessions/YYYY-MM-DD.md` otherwise.
+
+---
+
+## Resource Capture
+
+During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
+
+At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
+
+Only save if the user approves. Do not re-ask if declined.
+
+---
+
 ## Tasklist Updates
 
 Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
@@ -206,35 +293,16 @@ Run any of these to build structured understanding before or after merging.
 
 ---
 
-## Brain Capture
+## Handoff
 
-After code review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
+### Consumption — Plan-Aware Review
 
-**Capture the following**:
+Before starting the review, check for `flow/handoffs/handoff_<feature>_execute_to_review.md`. If it exists, enable **plan-aware review** — read the Plan Alignment Data and add a "Plan Alignment" section to the review output showing scope drift (unplanned file changes) and missing changes (planned files not modified). If it doesn't exist, proceed with standard review (backward compatible).
 
-```
-<!-- brain-capture
-skill: review-code
-feature: [feature or scope reviewed]
-status: completed
-data:
-  files_reviewed: [count]
-  issues_found: [total count]
-  severity_critical: [count]
-  severity_warning: [count]
-  severity_info: [count]
-  pattern_conflicts: [list of pattern conflicts found, if any]
--->
-```
+### Production — Review Variants
 
-Update `flow/brain/features/[feature-name].md` if reviewing a known feature. Log to `flow/brain/sessions/YYYY-MM-DD.md` otherwise.
+When review-code runs as a workflow's **first step** (bugfix diagnostic, refactor baseline, security audit), produce a handoff for the next step:
+- Bugfix: `flow/handoffs/handoff_<feature>_review_to_plan.md`
+- Refactor/Security: `flow/handoffs/handoff_<feature>_review_to_discovery.md`
 
----
-
-## Resource Capture
-
-During this skill's execution, watch for valuable reference materials worth preserving. See `.claude/resources/core/resource-capture.md` for capture rules, file format, and naming conventions.
-
-At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
-
-Only save if the user approves. Do not re-ask if declined.
+Include: feature name, workflow type, review variant, key findings, affected files, and focus guidance.

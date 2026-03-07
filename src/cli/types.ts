@@ -31,7 +31,7 @@ export interface InitResult {
 export type Platform = 'claude' | 'cursor' | 'openclaw' | 'clawhub' | 'codex';
 
 export interface ScheduleConfig {
-  type: 'daily' | 'interval' | 'weekly';
+  type: 'daily' | 'interval' | 'weekly' | 'once';
   hour?: number;
   minute?: number;
   intervalMs?: number;
@@ -45,6 +45,8 @@ export interface HeartbeatTask {
   command: string;
   enabled: boolean;
   description: string;
+  oneShot?: boolean;
+  tasklistLink?: string;
 }
 
 export interface HeartbeatOptions {

@@ -20,7 +20,7 @@ Use slash commands to invoke skills:
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
-| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
+| `/flow` | Configure plan-flow settings — autopilot, git control, runtime options (`key=value` syntax) |
 
 ## Workflow
 
@@ -68,7 +68,9 @@ flow/
 ├── memory.md          # Persistent artifact tracker (completed skill executions)
 ├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
 ├── log.md             # Heartbeat log of important events
-└── ledger.md          # Persistent project learning journal
+├── ledger.md          # Persistent project learning journal
+├── .flowconfig        # Central config file (autopilot, git control, settings)
+└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 
 ## Session Start Behaviors
@@ -77,7 +79,7 @@ flow/
 - **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Project Tasklist**: If `flow/tasklist.md` exists, read it silently and present a brief summary of active tasks. See `.claude/resources/core/project-tasklist.md` for full rules.
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
-- **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
+- **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Rules
 
@@ -171,7 +173,7 @@ npm run test
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
-| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
+| `/flow` | Configure plan-flow settings — autopilot, git control, runtime options (`key=value` syntax) |
 
 ## Recommended Workflow
 
@@ -187,7 +189,7 @@ npm run test
 - **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Project Tasklist**: If `flow/tasklist.md` exists, read it silently and present a brief summary of active tasks. See `.claude/resources/core/project-tasklist.md` for full rules.
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
-- **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
+- **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Critical Rules
 
@@ -211,7 +213,9 @@ flow/
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
-└── ledger.md          # Persistent project learning journal
+├── ledger.md          # Persistent project learning journal
+├── .flowconfig        # Central config file (autopilot, git control, settings)
+└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 
 ## Central Vault

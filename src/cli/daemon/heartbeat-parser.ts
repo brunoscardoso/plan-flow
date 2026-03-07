@@ -24,6 +24,8 @@ const DAY_MAP: Record<string, number> = {
  *   "every 6 hours"
  *   "every 30 minutes"
  *   "weekly on Monday at 9:00 AM"
+ *   "in 2 hours" (one-shot)
+ *   "in 30 minutes" (one-shot)
  */
 export function parseSchedule(schedule: string): ScheduleConfig | null {
   const s = schedule.trim().toLowerCase();
@@ -55,6 +57,20 @@ export function parseSchedule(schedule: string): ScheduleConfig | null {
   if (minutesMatch) {
     const n = parseInt(minutesMatch[1], 10);
     return { type: 'interval', intervalMs: n * 60 * 1000 };
+  }
+
+  // in N hours (one-shot)
+  const inHoursMatch = s.match(/^in\s+(\d+)\s+hours?$/);
+  if (inHoursMatch) {
+    const n = parseInt(inHoursMatch[1], 10);
+    return { type: 'once', intervalMs: n * 60 * 60 * 1000 };
+  }
+
+  // in N minutes (one-shot)
+  const inMinutesMatch = s.match(/^in\s+(\d+)\s+minutes?$/);
+  if (inMinutesMatch) {
+    const n = parseInt(inMinutesMatch[1], 10);
+    return { type: 'once', intervalMs: n * 60 * 1000 };
   }
 
   // weekly on {day} at HH:MM AM/PM
@@ -129,6 +145,18 @@ export function parseHeartbeatFile(content: string): HeartbeatTask[] {
       currentTask.description = descMatch[1].trim();
       continue;
     }
+
+    const oneShotMatch = trimmed.match(/^\-\s+\*\*One-Shot\*\*:\s*(.+)$/);
+    if (oneShotMatch) {
+      currentTask.oneShot = oneShotMatch[1].trim().toLowerCase() === 'true';
+      continue;
+    }
+
+    const tasklistLinkMatch = trimmed.match(/^\-\s+\*\*Tasklist Link\*\*:\s*(.+)$/);
+    if (tasklistLinkMatch) {
+      currentTask.tasklistLink = tasklistLinkMatch[1].trim();
+      continue;
+    }
   }
 
   // Save the last task
@@ -153,5 +181,7 @@ function finalizeTask(partial: Partial<HeartbeatTask>): HeartbeatTask | null {
     command: partial.command,
     enabled: partial.enabled ?? true,
     description: partial.description ?? '',
+    oneShot: partial.oneShot,
+    tasklistLink: partial.tasklistLink,
   };
 }

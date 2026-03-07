@@ -20,6 +20,11 @@ const logPath = join(target, 'flow', '.heartbeat.log');
 const activeTimers: NodeJS.Timeout[] = [];
 let taskRunning = false;
 
+const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 60_000;
+const retryCountMap = new Map<string, number>();
+
 function log(message: string): void {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] ${message}\n`;
@@ -77,6 +82,11 @@ function msUntilNextOccurrence(config: ScheduleConfig): number {
     return target.getTime() - now.getTime();
   }
 
+  // once — run after delay
+  if (config.type === 'once') {
+    return config.intervalMs!;
+  }
+
   // interval — start immediately
   return 0;
 }
@@ -110,6 +120,12 @@ function executeTask(task: HeartbeatTask): void {
     taskRunning = false;
     if (code === 0) {
       log(`Task "${task.name}" completed successfully`);
+      retryCountMap.delete(task.name);
+      if (task.oneShot) {
+        disableOneShotTask(task.name);
+      }
+    } else if (stderr.includes(ACTIVE_SESSION_ERROR)) {
+      scheduleRetry(task);
     } else {
       log(`Task "${task.name}" failed with code ${code}`);
       if (stderr) log(`  stderr: ${stderr.slice(0, 500)}`);
@@ -123,6 +139,40 @@ function executeTask(task: HeartbeatTask): void {
   });
 }
 
+function scheduleRetry(task: HeartbeatTask): void {
+  const count = (retryCountMap.get(task.name) ?? 0) + 1;
+  retryCountMap.set(task.name, count);
+
+  if (count > MAX_RETRIES) {
+    log(`Task "${task.name}" failed — exhausted ${MAX_RETRIES} retries (Claude Code session kept active)`);
+    retryCountMap.delete(task.name);
+    return;
+  }
+
+  log(`Task "${task.name}" deferred — Claude Code session active. Will retry in 60s (attempt ${count}/${MAX_RETRIES})`);
+  const timer = setTimeout(() => executeTask(task), RETRY_DELAY_MS);
+  activeTimers.push(timer);
+}
+
+function disableOneShotTask(taskName: string): void {
+  try {
+    if (!existsSync(heartbeatPath)) return;
+    let content = readFileSync(heartbeatPath, 'utf-8');
+    // Find the task section and replace Enabled: true with Enabled: false
+    const taskPattern = new RegExp(
+      `(###\\s+${taskName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?\\*\\*Enabled\\*\\*:\\s*)true`,
+      'i'
+    );
+    const updated = content.replace(taskPattern, '$1false');
+    if (updated !== content) {
+      writeFileSync(heartbeatPath, updated, 'utf-8');
+      log(`One-shot task "${taskName}" disabled after execution`);
+    }
+  } catch (err) {
+    log(`Failed to disable one-shot task "${taskName}": ${(err as Error).message}`);
+  }
+}
+
 function scheduleTask(task: HeartbeatTask): void {
   if (!task.enabled) {
     log(`Task "${task.name}" is disabled, skipping`);
@@ -130,6 +180,14 @@ function scheduleTask(task: HeartbeatTask): void {
   }
 
   const config = task.scheduleConfig;
+
+  if (config.type === 'once') {
+    const ms = config.intervalMs!;
+    log(`Scheduling one-shot "${task.name}" — runs in ${Math.round(ms / 1000)}s`);
+    const timer = setTimeout(() => executeTask(task), ms);
+    activeTimers.push(timer);
+    return;
+  }
 
   if (config.type === 'interval') {
     log(`Scheduling "${task.name}" every ${config.intervalMs! / 1000}s`);

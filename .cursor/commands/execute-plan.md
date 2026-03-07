@@ -49,7 +49,7 @@ WORKFLOW:
      - Presents phase details for approval
      - Implements after approval
      - Updates progress in plan file
-  4. Runs npm run build && npm run test (ONLY at the end)
+  4. Runs build and test verification using detected language commands (ONLY at the end)
   5. Auto-archives plan and discovery to flow/archive/
 
 EXECUTION STRATEGIES:
@@ -78,6 +78,13 @@ RELATED COMMANDS:
 > Before proceeding, check if `flow/.autopilot` exists.
 > - **If YES**: Autopilot is ON. After completing execution (build + test pass), **auto-proceed** to `/review-code`. Do NOT stop and wait.
 > - **If NO**: Follow the standard rules below (stop and wait for user).
+
+> **MODE: Dev**
+> Code first, test after. Prefer Edit/Write/Bash tools. Run build/test after changes.
+> Move efficiently. Verify with tests, not exploration.
+
+> **AGENT_PROFILE: full-access**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
 
 ## Critical Rules
 
@@ -134,9 +141,21 @@ Please run this command and let me know when it's complete.
 
 ## CRITICAL RULE: Build Verification ONLY at the End
 
-**DO NOT run `npm run build` after each phase or group.**
+**DO NOT run the project's build command after each phase or group.**
 
-**`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+**Build and test commands MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.** Use `.claude/resources/core/tech-detection.md` to determine the correct commands for the project's language.
+
+**Structured Verification Format**: When running final verification, output:
+
+```
+VERIFICATION: [PASS/FAIL]
+Build:    [OK/FAIL - details]
+Types:    [OK/X errors]
+Tests:    [X/Y passed]
+Ready for PR: [YES/NO]
+```
+
+Append this to the plan file under `## Verification Report`.
 
 ---
 
@@ -168,22 +187,10 @@ branch: develop  # Target branch (optional, defaults to current branch)
 | Rule | Description |
 |------|-------------|
 | **Commit only on success** | Only commit after a phase completes successfully. Never commit broken code. |
-| **Push only after build+test** | Push only after `npm run build && npm run test` pass at the very end. |
+| **Push only after build+test** | Push only after build and test pass at the very end. |
 | **No force push** | NEVER use `--force`. If push fails, stop and ask the user. |
-| **Commit message format** | `Phase N: <phase name> — <feature>` (e.g., "Phase 2: API endpoints — user-auth") |
-| **Final commit** | After build+test pass, make one final commit: `Complete: <feature> — all phases done, build passing` |
-| **Include flow artifacts** | Commits should include updated plan files with progress markers |
-
-### Example Flow with `commit=true push=true`
-
-```
-Phase 1: Setup types → completes → git commit "Phase 1: Setup types — user-auth"
-Phase 2: API endpoints → completes → git commit "Phase 2: API endpoints — user-auth"
-Phase 3: Frontend UI → completes → git commit "Phase 3: Frontend UI — user-auth"
-Phase 4: Tests → completes → git commit "Phase 4: Tests — user-auth"
-Build + Test → pass → git commit "Complete: user-auth — all phases done, build passing"
-                     → git push origin development
-```
+| **Commit message format** | `Phase N: <phase name> — <feature>` |
+| **Final commit** | After build+test pass: `Complete: <feature> — all phases done, build passing` |
 
 ---
 
@@ -352,11 +359,37 @@ When executing this command:
 | `resources/core/_index.md`    | Index of core rules with reference codes |
 | `resources/tools/_index.md`   | Index of tools with reference codes |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
+| `core/tech-detection.md`  | Language-adaptive build/test commands |
 | `plans-patterns.md`       | Rules and patterns for plans      |
 | `complexity-scoring.md`   | Complexity scoring system         |
 | `plan-mode-tool.md`       | Plan mode switching instructions  |
 | `/create-plan` command     | Create a plan first               |
 | `/discovery-plan` command  | Run discovery before planning     |
+
+---
+
+## Cleanup Pass (De-Sloppify)
+
+After ALL phases complete and build/tests pass, run an automatic cleanup pass to remove development artifacts. This runs before code review (in autopilot) or before archive.
+
+### Target Patterns (ONLY remove these)
+
+1. **Debug statements**: `console.log`, `console.debug`, `console.warn` used for debugging (not intentional application logging)
+2. **Commented-out code**: Code blocks that are commented out (not documentation comments or TODO/FIXME markers)
+3. **Language-behavior tests**: Test assertions that verify language or framework behavior rather than business logic (e.g., testing that `typeof` returns expected values, testing that `Array.map` works)
+4. **Redundant type checks**: Runtime type checks that duplicate compile-time TypeScript guarantees (e.g., `if (typeof x === 'string')` when `x` is already typed as `string`)
+5. **Unused imports**: Import statements added during development that are no longer referenced
+
+### Safety Protocol
+
+1. Make all cleanup changes
+2. Run the full test suite (using the detected test command)
+3. **If ANY test fails** → revert ALL cleanup changes and report: "Cleanup reverted — {N} test(s) failed after removing {description}"
+4. **If all tests pass** → report: "Cleanup: removed {X} debug statements, {Y} commented blocks, {Z} redundant tests. All tests passing."
+
+### Skip Option
+
+The cleanup pass runs by default but can be skipped. If the user requests skipping, proceed directly to archive/review.
 
 ---
 
@@ -430,3 +463,18 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Handoff
+
+### Consumption
+
+Before starting execution, check for `flow/handoffs/handoff_<feature>_plan_to_execute.md`. If it exists, read it silently and use its focus guidance to prioritize execution. If it doesn't exist, proceed normally (backward compatible).
+
+### Production
+
+After ALL phases complete and build/test verification passes, produce a handoff for the review step.
+
+**Output**: `flow/handoffs/handoff_<feature>_execute_to_review.md`
+
+Include: feature name, workflow type, phases completed, build/test status, plan path, and **Plan Alignment Data** — list of planned files (from plan tasks) vs actually modified files (from `git diff --name-only`), noting scope drift and missing changes.

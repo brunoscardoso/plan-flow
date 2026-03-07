@@ -65,6 +65,13 @@ RELATED COMMANDS:
 
 ---
 
+> **MODE: Research**
+> Explore before concluding. Read 3x more than you write. Prefer Read/Grep/Glob/WebSearch tools.
+> Ask clarifying questions when uncertain. Don't jump to implementation.
+
+> **AGENT_PROFILE: read-only**
+> See `.claude/resources/core/agent-profiles.md` for tool access rules.
+
 ## Critical Rules
 
 | Rule                     | Description                                              |
@@ -96,6 +103,13 @@ The skill will:
 3. Load review patterns
 4. Analyze code changes
 5. Generate review document
+
+**Confidence-Based Filtering Rules**:
+- Each finding must include a **Confidence** percentage (e.g., 85%)
+- **Only include findings with >80% confidence** in the main Findings section
+- **Consolidate similar findings**: Group by issue type + same/related files (e.g., "5 functions missing error handling" instead of 5 separate findings)
+- Findings below 80% confidence go in a collapsed "Low-Confidence Notes" section
+- Include an **Approval Recommendation**: APPROVE (no critical/major), WARNING (major only), BLOCK (critical found)
 
 See: `.claude/resources/skills/review-pr-skill.md`
 
@@ -172,40 +186,6 @@ When executing this command:
 
 ---
 
-## Tasklist Updates
-
-Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
-
-1. **On start**: Add "Review PR: #{number}" to **In Progress** (or move it from To Do if it already exists)
-2. **On complete**: Move "Review PR: #{number}" to **Done** with today's date
-
----
-
-## Learn Recommendations
-
-After the PR review completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
-
-**PR review-specific checks** (scan the diff for):
-- **New imports** from packages not previously used in the project
-- **Pattern changes** (different state management, different API patterns, new testing approaches)
-- **New configuration files** for tools not previously in the project (Docker, CI/CD, etc.)
-- **Framework migrations** (major version upgrades, framework switches)
-
-Present recommendations at the end of the review document, after the summary:
-
-```markdown
-## Learn Opportunities
-
-The following new technologies/patterns were detected in this PR:
-
-- `/learn zustand` — New state management library introduced (replaces Redux)
-- `/learn docker` — Docker configuration added to the project for the first time
-
-Run any of these to build structured understanding before or after merging.
-```
-
----
-
 ## Brain Capture
 
 After PR review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
@@ -238,3 +218,38 @@ During this skill's execution, watch for valuable reference materials worth pres
 At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
 
 Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points. See `.claude/resources/core/project-tasklist.md` for full rules.
+
+1. **On start**: Add "Review PR: #{number}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Review PR: #{number}" to **Done** with today's date
+
+---
+
+## Learn Recommendations
+
+After the PR review completes, check for learning opportunities. See `.claude/resources/core/learn-recommendations.md` for the full system.
+
+**PR review-specific checks** (scan the diff for):
+- **New imports** from packages not previously used in the project
+- **Pattern changes** (different state management, different API patterns, new testing approaches)
+- **New configuration files** for tools not previously in the project (Docker, CI/CD, etc.)
+- **Framework migrations** (major version upgrades, framework switches)
+
+Present recommendations at the end of the review document, after the summary:
+
+```markdown
+## Learn Opportunities
+
+The following new technologies/patterns were detected in this PR:
+
+- `/learn zustand` — New state management library introduced (replaces Redux)
+- `/learn docker` — Docker configuration added to the project for the first time
+
+Run any of these to build structured understanding before or after merging.
+```
+

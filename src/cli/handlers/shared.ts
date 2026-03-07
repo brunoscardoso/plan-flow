@@ -191,6 +191,7 @@ const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'reviewed-pr', subpath: 'reviewed-pr' },
   { name: 'references', subpath: 'references' },
   { name: 'resources', subpath: 'resources' },
+  { name: 'tasklist.md', subpath: 'tasklist.md' },
 ];
 
 /**
@@ -461,14 +462,23 @@ function registerVault(
     // Create real project directory
     ensureDir(projectDir);
 
-    // Create individual symlinks for each subdirectory
+    // Create individual symlinks for each subdirectory (and file links)
     let createdCount = 0;
     for (const link of VAULT_PROJECT_LINKS) {
       const linkPath = join(projectDir, link.name);
       const linkTarget = join(flowDir, link.subpath);
 
-      // Ensure the source directory exists in the project
-      ensureDir(linkTarget);
+      // For file symlinks (e.g. tasklist.md), skip if source doesn't exist yet
+      const isFileLink = link.subpath.includes('.');
+      if (isFileLink) {
+        if (!existsSync(linkTarget)) {
+          result.skipped.push(linkPath);
+          continue;
+        }
+      } else {
+        // Ensure the source directory exists in the project
+        ensureDir(linkTarget);
+      }
 
       const existingTarget = readSymlinkTarget(linkPath);
 
@@ -545,12 +555,102 @@ function registerVault(
 
     // Update vault index
     updateVaultIndex(vaultDir, projectName, target);
+
+    // Generate/update global tasklist
+    generateGlobalTasklist(vaultDir);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     log.warn(`Could not register vault (non-fatal): ${msg}`);
   }
 
   return result;
+}
+
+/**
+ * Generates or updates ~/plan-flow/brain/tasklist.md — a global aggregator
+ * that links to each project's tasklist for a cross-project overview.
+ */
+function generateGlobalTasklist(vaultDir: string): void {
+  const globalTasklistPath = join(vaultDir, 'tasklist.md');
+  const projectsDir = join(vaultDir, 'projects');
+
+  if (!existsSync(projectsDir)) return;
+
+  // Scan all project directories for tasklist.md symlinks
+  const projects: { name: string; tasklistPath: string }[] = [];
+  try {
+    const entries = readdirSync(projectsDir);
+    for (const entry of entries) {
+      const entryPath = join(projectsDir, entry);
+      const tasklistLink = join(entryPath, 'tasklist.md');
+      if (existsSync(tasklistLink)) {
+        projects.push({ name: entry, tasklistPath: tasklistLink });
+      }
+    }
+  } catch {
+    return;
+  }
+
+  // Count tasks per project by reading each tasklist
+  const projectSummaries: string[] = [];
+  for (const project of projects) {
+    try {
+      const content = readFileSync(project.tasklistPath, 'utf-8');
+      const inProgress = (content.match(/^- \[ \] .+/gm) || []).filter(
+        (line) => content.indexOf(line) < content.indexOf('## To Do') || !content.includes('## To Do')
+      );
+      const toDo = (content.match(/^- \[ \] .+/gm) || []).length - inProgress.length;
+      const done = (content.match(/^- \[x\] .+/gm) || []).length;
+
+      // Count tasks in each section properly
+      const sections = content.split(/^## /m);
+      let inProgressCount = 0;
+      let toDoCount = 0;
+      let doneCount = 0;
+      for (const section of sections) {
+        const lines = (section.match(/^- \[[ x]\] .+/gm) || []).length;
+        if (section.startsWith('In Progress')) inProgressCount = lines;
+        else if (section.startsWith('To Do')) toDoCount = lines;
+        else if (section.startsWith('Done')) doneCount = lines;
+      }
+
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        `| Status | Count |`,
+        `|--------|-------|`,
+        `| In Progress | ${inProgressCount} |`,
+        `| To Do | ${toDoCount} |`,
+        `| Done | ${doneCount} |`,
+        '',
+        `> See: [[${project.name}/tasklist.md|Full Tasklist]]`,
+        '',
+      );
+    } catch {
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        `_Tasklist not accessible_`,
+        '',
+      );
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const content = [
+    '# Global Tasklist',
+    '',
+    `**Last Updated**: ${today}`,
+    `**Projects**: ${projects.length}`,
+    '',
+    '---',
+    '',
+    ...(projectSummaries.length > 0
+      ? projectSummaries
+      : ['_No projects with tasklists found._', '']),
+  ].join('\n');
+
+  writeFileSync(globalTasklistPath, content, 'utf-8');
 }
 
 /**
