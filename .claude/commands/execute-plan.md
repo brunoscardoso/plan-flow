@@ -142,7 +142,7 @@ Please run this command and let me know when it's complete.
 
 ## Git Control
 
-On execution start, check if `flow/.gitcontrol` exists. If it does, read its settings and apply them during execution.
+On execution start, check if `flow/.flowconfig` exists — if yes, read git control settings (`commit`, `push`, `branch`) from it. Fallback: check `flow/.gitcontrol` for backward compatibility. If neither exists, no git operations are performed.
 
 ### Git Control Settings
 

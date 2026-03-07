@@ -1,16 +1,17 @@
 ---
-description: Toggle autopilot flow mode - automatically orchestrates discovery, planning, execution, and review for feature requests
+description: Configure plan-flow settings — autopilot mode, git control, and other runtime options. Use key=value syntax.
 ---
 
-# Flow: Autopilot Mode Toggle
+# Flow: Plan-Flow Configuration
 
 ## Command Description
 
-This command enables or disables **autopilot flow mode**. When enabled, every new user input is automatically classified and, if it's a feature request, the full plan-flow workflow runs automatically:
+This command is the **central configuration hub** for plan-flow runtime settings. All settings use `key=value` syntax and are persisted in `flow/.flowconfig` (YAML format).
 
-**contracts check → discovery → plan → execute → review-code → archive**
-
-The LLM pauses only at mandatory checkpoints (discovery Q&A, plan approval).
+Settings include:
+- **Autopilot mode** — auto-chain commands for feature requests
+- **Git control** — auto-commit per phase, auto-push after completion
+- **Branch targeting** — specify which branch to commit/push to
 
 ---
 
@@ -19,184 +20,167 @@ The LLM pauses only at mandatory checkpoints (discovery Q&A, plan approval).
 **If the user invokes this command with `-help`, display only this section and stop:**
 
 ```
-/flow - Autopilot Flow Mode Toggle
+/flow - Plan-Flow Configuration
 
 DESCRIPTION:
-  Enables or disables autopilot flow mode. When enabled, actionable requests
-  automatically run the full plan-flow workflow without manual command invocation.
-  Supports auto-detect mode (default) and 4 locked workflow types.
+  Central configuration command for plan-flow runtime settings.
+  All settings use key=value syntax and persist across sessions.
 
 USAGE:
-  /flow -enable          Enable autopilot with auto-detect (default)
-  /flow -enable [type]   Enable autopilot locked to a specific workflow type
-  /flow -disable         Disable autopilot mode
-  /flow -status          Show current autopilot state and workflow type
-  /flow                  Same as -status
-  /flow -help            Show this help
+  /flow <key>=<value> [key=value ...]   Set one or more settings
+  /flow <prompt>                         Enable autopilot and start flow with prompt
+  /flow -status                          Show all current settings
+  /flow -reset                           Reset all settings to defaults
+  /flow -help                            Show this help
 
-MODES:
-  auto       Auto-detect workflow type per input using signal analysis (default)
-             Each request is independently classified as feature/bugfix/refactor/security
+SETTINGS:
+  autopilot=true|false   Enable/disable autopilot mode (default: false)
+  commit=true|false      Auto-commit after each completed phase (default: false)
+  push=true|false        Auto-push after all phases + build/test pass (default: false)
+  branch=<name>          Target branch for git operations (default: current branch)
 
-WORKFLOW TYPES (for locked mode):
-  feature    New functionality, behavior changes
-             Steps: contracts → discovery → plan → execute → review → archive
-  bugfix     Bug reports, error fixes, regression fixes
-             Steps: review (diagnostic) → plan → execute → review (verification) → archive
-  refactor   Code restructuring, tech debt, pattern migration
-             Steps: review (baseline) → discovery → plan → execute → review (comparison) → archive
-  security   Security hardening, vulnerability fixes, auth changes
-             Steps: review (audit) → discovery → plan → execute → review (verification) → archive
+EXAMPLES:
+  /flow autopilot=true                    # Enable autopilot
+  /flow commit=true push=true             # Enable git control (works without autopilot)
+  /flow autopilot=true commit=true        # Enable both
+  /flow branch=development                # Set target branch
+  /flow commit=false push=false           # Disable git control
+  /flow -status                           # Show current config
+  /flow -reset                            # Reset everything
 
-BEHAVIOR WHEN ENABLED:
-  - Actionable requests → full flow using auto-detected or locked workflow type
-  - Trivial tasks (below workflow threshold) → executed directly, no flow
+  # Shorthand: text without key=value enables autopilot and starts flow
+  /flow add dark mode support             # autopilot=true + start discovery
+  /flow commit=true add user auth         # autopilot=true + git + start discovery
+
+BEHAVIOR WHEN AUTOPILOT IS ON:
+  - Feature requests → full flow (discovery → plan → execute → review → archive)
+  - Trivial tasks (complexity 0-2) → executed directly, no flow
   - Questions/exploration → answered normally
   - Slash commands → run as normal
 
+GIT CONTROL (when commit=true):
+  - After each phase completes: auto-commit
+    "Phase N: <phase name> — <feature>"
+  - After all phases + build/test pass: auto-push if push=true
+  - If build/test fails: commit is made but push is skipped
+  - push=true without commit=true: auto-enables commit=true
+
 MANDATORY CHECKPOINTS (even in autopilot):
-  - Discovery phase: pauses for user Q&A (feature, refactor, security)
-  - Plan review: pauses for user approval before execution (all workflows)
-  - Security review: pauses for user approval after execution (security only)
+  - Discovery phase: pauses for user Q&A
+  - Plan review: pauses for user approval before execution
 
-CONTEXT MANAGEMENT:
-  - Only loads the relevant command context at each step
-  - Suggests context cleanup (/clear) after each completed flow cycle
-
-GIT FLAGS (optional, combinable with any usage):
-  commit=true         Auto-commit after each completed phase
-  commit=false        Disable auto-commit (default)
-  push=true           Auto-push after all phases complete (requires commit=true)
-  push=false          Disable auto-push (default)
-  branch=<name>       Target branch for commits (default: current branch)
-
-STATE:
-  Persisted in flow/.autopilot (survives session restarts)
-  File content: "auto" for auto-detect, or a specific type for locked mode
-  Git settings persisted in flow/.gitcontrol (YAML format)
-
-EXAMPLES:
-  /flow -enable              # Auto-detect mode (recommended)
-  /flow -enable bugfix       # Lock to bugfix workflow only
-  /flow -enable security     # Lock to security workflow only
-  /flow commit=true push=true -enable  # Enable with git control
-  /flow commit=true          # Set git control only (no autopilot change)
-  /flow -disable             # Turn off autopilot + clear git control
+CONFIG FILE:
+  All settings stored in flow/.flowconfig (YAML)
+  Backward compatible: also reads flow/.autopilot and flow/.gitcontrol
 ```
 
 ---
 
-> **AGENT_PROFILE: write-restricted**
-> See `.claude/resources/core/agent-profiles.md` for tool access rules.
-
 ## Instructions
 
-### Step 0: Parse Git Flags
+### Step 1: Parse Input
 
-Before processing any subcommand, extract git flags from the input:
+Parse the user input to determine what action to take:
 
-1. Scan for `commit=true|false`, `push=true|false`, `branch=<name>` in the input
-2. Remove matched flags from the input (the rest is the prompt or subcommand)
-3. If any git flag is found, update `flow/.gitcontrol`:
+1. **Scan for `key=value` pairs**: Extract all `key=value` tokens from the input
+2. **Check for flags**: `-status`, `-reset`, `-help`
+3. **Remaining text**: Anything left after extracting keys and flags is a prompt
+
+**Valid keys**:
+
+| Key | Values | Default | Description |
+|-----|--------|---------|-------------|
+| `autopilot` | `true`, `false` | `false` | Enable/disable autopilot mode |
+| `commit` | `true`, `false` | `false` | Auto-commit after each phase |
+| `push` | `true`, `false` | `false` | Auto-push after completion |
+| `branch` | any string | current branch | Target branch for git ops |
+
+---
+
+### Step 2: Load Existing Config
+
+1. If `flow/.flowconfig` exists, read it
+2. **Backward compatibility**: If `.flowconfig` doesn't exist but `flow/.autopilot` does, read it and migrate:
+   - `flow/.autopilot` exists → `autopilot: true`
+   - `flow/.gitcontrol` exists → read its `commit`, `push`, `branch` values
+3. Merge parsed key=value pairs into existing config (new values override old)
+
+---
+
+### Step 3: Validate Settings
+
+1. If `push=true` but `commit` is not `true`, auto-enable `commit=true` and warn:
+   > `push=true` requires `commit=true`. Enabling auto-commit as well.
+2. If `autopilot=false` and `commit=false` and no other settings, consider removing `.flowconfig`
+
+---
+
+### Step 4: Save Config
+
+Write the merged config to `flow/.flowconfig`:
 
 ```yaml
-# flow/.gitcontrol
+# flow/.flowconfig — plan-flow runtime settings
+autopilot: true
 commit: true
 push: true
 branch: development
 ```
 
-4. If `push=true` but `commit` is not set or is `false`, warn and set `commit=true` automatically
-5. If no git flags are provided, leave `flow/.gitcontrol` unchanged
+**Also maintain backward-compatible marker files**:
+- If `autopilot: true` → create `flow/.autopilot` (for backward compat with existing rules)
+- If `autopilot: false` → delete `flow/.autopilot`
+- Write git settings to `flow/.gitcontrol` as well (for backward compat)
 
 ---
 
-### When invoked with `-enable` or `-enable <type>`
+### Step 5: Handle Action
 
-1. Parse the argument:
-   - No argument → **auto-detect mode** (default)
-   - Valid types: `feature`, `bugfix`, `refactor`, `security` → **locked mode**
-   - If an invalid type is provided, show an error and list valid types
-2. Create the file `flow/.autopilot` with the mode as content:
-   - No argument: write `auto` to the file
-   - Specific type: write the type name (e.g., `bugfix`, `refactor`, `security`, `feature`)
-3. Confirm to the user:
+#### If `-status` or no arguments and no key=value pairs
 
-**For auto-detect mode:**
+Show current config:
 
 ```markdown
-Autopilot flow mode **enabled** (mode: **auto-detect**).
+**Plan-Flow Configuration**
 
-From now on, each actionable request will be automatically classified:
-- Security signals → security workflow
-- Bug/error signals → bugfix workflow
-- Refactor signals → refactor workflow
-- Everything else → feature workflow
-
-Trivial tasks and questions are handled normally without the flow.
-
-Use `/flow -enable <type>` to lock to a specific workflow, `/flow -disable` to turn off, or `/flow -status` to check state.
+| Setting | Value |
+|---------|-------|
+| Autopilot | enabled/disabled |
+| Auto-commit | true/false |
+| Auto-push | true/false |
+| Branch | <name> or (current) |
 ```
 
-**For locked mode:**
+#### If `-reset`
+
+1. Delete `flow/.flowconfig`, `flow/.autopilot`, `flow/.gitcontrol`
+2. Confirm: "All plan-flow settings reset to defaults."
+
+#### If only key=value pairs (no prompt text)
+
+1. Save settings (Steps 2-4)
+2. Confirm what changed:
 
 ```markdown
-Autopilot flow mode **enabled** (workflow: **[type]** — locked).
+**Settings updated:**
+- commit: false → **true**
+- push: false → **true**
 
-From now on, ALL actionable requests will run the [type] workflow:
-[Show step sequence for the active workflow type]
-
-Trivial tasks and questions are handled normally without the flow.
-
-Use `/flow -enable` to switch to auto-detect, `/flow -enable <type>` to switch workflow, or `/flow -disable` to turn off.
+These apply to all `/execute-plan` runs.
 ```
 
-### When invoked with `-disable`
+#### If prompt text remains (with or without key=value pairs)
 
-1. Delete the file `flow/.autopilot` (if it exists)
-2. Delete the file `flow/.gitcontrol` (if it exists)
-3. Delete `flow/state/autopilot-progress.md` (if it exists — cleans up any in-progress workflow tracking)
-4. Confirm to the user:
+This is a **feature request with autopilot**:
 
-```markdown
-Autopilot flow mode **disabled**.
-Git control: cleared.
+1. Set `autopilot: true` (if not already)
+2. Save all settings (Steps 2-4)
+3. Confirm settings briefly (one line)
+4. **Immediately start the flow** by invoking `/discovery-plan` with the prompt
 
-Commands will no longer auto-chain. Use individual slash commands as before:
-`/discovery-plan` → `/create-plan` → `/execute-plan` → `/review-code`
-```
-
-### When invoked with `-status` or no arguments
-
-1. Check if `flow/.autopilot` exists
-2. If exists, read its content to determine mode:
-   - Content is `auto` → auto-detect mode
-   - Content is `feature`, `bugfix`, `refactor`, or `security` → locked to that type
-   - Empty or unrecognized → treat as `auto`
-3. Check if `flow/state/autopilot-progress.md` exists — if so, read it to show workflow progress
-4. Report:
-
-```markdown
-Autopilot flow mode: **[ENABLED/DISABLED]**
-
-[If enabled — auto-detect]:
-- **Mode**: auto-detect
-- Each actionable request is classified independently (security > bugfix > refactor > feature)
-
-[If enabled — locked]:
-- **Mode**: locked — **[type]**
-- **Steps**: [step sequence for the locked workflow type]
-- ALL actionable requests will run the [type] workflow.
-
-[If enabled AND autopilot-progress.md exists]:
-- **Active workflow**: [feature name]
-- **Detected type**: [workflow type for current input]
-- **Progress**: Step [N] of [total] ([step name])
-- **Completed**: [list of done steps]
-- **Next**: [description of current/next step]
-
-[If disabled]: Use individual slash commands to run each step manually.
-```
+**Examples**:
+- `/flow add dark mode` → `autopilot=true`, start discovery
+- `/flow commit=true push=true add user auth` → `autopilot=true, commit=true, push=true`, start discovery
 
 ---
 
@@ -204,8 +188,26 @@ Autopilot flow mode: **[ENABLED/DISABLED]**
 
 | Rule | Description |
 | --- | --- |
-| **File-based state** | Autopilot in `flow/.autopilot`, git control in `flow/.gitcontrol` |
-| **Mode in file content** | File content is `auto` (auto-detect) or a specific type (`feature`, `bugfix`, `refactor`, `security`) for locked mode |
-| **No other side effects** | This command ONLY manages marker/config files. It does not run any workflow steps. |
-| **Complete and stop** | After toggling state, STOP and wait for user input |
-| **Git flags are independent** | Git control works with or without autopilot mode |
+| **Single config file** | All settings in `flow/.flowconfig`. Maintain `.autopilot` and `.gitcontrol` for backward compat. |
+| **Key=value syntax** | All settings use `key=value`. No `-enable`/`-disable` flags needed (use `autopilot=true/false`). |
+| **Settings are independent** | `commit=true` works without `autopilot=true`. Git control applies to any `/execute-plan` run. |
+| **Complete and stop** | After updating settings, STOP and wait for user input (unless a prompt was provided). |
+| **Backward compatible** | Still reads `flow/.autopilot` and `flow/.gitcontrol` if `.flowconfig` doesn't exist yet. |
+
+---
+
+## Config File Format
+
+```yaml
+# flow/.flowconfig — plan-flow runtime settings
+# Managed by /flow command. Do not edit manually.
+
+autopilot: false
+commit: false
+push: false
+branch: ""
+```
+
+**Location**: `flow/.flowconfig`
+**Format**: YAML
+**Persists**: Across sessions (file-based)

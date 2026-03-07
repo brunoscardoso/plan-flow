@@ -8,9 +8,9 @@ When `flow/.autopilot` exists, this rule is active. It automatically orchestrate
 
 ## On Session Start
 
-1. Check if `flow/.autopilot` exists
-2. If it exists: autopilot mode is **ON** - follow the rules below for every user input
-3. If it does not exist: autopilot mode is **OFF** - ignore this rule entirely, normal behavior applies
+1. Check if `flow/.flowconfig` exists and has `autopilot: true`, OR if `flow/.autopilot` exists (backward compat)
+2. If either is true: autopilot mode is **ON** - follow the rules below for every user input
+3. If neither exists: autopilot mode is **OFF** - ignore this rule entirely, normal behavior applies
 4. Load `flow/tasklist.md` if it exists — summarize active tasks and ask if the user wants to pick one
 5. Load `flow/memory.md` if it exists — internalize last 7 days of completed work silently
 
@@ -91,12 +91,12 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 ### Step 4: Execute Plan
 
 1. **Read** the file `.claude/commands/execute-plan.md` to load execution context
-2. **Check** if `flow/.gitcontrol` exists — if yes, apply git control settings during execution
+2. **Check** if `flow/.flowconfig` exists — if yes, read git control settings (`commit`, `push`, `branch`). Fallback: check `flow/.gitcontrol` for backward compat.
 3. Execute the plan following complexity-based grouping strategy
 4. Update the plan file with progress
-5. If `commit: true` in `.gitcontrol`: auto-commit after each completed phase
+5. If `commit: true`: auto-commit after each completed phase
 6. Run build + test verification at the end
-7. If `push: true` in `.gitcontrol` and build+test pass: auto-push
+7. If `push: true` and build+test pass: auto-push
 8. Write transition summary
 9. **Auto-proceed** to Step 5
 
