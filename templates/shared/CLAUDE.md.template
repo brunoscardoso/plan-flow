@@ -27,7 +27,9 @@
 
 - **Project Ledger**: If `flow/ledger.md` exists, read it silently and internalize learnings. Update it when you learn project-specific lessons. See `.claude/resources/core/project-ledger.md` for full rules.
 - **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
-- **Autopilot Mode**: If `flow/.autopilot` exists, read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
+- **Project Tasklist**: If `flow/tasklist.md` exists, read it silently and present a brief summary of active tasks. See `.claude/resources/core/project-tasklist.md` for full rules.
+- **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
+- **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Critical Rules
 
@@ -35,6 +37,7 @@
 2. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
+5. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST use the Edit tool to write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory. If the user says "add to tasklist", read `flow/tasklist.md`, then Edit it. See `.claude/resources/core/project-tasklist.md` for full rules.
 
 ## Flow Directory Structure
 
@@ -51,7 +54,13 @@ flow/
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
-└── ledger.md          # Persistent project learning journal
+├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── memory.md          # Persistent artifact tracker (completed skill executions)
+├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
+├── log.md             # Heartbeat log of important events
+├── ledger.md          # Persistent project learning journal
+├── .flowconfig        # Central config file (autopilot, git control, settings)
+└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 
 ## Central Vault

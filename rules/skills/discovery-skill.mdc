@@ -296,3 +296,11 @@ Before completing discovery, verify:
 | `.cursor/rules/tools/interactive-questions-tool.mdc` | Interactive Questions UI workflow |
 | `flow/discovery/`                                 | Output folder for discovery docs  |
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points (you MUST write to the file, not keep in memory):
+
+1. **On start**: Add "Discovery: {feature}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Discovery: {feature}" to **Done** with today's date
+3. **Next step**: Add "Create plan for {feature}" to **To Do**
+

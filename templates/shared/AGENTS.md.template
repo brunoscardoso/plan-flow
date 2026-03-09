@@ -31,12 +31,23 @@ The Project Ledger (`flow/ledger.md`) is always active. It silently captures pro
 
 The Project Brain (`flow/brain/`) automatically captures features, errors, decisions, and session logs during skill execution. If `flow/brain/index.md` exists, read it silently at session start. Uses Obsidian-compatible `[[wiki-links]]` for cross-referencing.
 
+## Project Tasklist
+
+The Project Tasklist (`flow/tasklist.md`) tracks work items across sessions. If it exists, read it silently at session start and present a brief summary of active task counts.
+
+**CRITICAL**: When adding, moving, or completing tasks, you MUST write changes to `flow/tasklist.md` on disk. NEVER keep tasks only in conversation memory. If the user says "add to tasklist", read the file, then edit it. The tasklist is a **file on disk**, not a conversation artifact.
+
+## Project Memory
+
+The Project Memory (`flow/memory.md`) tracks completed skill executions. If it exists, read it silently at session start and internalize the last 7 days of completed work.
+
 ## Critical Rules
 
 1. **No Auto-Chaining**: Never auto-invoke the next command. Wait for user. **Exception**: When autopilot mode is ON (`flow/.autopilot` exists), commands auto-chain per the autopilot flow skill.
 2. **Discovery First**: Recommend `/discovery-plan` before `/create-plan` for new features.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
+5. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory.
 
 ## Flow Directory Structure
 
@@ -53,7 +64,13 @@ flow/
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
-└── ledger.md          # Persistent project learning journal
+├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── memory.md          # Persistent artifact tracker (completed skill executions)
+├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
+├── log.md             # Heartbeat log of important events
+├── ledger.md          # Persistent project learning journal
+├── .flowconfig        # Central config file (autopilot, git control, settings)
+└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 
 ## Complexity Scoring

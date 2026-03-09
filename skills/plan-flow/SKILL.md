@@ -33,6 +33,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 |---------|-------------|
 | Project Ledger | Persistent learning journal at `flow/ledger.md` - silently captures mistakes, corrections, and project-specific knowledge across sessions |
 | Project Brain | Automatic knowledge capture at `flow/brain/` - records features, errors, decisions, and session logs with Obsidian-compatible `[[wiki-links]]` |
+| Project Tasklist | Persistent todo list at `flow/tasklist.md` — **MUST be written to disk**, never kept in-memory only. Every task addition or status change must edit the file immediately. |
 | Resource Capture | During any skill execution, watches for valuable reference materials (API specs, architecture notes, domain knowledge) and asks user before saving to `flow/resources/` |
 
 ## Recommended Workflow
@@ -102,6 +103,7 @@ flow/
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run build verification only after ALL phases complete.
 5. **Archive When Done**: Move completed discovery and plans to `flow/archive/`.
+6. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory.
 
 ## Configuration
 

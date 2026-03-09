@@ -11,6 +11,10 @@ A persistent project todo list that tracks work items across sessions. The taskl
 
 ## Behavior
 
+### CRITICAL: All Tasks MUST Be Written to Disk
+
+**NEVER keep tasks in-memory only.** Every task addition, status change, or update MUST be written to `flow/tasklist.md` immediately using the Edit or Write tool. If a user asks to add tasks to the tasklist, you MUST edit the file — not just acknowledge the tasks in conversation. The tasklist is a **file on disk**, not a conversation artifact.
+
 ### On Session Start
 
 1. Check if `flow/tasklist.md` exists
@@ -27,6 +31,7 @@ A persistent project todo list that tracks work items across sessions. The taskl
 - When a task is completed (skill finishes successfully), move it to **Done** with the completion date
 - When new work items are discovered during execution, add them to **To Do**
 - Update `flow/tasklist.md` in real-time as work progresses
+- **EVERY update MUST be persisted to `flow/tasklist.md` via Edit/Write tool — no exceptions**
 
 ### Task Format
 
@@ -221,3 +226,4 @@ When a task is completed:
 6. **Always update**: Every command MUST update the tasklist — this is not optional
 7. **Add vs Execute**: When the user says "add to tasklist" or "add a task for X", ONLY add it to **To Do**. Do NOT start working on it. Only execute when the user explicitly says "do this", "implement this", "work on X", or invokes a command.
 8. **Tasklist is a backlog**: The tasklist is a planning tool, not an execution trigger. Adding a task is separate from executing it.
+9. **Persist to disk — ALWAYS**: Every task addition or status change MUST be written to `flow/tasklist.md` using Edit or Write. NEVER keep tasks only in conversation memory. If you added tasks but did not call Edit/Write on `flow/tasklist.md`, you have a bug — fix it immediately.

@@ -63,6 +63,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-BR-2 | File templates (feature, error, decision, session) and naming conventions | brain-capture.mdc | 52-100 |
 | COR-BR-3 | Index management (caps, rotation) and brain vs ledger comparison | brain-capture.mdc | 102-140 |
 
+### Project Tasklist (`project-tasklist.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-TL-1 | Tasklist disk persistence rules and session behavior | project-tasklist.mdc | 10-50 |
+| COR-TL-2 | Command integration and update rules | project-tasklist.mdc | 52-80 |
+| COR-TL-3 | Task management rules (persist to disk, no duplicates, add vs execute) | project-tasklist.mdc | 82-100 |
+
 ### Resource Capture (`resource-capture.mdc`)
 
 | Code | Description | Source | Lines |
@@ -93,6 +101,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AM-1 | Need to understand input classification for autopilot |
 | COR-AM-2 | Need autopilot flow execution steps |
 | COR-AM-3 | Need mandatory checkpoint and override rules |
+| COR-TL-1 | Need tasklist disk persistence and session behavior |
+| COR-TL-2 | Need tasklist command integration rules |
+| COR-TL-3 | Need tasklist management rules |
 | COR-RC-1 | Need resource capture behavior and criteria |
 | COR-RC-2 | Need resource file format and naming conventions |
 
@@ -130,4 +141,5 @@ Core rules define the foundational coding standards that apply across the entire
 - `brain-capture.mdc` has `alwaysApply: false` - loaded when `flow/brain/index.md` exists or when brain-capture blocks need processing
 - `complexity-scoring.mdc` has `alwaysApply: false` - loaded on-demand when needed for planning
 - `autopilot-mode.mdc` has `alwaysApply: false` - loaded when autopilot mode is active (`flow/.autopilot` exists)
+- `project-tasklist.mdc` has `alwaysApply: false` - loaded when `flow/tasklist.md` exists or when tasks are being managed
 - `resource-capture.mdc` has `alwaysApply: false` - loaded during skill execution to watch for valuable reference materials

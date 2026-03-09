@@ -102,6 +102,7 @@ On-demand reference files (loaded by commands when needed) are in `.claude/resou
 4. **Tests Last**: Tests are always the last phase of any implementation plan.
 5. **Build at End Only**: Run `npm run build` only after ALL phases complete.
 6. **No Direct DB Commands**: Never run database migrations directly - ask user to execute.
+7. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST use the Edit tool to write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory. If the user says "add to tasklist", read `flow/tasklist.md`, then Edit it. See `.claude/resources/core/project-tasklist.md` for full rules.
 
 ## File Naming Conventions
 
@@ -197,6 +198,7 @@ npm run test
 2. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
+5. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST use the Edit tool to write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory.
 
 ## Flow Directory Structure
 

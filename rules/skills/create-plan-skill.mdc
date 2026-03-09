@@ -269,3 +269,11 @@ Before completing the plan, verify:
 | `flow/plans/`                                  | Output folder for plan documents |
 | `flow/discovery/`                              | Input discovery documents        |
 
+## Tasklist Updates
+
+Update `flow/tasklist.md` at these points (you MUST write to the file, not keep in memory):
+
+1. **On start**: Add "Plan: {feature}" to **In Progress** (or move it from To Do if it already exists)
+2. **On complete**: Move "Plan: {feature}" to **Done** with today's date
+3. **Next step**: Add "Execute plan for {feature}" to **To Do**
+

@@ -1,0 +1,90 @@
+---
+description: "Project tasklist persistence - ensures tasks are always written to flow/tasklist.md on disk. Include when working with tasks, backlogs, or when flow/tasklist.md exists."
+alwaysApply: false
+---
+
+# Project Tasklist
+
+## Purpose
+
+A persistent project todo list that tracks work items across sessions. The tasklist is loaded at session start to provide continuity and help users pick up where they left off.
+
+**Location**: `flow/tasklist.md`
+
+---
+
+## CRITICAL: All Tasks MUST Be Written to Disk
+
+**NEVER keep tasks in-memory only.** Every task addition, status change, or update MUST be written to `flow/tasklist.md` immediately. If a user asks to add tasks to the tasklist, you MUST edit the file — not just acknowledge the tasks in conversation. The tasklist is a **file on disk**, not a conversation artifact.
+
+---
+
+## Behavior
+
+### On Session Start
+
+1. Check if `flow/tasklist.md` exists
+2. If it exists: read it silently and internalize the content
+3. Present a brief summary of active tasks:
+   - Count of **In Progress** items
+   - Count of **To Do** items
+4. Ask the user if they want to pick a task from the list
+5. Do NOT read the full tasklist aloud — just summarize counts and top items
+
+### During Work
+
+- When a task is picked by the user, mark it as **In Progress** in `flow/tasklist.md`
+- When a task is completed (skill finishes successfully), move it to **Done** with the completion date
+- When new work items are discovered during execution, add them to **To Do**
+- Update `flow/tasklist.md` in real-time as work progresses
+- **EVERY update MUST be persisted to `flow/tasklist.md` — no exceptions**
+
+### Task Format
+
+```markdown
+## In Progress
+
+- [ ] Task description — started {YYYY-MM-DD}
+
+## To Do
+
+- [ ] Task description
+
+## Done
+
+- [x] Task description — completed {YYYY-MM-DD}
+```
+
+---
+
+## Command Integration
+
+Every plan-flow command MUST update the tasklist at specific points:
+
+| Command | On Start | On Complete | Next Task Added |
+|---------|----------|-------------|-----------------|
+| `/discovery` | Add "Discovery: {feature}" → In Progress | Move to Done | Add "Create plan for {feature}" → To Do |
+| `/create-plan` | Add "Plan: {feature}" → In Progress | Move to Done | Add "Execute plan for {feature}" → To Do |
+| `/execute-plan` | Add "Execute: {feature}" → In Progress | Move to Done | Add "Review code for {feature}" → To Do |
+| `/review-code` | Add "Review: {scope}" → In Progress | Move to Done | — |
+| `/review-pr` | Add "Review PR: #{number}" → In Progress | Move to Done | — |
+| `/write-tests` | Add "Tests: {scope}" → In Progress | Move to Done | — |
+
+### Update Rules
+
+1. **On command start**: Check if the task already exists. If yes, move it to In Progress. If no, add it.
+2. **On command complete**: Move from In Progress to Done with today's date.
+3. **Next step task**: Add the logical next step to To Do.
+4. **User requests**: When the user asks to add tasks outside a command, add them to **To Do** in `flow/tasklist.md` immediately.
+
+---
+
+## Rules
+
+1. **Summarize, don't dump**: On session start, show counts and top 3 items, not the full list
+2. **Real-time updates**: Update tasklist immediately when status changes, don't batch
+3. **No duplicates**: Before adding a task, check if it already exists (check all sections)
+4. **User-driven**: Only pick/execute tasks when the user explicitly asks to
+5. **Add vs Execute**: "Add to tasklist" = add to To Do. "Do this" = execute. They are separate actions.
+6. **Always update**: Every command MUST update the tasklist — this is not optional
+7. **Persist to disk — ALWAYS**: Every task addition or status change MUST be written to `flow/tasklist.md`. NEVER keep tasks only in conversation memory. If you added tasks but did not write to the file, you have a bug — fix it immediately.
