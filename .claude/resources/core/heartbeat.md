@@ -153,6 +153,58 @@ Tasks created from the tasklist have a `Tasklist Link` field that points back to
 
 ---
 
+## Vault Sync
+
+The project heartbeat is linked into the central Obsidian vault at `~/plan-flow/brain/projects/{project}/heartbeat.md` (symlink). A **global heartbeat** at `~/plan-flow/brain/heartbeat.md` aggregates all projects, showing all scheduled tasks for a cross-project automation view.
+
+### When Global Updates Happen
+
+The global heartbeat MUST be synced **every time** `flow/heartbeat.md` is modified. This is not optional.
+
+#### Sync Trigger
+
+After **every** Edit or Write to `flow/heartbeat.md`, you MUST also update the global heartbeat at `~/plan-flow/brain/heartbeat.md`:
+
+1. **Read** `~/plan-flow/brain/heartbeat.md`
+2. **Parse** task blocks (### headings) and extract: name, schedule, enabled status
+3. **Count** active vs disabled tasks
+4. **Update** only the current project's section with the task list
+5. **Update** the `**Last Updated**` date to today
+
+#### Sync Rules
+
+- **Always sync**: Every heartbeat edit triggers a sync — no exceptions
+- **Only update your project**: Do not recalculate data for other projects
+- **Show all tasks**: List every task with name, schedule, and active/disabled status
+- **Preserve format**: Keep the existing global heartbeat format (wiki-links, table, see-link)
+- **Create if missing**: If `~/plan-flow/brain/heartbeat.md` doesn't exist, create it with the standard format
+
+#### Example Sync
+
+After editing `flow/heartbeat.md` for project `parcels` with 3 tasks:
+
+```markdown
+### [[parcels]]
+
+**Active**: 2 | **Disabled**: 1
+
+| Task | Schedule | Status |
+|------|----------|--------|
+| babysit-deploy | every 30 minutes | Active |
+| daily-review | daily at 10:00 PM | Active |
+| one-shot-fix | in 1 hour | Disabled |
+
+> See: [[parcels/heartbeat.md|Full Heartbeat]]
+```
+
+---
+
+## Vault Sync: Log File
+
+The project log (`flow/log.md`) is also linked into the vault at `~/plan-flow/brain/projects/{project}/log.md`. Unlike other files, the log does **not** have a global aggregator — it is read directly from the project symlink. This is because logs are append-heavy and project-specific; Obsidian users navigate to the project's log via `[[project/log.md]]` links.
+
+---
+
 ## Rules
 
 1. **No external dependencies**: Daemon uses only Node.js built-in modules
@@ -162,3 +214,4 @@ Tasks created from the tasklist have a `Tasklist Link` field that points back to
 5. **Hot reload**: Changes to `flow/heartbeat.md` are picked up automatically without restart
 6. **Log rotation**: Keep `flow/.heartbeat.log` under 1000 lines by truncating oldest entries
 7. **One-shot cleanup**: After a one-shot task executes, auto-disable it and update the linked tasklist item
+8. **Vault sync**: Every heartbeat update MUST also update `~/plan-flow/brain/heartbeat.md` — see Vault Sync section

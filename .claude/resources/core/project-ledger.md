@@ -141,6 +141,49 @@ The ledger is **not** a replacement for plan-flow artifacts. Discovery documents
 
 ---
 
+## Vault Sync
+
+The project ledger is linked into the central Obsidian vault at `~/plan-flow/brain/projects/{project}/ledger.md` (symlink). A **global ledger** at `~/plan-flow/brain/ledger.md` aggregates all projects, showing learnings per section for a cross-project knowledge view.
+
+### When Global Updates Happen
+
+The global ledger MUST be synced **every time** `flow/ledger.md` is modified. This is not optional.
+
+#### Sync Trigger
+
+After **every** Edit or Write to `flow/ledger.md`, you MUST also update the global ledger at `~/plan-flow/brain/ledger.md`:
+
+1. **Read** `~/plan-flow/brain/ledger.md`
+2. **Count** entries per section (bullet lines starting with `-` under each `## ` heading)
+3. **Update** only the current project's section with new counts
+4. **Update** the `**Last Updated**` date to today
+
+#### Sync Rules
+
+- **Always sync**: Every ledger edit triggers a sync — no exceptions
+- **Only update your project**: Do not recalculate data for other projects
+- **Section counts**: Show each non-empty section with its entry count
+- **Preserve format**: Keep the existing global ledger format (wiki-links, table, see-link)
+- **Create if missing**: If `~/plan-flow/brain/ledger.md` doesn't exist, create it with the standard format
+
+#### Example Sync
+
+After editing `flow/ledger.md` for project `parcels` with entries in 3 sections:
+
+```markdown
+### [[parcels]]
+
+| Section | Entries |
+|---------|---------|
+| Project Quirks | 4 |
+| What Works | 3 |
+| User Preferences | 2 |
+
+> See: [[parcels/ledger.md|Full Ledger]]
+```
+
+---
+
 ## Rules
 
 1. **Silent by default**: Never tell the user "I updated the ledger" unless they ask about it
@@ -148,3 +191,4 @@ The ledger is **not** a replacement for plan-flow artifacts. Discovery documents
 3. **Lessons over logs**: Write what you learned, not what you did
 4. **Project-specific only**: Only record things unique to this project
 5. **Honest self-correction**: Record your own mistakes, not just user corrections
+6. **Vault sync**: Every ledger update MUST also update `~/plan-flow/brain/ledger.md` — see Vault Sync section

@@ -192,6 +192,10 @@ const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
   { name: 'references', subpath: 'references' },
   { name: 'resources', subpath: 'resources' },
   { name: 'tasklist.md', subpath: 'tasklist.md' },
+  { name: 'memory.md', subpath: 'memory.md' },
+  { name: 'heartbeat.md', subpath: 'heartbeat.md' },
+  { name: 'log.md', subpath: 'log.md' },
+  { name: 'ledger.md', subpath: 'ledger.md' },
 ];
 
 /**
@@ -272,7 +276,16 @@ function updateVaultIndex(vaultDir: string, projectName: string, target: string)
     const content = [
       '# Plan-Flow Vault',
       '',
-      'Central knowledge vault aggregating all projects.',
+      'Central knowledge vault — orchestration hub for all projects.',
+      '',
+      '## Dashboard',
+      '',
+      '| View | Description |',
+      '|------|-------------|',
+      '| [[tasklist]] | Tasks across all projects — backlog, in-progress, done |',
+      '| [[memory]] | Recent skill completions across all projects |',
+      '| [[heartbeat]] | Scheduled automations across all projects |',
+      '| [[ledger]] | Learnings and project quirks across all projects |',
       '',
       '## Projects',
       '',
@@ -281,6 +294,25 @@ function updateVaultIndex(vaultDir: string, projectName: string, target: string)
     ].join('\n');
     writeFileSync(indexPath, content, 'utf-8');
     return;
+  }
+
+  // Ensure Dashboard section exists in legacy index files
+  const existingContent = readFileSync(indexPath, 'utf-8');
+  if (!existingContent.includes('## Dashboard')) {
+    const dashboardSection = [
+      '',
+      '## Dashboard',
+      '',
+      '| View | Description |',
+      '|------|-------------|',
+      '| [[tasklist]] | Tasks across all projects — backlog, in-progress, done |',
+      '| [[memory]] | Recent skill completions across all projects |',
+      '| [[heartbeat]] | Scheduled automations across all projects |',
+      '| [[ledger]] | Learnings and project quirks across all projects |',
+      '',
+    ].join('\n');
+    const updatedContent = existingContent.replace('## Projects', dashboardSection + '## Projects');
+    writeFileSync(indexPath, updatedContent, 'utf-8');
   }
 
   const existing = readFileSync(indexPath, 'utf-8');
@@ -556,8 +588,11 @@ function registerVault(
     // Update vault index
     updateVaultIndex(vaultDir, projectName, target);
 
-    // Generate/update global tasklist
+    // Generate/update global aggregation files
     generateGlobalTasklist(vaultDir);
+    generateGlobalMemory(vaultDir);
+    generateGlobalHeartbeat(vaultDir);
+    generateGlobalLedger(vaultDir);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     log.warn(`Could not register vault (non-fatal): ${msg}`);
@@ -605,23 +640,30 @@ function generateGlobalTasklist(vaultDir: string): void {
       // Count tasks in each section properly
       const sections = content.split(/^## /m);
       let inProgressCount = 0;
+      let backlogCount = 0;
       let toDoCount = 0;
       let doneCount = 0;
       for (const section of sections) {
         const lines = (section.match(/^- \[[ x]\] .+/gm) || []).length;
         if (section.startsWith('In Progress')) inProgressCount = lines;
+        else if (section.startsWith('Backlog')) backlogCount = lines;
         else if (section.startsWith('To Do')) toDoCount = lines;
         else if (section.startsWith('Done')) doneCount = lines;
       }
+
+      const summaryRows = [
+        `| In Progress | ${inProgressCount} |`,
+        ...(backlogCount > 0 ? [`| Backlog | ${backlogCount} |`] : []),
+        `| To Do | ${toDoCount} |`,
+        `| Done | ${doneCount} |`,
+      ];
 
       projectSummaries.push(
         `### [[${project.name}]]`,
         '',
         `| Status | Count |`,
         `|--------|-------|`,
-        `| In Progress | ${inProgressCount} |`,
-        `| To Do | ${toDoCount} |`,
-        `| Done | ${doneCount} |`,
+        ...summaryRows,
         '',
         `> See: [[${project.name}/tasklist.md|Full Tasklist]]`,
         '',
@@ -651,6 +693,276 @@ function generateGlobalTasklist(vaultDir: string): void {
   ].join('\n');
 
   writeFileSync(globalTasklistPath, content, 'utf-8');
+}
+
+/**
+ * Generates or updates ~/plan-flow/brain/memory.md — a global aggregator
+ * that shows recent skill completions across all projects.
+ */
+function generateGlobalMemory(vaultDir: string): void {
+  const globalMemoryPath = join(vaultDir, 'memory.md');
+  const projectsDir = join(vaultDir, 'projects');
+
+  if (!existsSync(projectsDir)) return;
+
+  const projects: { name: string; memoryPath: string }[] = [];
+  try {
+    const entries = readdirSync(projectsDir);
+    for (const entry of entries) {
+      const memoryLink = join(projectsDir, entry, 'memory.md');
+      if (existsSync(memoryLink)) {
+        projects.push({ name: entry, memoryPath: memoryLink });
+      }
+    }
+  } catch {
+    return;
+  }
+
+  const projectSummaries: string[] = [];
+  for (const project of projects) {
+    try {
+      const content = readFileSync(project.memoryPath, 'utf-8');
+      // Count table rows (lines starting with | that are not headers or separators)
+      const tableRows = (content.match(/^\| \d{4}-/gm) || []).length;
+      // Extract last 5 entries for preview
+      const rows = content.split('\n').filter((l) => /^\| \d{4}-/.test(l));
+      const recentRows = rows.slice(0, 5);
+
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        `**Total entries**: ${tableRows}`,
+        '',
+      );
+
+      if (recentRows.length > 0) {
+        projectSummaries.push(
+          '| Date | Skill | Feature | Summary |',
+          '|------|-------|---------|---------|',
+        );
+        for (const row of recentRows) {
+          // Extract Date, Skill, Feature, and Summary columns (skip Artifact)
+          const cols = row.split('|').map((c) => c.trim()).filter(Boolean);
+          if (cols.length >= 5) {
+            projectSummaries.push(`| ${cols[0]} | ${cols[1]} | ${cols[2]} | ${cols[4]} |`);
+          } else if (cols.length >= 4) {
+            projectSummaries.push(`| ${cols[0]} | ${cols[1]} | ${cols[2]} | ${cols[3]} |`);
+          }
+        }
+        projectSummaries.push('');
+      }
+
+      projectSummaries.push(
+        `> See: [[${project.name}/memory.md|Full Memory]]`,
+        '',
+      );
+    } catch {
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        '_Memory not accessible_',
+        '',
+      );
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const output = [
+    '# Global Memory',
+    '',
+    `**Last Updated**: ${today}`,
+    `**Projects**: ${projects.length}`,
+    '',
+    '---',
+    '',
+    ...(projectSummaries.length > 0
+      ? projectSummaries
+      : ['_No projects with memory files found._', '']),
+  ].join('\n');
+
+  writeFileSync(globalMemoryPath, output, 'utf-8');
+}
+
+/**
+ * Generates or updates ~/plan-flow/brain/heartbeat.md — a global aggregator
+ * that shows all scheduled tasks across all projects.
+ */
+function generateGlobalHeartbeat(vaultDir: string): void {
+  const globalHeartbeatPath = join(vaultDir, 'heartbeat.md');
+  const projectsDir = join(vaultDir, 'projects');
+
+  if (!existsSync(projectsDir)) return;
+
+  const projects: { name: string; heartbeatPath: string }[] = [];
+  try {
+    const entries = readdirSync(projectsDir);
+    for (const entry of entries) {
+      const heartbeatLink = join(projectsDir, entry, 'heartbeat.md');
+      if (existsSync(heartbeatLink)) {
+        projects.push({ name: entry, heartbeatPath: heartbeatLink });
+      }
+    }
+  } catch {
+    return;
+  }
+
+  const projectSummaries: string[] = [];
+  for (const project of projects) {
+    try {
+      const content = readFileSync(project.heartbeatPath, 'utf-8');
+      // Parse task blocks (### headings under ## Tasks)
+      const taskBlocks = content.split(/^### /m).slice(1);
+      let enabledCount = 0;
+      let disabledCount = 0;
+      const taskLines: string[] = [];
+
+      for (const block of taskBlocks) {
+        const nameMatch = block.match(/^(.+)/);
+        const name = nameMatch ? nameMatch[1].trim() : 'Unknown';
+        const scheduleMatch = block.match(/\*\*Schedule\*\*:\s*(.+)/);
+        const enabledMatch = block.match(/\*\*Enabled\*\*:\s*(true|false)/);
+        const schedule = scheduleMatch ? scheduleMatch[1].trim() : '—';
+        const enabled = enabledMatch ? enabledMatch[1].trim() === 'true' : false;
+
+        if (enabled) enabledCount++;
+        else disabledCount++;
+
+        taskLines.push(`| ${name} | ${schedule} | ${enabled ? 'Active' : 'Disabled'} |`);
+      }
+
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        `**Active**: ${enabledCount} | **Disabled**: ${disabledCount}`,
+        '',
+      );
+
+      if (taskLines.length > 0) {
+        projectSummaries.push(
+          '| Task | Schedule | Status |',
+          '|------|----------|--------|',
+          ...taskLines,
+          '',
+        );
+      }
+
+      projectSummaries.push(
+        `> See: [[${project.name}/heartbeat.md|Full Heartbeat]]`,
+        '',
+      );
+    } catch {
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        '_Heartbeat not accessible_',
+        '',
+      );
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const output = [
+    '# Global Heartbeat',
+    '',
+    `**Last Updated**: ${today}`,
+    `**Projects**: ${projects.length}`,
+    '',
+    '---',
+    '',
+    ...(projectSummaries.length > 0
+      ? projectSummaries
+      : ['_No projects with heartbeat files found._', '']),
+  ].join('\n');
+
+  writeFileSync(globalHeartbeatPath, output, 'utf-8');
+}
+
+/**
+ * Generates or updates ~/plan-flow/brain/ledger.md — a global aggregator
+ * that shows learnings and project quirks across all projects.
+ */
+function generateGlobalLedger(vaultDir: string): void {
+  const globalLedgerPath = join(vaultDir, 'ledger.md');
+  const projectsDir = join(vaultDir, 'projects');
+
+  if (!existsSync(projectsDir)) return;
+
+  const projects: { name: string; ledgerPath: string }[] = [];
+  try {
+    const entries = readdirSync(projectsDir);
+    for (const entry of entries) {
+      const ledgerLink = join(projectsDir, entry, 'ledger.md');
+      if (existsSync(ledgerLink)) {
+        projects.push({ name: entry, ledgerPath: ledgerLink });
+      }
+    }
+  } catch {
+    return;
+  }
+
+  const projectSummaries: string[] = [];
+  for (const project of projects) {
+    try {
+      const content = readFileSync(project.ledgerPath, 'utf-8');
+      // Count entries per section
+      const sections = content.split(/^## /m).slice(1);
+      const sectionCounts: string[] = [];
+
+      for (const section of sections) {
+        const titleMatch = section.match(/^(.+)/);
+        const title = titleMatch ? titleMatch[1].trim() : 'Unknown';
+        // Count bullet entries (lines starting with -)
+        const entries = (section.match(/^- .+/gm) || []).length;
+        if (entries > 0) {
+          sectionCounts.push(`| ${title} | ${entries} |`);
+        }
+      }
+
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+      );
+
+      if (sectionCounts.length > 0) {
+        projectSummaries.push(
+          '| Section | Entries |',
+          '|---------|---------|',
+          ...sectionCounts,
+          '',
+        );
+      } else {
+        projectSummaries.push('_No learnings recorded yet._', '');
+      }
+
+      projectSummaries.push(
+        `> See: [[${project.name}/ledger.md|Full Ledger]]`,
+        '',
+      );
+    } catch {
+      projectSummaries.push(
+        `### [[${project.name}]]`,
+        '',
+        '_Ledger not accessible_',
+        '',
+      );
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const output = [
+    '# Global Ledger',
+    '',
+    `**Last Updated**: ${today}`,
+    `**Projects**: ${projects.length}`,
+    '',
+    '---',
+    '',
+    ...(projectSummaries.length > 0
+      ? projectSummaries
+      : ['_No projects with ledger files found._', '']),
+  ].join('\n');
+
+  writeFileSync(globalLedgerPath, output, 'utf-8');
 }
 
 /**

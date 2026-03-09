@@ -58,6 +58,51 @@ The memory file uses a markdown table for parseability and compact representatio
 
 ---
 
+## Vault Sync
+
+The project memory is linked into the central Obsidian vault at `~/plan-flow/brain/projects/{project}/memory.md` (symlink). A **global memory** at `~/plan-flow/brain/memory.md` aggregates all projects, showing recent skill completions for a cross-project activity view.
+
+### When Global Updates Happen
+
+The global memory MUST be synced **every time** `flow/memory.md` is modified. This is not optional.
+
+#### Sync Trigger
+
+After **every** Edit or Write to `flow/memory.md`, you MUST also update the global memory at `~/plan-flow/brain/memory.md`:
+
+1. **Read** `~/plan-flow/brain/memory.md`
+2. **Count** total entries (rows matching `| YYYY-` pattern) in this project's memory
+3. **Extract** the 5 most recent entries (first 5 data rows) for the preview table
+4. **Update** only the current project's section with new counts and preview rows
+5. **Update** the `**Last Updated**` date to today
+
+#### Sync Rules
+
+- **Always sync**: Every memory edit triggers a sync — no exceptions
+- **Only update your project**: Do not recalculate data for other projects
+- **Preview table**: Show Date, Skill, Feature, Summary (skip Artifact column for brevity)
+- **Preserve format**: Keep the existing global memory format (wiki-links, table, see-link)
+- **Create if missing**: If `~/plan-flow/brain/memory.md` doesn't exist, create it with the standard format
+
+#### Example Sync
+
+After editing `flow/memory.md` for project `parcels` with 12 total entries:
+
+```markdown
+### [[parcels]]
+
+**Total entries**: 12
+
+| Date | Skill | Feature | Summary |
+|------|-------|---------|---------|
+| 2026-03-09 | create-plan | [[saved-search-alerts]] | Created 5-phase plan for alerts |
+| 2026-03-08 | discovery-plan | [[saved-search-alerts]] | Gathered requirements for alerts |
+
+> See: [[parcels/memory.md|Full Memory]]
+```
+
+---
+
 ## Rules
 
 1. **Append-only**: Never modify or delete existing entries
@@ -67,3 +112,4 @@ The memory file uses a markdown table for parseability and compact representatio
 5. **Artifact paths**: Use backtick-wrapped relative paths from project root
 6. **Summary brevity**: Max 1 line, focus on outcome not process
 7. **Auto-create**: If `flow/memory.md` doesn't exist when needed, create it using the template above
+8. **Vault sync**: Every memory update MUST also update `~/plan-flow/brain/memory.md` — see Vault Sync section

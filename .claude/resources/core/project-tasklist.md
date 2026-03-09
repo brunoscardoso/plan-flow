@@ -102,7 +102,7 @@ The project tasklist is linked into the central Obsidian vault at `~/plan-flow/b
 
 1. During `plan-flow init`, the project's `flow/tasklist.md` is symlinked into the vault
 2. A global `~/plan-flow/brain/tasklist.md` is generated with per-project summaries
-3. Each project summary shows In Progress / To Do / Done counts
+3. Each project summary shows In Progress / Backlog (if present) / To Do / Done counts
 4. Obsidian `[[project-name]]` links connect the global view to each project
 
 ### Global Tasklist Format
@@ -136,13 +136,48 @@ The project tasklist is linked into the central Obsidian vault at `~/plan-flow/b
 > See: [[api-service/tasklist.md|Full Tasklist]]
 ```
 
-### When Global Updates Happen
+### When Global Updates Happen — Vault Sync
 
-The global tasklist is regenerated:
-- On `plan-flow init` (during vault registration)
-- Engineers can refresh it manually by re-running `plan-flow init`
+The global tasklist MUST be synced **every time** a project's `flow/tasklist.md` is modified. This is not optional.
 
-> **Note**: The global tasklist is a snapshot. Since each project's tasklist is symlinked into the vault, Obsidian users can navigate directly to any project's live tasklist via the `[[project/tasklist.md]]` link.
+#### Sync Trigger
+
+After **every** Edit or Write to `flow/tasklist.md`, you MUST also update the global tasklist at `~/plan-flow/brain/tasklist.md`:
+
+1. **Count tasks** in the updated `flow/tasklist.md` by section:
+   - Split content by `## ` headings
+   - Count lines matching `^- \[[ x]\] .+` in each section
+   - Sections to count: **In Progress**, **Backlog** (if present), **To Do**, **Done**
+2. **Read** `~/plan-flow/brain/tasklist.md`
+3. **Update** only the current project's section with new counts
+4. **Update** the `**Last Updated**` date to today
+
+#### Sync Rules
+
+- **Always sync**: Every tasklist edit triggers a sync — no exceptions
+- **Only update your project**: Do not recalculate counts for other projects
+- **Include Backlog**: If the project uses a `## Backlog` section, include it in the counts table
+- **Preserve format**: Keep the existing global tasklist format (wiki-links, table, see-link)
+- **Create if missing**: If `~/plan-flow/brain/tasklist.md` doesn't exist, create it with the standard format
+
+#### Example Sync
+
+After editing `flow/tasklist.md` for project `parcels` where counts are: In Progress=1, Backlog=10, To Do=2, Done=3:
+
+```markdown
+### [[parcels]]
+
+| Status | Count |
+|--------|-------|
+| In Progress | 1 |
+| Backlog | 10 |
+| To Do | 2 |
+| Done | 3 |
+
+> See: [[parcels/tasklist.md|Full Tasklist]]
+```
+
+> **Note**: The global tasklist is also regenerated during `plan-flow init`. Between init runs, the AI agent keeps it in sync via the rules above.
 
 ---
 
