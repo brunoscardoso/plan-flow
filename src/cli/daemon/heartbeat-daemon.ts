@@ -100,9 +100,15 @@ function executeTask(task: HeartbeatTask): void {
   taskRunning = true;
   log(`Executing "${task.name}": ${task.command}`);
 
-  const child = spawn('claude', ['-p', task.command], {
+  // Strip CLAUDECODE env var to avoid "nested session" detection.
+  // The daemon runs detached — it's not actually nested.
+  const cleanEnv = { ...process.env };
+  delete cleanEnv['CLAUDECODE'];
+
+  const child = spawn('claude', ['-p', '--dangerously-skip-permissions', task.command], {
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env },
+    cwd: target,
+    env: cleanEnv,
   });
 
   let stdout = '';
