@@ -29,6 +29,7 @@ DESCRIPTION:
 USAGE:
   /flow <key>=<value> [key=value ...]   Set one or more settings
   /flow <prompt>                         Enable autopilot and start flow with prompt
+  /flow cost [--today|--week|--month]   Show token usage and cost report
   /flow -status                          Show all current settings
   /flow -reset                           Reset all settings to defaults
   /flow -help                            Show this help
@@ -39,12 +40,23 @@ SETTINGS:
   push=true|false        Auto-push after all phases + build/test pass (default: false)
   branch=<name>          Target branch for git operations (default: current branch)
 
+COST REPORTING:
+  /flow cost                             Last 7 days summary (default)
+  /flow cost --today                     Today's usage only
+  /flow cost --week                      Last 7 days
+  /flow cost --month                     Last 30 days
+  /flow cost --project <name>            Filter by project name
+  /flow cost --session <id>              Show single session detail
+  /flow cost --detail                    Include model breakdown
+
 EXAMPLES:
   /flow autopilot=true                    # Enable autopilot
   /flow commit=true push=true             # Enable git control (works without autopilot)
   /flow autopilot=true commit=true        # Enable both
   /flow branch=development                # Set target branch
   /flow commit=false push=false           # Disable git control
+  /flow cost                              # Show cost report (last 7 days)
+  /flow cost --today --detail             # Today's costs with model breakdown
   /flow -status                           # Show current config
   /flow -reset                            # Reset everything
 
@@ -82,9 +94,10 @@ CONFIG FILE:
 
 Parse the user input to determine what action to take:
 
-1. **Scan for `key=value` pairs**: Extract all `key=value` tokens from the input
-2. **Check for flags**: `-status`, `-reset`, `-help`
-3. **Remaining text**: Anything left after extracting keys and flags is a prompt
+1. **Check for `cost` subcommand**: If input starts with `cost`, route to cost reporting (see Step 6)
+2. **Scan for `key=value` pairs**: Extract all `key=value` tokens from the input
+3. **Check for flags**: `-status`, `-reset`, `-help`
+4. **Remaining text**: Anything left after extracting keys and flags is a prompt
 
 **Valid keys**:
 
@@ -181,6 +194,23 @@ This is a **feature request with autopilot**:
 **Examples**:
 - `/flow add dark mode` → `autopilot=true`, start discovery
 - `/flow commit=true push=true add user auth` → `autopilot=true, commit=true, push=true`, start discovery
+
+---
+
+### Step 6: Cost Reporting (`/flow cost`)
+
+If the input starts with `cost`, route to the cost reporting flow:
+
+1. **Load the skill**: Read `.claude/resources/skills/flow-cost.md` for full implementation details
+2. **Parse cost flags**: `--today`, `--week`, `--month`, `--project <name>`, `--session <id>`, `--detail`
+3. **Read metrics file**: `~/.claude/metrics/costs.jsonl`
+4. **Filter and aggregate**: Apply time/project/session filters, group by project
+5. **Display summary table**: Format tokens (K/M), costs ($X.XX), present as markdown table
+6. **STOP**: After showing the report, wait for user input
+
+**Default behavior** (no flags): Show last 7 days summary grouped by project.
+
+See `.claude/resources/skills/flow-cost.md` for detailed formatting rules and examples.
 
 ---
 

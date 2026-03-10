@@ -144,4 +144,82 @@ describe('initClaude', () => {
     expect(result.skipped.length).toBeGreaterThan(0);
     expect(result.created).toHaveLength(0);
   });
+
+  describe('cost tracking hooks', () => {
+    it('should copy hook scripts to .claude/hooks/', async () => {
+      await initClaude(tempDir, { force: false });
+
+      const hooksDir = join(tempDir, '.claude', 'hooks');
+      expect(existsSync(hooksDir)).toBe(true);
+      expect(existsSync(join(hooksDir, 'cost-tracker.cjs'))).toBe(true);
+      expect(existsSync(join(hooksDir, 'cost-display.cjs'))).toBe(true);
+      expect(existsSync(join(hooksDir, 'session-summary.cjs'))).toBe(true);
+    });
+
+    it('should register hooks in .claude/settings.json', async () => {
+      await initClaude(tempDir, { force: false });
+
+      const settingsPath = join(tempDir, '.claude', 'settings.json');
+      expect(existsSync(settingsPath)).toBe(true);
+
+      const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+      expect(settings.hooks).toBeDefined();
+      expect(settings.hooks.Stop).toBeDefined();
+      expect(settings.hooks.SessionEnd).toBeDefined();
+
+      // Verify Stop hook is async
+      const stopHook = settings.hooks.Stop[0].hooks[0];
+      expect(stopHook.command).toBe('.claude/hooks/cost-tracker.cjs');
+      expect(stopHook.async).toBe(true);
+
+      // Verify SessionEnd hook
+      const sessionHook = settings.hooks.SessionEnd[0].hooks[0];
+      expect(sessionHook.command).toBe('.claude/hooks/session-summary.cjs');
+    });
+
+    it('should preserve existing hooks in settings.json', async () => {
+      // Create settings with existing hooks
+      mkdirSync(join(tempDir, '.claude'), { recursive: true });
+      writeFileSync(
+        join(tempDir, '.claude', 'settings.json'),
+        JSON.stringify({
+          hooks: {
+            Stop: [{
+              hooks: [{ type: 'command', command: 'my-custom-hook.sh' }],
+            }],
+          },
+          otherSetting: true,
+        }, null, 2),
+        'utf-8'
+      );
+
+      await initClaude(tempDir, { force: false });
+
+      const settings = JSON.parse(
+        readFileSync(join(tempDir, '.claude', 'settings.json'), 'utf-8')
+      );
+
+      // Existing hook + cost-tracker + cost-display = 3
+      expect(settings.hooks.Stop.length).toBe(3);
+      expect(settings.hooks.Stop[0].hooks[0].command).toBe('my-custom-hook.sh');
+      expect(settings.hooks.Stop[1].hooks[0].command).toBe('.claude/hooks/cost-tracker.cjs');
+      expect(settings.hooks.Stop[2].hooks[0].command).toBe('.claude/hooks/cost-display.cjs');
+
+      // Other settings preserved
+      expect(settings.otherSetting).toBe(true);
+    });
+
+    it('should not duplicate hooks on repeated init', async () => {
+      await initClaude(tempDir, { force: false });
+      await initClaude(tempDir, { force: false });
+
+      const settings = JSON.parse(
+        readFileSync(join(tempDir, '.claude', 'settings.json'), 'utf-8')
+      );
+
+      // Should have exactly 2 Stop hooks (cost-tracker + cost-display) and 1 SessionEnd
+      expect(settings.hooks.Stop.length).toBe(2);
+      expect(settings.hooks.SessionEnd.length).toBe(1);
+    });
+  });
 });

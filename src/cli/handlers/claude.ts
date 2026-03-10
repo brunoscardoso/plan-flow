@@ -231,11 +231,128 @@ export async function initClaude(
     }
   }
 
-  // 5. Handle CLAUDE.md
+  // 5. Install cost tracking hooks
+  const hooksResult = installCostHooks(target, packageRoot, options);
+  result.created.push(...hooksResult.created);
+  result.skipped.push(...hooksResult.skipped);
+  result.updated.push(...hooksResult.updated);
+
+  // 6. Handle CLAUDE.md
   const mdResult = handleClaudeMd(target, packageRoot, options);
   result.created.push(...mdResult.created);
   result.skipped.push(...mdResult.skipped);
   result.updated.push(...mdResult.updated);
 
   return result;
+}
+
+function installCostHooks(
+  target: string,
+  packageRoot: string,
+  options: CopyOptions
+): CopyResult {
+  const result: CopyResult = { created: [], skipped: [], updated: [] };
+  const hookScripts = ['cost-tracker.cjs', 'cost-display.cjs', 'session-summary.cjs'];
+  const hooksSrc = join(packageRoot, 'scripts', 'hooks');
+  const hooksDest = join(target, '.claude', 'hooks');
+
+  // Copy hook scripts
+  for (const script of hookScripts) {
+    const src = join(hooksSrc, script);
+    if (!existsSync(src)) continue;
+
+    ensureDir(hooksDest);
+    const dest = join(hooksDest, script);
+
+    const copyResult = copyFile(src, dest, options);
+    result.created.push(...copyResult.created);
+    result.skipped.push(...copyResult.skipped);
+    result.updated.push(...copyResult.updated);
+
+    for (const f of copyResult.created) {
+      log.success(`Created ${f.replace(target + '/', '')}`);
+    }
+    for (const f of copyResult.skipped) {
+      log.skip(`Skipped ${f.replace(target + '/', '')}`);
+    }
+    for (const f of copyResult.updated) {
+      log.warn(`Updated ${f.replace(target + '/', '')}`);
+    }
+  }
+
+  // Register hooks in .claude/settings.json
+  const settingsPath = join(target, '.claude', 'settings.json');
+  try {
+    let settings: Record<string, unknown> = {};
+    if (existsSync(settingsPath)) {
+      settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+    }
+
+    const hooks = (settings.hooks || {}) as Record<string, unknown[]>;
+    let updated = false;
+
+    // Register Stop hook for cost-tracker (async — background file write)
+    const costTrackerCmd = '.claude/hooks/cost-tracker.cjs';
+    if (!hasHookCommand(hooks, 'Stop', costTrackerCmd)) {
+      if (!hooks['Stop']) hooks['Stop'] = [];
+      (hooks['Stop'] as unknown[]).push({
+        hooks: [{ type: 'command', command: costTrackerCmd, async: true }],
+      });
+      updated = true;
+    }
+
+    // Register Stop hook for cost-display (synchronous — shows after each response)
+    const costDisplayCmd = '.claude/hooks/cost-display.cjs';
+    if (!hasHookCommand(hooks, 'Stop', costDisplayCmd)) {
+      if (!hooks['Stop']) hooks['Stop'] = [];
+      (hooks['Stop'] as unknown[]).push({
+        hooks: [{ type: 'command', command: costDisplayCmd }],
+      });
+      updated = true;
+    }
+
+    // Register SessionEnd hook for session-summary
+    const sessionSummaryCmd = '.claude/hooks/session-summary.cjs';
+    if (!hasHookCommand(hooks, 'SessionEnd', sessionSummaryCmd)) {
+      if (!hooks['SessionEnd']) hooks['SessionEnd'] = [];
+      (hooks['SessionEnd'] as unknown[]).push({
+        hooks: [{ type: 'command', command: sessionSummaryCmd }],
+      });
+      updated = true;
+    }
+
+    if (updated) {
+      settings.hooks = hooks;
+      ensureDir(join(target, '.claude'));
+      writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
+      log.success('Registered cost tracking hooks in .claude/settings.json');
+      result.updated.push(settingsPath);
+    } else {
+      log.skip('Cost tracking hooks already registered');
+      result.skipped.push(settingsPath);
+    }
+  } catch (err) {
+    log.warn(`Could not register hooks: ${(err as Error).message}`);
+  }
+
+  return result;
+}
+
+function hasHookCommand(
+  hooks: Record<string, unknown[]>,
+  event: string,
+  command: string
+): boolean {
+  const eventHooks = hooks[event];
+  if (!Array.isArray(eventHooks)) return false;
+
+  for (const entry of eventHooks) {
+    const hookEntry = entry as { hooks?: Array<{ command?: string }> };
+    if (hookEntry.hooks) {
+      for (const h of hookEntry.hooks) {
+        if (h.command === command) return true;
+      }
+    }
+  }
+  return false;
 }

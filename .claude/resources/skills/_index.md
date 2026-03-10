@@ -5,7 +5,7 @@
 
 Skills implement the workflow logic for commands. Each skill orchestrates a specific process like discovery, planning, execution, or code review.
 
-**Total Files**: 10 files, ~3,100 lines
+**Total Files**: 11 files, ~3,300 lines
 **Reference Codes**: SKL-BR-1 through SKL-TEST-5
 
 > **Note**: All skills (except brain and flow) include a Resource Capture section. During execution, the LLM watches for valuable reference materials and asks the user before saving to `flow/resources/`. See `.claude/resources/core/resource-capture.md` for full rules.
@@ -57,6 +57,15 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | SKL-LRN-2 | Workflow, output format, and validation | learn-skill.md | 57-115 |
 | SKL-LRN-3 | Teaching mode restrictions and curriculum generation | learn-skill.md | 140-175 |
 | SKL-LRN-4 | Step confirmation flow and storage rules | learn-skill.md | 177-210 |
+
+### Flow Cost Skill (`flow-cost.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| SKL-COST-1 | Usage and filter flags | flow-cost.md | 7-18 |
+| SKL-COST-2 | Implementation steps (read, filter, aggregate, format) | flow-cost.md | 20-85 |
+| SKL-COST-3 | Output format examples (default, detail, session) | flow-cost.md | 87-145 |
+| SKL-COST-4 | JSONL schema and error handling | flow-cost.md | 147-195 |
 
 ### Execute Plan Skill (`execute-plan-skill.md`)
 
@@ -165,6 +174,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
 | `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
+| `/flow cost` | flow-cost | SKL-COST-1 through SKL-COST-4 |
 | `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-4 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |
 | `/create-plan` | create-plan-skill | SKL-PLN-1 through SKL-PLN-4 |
@@ -189,4 +199,5 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | write-tests-skill | 294 | 5 | Medium - iterative testing |
 | create-plan-skill | 271 | 4 | Low - plan structuring |
 | learn-skill | 185 | 4 | Medium - pattern extraction + teaching mode |
+| flow-cost | 195 | 4 | Low - JSONL parsing and reporting |
 | create-contract-skill | 239 | 4 | Low - contract generation |
