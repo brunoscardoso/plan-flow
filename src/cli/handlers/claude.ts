@@ -231,8 +231,8 @@ export async function initClaude(
     }
   }
 
-  // 5. Install cost tracking hooks
-  const hooksResult = installCostHooks(target, packageRoot, options);
+  // 5. Install hooks (cost tracking, compact suggestions, pre-compact state)
+  const hooksResult = installHooks(target, packageRoot, options);
   result.created.push(...hooksResult.created);
   result.skipped.push(...hooksResult.skipped);
   result.updated.push(...hooksResult.updated);
@@ -246,13 +246,19 @@ export async function initClaude(
   return result;
 }
 
-function installCostHooks(
+function installHooks(
   target: string,
   packageRoot: string,
   options: CopyOptions
 ): CopyResult {
   const result: CopyResult = { created: [], skipped: [], updated: [] };
-  const hookScripts = ['cost-tracker.cjs', 'cost-display.cjs', 'session-summary.cjs'];
+  const hookScripts = [
+    'cost-tracker.cjs',
+    'cost-display.cjs',
+    'suggest-compact.cjs',
+    'pre-compact-save.cjs',
+    'session-summary.cjs',
+  ];
   const hooksSrc = join(packageRoot, 'scripts', 'hooks');
   const hooksDest = join(target, '.claude', 'hooks');
 
@@ -311,6 +317,26 @@ function installCostHooks(
       updated = true;
     }
 
+    // Register Stop hook for suggest-compact (synchronous — displays immediately)
+    const suggestCompactCmd = '.claude/hooks/suggest-compact.cjs';
+    if (!hasHookCommand(hooks, 'Stop', suggestCompactCmd)) {
+      if (!hooks['Stop']) hooks['Stop'] = [];
+      (hooks['Stop'] as unknown[]).push({
+        hooks: [{ type: 'command', command: suggestCompactCmd }],
+      });
+      updated = true;
+    }
+
+    // Register PreCompact hook for pre-compact-save (both auto and manual triggers)
+    const preCompactCmd = '.claude/hooks/pre-compact-save.cjs';
+    if (!hasHookCommand(hooks, 'PreCompact', preCompactCmd)) {
+      if (!hooks['PreCompact']) hooks['PreCompact'] = [];
+      (hooks['PreCompact'] as unknown[]).push({
+        hooks: [{ type: 'command', command: preCompactCmd }],
+      });
+      updated = true;
+    }
+
     // Register SessionEnd hook for session-summary
     const sessionSummaryCmd = '.claude/hooks/session-summary.cjs';
     if (!hasHookCommand(hooks, 'SessionEnd', sessionSummaryCmd)) {
@@ -325,10 +351,10 @@ function installCostHooks(
       settings.hooks = hooks;
       ensureDir(join(target, '.claude'));
       writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
-      log.success('Registered cost tracking hooks in .claude/settings.json');
+      log.success('Registered hooks in .claude/settings.json');
       result.updated.push(settingsPath);
     } else {
-      log.skip('Cost tracking hooks already registered');
+      log.skip('Hooks already registered');
       result.skipped.push(settingsPath);
     }
   } catch (err) {

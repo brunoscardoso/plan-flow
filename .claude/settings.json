@@ -17,6 +17,24 @@
             "command": ".claude/hooks/cost-display.cjs"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/suggest-compact.cjs"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-compact-save.cjs"
+          }
+        ]
       }
     ],
     "SessionEnd": [

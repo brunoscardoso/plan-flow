@@ -145,18 +145,20 @@ describe('initClaude', () => {
     expect(result.created).toHaveLength(0);
   });
 
-  describe('cost tracking hooks', () => {
-    it('should copy hook scripts to .claude/hooks/', async () => {
+  describe('hooks installation', () => {
+    it('should copy all hook scripts to .claude/hooks/', async () => {
       await initClaude(tempDir, { force: false });
 
       const hooksDir = join(tempDir, '.claude', 'hooks');
       expect(existsSync(hooksDir)).toBe(true);
       expect(existsSync(join(hooksDir, 'cost-tracker.cjs'))).toBe(true);
       expect(existsSync(join(hooksDir, 'cost-display.cjs'))).toBe(true);
+      expect(existsSync(join(hooksDir, 'suggest-compact.cjs'))).toBe(true);
+      expect(existsSync(join(hooksDir, 'pre-compact-save.cjs'))).toBe(true);
       expect(existsSync(join(hooksDir, 'session-summary.cjs'))).toBe(true);
     });
 
-    it('should register hooks in .claude/settings.json', async () => {
+    it('should register all hooks in .claude/settings.json', async () => {
       await initClaude(tempDir, { force: false });
 
       const settingsPath = join(tempDir, '.claude', 'settings.json');
@@ -165,20 +167,26 @@ describe('initClaude', () => {
       const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
       expect(settings.hooks).toBeDefined();
       expect(settings.hooks.Stop).toBeDefined();
+      expect(settings.hooks.PreCompact).toBeDefined();
       expect(settings.hooks.SessionEnd).toBeDefined();
 
-      // Verify Stop hook is async
-      const stopHook = settings.hooks.Stop[0].hooks[0];
-      expect(stopHook.command).toBe('.claude/hooks/cost-tracker.cjs');
-      expect(stopHook.async).toBe(true);
+      // Verify Stop hooks: cost-tracker (async), cost-display (sync), suggest-compact (sync)
+      expect(settings.hooks.Stop.length).toBe(3);
+      expect(settings.hooks.Stop[0].hooks[0].command).toBe('.claude/hooks/cost-tracker.cjs');
+      expect(settings.hooks.Stop[0].hooks[0].async).toBe(true);
+      expect(settings.hooks.Stop[1].hooks[0].command).toBe('.claude/hooks/cost-display.cjs');
+      expect(settings.hooks.Stop[2].hooks[0].command).toBe('.claude/hooks/suggest-compact.cjs');
+
+      // Verify PreCompact hook
+      expect(settings.hooks.PreCompact.length).toBe(1);
+      expect(settings.hooks.PreCompact[0].hooks[0].command).toBe('.claude/hooks/pre-compact-save.cjs');
 
       // Verify SessionEnd hook
-      const sessionHook = settings.hooks.SessionEnd[0].hooks[0];
-      expect(sessionHook.command).toBe('.claude/hooks/session-summary.cjs');
+      expect(settings.hooks.SessionEnd.length).toBe(1);
+      expect(settings.hooks.SessionEnd[0].hooks[0].command).toBe('.claude/hooks/session-summary.cjs');
     });
 
     it('should preserve existing hooks in settings.json', async () => {
-      // Create settings with existing hooks
       mkdirSync(join(tempDir, '.claude'), { recursive: true });
       writeFileSync(
         join(tempDir, '.claude', 'settings.json'),
@@ -199,11 +207,12 @@ describe('initClaude', () => {
         readFileSync(join(tempDir, '.claude', 'settings.json'), 'utf-8')
       );
 
-      // Existing hook + cost-tracker + cost-display = 3
-      expect(settings.hooks.Stop.length).toBe(3);
+      // Existing hook + cost-tracker + cost-display + suggest-compact = 4
+      expect(settings.hooks.Stop.length).toBe(4);
       expect(settings.hooks.Stop[0].hooks[0].command).toBe('my-custom-hook.sh');
       expect(settings.hooks.Stop[1].hooks[0].command).toBe('.claude/hooks/cost-tracker.cjs');
       expect(settings.hooks.Stop[2].hooks[0].command).toBe('.claude/hooks/cost-display.cjs');
+      expect(settings.hooks.Stop[3].hooks[0].command).toBe('.claude/hooks/suggest-compact.cjs');
 
       // Other settings preserved
       expect(settings.otherSetting).toBe(true);
@@ -217,8 +226,9 @@ describe('initClaude', () => {
         readFileSync(join(tempDir, '.claude', 'settings.json'), 'utf-8')
       );
 
-      // Should have exactly 2 Stop hooks (cost-tracker + cost-display) and 1 SessionEnd
-      expect(settings.hooks.Stop.length).toBe(2);
+      // 3 Stop hooks, 1 PreCompact, 1 SessionEnd — no duplicates
+      expect(settings.hooks.Stop.length).toBe(3);
+      expect(settings.hooks.PreCompact.length).toBe(1);
       expect(settings.hooks.SessionEnd.length).toBe(1);
     });
   });
