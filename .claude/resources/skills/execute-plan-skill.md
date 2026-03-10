@@ -234,6 +234,31 @@ Then continue to the next phase (NO BUILD HERE).
 
 ---
 
+### Step 5b: Phase-Boundary Context Check
+
+**After each phase completes**, check context window usage by looking at the token count from the last response. If you notice the conversation is getting long (many phases completed, lots of file reads/edits), **proactively run `/compact`** with a summary of remaining work.
+
+**When to compact** (at phase boundaries):
+- Context feels heavy (many tool calls, large file reads accumulated)
+- Multiple phases completed and more remain
+- You're about to start a complex phase (complexity >= 6)
+
+**How to compact at a phase boundary**:
+
+Run `/compact` with instructions that preserve execution state:
+
+```
+/compact Executing plan: [plan file path]. Completed phases: [list]. Next phase: [name and scope]. Key files modified: [list]. Active tasklist items: [list from flow/tasklist.md]. Resume execution from phase [N].
+```
+
+**Rules**:
+- NEVER compact mid-phase — only at phase boundaries (between phases)
+- Always include enough context in the compact instructions to resume
+- After compaction, re-read the plan file and continue from the next phase
+- In autopilot mode, compact automatically without asking — this is a maintenance action, not a user decision
+
+---
+
 ### Step 6: Handle Tests Phase
 
 The Tests phase is **always executed separately**, regardless of complexity score:

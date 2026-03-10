@@ -85,6 +85,7 @@ RELATED COMMANDS:
 | ------------------------ | -------------------------------------------------------- |
 | **Build ONLY at End**    | Do NOT run build after each phase - only at the very end |
 | **No Direct DB/ORM**     | NEVER run ORM or database commands directly              |
+| **Compact at Boundaries**| After each phase, if context is heavy, run `/compact` with execution state (see Step 5b in skill) |
 | **Complete and Stop**    | After execution, STOP and wait for user (unless autopilot ON) |
 
 ---
