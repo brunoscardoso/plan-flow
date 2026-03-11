@@ -209,7 +209,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | execute-plan-skill | 388 | 6 | High - phase execution logic |
 | review-code-skill | 308 | 5 | Medium - pattern matching |
 | discovery-skill | 295 | 4 | Medium - requirements gathering |
-| brainstorm-skill | 220 | 3 | Medium - conversational AI |
+| brainstorm-skill | 280 | 3 | Medium - structured exploration with interactive questions |
 | write-tests-skill | 294 | 5 | Medium - iterative testing |
 | create-plan-skill | 271 | 4 | Low - plan structuring |
 | learn-skill | 185 | 4 | Medium - pattern extraction + teaching mode |

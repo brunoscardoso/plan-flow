@@ -45,12 +45,12 @@ This is the main change — rewriting the core interaction loop.
 **Scope**: Update help text, critical rules, and skills index to reflect the new interaction pattern
 **Complexity**: 2/10
 
-- [ ] Update `.claude/commands/brainstorm.md`:
+- [x] Update `.claude/commands/brainstorm.md`:
   - Help section: change "LLM asks one question at a time (not batched)" to "LLM presents batched questions with options (3-4 per round, with recommended choices)"
   - Help section: update WORKFLOW step 2 accordingly
   - Critical rules table: change "One question per turn. Never batch 3-4 questions." to "Questions in batches of 3-4 with options. Commentary between batches."
   - Help WHAT IT IS section: update "challenges, suggests, connects" to include "presents structured options"
-- [ ] Update `.claude/resources/skills/_index.md`:
+- [x] Update `.claude/resources/skills/_index.md`:
   - Update brainstorm skill description in Skill Complexity table if it references "conversational" — should mention structured questions
 
 ---

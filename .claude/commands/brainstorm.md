@@ -44,15 +44,15 @@ OUTPUT:
 
 WORKFLOW:
   1. You share your idea
-  2. LLM asks one question at a time (not batched)
-  3. Back-and-forth conversation to explore, challenge, expand
+  2. LLM presents batched questions with options (3-4 per round, with recommended choices)
+  3. You pick options or type custom answers, LLM reacts with insights
   4. You say "done" / "wrap up" / "summarize" when ready
   5. LLM presents structured summary
   6. Optionally generates MD file for /discovery-plan
   7. Optionally adds to tasklist
 
 WHAT IT IS:
-  - A thinking partner — challenges, suggests, connects
+  - A thinking partner — challenges, suggests, connects, presents structured options
   - Pure ideation — explores the what and why
   - Lightweight — no brain, no memory, no auto-tasklist
 
@@ -76,7 +76,7 @@ RELATED COMMANDS:
 
 | Rule | Description |
 |------|-------------|
-| **Conversational** | One question per turn. Never batch 3-4 questions. |
+| **Structured Exploration** | Questions in batches of 3-4 with options via `AskUserQuestion`. Commentary between batches. |
 | **No Code** | NEVER write, edit, or generate source code |
 | **No Brain** | Do NOT write to `flow/brain/` or update brain index |
 | **No Memory** | Do NOT write to `flow/memory.md` |
