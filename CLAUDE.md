@@ -16,6 +16,7 @@ Use slash commands to invoke skills:
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brainstorm` | Free-form idea exploration with collaborative dialogue |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
@@ -27,10 +28,11 @@ Use slash commands to invoke skills:
 The recommended workflow is:
 
 1. `/setup` - Run once to index project patterns
-2. `/discovery-plan` - Gather requirements for a new feature
-3. `/create-plan` - Create structured implementation plan
-4. `/execute-plan` - Execute the plan phase by phase
-5. `/review-code` or `/review-pr` - Review changes before merging
+2. `/brainstorm` - (Optional) Explore and crystallize a vague idea
+3. `/discovery-plan` - Gather requirements for a new feature
+4. `/create-plan` - Create structured implementation plan
+5. `/execute-plan` - Execute the plan phase by phase
+6. `/review-code` or `/review-pr` - Review changes before merging
 
 ## Core Patterns
 
@@ -57,6 +59,7 @@ flow/
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
 │   └── errors/        # Reusable error patterns
+├── brainstorms/       # Brainstorm exploration documents
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
@@ -172,17 +175,18 @@ npm run test
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brainstorm` | Free-form idea exploration with collaborative dialogue |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
-| `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
-| `/flow` | Configure plan-flow settings — autopilot, git control, runtime options (`key=value` syntax) |
+| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow
 
 1. `/setup` - Run once to index project patterns
-2. `/discovery-plan` - Gather requirements for a new feature
-3. `/create-plan` - Create structured implementation plan
-4. `/execute-plan` - Execute the plan phase by phase
-5. `/review-code` or `/review-pr` - Review changes before merging
+2. `/brainstorm` - (Optional) Explore and crystallize a vague idea
+3. `/discovery-plan` - Gather requirements for a new feature
+4. `/create-plan` - Create structured implementation plan
+5. `/execute-plan` - Execute the plan phase by phase
+6. `/review-code` or `/review-pr` - Review changes before merging
 
 ## Session Start Behaviors
 
@@ -198,7 +202,7 @@ npm run test
 2. **Discovery First**: `/discovery-plan` is **required** before `/create-plan`. Plans cannot be created without a discovery document. No exceptions.
 3. **Tests Last**: Tests are always the last phase of any implementation plan.
 4. **Build at End Only**: Run `npm run build` only after ALL phases complete.
-5. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST use the Edit tool to write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory.
+5. **Tasklist is a file, not memory**: When adding, moving, or completing tasks, you MUST use the Edit tool to write changes to `flow/tasklist.md`. NEVER keep tasks only in conversation memory. If the user says "add to tasklist", read `flow/tasklist.md`, then Edit it. See `.claude/resources/core/project-tasklist.md` for full rules.
 
 ## Flow Directory Structure
 
@@ -209,12 +213,17 @@ flow/
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
 │   └── errors/        # Reusable error patterns
+├── brainstorms/       # Brainstorm exploration documents
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
 ├── references/        # Reference materials
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
+├── tasklist.md        # Project todo list (updated in real-time during execution)
+├── memory.md          # Persistent artifact tracker (completed skill executions)
+├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
+├── log.md             # Heartbeat log of important events
 ├── ledger.md          # Persistent project learning journal
 ├── .flowconfig        # Central config file (autopilot, git control, settings)
 └── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)

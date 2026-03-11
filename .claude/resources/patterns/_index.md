@@ -5,7 +5,7 @@
 
 Pattern files provide templates, examples, and guidelines for specific workflows. This is the largest category covering discovery, planning, testing, code review, and contracts.
 
-**Total Files**: 10 files, ~3,320 lines
+**Total Files**: 11 files, ~3,420 lines
 **Reference Codes**: PTN-BR-1 through PTN-PR-6
 
 ---
@@ -20,6 +20,13 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 | PTN-BR-2 | Wiki-link patterns and brain-capture block per skill | brain-patterns.md | 47-160 |
 | PTN-BR-3 | Feature status lifecycle and index update rules | brain-patterns.md | 162-210 |
 | PTN-BR-4 | Learning subdirectory for teaching curricula | brain-patterns.md | 12-14 |
+
+### Brainstorm Templates (`brainstorm-templates.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| PTN-BST-1 | Brainstorm document template with "For Discovery" bridge | brainstorm-templates.md | 5-75 |
+| PTN-BST-2 | Status definitions and file naming conventions | brainstorm-templates.md | 77-105 |
 
 ### Contract Patterns (`contract-patterns.md`)
 
@@ -185,6 +192,9 @@ Pattern files provide templates, examples, and guidelines for specific workflows
 ### Reviews
 - **PTN-REV-***: Code review templates
 - **PTN-PR-***: PR review patterns
+
+### Brainstorm
+- **PTN-BST-***: Brainstorm output templates
 
 ### Contracts
 - **PTN-CON-***: Integration contract patterns

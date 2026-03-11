@@ -5,7 +5,7 @@
 
 Skills implement the workflow logic for commands. Each skill orchestrates a specific process like discovery, planning, execution, or code review.
 
-**Total Files**: 11 files, ~3,300 lines
+**Total Files**: 12 files, ~3,500 lines
 **Reference Codes**: SKL-BR-1 through SKL-TEST-5
 
 > **Note**: All skills (except brain and flow) include a Resource Capture section. During execution, the LLM watches for valuable reference materials and asks the user before saving to `flow/resources/`. See `.claude/resources/core/resource-capture.md` for full rules.
@@ -15,6 +15,14 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 ---
 
 ## Reference Codes
+
+### Brainstorm Skill (`brainstorm-skill.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| SKL-BS-1 | Purpose, restrictions, and inputs | brainstorm-skill.md | 8-60 |
+| SKL-BS-2 | Conversational loop, question types, and silent tracking | brainstorm-skill.md | 62-150 |
+| SKL-BS-3 | End detection, summary, output generation, and tasklist offer | brainstorm-skill.md | 152-220 |
 
 ### Brain Skill (`brain-skill.md`)
 
@@ -175,6 +183,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
+| `/brainstorm` | brainstorm-skill | SKL-BS-1 through SKL-BS-3 |
 | `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
 | `/flow cost` | flow-cost | SKL-COST-1 through SKL-COST-4 |
 | `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-4 |
@@ -198,6 +207,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | execute-plan-skill | 388 | 6 | High - phase execution logic |
 | review-code-skill | 308 | 5 | Medium - pattern matching |
 | discovery-skill | 295 | 4 | Medium - requirements gathering |
+| brainstorm-skill | 220 | 3 | Medium - conversational AI |
 | write-tests-skill | 294 | 5 | Medium - iterative testing |
 | create-plan-skill | 271 | 4 | Low - plan structuring |
 | learn-skill | 185 | 4 | Medium - pattern extraction + teaching mode |

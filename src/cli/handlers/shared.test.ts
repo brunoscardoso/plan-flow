@@ -45,6 +45,8 @@ const EXPECTED_SUBDIRS = [
   'brain',
   'brain/features',
   'brain/errors',
+  'brain/learning',
+  'brainstorms',
   'contracts',
   'discovery',
   'plans',

@@ -74,9 +74,10 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 
 1. Identify references (look for @mentions, file paths, URLs)
 2. Read each file using the Read tool
-3. Extract key information (requirements, constraints, contracts)
-4. Summarize findings for each source
-5. **Capture patterns**: While reading existing code and documents, watch for recurring conventions and established patterns. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+3. **If a brainstorm file** (`flow/brainstorms/brainstorm_*.md`): parse the "For Discovery" section — inherit resolved decisions, use open questions as investigation starting points, and skip rejected alternatives
+4. Extract key information (requirements, constraints, contracts)
+5. Summarize findings for each source
+6. **Capture patterns**: While reading existing code and documents, watch for recurring conventions and established patterns. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
 
 **Document Analysis Format**:
 

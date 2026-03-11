@@ -1,0 +1,266 @@
+
+# Brainstorm Skill
+
+## Purpose
+
+Facilitate a **free-form, conversational exploration** of an idea through collaborative dialogue. The LLM acts as a sharp coworker at a whiteboard — asking one question at a time, challenging assumptions, suggesting angles, and silently tracking the emerging structure.
+
+This skill is the **pre-discovery phase** — pure ideation before requirements formalization. It does NOT:
+
+- Write any source code
+- Modify any source files
+- Create implementation plans
+- Execute any implementation
+- Scan the codebase (unless user explicitly asks)
+- Write to `flow/brain/` or `flow/memory.md`
+- Automatically update `flow/tasklist.md`
+
+---
+
+## Restrictions
+
+### Allowed Actions
+
+| Action | Purpose |
+|--------|---------|
+| Conversational dialogue | Core brainstorm interaction |
+| Read codebase files | **Only when user explicitly asks** (e.g., "check how X works") |
+| Write to `flow/brainstorms/` | Save brainstorm output document |
+| Read `flow/brainstorms/` | Check for existing brainstorms on same topic |
+| Edit `flow/tasklist.md` | **Only when user explicitly requests** at the end |
+
+### Forbidden Actions
+
+| Action | Reason |
+|--------|--------|
+| Write source code | Brainstorm is ideation only |
+| Write to `flow/brain/` | No brain integration |
+| Write to `flow/memory.md` | No memory integration |
+| Auto-update `flow/tasklist.md` | Only on explicit user request |
+| Deep codebase scanning | That's discovery's job — brainstorm stays in idea space |
+| Create plans or discovery docs | Brainstorm only produces brainstorm files |
+| Run build/test commands | No execution commands |
+
+---
+
+## Inputs
+
+| Input | Required | Description |
+|-------|----------|-------------|
+| `idea` | Yes | Free-text description of the idea to explore |
+| `topic_name` | Optional | Short name for the topic (derived from idea if not provided) |
+
+---
+
+## Workflow
+
+### Step 1: Parse Idea and Open the Conversation
+
+1. Read the user's idea
+2. **Show understanding** — restate the core concept in your own words to confirm alignment
+3. **Add an initial insight** — offer a first reaction, angle, or connection
+4. **Ask one focused question** — the first question that would most help shape the idea
+
+**Tone**: Casual, collaborative, curious. Like a coworker who just heard your idea and is genuinely interested.
+
+**Example**:
+
+```
+User: /brainstorm I want to add a plugin system to plan-flow
+
+LLM: A plugin system — so users could extend plan-flow with custom skills
+or hooks without forking the repo. That could unlock a whole ecosystem.
+
+The first thing I'd want to understand: are you thinking plugins that
+add new slash commands, or something lower-level like middleware that
+hooks into the existing skill execution pipeline?
+```
+
+---
+
+### Step 2: Conversational Loop
+
+This is the core of the brainstorm. Repeat until the user signals they're done:
+
+**Per Turn Behavior**:
+
+1. **Acknowledge** — show you understood what the user said (don't just parrot it back — add value)
+2. **React** — offer an insight, connection, challenge, or build on the idea
+3. **Ask OR Suggest** — either ask one focused question OR make a proactive suggestion
+
+**Mix**: ~70% turns end with a question, ~30% end with a suggestion ("what if we...?")
+
+**Question Types to Rotate**:
+
+| Type | Purpose | Example |
+|------|---------|---------|
+| Clarifying | Understand the concept deeper | "When you say extensible, do you mean at runtime or build-time?" |
+| Challenging | Push back on assumptions | "Do we actually need plugins, or could configuration cover these cases?" |
+| Expanding | Broaden scope or find connections | "That could also solve the customization problem — have you thought about...?" |
+| Constraining | Find the MVP / simplest version | "What's the smallest version of this that delivers value?" |
+| Connecting | Link to existing knowledge | "This reminds me of how VS Code extensions work — similar model?" |
+
+**When the User is on a Roll**:
+
+If the user is mid-explanation or clearly flowing, do NOT interrupt with a question. Instead:
+- Encourage: "Keep going", "Tell me more about that", "That's interesting — go on"
+- Or just acknowledge and let them continue naturally
+
+**Silent Tracking**:
+
+While conversing, maintain an internal running tally of:
+
+| Category | What to Track |
+|----------|--------------|
+| **Core Idea** | The central thesis — evolves as the conversation progresses |
+| **Key Decisions** | Forks that were discussed and resolved (with reasoning) |
+| **Open Questions** | Things raised but not yet resolved |
+| **Constraints** | Limitations that surfaced (technical, time, scope, etc.) |
+| **Inspirations / References** | Existing code, patterns, tools, or external ideas mentioned |
+| **Rejected Alternatives** | Things considered and explicitly discarded (with reasoning) |
+
+Do NOT show this tracking to the user during the conversation. It's used to generate the summary and output file.
+
+---
+
+### Step 3: End Detection
+
+The brainstorm ends when the user signals they're done. Watch for:
+
+**Clear End Signals** (transition immediately):
+- "I'm done"
+- "Let's wrap up"
+- "That's enough"
+- "Summarize"
+- "Let's move on"
+- "I think we've covered it"
+- "Generate the file"
+
+**Ambiguous Signals** (ask to confirm):
+- Long pause with a short response like "yeah" or "ok"
+- "I think so" or "maybe"
+- Response: "Sounds like we might be reaching a natural stopping point — should I summarize what we've discussed, or is there another angle you want to explore?"
+
+**Never End Signals** (keep going):
+- User asks a new question
+- User introduces a new angle
+- User says "what about..." or "also..."
+- User is mid-thought
+
+**Default**: When in doubt, keep the brainstorm going. It's better to explore one more angle than to cut short.
+
+---
+
+### Step 4: Present Summary
+
+When the brainstorm ends, present a structured summary of what was discussed:
+
+```markdown
+## Brainstorm Summary: {topic}
+
+### Core Idea
+{The central thesis as it evolved during the conversation}
+
+### Key Decisions
+- {Decision 1} — {reasoning}
+- {Decision 2} — {reasoning}
+
+### Open Questions
+- {Question still unresolved}
+
+### Constraints
+- {Limitation that surfaced}
+
+### Inspirations & References
+- {Tool, pattern, or idea that came up}
+
+### Rejected Alternatives
+- {Alternative considered and discarded} — {why}
+```
+
+Present this as a chat message (not a file yet).
+
+---
+
+### Step 5: Offer MD File Generation
+
+After presenting the summary, ask:
+
+```markdown
+Would you like me to save this as a brainstorm document? It can be used as
+input for `/discovery-plan` later.
+```
+
+- **If yes**: Proceed to Step 6
+- **If no**: Proceed to Step 7 (skip file generation)
+
+---
+
+### Step 6: Generate Output File
+
+**Location**: `flow/brainstorms/brainstorm_{topic}_v{version}.md`
+
+**Topic naming**: kebab-case derived from the idea (e.g., "plugin system" → `plugin-system`)
+
+**Versioning**: Check `flow/brainstorms/` for existing files with the same topic. Increment version if found.
+
+**Template**: Use the template from `.claude/resources/patterns/brainstorm-templates.md`
+
+The output file must include all tracked categories plus the **"For Discovery" bridge section** that makes the handoff to `/discovery-plan` seamless.
+
+After writing, report:
+
+```markdown
+Brainstorm saved.
+
+**Created**: `flow/brainstorms/brainstorm_{topic}_v{version}.md`
+
+To continue: `/discovery-plan @flow/brainstorms/brainstorm_{topic}_v{version}.md`
+```
+
+---
+
+### Step 7: Offer Tasklist Entry (Optional)
+
+After the brainstorm completes (whether or not an MD file was generated):
+
+```markdown
+Want me to add this to the tasklist?
+```
+
+- **If yes**: Add "Discovery: {topic}" to the **To Do** section of `flow/tasklist.md`
+- **If no**: Done — do not add anything
+
+---
+
+## Output Format
+
+See `.claude/resources/patterns/brainstorm-templates.md` for the full output template.
+
+---
+
+## Validation Checklist
+
+Before completing the brainstorm, verify:
+
+- [ ] Conversation followed one-question-per-turn pattern
+- [ ] User signaled end (not auto-ended by LLM)
+- [ ] Summary presented before offering file generation
+- [ ] If file generated: saved to `flow/brainstorms/` with correct naming
+- [ ] If file generated: includes "For Discovery" bridge section
+- [ ] Tasklist only updated if user explicitly requested
+- [ ] No source code written
+- [ ] No brain entries created
+- [ ] No memory entries created
+- [ ] Codebase only read when user explicitly asked
+
+---
+
+## Related Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/commands/brainstorm.md` | Command file that invokes this skill |
+| `.claude/resources/patterns/brainstorm-templates.md` | Output file template |
+| `.claude/resources/skills/discovery-skill.md` | Discovery skill that consumes brainstorm output |
+| `flow/brainstorms/` | Output directory for brainstorm documents |

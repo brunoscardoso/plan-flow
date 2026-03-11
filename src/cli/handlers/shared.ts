@@ -29,6 +29,7 @@ const FLOW_SUBDIRS = [
   'plans',
   'references',
   'resources',
+  'brainstorms',
   'reviewed-code',
   'reviewed-pr',
 ];

@@ -55,6 +55,7 @@ EXAMPLES:
   /discovery-plan @flow/contracts/api_contract.md
   /discovery-plan "User authentication with OAuth2"
   /discovery-plan @docs/feature-spec.md "Focus on the payment flow"
+  /discovery-plan @flow/brainstorms/brainstorm_plugin-system_v1.md
 
 OUTPUT:
   Creates: flow/discovery/discovery_<feature_name>_v<version>.md
@@ -145,9 +146,14 @@ Check `flow/discovery/` for existing discovery documents for this feature:
 
 ### Step 4: Invoke Discovery Skill
 
+**Brainstorm files as input**: If the reference document is a brainstorm file (`flow/brainstorms/brainstorm_*.md`), the skill should:
+- Treat "Resolved During Brainstorm" decisions as settled — do NOT re-ask
+- Use "Still Open (Discovery Should Investigate)" as starting investigation points
+- Respect "Rejected (Do Not Revisit)" — do NOT re-propose these alternatives
+
 The skill will:
 
-1. Read all referenced documents
+1. Read all referenced documents (including brainstorm files)
 2. Find all related code references in the codebase
 3. Ask clarifying questions via Interactive Questions Tool
 4. Track question status
