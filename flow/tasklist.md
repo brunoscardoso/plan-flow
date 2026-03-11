@@ -6,7 +6,6 @@
 
 ## In Progress
 
-- [ ] **Execute: brainstorm interactive questions** — `flow/plans/plan_brainstorm_interactive_questions_v1.md`
 
 ## To Do
 - [ ] **UI design awareness** — Integrate interface-design plugin into discovery/execution for UI features. Brainstorm: `flow/brainstorms/brainstorm_ui-design-awareness_v1.md`
@@ -18,3 +17,4 @@
 ## Done
 
 - [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
+- [x] **Brainstorm interactive questions** — Batched `AskUserQuestion` with options + commentary (2026-03-11)
