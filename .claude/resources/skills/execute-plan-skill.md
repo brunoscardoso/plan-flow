@@ -190,8 +190,9 @@ Wait for user confirmation before proceeding.
 2. **Present phase details** - Show scope, tasks, and approach
 3. **Wait for approval** - Get user confirmation
 4. **Implement** - Execute the phase following approved approach
-5. **Update progress** - Mark tasks complete in plan file
-6. **Continue to next phase** - NO BUILD between phases
+5. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+6. **Update progress** - Mark tasks complete in plan file
+7. **Continue to next phase** - NO BUILD between phases
 
 **Phase Presentation Template**:
 
@@ -269,6 +270,19 @@ The Tests phase is **always executed separately**, regardless of complexity scor
 4. Get user approval
 5. Implement tests
 6. **DO NOT run tests yet** - Continue to Step 7
+
+---
+
+### Step 7b: Pattern Review
+
+After all phases are complete but **before** build/test verification, run the pattern review protocol:
+
+1. Read `flow/resources/pending-patterns.md`
+2. If the buffer has entries, present grouped patterns for user approval
+3. Write approved patterns to `.claude/rules/core/allowed-patterns.md` or `.claude/rules/core/forbidden-patterns.md`
+4. Clear the buffer
+
+See `.claude/resources/core/pattern-capture.md` for the full end-of-skill review protocol.
 
 ---
 

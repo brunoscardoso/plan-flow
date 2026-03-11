@@ -49,7 +49,7 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 | Write to `flow/discovery/`             | Save discovery document              |
 | Read project rule files                | Understand patterns to follow        |
 
-> **Important**: The ONLY writable location is `flow/discovery/`. No source code, configuration files, or any other project files should be modified.
+> **Important**: The ONLY writable locations are `flow/discovery/`, `flow/resources/pending-patterns.md`, and `.claude/rules/core/*.md` (for approved patterns). No source code, configuration files, or any other project files should be modified.
 
 ---
 
@@ -76,6 +76,7 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 2. Read each file using the Read tool
 3. Extract key information (requirements, constraints, contracts)
 4. Summarize findings for each source
+5. **Capture patterns**: While reading existing code and documents, watch for recurring conventions and established patterns. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
 
 **Document Analysis Format**:
 
@@ -170,7 +171,9 @@ Categorize requirements as they are gathered:
 
 ### Step 5: Identify Technical Considerations
 
-Document high-level technical insights (NO implementation code):
+Document high-level technical insights (NO implementation code).
+
+**While analyzing technical considerations**, watch for conventions in the existing codebase that should be captured as patterns. Silently append to `flow/resources/pending-patterns.md`.
 
 ```markdown
 ## Technical Considerations
@@ -227,6 +230,19 @@ Capture risks discovered:
 ### Unknowns (Require Further Investigation)
 - [ ] [Unknown item]
 ```
+
+---
+
+### Step 8b: Pattern Review
+
+After generating the discovery document but before completing the skill, run the pattern review protocol:
+
+1. Read `flow/resources/pending-patterns.md`
+2. If the buffer has entries, present grouped patterns for user approval
+3. Write approved patterns to `.claude/rules/core/allowed-patterns.md` or `.claude/rules/core/forbidden-patterns.md`
+4. Clear the buffer
+
+See `.claude/resources/core/pattern-capture.md` for the full end-of-skill review protocol.
 
 ---
 

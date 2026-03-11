@@ -431,3 +431,13 @@ At natural break points, if you encounter information that could be useful for f
 
 Only save if the user approves. Do not re-ask if declined.
 
+---
+
+## Pattern Capture
+
+During execution, silently watch for recurring conventions, anti-patterns, workarounds, and user corrections. Append captured patterns to `flow/resources/pending-patterns.md` without interrupting work.
+
+After all phases complete (before brain-capture), present any buffered patterns for user approval. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `.claude/rules/core/forbidden-patterns.md`.
+
+See `.claude/resources/core/pattern-capture.md` for buffer format, capture triggers, conflict detection, and the full review protocol.
+

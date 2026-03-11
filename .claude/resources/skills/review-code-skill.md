@@ -51,7 +51,7 @@ This skill is **strictly read-only analysis**. The review process:
 | Write to `flow/reviewed-code/`     | Save review notes locally       |
 | Read project rule files                | Load patterns for analysis      |
 
-> **Important**: The ONLY writable location is `flow/reviewed-code/`. No source code, configuration files, or any other project files should be modified.
+> **Important**: The ONLY writable locations are `flow/reviewed-code/`, `flow/resources/pending-patterns.md`, and `.claude/rules/core/*.md` (for approved patterns). No source code, configuration files, or any other project files should be modified.
 
 ---
 
@@ -157,6 +157,21 @@ When a pattern conflict is found:
 3. **Generate rule update recommendations**:
    - Suggest additions to `.claude/rules/core/allowed-patterns.md`
    - Suggest additions to `.claude/rules/core/forbidden-patterns.md`
+
+4. **Buffer patterns for capture**: Silently append identified patterns (both good patterns and anti-patterns found during review) to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+
+### Step 6b: Pattern Review
+
+After analysis but before generating the review document, run the pattern review protocol:
+
+1. Read `flow/resources/pending-patterns.md`
+2. If the buffer has entries, present grouped patterns for user approval
+3. Write approved patterns to `.claude/rules/core/allowed-patterns.md` or `.claude/rules/core/forbidden-patterns.md`
+4. Clear the buffer
+
+See `.claude/resources/core/pattern-capture.md` for the full end-of-skill review protocol.
+
+---
 
 ### Step 6: Generate Review Document
 

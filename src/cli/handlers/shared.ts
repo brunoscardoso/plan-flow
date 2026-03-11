@@ -40,7 +40,7 @@ const MARKER_END = '# <<< plan-flow';
  * Maps each platform to the paths it installs in the user's project.
  */
 const PLATFORM_GITIGNORE_ENTRIES: Record<Platform, string[]> = {
-  claude: ['.claude/', 'CLAUDE.md'],
+  claude: ['.claude/*', '!.claude/rules/', '!.claude/rules/core/', '!.claude/rules/core/allowed-patterns.md', '!.claude/rules/core/forbidden-patterns.md', 'CLAUDE.md'],
   cursor: ['.cursor/'],
   openclaw: ['skills/plan-flow/'],
   clawhub: ['skills/plan-flow/', '.clawdhub/'],

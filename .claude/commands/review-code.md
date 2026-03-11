@@ -238,3 +238,13 @@ During this skill's execution, watch for valuable reference materials worth pres
 At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
 
 Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Pattern Capture
+
+During code review, silently watch for anti-patterns found in changed code, good patterns that should be documented, and pattern conflicts between new and existing code. Append captured patterns to `flow/resources/pending-patterns.md` without interrupting work.
+
+After analysis, present any buffered patterns for user approval. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `.claude/rules/core/forbidden-patterns.md`.
+
+See `.claude/resources/core/pattern-capture.md` for buffer format, capture triggers, conflict detection, and the full review protocol.

@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 11 files, ~1730 lines
-**Reference Codes**: COR-AP-1 through COR-LR-2
+**Total Files**: 12 files, ~1930 lines
+**Reference Codes**: COR-AP-1 through COR-PC-3
 
 ---
 
@@ -94,6 +94,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-LR-1 | Trigger conditions and detection logic | learn-recommendations.md | 10-62 |
 | COR-LR-2 | Recommendation format, rules, and integration points | learn-recommendations.md | 64-170 |
 
+### Pattern Capture (`pattern-capture.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-PC-1 | Capture behavior, triggers, and buffer format | pattern-capture.md | 10-80 |
+| COR-PC-2 | End-of-skill review protocol and user approval flow | pattern-capture.md | 82-140 |
+| COR-PC-3 | Auto-captured entry format and conflict detection | pattern-capture.md | 142-210 |
+
 ---
 
 ## When to Expand
@@ -127,6 +135,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RC-2 | Need resource file format and naming conventions |
 | COR-LR-1 | Need learn recommendation trigger conditions |
 | COR-LR-2 | Need learn recommendation format and integration rules |
+| COR-PC-1 | Need pattern capture behavior and buffer format |
+| COR-PC-2 | Need end-of-skill review protocol |
+| COR-PC-3 | Need auto-captured entry format and conflict detection |
 
 ---
 
@@ -164,6 +175,7 @@ Core rules define the foundational coding standards that apply across the entire
 - `brain-capture.md` is loaded on-demand - processes brain-capture blocks and manages brain index
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
 - `learn-recommendations.md` is loaded on-demand - detects learning opportunities and recommends `/learn`
+- `pattern-capture.md` is loaded on-demand - silently captures patterns during skill execution and presents for approval
 - `project-tasklist.md` is loaded on-demand - session start tasklist behavior
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration

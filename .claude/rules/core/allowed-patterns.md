@@ -173,3 +173,9 @@ const example = correctApproach()
 - Guideline 1
 - Guideline 2
 ```
+
+---
+
+## Project Patterns
+
+<!-- auto-captured patterns below this line -->

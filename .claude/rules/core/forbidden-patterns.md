@@ -251,3 +251,9 @@ const badExample = problematicCode()
 
 **Fix**: Description or link to `.claude/rules/core/allowed-patterns.md`.
 ```
+
+---
+
+## Project Anti-Patterns
+
+<!-- auto-captured anti-patterns below this line -->

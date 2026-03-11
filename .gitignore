@@ -35,12 +35,10 @@ flow
 flow/
 .plan-flow.yml
 .plan.flow.env
-.claude/
+.claude/*
+!.claude/rules/
+!.claude/rules/core/
+!.claude/rules/core/allowed-patterns.md
+!.claude/rules/core/forbidden-patterns.md
 CLAUDE.md
-.cursor/
-skills/plan-flow/
-skills/plan-flow/
-.clawdhub/
-.agents/
-AGENTS.md
 # <<< plan-flow

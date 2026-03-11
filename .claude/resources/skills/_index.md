@@ -9,6 +9,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 **Reference Codes**: SKL-BR-1 through SKL-TEST-5
 
 > **Note**: All skills (except brain and flow) include a Resource Capture section. During execution, the LLM watches for valuable reference materials and asks the user before saving to `flow/resources/`. See `.claude/resources/core/resource-capture.md` for full rules.
+>
+> **Note**: The execute-plan, discovery, and review-code skills also include Pattern Capture. During execution, the LLM silently buffers coding patterns and anti-patterns, then presents them for user approval at the end. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`. See `.claude/resources/core/pattern-capture.md` for full rules.
 
 ---
 
