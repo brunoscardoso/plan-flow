@@ -6,7 +6,6 @@
 
 ## In Progress
 
-- [ ] **Execute: model routing** — `flow/plans/plan_model_routing_v1.md`
 
 ## To Do
 - [ ] **Review: Verification pass** — Add a second-pass verification step to `/review-code` and `/review-pr` that re-examines each finding against surrounding context to filter false positives. Ref: `flow/resources/review-verification-pass.md`
@@ -16,3 +15,4 @@
 
 ## Done
 
+- [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
