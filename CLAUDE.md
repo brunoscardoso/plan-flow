@@ -21,7 +21,7 @@ Use slash commands to invoke skills:
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
-| `/flow` | Configure plan-flow settings — autopilot, git control, runtime options (`key=value` syntax) |
+| `/flow` | Configure plan-flow settings — autopilot, git control, model routing, runtime options (`key=value` syntax) |
 
 ## Workflow
 
@@ -177,7 +177,7 @@ npm run test
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brainstorm` | Free-form idea exploration with collaborative dialogue |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
-| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
+| `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 
 ## Recommended Workflow
 

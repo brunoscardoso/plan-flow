@@ -39,6 +39,7 @@ SETTINGS:
   commit=true|false      Auto-commit after each completed phase (default: false)
   push=true|false        Auto-push after all phases + build/test pass (default: false)
   branch=<name>          Target branch for git operations (default: current branch)
+  model_routing=true|false  Auto-select model per phase based on complexity (default: true)
 
 COST REPORTING:
   /flow cost                             Last 7 days summary (default)
@@ -55,6 +56,7 @@ EXAMPLES:
   /flow autopilot=true commit=true        # Enable both
   /flow branch=development                # Set target branch
   /flow commit=false push=false           # Disable git control
+  /flow model_routing=false               # Disable model routing (use session model for all phases)
   /flow cost                              # Show cost report (last 7 days)
   /flow cost --today --detail             # Today's costs with model breakdown
   /flow -status                           # Show current config
@@ -107,6 +109,7 @@ Parse the user input to determine what action to take:
 | `commit` | `true`, `false` | `false` | Auto-commit after each phase |
 | `push` | `true`, `false` | `false` | Auto-push after completion |
 | `branch` | any string | current branch | Target branch for git ops |
+| `model_routing` | `true`, `false` | `true` | Auto-select model per phase based on complexity |
 
 ---
 

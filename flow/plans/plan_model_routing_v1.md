@@ -71,11 +71,11 @@ This is the core integration — changes how phases are executed.
 **Scope**: Add `model_routing` setting to `.flowconfig` schema and `/flow` command
 **Complexity**: 3/10
 
-- [ ] Update `.claude/commands/flow.md`:
+- [x] Update `.claude/commands/flow.md`:
   - Add `model_routing` to the valid keys table: `model_routing | true, false | true | Auto-select model per phase based on complexity`
   - Add to help text SETTINGS section
   - Add example: `/flow model_routing=false` to disable
-- [ ] Update CLAUDE.md:
+- [x] Update CLAUDE.md:
   - Add `model_routing` mention in the `/flow` command description (both Quick Start sections)
 
 ---
@@ -85,7 +85,7 @@ This is the core integration — changes how phases are executed.
 **Scope**: Show which model was used per phase in the completion output
 **Complexity**: 2/10
 
-- [ ] Update `.claude/resources/skills/execute-plan-skill.md` completion summary (Step 7):
+- [x] Update `.claude/resources/skills/execute-plan-skill.md` completion summary (Step 7):
   - Add "Model" column to the phase completion table
   - Example format:
     ```
