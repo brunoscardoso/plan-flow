@@ -441,3 +441,19 @@ After all phases complete (before brain-capture), present any buffered patterns 
 
 See `.claude/resources/core/pattern-capture.md` for buffer format, capture triggers, conflict detection, and the full review protocol.
 
+---
+
+## Model Routing
+
+When `model_routing: true` in `flow/.flowconfig` (default), each phase is automatically routed to the most cost-effective model based on its complexity score:
+
+| Complexity | Tier | Claude Code Model |
+|-----------|------|-------------------|
+| 0-3 | Fast | haiku |
+| 4-5 | Standard | sonnet |
+| 6-10 | Powerful | opus |
+
+Routing happens at Step 4 of the execution skill — the phase implementation is spawned as an Agent subagent with the appropriate `model` parameter. Planning/approval steps always use the session model.
+
+Disable with `/flow model_routing=false`. See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and aggregation rules.
+

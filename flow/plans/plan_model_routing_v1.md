@@ -47,7 +47,7 @@ This is the foundation — all other phases reference it.
 
 This is the core integration — changes how phases are executed.
 
-- [ ] Update `.claude/resources/skills/execute-plan-skill.md`:
+- [x] Update `.claude/resources/skills/execute-plan-skill.md`:
   - Add model routing sub-step to Step 4 (between "wait for approval" and "implement"):
     - Check if `model_routing` is enabled in `.flowconfig` (default: true)
     - Read phase complexity score
@@ -56,12 +56,12 @@ This is the core integration — changes how phases are executed.
     - Include in Agent prompt: plan file path, current phase details, files modified so far, project context
   - Update aggregated phase handling: when multiple phases are aggregated, use highest individual complexity for tier selection
   - Add reference to `.claude/resources/core/model-routing.md`
-- [ ] Update `.claude/commands/execute-plan.md`:
+- [x] Update `.claude/commands/execute-plan.md`:
   - Add `## Model Routing` section (similar to existing Brain Capture, Pattern Capture sections)
   - Brief description: automatic model selection per phase based on complexity scores
   - Reference to core resource
   - Note: disabled when `model_routing: false` in `.flowconfig`
-- [ ] Update `.claude/resources/skills/_index.md`:
+- [x] Update `.claude/resources/skills/_index.md`:
   - Add note about model routing capability in execute-plan skill entry
 
 ---

@@ -189,10 +189,19 @@ Wait for user confirmation before proceeding.
 1. **Auto-switch to Plan mode** - Call `SwitchMode` tool
 2. **Present phase details** - Show scope, tasks, and approach
 3. **Wait for approval** - Get user confirmation
-4. **Implement** - Execute the phase following approved approach
-5. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
-6. **Update progress** - Mark tasks complete in plan file
-7. **Continue to next phase** - NO BUILD between phases
+4. **Select model tier** - If `model_routing` is enabled in `flow/.flowconfig` (default: `true`):
+   - Read the phase's complexity score
+   - Look up model tier: **0-3 → Fast (haiku)**, **4-5 → Standard (sonnet)**, **6-10 → Powerful (opus)**
+   - For aggregated phases, use the **highest individual phase complexity** to determine the tier
+   - Spawn implementation as an **Agent subagent** with `model={tier}` parameter
+   - Include in Agent prompt: plan file path, current phase details, files modified so far, allowed/forbidden patterns
+   - If `model_routing` is `false` or key is missing, skip routing and implement directly (use session model)
+   - See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and rules
+5. **Implement** - Execute the phase following approved approach (via subagent if model routing is active, or directly if not)
+6. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+7. **Update progress** - Mark tasks complete in plan file
+8. **Record model used** - Track which model tier was used for this phase (for the completion summary)
+9. **Continue to next phase** - NO BUILD between phases
 
 **Phase Presentation Template**:
 
@@ -303,7 +312,18 @@ npm run build && npm run test
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes
 
-3. **Present summary** of completed work
+3. **Present summary** of completed work, including model routing info if enabled:
+
+```markdown
+| Phase | Complexity | Model | Status |
+|-------|-----------|-------|--------|
+| 1. Setup types | 2/10 | haiku | Done |
+| 2. Core logic | 5/10 | sonnet | Done |
+| 3. Integration | 7/10 | opus | Done |
+| 4. Tests | 4/10 | sonnet | Done |
+
+**Model routing**: Saved ~X% vs all-opus execution
+```
 
 4. **List all key changes** made
 
