@@ -1,44 +1,18 @@
 # Tasklist
 
-**Project**: [[plan-flow]]
-**Created**: 2026-03-06
-**Last Updated**: 2026-03-09
+**Project**: [[cli]]
+**Created**: 2026-03-11
+**Last Updated**: 2026-03-11
 
 ## In Progress
 
-
-## Backlog
-
-### High Impact — Token Cost Control
-
-- [ ] **Token Budget Config** — Add `thinking_tokens` setting to `/flow` config (`.flowconfig`) to control `MAX_THINKING_TOKENS` (default 10,000 vs 31,999)
-- [ ] **Model Routing Rules** — Add `model` setting to `/flow` config with guidance rules: Haiku for exploration agents, Sonnet for coding, Opus for architecture/security only
-
-### Medium Impact — Context Optimization
-
-- [ ] **Subagent Model Routing** — Configure exploration/research subagents to run on Haiku instead of inheriting the parent model
-- [ ] **Strategic Compaction Guide** — Resource file documenting when to compact (phase boundaries) vs when not to (mid-implementation)
-- [ ] **Replace MCPs with Skills** — Wrap common MCP tools (GitHub, Supabase) as plan-flow skills to free context window space
-
-### Lower Priority — Advanced
-
-- [ ] **Content-Hash File Cache** — Cache file processing results using SHA-256 hashes to avoid re-reading unchanged files across sessions
-- [ ] **Iterative Retrieval for Subagents** — Dispatch → Evaluate → Refine pattern for subagent context gathering to reduce wasted tokens
+- [ ] **Execute: model routing** — `flow/plans/plan_model_routing_v1.md`
 
 ## To Do
-
-- [ ] Review code for suggest_compact_hook
-- [ ] Review code for cost_tracker_hook
+- [ ] **Review: Verification pass** — Add a second-pass verification step to `/review-code` and `/review-pr` that re-examines each finding against surrounding context to filter false positives. Ref: `flow/resources/review-verification-pass.md`
+- [ ] **Review: Adaptive depth by PR size** — Scale review depth based on changeset size: lightweight (<50 lines), standard (50-500), deep (500+). Ref: `flow/resources/review-adaptive-depth.md`
+- [ ] **Review: Severity re-ranking** — Re-rank findings by impact (critical first), group related findings across files, add executive summary for 5+ findings. Ref: `flow/resources/review-severity-ranking.md`
+- [ ] **Review: Multi-agent parallel review** — For large PRs (500+ lines), spawn specialized subagents (security, logic, performance, patterns) in parallel, then merge/deduplicate/verify. Depends on adaptive depth + verification pass. Ref: `flow/resources/review-multi-agent.md`
 
 ## Done
 
-- [x] Execute: suggest_compact_hook — completed 2026-03-10
-- [x] Plan: suggest_compact_hook — completed 2026-03-10
-- [x] Discovery: suggest_compact_hook — completed 2026-03-10
-- [x] Execute: cost_tracker_hook — completed 2026-03-09
-- [x] Plan: cost_tracker_hook — completed 2026-03-09
-- [x] Discovery: cost_tracker_hook — completed 2026-03-09
-
-- [x] Full vault sync for memory, heartbeat, ledger, and tasklist — completed 2026-03-09
-- [x] Heartbeat daemon env fix (CLAUDECODE var + permissions) — completed 2026-03-09
-- [x] Git control for execution plan — auto-commit per phase, optional push — completed 2026-03-07

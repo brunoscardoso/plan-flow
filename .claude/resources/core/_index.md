@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 12 files, ~1930 lines
-**Reference Codes**: COR-AP-1 through COR-PC-3
+**Total Files**: 13 files, ~2030 lines
+**Reference Codes**: COR-AP-1 through COR-MR-3
 
 ---
 
@@ -102,6 +102,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PC-2 | End-of-skill review protocol and user approval flow | pattern-capture.md | 82-140 |
 | COR-PC-3 | Auto-captured entry format and conflict detection | pattern-capture.md | 142-210 |
 
+### Model Routing (`model-routing.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-MR-1 | Model tiers, platform mappings, and routing rules | model-routing.md | 10-60 |
+| COR-MR-2 | Aggregation behavior and plan mode exception | model-routing.md | 62-85 |
+| COR-MR-3 | Cost impact estimates and execution summary format | model-routing.md | 87-115 |
+
 ---
 
 ## When to Expand
@@ -138,6 +146,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PC-1 | Need pattern capture behavior and buffer format |
 | COR-PC-2 | Need end-of-skill review protocol |
 | COR-PC-3 | Need auto-captured entry format and conflict detection |
+| COR-MR-1 | Need model tier definitions and platform mappings |
+| COR-MR-2 | Need aggregation behavior for model routing |
+| COR-MR-3 | Need cost impact estimates or execution summary format |
 
 ---
 
@@ -176,6 +187,7 @@ Core rules define the foundational coding standards that apply across the entire
 - `resource-capture.md` is loaded on-demand - watches for valuable reference materials during skill execution
 - `learn-recommendations.md` is loaded on-demand - detects learning opportunities and recommends `/learn`
 - `pattern-capture.md` is loaded on-demand - silently captures patterns during skill execution and presents for approval
+- `model-routing.md` is loaded on-demand - automatic model selection per phase based on complexity scores during `/execute-plan`
 - `project-tasklist.md` is loaded on-demand - session start tasklist behavior
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration
