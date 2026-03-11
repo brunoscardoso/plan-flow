@@ -78,46 +78,62 @@ hooks into the existing skill execution pipeline?
 
 ---
 
-### Step 2: Conversational Loop
+### Step 2: Structured Exploration Loop
 
-This is the core of the brainstorm. Repeat until the user signals they're done:
+This is the core of the brainstorm. After the open-ended first round (Step 1), switch to structured batched questions using the `AskUserQuestion` tool. Repeat until the user signals they're done.
 
-**Per Turn Behavior**:
+**Per Round Behavior**:
 
-1. **Acknowledge** — show you understood what the user said (don't just parrot it back — add value)
-2. **React** — offer an insight, connection, challenge, or build on the idea
-3. **Ask OR Suggest** — either ask one focused question OR make a proactive suggestion
+1. **Formulate questions** — create 3-4 questions based on the current state of the brainstorm, each with 2-4 options
+2. **Present via `AskUserQuestion`** — call the tool with the batch of questions (see `.claude/resources/tools/interactive-questions-tool.md` for tool usage)
+3. **Wait for responses** — user picks options or types custom answers via "Other"
+4. **Process answers** — update silent tracking with the user's choices
+5. **Commentary** — react to the answers in regular chat: connect dots, surface insights, challenge assumptions, make suggestions. This is what keeps it feeling like a brainstorm, not a form.
+6. **Check for end signals** — if user typed "done", "wrap up", etc. in any "Other" field or in response to commentary, proceed to Step 3
+7. **Repeat** — formulate next batch based on what was learned
 
-**Mix**: ~70% turns end with a question, ~30% end with a suggestion ("what if we...?")
+**Question Formulation Rules**:
 
-**Question Types to Rotate**:
+- Each question must have a **recommended option** as the first option with "(Recommended)" suffix on the label
+- Mix question types across each batch — don't ask 4 clarifying questions in a row
+- When the idea is too vague for structured options on a particular point, ask that question as regular chat within the commentary instead — not everything needs to go through `AskUserQuestion`
+- Cap at **3-4 questions per `AskUserQuestion` call** (tool limit is 4)
+- Each option needs a `label` (1-5 words) and `description` (explanation of what it means)
 
-| Type | Purpose | Example |
+**Question Types to Mix**:
+
+| Type | Purpose | Example Question |
 |------|---------|---------|
-| Clarifying | Understand the concept deeper | "When you say extensible, do you mean at runtime or build-time?" |
-| Challenging | Push back on assumptions | "Do we actually need plugins, or could configuration cover these cases?" |
-| Expanding | Broaden scope or find connections | "That could also solve the customization problem — have you thought about...?" |
-| Constraining | Find the MVP / simplest version | "What's the smallest version of this that delivers value?" |
-| Connecting | Link to existing knowledge | "This reminds me of how VS Code extensions work — similar model?" |
+| Clarifying | Understand the concept deeper | "What scope should this feature cover?" with options like "MVP only (Recommended)" / "Full feature" / "Phased rollout" |
+| Challenging | Push back on assumptions | "Is this the right approach?" with options presenting alternatives |
+| Expanding | Broaden scope or find connections | "What else could this enable?" with options for related features |
+| Constraining | Find the MVP / simplest version | "What can we cut from v1?" with options for scope reduction |
+| Connecting | Link to existing knowledge | "Which existing pattern fits best?" with options for known patterns |
 
-**When the User is on a Roll**:
+**Commentary Between Batches**:
 
-If the user is mid-explanation or clearly flowing, do NOT interrupt with a question. Instead:
-- Encourage: "Keep going", "Tell me more about that", "That's interesting — go on"
-- Or just acknowledge and let them continue naturally
+The commentary is what makes this a brainstorm and not a survey. After processing each batch of answers:
+
+- **React** — show you understood the choices and what they mean together
+- **Connect** — link answers across questions ("Your choice of X combined with Y suggests...")
+- **Challenge** — if an answer seems contradictory or surprising, call it out
+- **Suggest** — offer an insight the user might not have considered ("What if we also...")
+- **Transition** — naturally lead into why the next batch of questions matters
+
+Keep commentary concise (2-4 sentences). Don't lecture — think sharp coworker at a whiteboard.
 
 **Silent Tracking**:
 
-While conversing, maintain an internal running tally of:
+While processing responses and writing commentary, maintain an internal running tally of:
 
 | Category | What to Track |
 |----------|--------------|
-| **Core Idea** | The central thesis — evolves as the conversation progresses |
-| **Key Decisions** | Forks that were discussed and resolved (with reasoning) |
+| **Core Idea** | The central thesis — evolves as options are selected |
+| **Key Decisions** | Options chosen by the user (with reasoning from descriptions) |
 | **Open Questions** | Things raised but not yet resolved |
 | **Constraints** | Limitations that surfaced (technical, time, scope, etc.) |
 | **Inspirations / References** | Existing code, patterns, tools, or external ideas mentioned |
-| **Rejected Alternatives** | Things considered and explicitly discarded (with reasoning) |
+| **Rejected Alternatives** | Options NOT chosen — preserve as rejected alternatives with reasoning |
 
 Do NOT show this tracking to the user during the conversation. It's used to generate the summary and output file.
 
@@ -243,7 +259,9 @@ See `.claude/resources/patterns/brainstorm-templates.md` for the full output tem
 
 Before completing the brainstorm, verify:
 
-- [ ] Conversation followed one-question-per-turn pattern
+- [ ] Questions presented in batches with options via `AskUserQuestion`
+- [ ] Commentary provided between question batches
+- [ ] Open-ended first round (Step 1) before structured batches
 - [ ] User signaled end (not auto-ended by LLM)
 - [ ] Summary presented before offering file generation
 - [ ] If file generated: saved to `flow/brainstorms/` with correct naming
