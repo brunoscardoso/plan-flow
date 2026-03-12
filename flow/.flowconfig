@@ -1,0 +1,7 @@
+# flow/.flowconfig — plan-flow runtime settings
+# Managed by /flow command. Do not edit manually.
+
+autopilot: true
+commit: true
+push: false
+branch: ""
