@@ -74,26 +74,26 @@ Add a second-pass verification step to both `/review-code` and `/review-pr` that
 **Scope**: Add verification step to both review-code and review-pr skills.
 **Complexity**: 5/10
 
-- [ ] Modify `.claude/resources/skills/review-code-skill.md`:
+- [x] Modify `.claude/resources/skills/review-code-skill.md`:
   - Add Step 5b (Verify Findings) after Step 5 (Pattern Conflicts), before Step 6b (Pattern Review)
   - Reference `.claude/resources/core/review-verification.md` for verification logic
   - Update Step 6 (Generate Document) to use only Confirmed and Likely findings
-- [ ] Modify `.claude/resources/skills/review-pr-skill.md`:
+- [x] Modify `.claude/resources/skills/review-pr-skill.md`:
   - Add Step 3b (Verify Findings) after Step 3 (Analyze), before Step 4 (Generate)
   - Reference `.claude/resources/core/review-verification.md` for verification logic
   - Update Step 4 (Generate Document) to use only Confirmed and Likely findings
-- [ ] Update validation checklists in both skills to include verification step
+- [x] Update validation checklists in both skills to include verification step
 
 ### Phase 3: Update Output Templates
 
 **Scope**: Add Verification Summary section and `[Likely]` tag to review output templates.
 **Complexity**: 3/10
 
-- [ ] Modify `.claude/resources/patterns/review-code-templates.md`:
+- [x] Modify `.claude/resources/patterns/review-code-templates.md`:
   - Add `## Verification Summary` section after Review Summary (after the metrics table)
   - Add `[Likely]` tag example to the finding template
   - Update Review Summary metrics to include "After verification" count
-- [ ] Ensure review-pr output format (defined in review-pr-skill.md) includes the same Verification Summary
+- [x] Ensure review-pr output format (defined in review-pr-skill.md) includes the same Verification Summary
 
 ### Phase 4: Update Command Files and Indexes
 

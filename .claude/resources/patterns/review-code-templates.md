@@ -61,7 +61,22 @@ For each changed file, similar implementations in the codebase:
 
 ---
 
+## Verification Summary
+
+| Metric | Count |
+|--------|-------|
+| Initial findings | {N} |
+| Confirmed | {N} |
+| Likely (needs human judgment) | {N} |
+| Dismissed (false positives filtered) | {N} |
+| **False positive rate** | **{N}%** |
+
+---
+
 ## Findings
+
+> For findings classified as "Likely" during verification, prepend `[Likely]` to the heading:
+> ### [Likely] Finding Title
 
 ### Finding 1: {Finding Name}
 

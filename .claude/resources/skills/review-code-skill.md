@@ -160,6 +160,31 @@ When a pattern conflict is found:
 
 4. **Buffer patterns for capture**: Silently append identified patterns (both good patterns and anti-patterns found during review) to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
 
+---
+
+### Step 5b: Verify Findings
+
+After collecting all findings from Steps 4 and 5, run a second-pass verification to filter false positives. See `.claude/resources/core/review-verification.md` for full logic.
+
+**For each finding**:
+
+1. **Re-read surrounding context** — Read 15 lines above and 15 below the flagged line
+2. **Ask 3 standard questions**:
+   - Is this actually a bug, or does surrounding code handle it?
+   - Is there a test that covers this case?
+   - Would a senior developer agree this is a real issue?
+3. **Ask 1 category-specific question** (security → exploit path, logic → reachability, performance → hot path, etc.)
+4. **Classify**:
+   - **Confirmed** — Clear issue, 2+ standard questions support it. Keep as-is.
+   - **Likely** — Ambiguous, 1 question supports. Tag with `[Likely]` in output.
+   - **Dismissed** — False positive, all questions fail. Remove from output.
+
+**Rules**:
+- When in doubt between Likely and Dismissed → choose **Likely**
+- NEVER dismiss a Critical severity finding (downgrade to Likely at most)
+
+**After verification**: Remove Dismissed findings, tag Likely findings, generate Verification Summary stats.
+
 ### Step 6b: Pattern Review
 
 After analysis but before generating the review document, run the pattern review protocol:
@@ -174,6 +199,8 @@ See `.claude/resources/core/pattern-capture.md` for the full end-of-skill review
 ---
 
 ### Step 6: Generate Review Document
+
+**Important**: Only include Confirmed and Likely findings in the output. Dismissed findings are excluded. Add the Verification Summary section after the Review Summary.
 
 Create a markdown file in `flow/reviewed-code/` with the naming convention:
 
@@ -317,3 +344,15 @@ After running this command:
 5. **Commit changes** once review concerns are addressed
 
 > The goal is not just to review current changes, but to **improve the codebase patterns over time** by documenting good patterns and preventing anti-patterns from spreading.
+
+### Validation Checklist
+
+- [ ] All changed files analyzed
+- [ ] Forbidden patterns checked
+- [ ] Allowed patterns verified
+- [ ] Similar implementations searched
+- [ ] Pattern conflicts documented
+- [ ] Verification pass completed — all findings classified
+- [ ] Dismissed findings removed from output
+- [ ] Likely findings tagged with `[Likely]`
+- [ ] Verification Summary section included

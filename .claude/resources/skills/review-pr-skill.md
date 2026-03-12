@@ -182,7 +182,34 @@ For each file in the PR:
 4. Apply language-specific checks
 5. Identify security, performance, and maintainability concerns
 
+---
+
+### Step 3b: Verify Findings
+
+After collecting all findings from Step 3, run a second-pass verification to filter false positives. See `.claude/resources/core/review-verification.md` for full logic.
+
+**For each finding**:
+
+1. **Re-read surrounding context** — Read 15 lines above and 15 below the flagged line
+2. **Ask 3 standard questions**:
+   - Is this actually a bug, or does surrounding code handle it?
+   - Is there a test that covers this case?
+   - Would a senior developer agree this is a real issue?
+3. **Ask 1 category-specific question** (security → exploit path, logic → reachability, performance → hot path, etc.)
+4. **Classify**:
+   - **Confirmed** — Clear issue, 2+ standard questions support it. Keep as-is.
+   - **Likely** — Ambiguous, 1 question supports. Tag with `[Likely]` in output.
+   - **Dismissed** — False positive, all questions fail. Remove from output.
+
+**Rules**:
+- When in doubt between Likely and Dismissed → choose **Likely**
+- NEVER dismiss a Critical severity finding (downgrade to Likely at most)
+
+**After verification**: Remove Dismissed findings, tag Likely findings, generate Verification Summary stats.
+
 ### Step 4: Generate or Update Review Document
+
+**Important**: Only include Confirmed and Likely findings in the output. Dismissed findings are excluded. Add the Verification Summary section after the Review Summary.
 
 **Check for existing review file** in `flow/reviewed-pr/` before creating a new one.
 
