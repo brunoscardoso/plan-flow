@@ -197,11 +197,12 @@ Wait for user confirmation before proceeding.
    - Include in Agent prompt: plan file path, current phase details, files modified so far, allowed/forbidden patterns
    - If `model_routing` is `false` or key is missing, skip routing and implement directly (use session model)
    - See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and rules
-5. **Implement** - Execute the phase following approved approach (via subagent if model routing is active, or directly if not)
-6. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
-7. **Update progress** - Mark tasks complete in plan file
-8. **Record model used** - Track which model tier was used for this phase (for the completion summary)
-9. **Continue to next phase** - NO BUILD between phases
+5. **Inject design context** - Before implementing, check if the discovery doc (from plan's "Based on Discovery" field) has a `## Design Context` section. If present and the phase involves UI work (see UI Phase Detection Heuristics in `.claude/resources/core/design-awareness.md`), prepend the Design Context to the implementation prompt with: "Follow these design tokens when implementing UI elements. Use the exact color values, typography, and spacing from the Design Context." If no Design Context or phase is not UI-related, skip this step.
+6. **Implement** - Execute the phase following approved approach (via subagent if model routing is active, or directly if not)
+7. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+8. **Update progress** - Mark tasks complete in plan file
+9. **Record model used** - Track which model tier was used for this phase (for the completion summary)
+10. **Continue to next phase** - NO BUILD between phases
 
 **Phase Presentation Template**:
 
@@ -210,6 +211,7 @@ Wait for user confirmation before proceeding.
 
 **Complexity**: X/10
 **Scope**: [Phase scope description]
+**Design Context**: Available / Not applicable
 
 ### Tasks to Complete:
 - [ ] Task 1
@@ -223,6 +225,7 @@ Wait for user confirmation before proceeding.
 - [ ] Following allowed patterns
 - [ ] Avoiding forbidden patterns
 - [ ] Using appropriate language patterns
+- [ ] Following design tokens from Design Context (if applicable)
 
 ---
 

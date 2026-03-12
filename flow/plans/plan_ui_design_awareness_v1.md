@@ -99,11 +99,11 @@ Make plan-flow design-aware by capturing design context (colors, typography, spa
 **Scope**: Add read-only design context injection to phase execution.
 **Complexity**: 4/10
 
-- [ ] Modify Step 4 (Execute Each Phase) in `.claude/resources/skills/execute-plan-skill.md`:
+- [x] Modify Step 4 (Execute Each Phase) in `.claude/resources/skills/execute-plan-skill.md`:
   - Before constructing phase prompt, check if discovery doc has `## Design Context` section
   - If present and phase involves UI work (detect via keywords in phase name/tasks), inject Design Context into the Agent subagent prompt
   - Add to Phase Presentation Template: "Design Context: Available / Not applicable"
-- [ ] Add design context to the Rules Checklist for UI phases: "Following design tokens from discovery"
+- [x] Add design context to the Rules Checklist for UI phases: "Following design tokens from discovery"
 
 ### Phase 5: Update Command Files and Indexes
 
