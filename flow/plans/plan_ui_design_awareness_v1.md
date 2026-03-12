@@ -77,22 +77,22 @@ Make plan-flow design-aware by capturing design context (colors, typography, spa
 **Scope**: Modify the discovery skill to include design-specific questions and generate the Design Context section.
 **Complexity**: 5/10
 
-- [ ] Expand Step 2 (Ask Clarifying Questions) in `.claude/resources/skills/discovery-skill.md`:
+- [x] Expand Step 2 (Ask Clarifying Questions) in `.claude/resources/skills/discovery-skill.md`:
   - Add design awareness question after standard questions: "Does this feature involve UI work?"
   - If yes, add design source question batch via `AskUserQuestion`
   - Reference `.claude/resources/core/design-awareness.md` for question flow
-- [ ] Expand Step 8 (Generate Document) to include `## Design Context` section when UI work is confirmed
-- [ ] Add design awareness to the allowed-write list if needed
-- [ ] Update validation checklist to verify Design Context section when UI detected
+- [x] Expand Step 8 (Generate Document) to include `## Design Context` section when UI work is confirmed
+- [x] Add design awareness to the allowed-write list if needed
+- [x] Update validation checklist to verify Design Context section when UI detected
 
 ### Phase 3: Update Discovery Template
 
 **Scope**: Add the Design Context section to the discovery document template.
 **Complexity**: 2/10
 
-- [ ] Add `## Design Context` section to `.claude/resources/patterns/discovery-templates.md` between Technical Considerations and Proposed Approach
-- [ ] Include subsections: Design Personality, Color Palette, Typography, Spacing Scale, Component Patterns, Design Source
-- [ ] Add conditional note: "Include this section only when UI work is confirmed during discovery"
+- [x] Add `## Design Context` section to `.claude/resources/patterns/discovery-templates.md` between Technical Considerations and Proposed Approach
+- [x] Include subsections: Design Personality, Color Palette, Typography, Spacing Scale, Component Patterns, Design Source
+- [x] Add conditional note: "Include this section only when UI work is confirmed during discovery"
 
 ### Phase 4: Update Execute-Plan Skill
 

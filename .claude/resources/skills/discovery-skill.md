@@ -111,6 +111,20 @@ Ask questions about gaps identified in documents and unclear requirements.
 | Technical  | Architecture, dependencies         |
 | UI/UX      | User interface and experience      |
 
+**Design Awareness Questions**:
+
+After standard clarifying questions, check for UI work. See `.claude/resources/core/design-awareness.md` for the full question flow.
+
+1. **Always ask** (as part of the standard question batch): "Does this feature involve any UI or visual interface work?"
+   - If **Yes** or **Partially**: Add a follow-up question batch via `AskUserQuestion`:
+     - "Do you have an existing design to follow?" (screenshots/mockups, existing design system, or need new design direction)
+     - "What design personality fits this feature?" (only if no existing design — Stark, Aura, Neo, Zen, Flux, Terra)
+     - "What's the primary layout pattern?" (dashboard, content+sidebar, form workflow, data table)
+   - If **No**: Skip design questions entirely
+2. **If user provides screenshots**: Analyze visually and extract structured design tokens (colors, typography, spacing, component patterns). See token extraction rules in `.claude/resources/core/design-awareness.md`.
+3. **If user picks a personality**: Use the personality's default tokens from `.claude/resources/core/design-awareness.md`.
+4. **Plugin detection**: Check if `.interface-design/system.md` exists. If found, offer to use it as the design source.
+
 **Use Interactive Questions Tool**:
 
 Follow `.claude/resources/tools/interactive-questions-tool.md`:
@@ -266,6 +280,8 @@ Create the discovery markdown file:
 7. Risks and Unknowns
 8. Next Steps
 
+**Design Context**: If UI work was confirmed during questioning, append a `## Design Context` section to the discovery document using the template from `.claude/resources/core/design-awareness.md`. Populate with extracted tokens (from screenshots), personality defaults, or existing design system values.
+
 ---
 
 ## Output Format
@@ -293,6 +309,7 @@ Before completing discovery, verify:
 - [ ] Risks and unknowns are identified
 - [ ] Proposed approach is documented (high-level only)
 - [ ] Next steps are defined (pointing to `/create-plan`)
+- [ ] If UI work detected: `## Design Context` section included with structured tokens
 - [ ] **NO implementation code is included**
 - [ ] **NO source files were created or modified**
 

@@ -102,6 +102,50 @@ Use this template when creating discovery documents:
 
 [Identified difficulties]
 
+## Design Context
+
+> Include this section only when UI work is confirmed during discovery.
+
+### Design Personality
+{personality name} — {brief description of the visual style}
+
+### Color Palette
+| Token | Value | Usage |
+|-------|-------|-------|
+| Primary | #XXXXXX | Main actions, CTAs |
+| Secondary | #XXXXXX | Supporting elements |
+| Background | #XXXXXX | Page/card backgrounds |
+| Surface | #XXXXXX | Elevated surfaces |
+| Text Primary | #XXXXXX | Main body text |
+| Text Secondary | #XXXXXX | Secondary/muted text |
+| Error | #XXXXXX | Error states |
+| Success | #XXXXXX | Success states |
+
+### Typography
+| Element | Font | Size | Weight |
+|---------|------|------|--------|
+| Heading 1 | {font} | {size} | {weight} |
+| Heading 2 | {font} | {size} | {weight} |
+| Body | {font} | {size} | {weight} |
+| Caption | {font} | {size} | {weight} |
+
+### Spacing Scale
+| Token | Value |
+|-------|-------|
+| xs | {value} |
+| sm | {value} |
+| md | {value} |
+| lg | {value} |
+| xl | {value} |
+
+### Component Patterns
+- {Pattern 1}: {description}
+- {Pattern 2}: {description}
+
+### Design Source
+- **Source**: {screenshots / Figma export / design personality / existing system.md}
+- **Files**: {list of provided design files, if any}
+
 ## Proposed Approach
 
 [High-level approach recommendation based on findings]
