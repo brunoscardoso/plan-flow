@@ -1,5 +1,7 @@
 # Plan: Cost Tracker Hook
 
+**Project**: [[cli]]
+
 **Feature**: [[cost-tracker-hook]]
 **Project**: [[plan-flow]]
 **Created**: 2026-03-09

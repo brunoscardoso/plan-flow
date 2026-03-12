@@ -1,5 +1,7 @@
 # Discovery: Suggest Compact Hook
 
+**Project**: [[cli]]
+
 **Feature**: [[suggest-compact-hook]]
 **Project**: [[plan-flow]]
 **Created**: 2026-03-10

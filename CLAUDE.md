@@ -175,18 +175,16 @@ npm run test
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
-| `/brainstorm` | Free-form idea exploration with collaborative dialogue |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
-| `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
+| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow
 
 1. `/setup` - Run once to index project patterns
-2. `/brainstorm` - (Optional) Explore and crystallize a vague idea
-3. `/discovery-plan` - Gather requirements for a new feature
-4. `/create-plan` - Create structured implementation plan
-5. `/execute-plan` - Execute the plan phase by phase
-6. `/review-code` or `/review-pr` - Review changes before merging
+2. `/discovery-plan` - Gather requirements for a new feature
+3. `/create-plan` - Create structured implementation plan
+4. `/execute-plan` - Execute the plan phase by phase
+5. `/review-code` or `/review-pr` - Review changes before merging
 
 ## Session Start Behaviors
 
@@ -213,7 +211,6 @@ flow/
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
 │   └── errors/        # Reusable error patterns
-├── brainstorms/       # Brainstorm exploration documents
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans

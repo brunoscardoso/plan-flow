@@ -1,0 +1,80 @@
+---
+description: "Summary index for language patterns - load this to see available references"
+alwaysApply: false
+---
+
+# Languages Index
+
+## Overview
+
+Language-specific patterns and best practices. These rules apply when working with TypeScript/JavaScript or Python files respectively.
+
+**Total Files**: 2 files, ~316 lines
+**Reference Codes**: LNG-TS-1 through LNG-PY-5
+
+---
+
+## Reference Codes
+
+### TypeScript Patterns (`typescript-patterns.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| LNG-TS-1 | Type definitions (interfaces, unions, generics) | typescript-patterns.mdc | 9-50 |
+| LNG-TS-2 | Error handling and custom error types | typescript-patterns.mdc | 51-65 |
+| LNG-TS-3 | Type safety (utility types, avoid any, null safety) | typescript-patterns.mdc | 66-86 |
+| LNG-TS-4 | Advanced patterns (const assertions, type guards, immutability, satisfies) | typescript-patterns.mdc | 87-129 |
+
+### Python Patterns (`python-patterns.mdc`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| LNG-PY-1 | Style and typing (PEP 8, type hints, dataclasses) | python-patterns.mdc | 9-52 |
+| LNG-PY-2 | Code organization (modular functions, enums, context managers) | python-patterns.mdc | 53-97 |
+| LNG-PY-3 | Error handling and custom exceptions | python-patterns.mdc | 98-110 |
+| LNG-PY-4 | Async and I/O patterns | python-patterns.mdc | 111-125 |
+| LNG-PY-5 | Best practices (DI, logging, Pydantic, Pathlib) | python-patterns.mdc | 126-189 |
+
+---
+
+## When to Expand
+
+| Code | Expand When |
+|------|-------------|
+| LNG-TS-1 | Defining TypeScript interfaces or unions |
+| LNG-TS-2 | Implementing custom error classes in TS |
+| LNG-TS-3 | Need examples of utility types or null safety |
+| LNG-TS-4 | Using advanced TS features like satisfies or type guards |
+| LNG-PY-1 | Setting up Python project structure or typing |
+| LNG-PY-2 | Organizing Python modules and using enums |
+| LNG-PY-3 | Creating custom Python exceptions |
+| LNG-PY-4 | Implementing async/await in Python |
+| LNG-PY-5 | Using Pydantic, logging, or dependency injection |
+
+---
+
+## Quick Reference
+
+### TypeScript Key Points
+- **Strict mode**: Always enable `strict: true`
+- **Interfaces**: Prefer for object shapes
+- **Discriminated unions**: Model exclusive states
+- **Generics**: Reusable, type-safe components
+- **Avoid any**: Use `unknown` with type guards
+- **Immutability**: Use `readonly` and `ReadonlyArray`
+
+### Python Key Points
+- **PEP 8**: Follow naming conventions
+- **Type hints**: Add annotations for clarity
+- **Dataclasses**: Use for structured data
+- **Enums**: Replace magic strings/numbers
+- **Context managers**: Resource management
+- **Logging**: Use logger, not print
+
+---
+
+## Notes
+
+- Both files have `alwaysApply: false` - loaded based on file glob patterns
+- TypeScript patterns apply to `**/*.ts` and `**/*.tsx` files
+- Python patterns apply to `**/*.py` files

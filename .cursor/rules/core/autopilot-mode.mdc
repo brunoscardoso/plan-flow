@@ -1,0 +1,216 @@
+---
+description: "Autopilot flow mode - when flow/.autopilot exists, automatically orchestrates discovery → plan → execute → review for feature requests. Include when autopilot mode is active."
+alwaysApply: false
+---
+
+# Autopilot Flow Mode
+
+## Purpose
+
+When `flow/.autopilot` exists, this rule is active. It automatically orchestrates the full plan-flow workflow for feature requests. **You MUST follow every step below in order. Do NOT skip steps. Do NOT jump to implementation without discovery and planning first.**
+
+---
+
+## On Session Start
+
+1. Check if `flow/.autopilot` exists
+2. If it exists: autopilot mode is **ON** - follow the rules below for every user input
+3. If it does not exist: autopilot mode is **OFF** - ignore this rule entirely, normal behavior applies
+
+---
+
+## Input Classification
+
+When autopilot is ON, classify every new user input before acting:
+
+| Category | Signals | Action |
+|----------|---------|--------|
+| Slash Command | Input starts with `/` | Run that command normally. Do NOT trigger the flow. |
+| Question/Exploration | Asking about code, explanations, help | Answer normally. Do NOT trigger the flow. |
+| Trivial Task | Single-file change, obvious fix, complexity 0-2 | Execute directly. Do NOT trigger the flow. |
+| **Feature Request** | New functionality, behavior changes, multi-file scope, complexity 3+ | **TRIGGER THE FULL FLOW BELOW. You MUST complete ALL 6 steps in order.** |
+
+### When Uncertain
+
+If the input doesn't clearly fit a category, **CALL** `AskQuestion` to ask:
+
+- **CALL** `SwitchMode(target_mode_id: "plan", explanation: "Classifying user input for autopilot mode")` — **actually invoke the tool**
+- **CALL** `AskQuestion` with these options:
+  - A) Run the full flow (discovery → plan → execute → review)
+  - B) Handle it directly without the full flow
+- After the user answers, **CALL** `SwitchMode(target_mode_id: "agent", explanation: "Input classified, returning to Agent mode")` — **actually invoke the tool**
+- If `SwitchMode` or `AskQuestion` tools are not available, fall back to asking as plain text in chat
+
+---
+
+## FULL FLOW — 6 MANDATORY STEPS
+
+**CRITICAL**: When a feature request is detected, you MUST execute ALL 6 steps below in order. **Do NOT skip discovery. Do NOT skip planning. Do NOT jump to writing code.**
+
+The flow is: **Contracts → Discovery → Plan → Execute → Review → Archive**
+
+---
+
+### Step 1: Check Contracts
+
+Check `flow/contracts/` for any relevant integration contracts. If found, note them for Step 2.
+
+---
+
+### Step 2: Discovery (MANDATORY — Do NOT skip)
+
+**PURPOSE**: Gather requirements, search the codebase for context, ask clarifying questions. **NO CODE is written in this step.**
+
+**What to do**:
+
+1. Read the file `.cursor/commands/discovery-plan.md` for detailed instructions
+2. Search the codebase to find all files related to the feature (components, types, API routes, stores, tests)
+3. Read referenced documents or contracts if any
+4. **SWITCH TO PLAN MODE and ask clarifying questions** — this is a mandatory checkpoint:
+   - **CALL** `SwitchMode(target_mode_id: "plan", explanation: "Discovery phase: Gathering requirements via interactive questions")` — **actually invoke the tool, do not describe it**
+   - **CALL** `AskQuestion` tool for each clarifying question about requirements (use 2-6 options per question, A/B/C/D format)
+   - Wait for the user to answer all questions
+   - **CALL** `SwitchMode(target_mode_id: "agent", explanation: "Discovery questions complete, returning to Agent mode")` — **actually invoke the tool**
+   - If `SwitchMode` or `AskQuestion` tools are not available, fall back to asking questions as plain text in chat
+5. Document requirements as: Functional (FR-), Non-Functional (NFR-), Constraints (C-)
+6. Identify technical considerations, risks, and proposed approach (high-level, NO code)
+7. **Save the discovery document** to `flow/discovery/discovery_<feature>_v1.md`
+
+**Output**: A discovery markdown file in `flow/discovery/`
+
+**FORBIDDEN during discovery**: Writing code, editing source files, creating plans, running build/test commands
+
+**After completing discovery**: Auto-proceed to Step 3. Do NOT ask "Would you like to proceed?" — just continue.
+
+---
+
+### Step 3: Create Plan (MANDATORY — Do NOT skip)
+
+**GATE CHECK**: Before this step, verify that Step 2 produced a discovery document in `flow/discovery/`. **If no discovery document exists, go back to Step 2. A plan CANNOT be created without discovery. No exceptions.**
+
+**What to do**:
+
+1. Read the file `.cursor/commands/create-plan.md` for detailed instructions
+2. Read the discovery document created in Step 2
+3. Extract requirements (FR, NFR, Constraints) from discovery
+4. Create phases with complexity scores (0-10) for each phase
+5. Tests MUST be the last phase
+6. Include a Key Changes section
+7. **Save the plan** to `flow/plans/plan_<feature>_v1.md`
+8. **PAUSE and present the plan for user approval** — this is a mandatory checkpoint
+9. Wait for user to approve before proceeding
+
+**Output**: A plan markdown file in `flow/plans/`
+
+**FORBIDDEN during planning**: Writing code, editing source files, running build/test commands
+
+**After user approves**: Auto-proceed to Step 4.
+
+---
+
+### Step 4: Execute Plan
+
+**What to do**:
+
+1. Read the file `.cursor/commands/execute-plan.md` for detailed instructions
+2. Read the plan file created in Step 3
+3. Execute phases following complexity-based grouping:
+   - Combined score ≤ 6: Aggregate phases together
+   - Combined score 7-10: Execute 1-2 phases at a time
+   - Combined score > 10: Execute one phase at a time
+   - Tests phase: Always execute separately
+4. For each phase: implement the code, then mark tasks complete in the plan file
+5. **Run build + test verification ONLY at the very end** (not between phases)
+6. Update the plan file with progress after each phase
+
+**After execution completes**: Auto-proceed to Step 5.
+
+---
+
+### Step 5: Review Code
+
+**What to do**:
+
+1. Read the file `.cursor/commands/review-code.md` for detailed instructions
+2. Review all uncommitted changes (git diff)
+3. Check for pattern consistency, security issues, and code quality
+4. Present a review summary
+
+**After review**: Auto-proceed to Step 6.
+
+---
+
+### Step 6: Archive and Complete
+
+1. Move the discovery document to `flow/archive/`
+2. Move the plan document to `flow/archive/`
+3. Present completion summary:
+
+```
+Flow complete! All artifacts archived.
+
+Summary:
+- Discovery: archived
+- Plan: archived
+- Code: reviewed
+- Build: passing
+- Tests: passing
+
+Ready for the next task?
+```
+
+---
+
+## Transition Summary Format
+
+At each step boundary, write this brief summary:
+
+```
+## Flow Progress
+
+**Feature**: [feature name]
+**Current Step**: [N] of 6
+**Completed**:
+- Step 1: Contracts check → [found/none]
+- Step 2: Discovery → `flow/discovery/discovery_<feature>_v1.md`
+- Step 3: Plan → `flow/plans/plan_<feature>_v1.md`
+**Next**: [description of next step]
+```
+
+---
+
+## Mandatory Checkpoints
+
+Even in autopilot, these checkpoints **always** pause for user input:
+
+| Checkpoint | When | Why |
+| --- | --- | --- |
+| Discovery Q&A | Step 2 | User must answer requirements questions |
+| Discovery Gate | Step 2→3 | Discovery document MUST exist before plan. No exceptions. |
+| Plan Approval | Step 3 | User must approve plan before execution begins |
+
+All other transitions happen automatically without asking.
+
+---
+
+## Overriding No Auto-Chaining Rules
+
+When autopilot is ON, the following rules in individual commands are **suspended**:
+
+- `.cursor/commands/discovery-plan.md`: "Ask Before Proceeding" and "No Auto-Execution" rules
+- `.cursor/commands/create-plan.md`: "No Auto-Chaining" and "Complete and Stop" rules
+- `.cursor/commands/execute-plan.md`: "Complete and Stop" rule
+- `.cursor/commands/review-code.md`: completion stop behavior
+
+These rules remain fully active when autopilot is OFF.
+
+---
+
+## Error Handling
+
+If any step fails:
+
+1. Present the error to the user
+2. Ask how to proceed: retry, skip, or abort the flow
+3. If aborted: note which steps completed and which artifacts exist
+4. The flow can be resumed manually using individual slash commands

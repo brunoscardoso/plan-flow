@@ -1,5 +1,7 @@
 # Discovery: Learn Recommendations System
 
+**Project**: [[cli]]
+
 **Feature**: learn_recommendations
 **Date**: 2026-03-07
 **Status**: Completed (implemented during discovery)

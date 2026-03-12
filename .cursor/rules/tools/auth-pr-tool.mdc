@@ -1,0 +1,362 @@
+---
+description: "Include when PR authentication is needed for GitHub or Azure DevOps access"
+alwaysApply: false
+---
+
+# PR Authentication Tool
+
+## Purpose
+
+Provides authentication mechanism for accessing Pull Requests from GitHub or Azure DevOps using Personal Access Tokens (PATs). This tool handles platform detection, credential loading, authentication, and access verification.
+
+## Usage
+
+This tool can be used by skills or commands that need to authenticate and access PRs from GitHub or Azure DevOps.
+
+**Example**: Used by the `review-pr` skill to authenticate before fetching PR information.
+
+## Inputs
+
+| Input      | Required | Description                                      |
+| ---------- | -------- | ------------------------------------------------ |
+| `pr_link`  | Yes      | The URL of the Pull Request                      |
+
+The tool automatically detects the platform from the PR URL:
+- **GitHub**: URLs contain `github.com`
+- **Azure DevOps**: URLs contain `dev.azure.com` or `visualstudio.com`
+
+## Configuration
+
+### Environment Variables
+
+Store authentication tokens in `.plan.flow.env` (this file is gitignored for security):
+
+```bash
+# GitHub Authentication
+GITHUB_TOKEN=ghp_your_token_here
+
+# Azure DevOps Authentication
+AZURE_DEVOPS_PAT=your_pat_here
+```
+
+## Workflow
+
+### Step 1: Detect Platform
+
+Analyze the PR URL to determine the platform:
+
+```bash
+# Extract platform from PR URL
+# GitHub: github.com
+# Azure DevOps: dev.azure.com or visualstudio.com
+```
+
+### Step 2: Load Credentials from `.plan.flow.env` (REQUIRED FIRST STEP)
+
+**ALWAYS start by reading the `.plan.flow.env` file:**
+
+```bash
+# Read .plan.flow.env and extract credentials
+```
+
+| Platform     | Environment Variable | Purpose                                           |
+| ------------ | -------------------- | ------------------------------------------------- |
+| GitHub       | `GITHUB_TOKEN`       | GitHub Personal Access Token                      |
+| Azure DevOps | `AZURE_DEVOPS_PAT`   | Azure DevOps Personal Access Token                |
+
+### Step 3: Authenticate Using Credentials
+
+#### For GitHub PRs:
+
+```bash
+# Authenticate using token from .plan.flow.env
+echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+# Verify authentication
+gh auth status
+```
+
+#### For Azure DevOps PRs:
+
+```bash
+# Set the PAT for Azure DevOps CLI
+export AZURE_DEVOPS_EXT_PAT="$AZURE_DEVOPS_PAT"
+
+# Or use directly in curl requests with Basic Auth
+curl -u ":$AZURE_DEVOPS_PAT" "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
+```
+
+**Alternative method using curl with Bearer token:**
+
+```bash
+# Azure DevOps API call using PAT
+curl -H "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64)" \
+  "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
+```
+
+### Step 4: Verify Access
+
+Test that the credentials work by fetching the PR:
+
+```bash
+# For GitHub
+gh pr view {pr_number} --repo {owner/repo}
+
+# For Azure DevOps (using curl with PAT)
+curl -s -u ":$AZURE_DEVOPS_PAT" \
+  "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
+```
+
+### Step 5: Handle Missing or Invalid Credentials
+
+**ONLY if `.plan.flow.env` credentials are missing or empty**, inform the user:
+
+```
+⚠️ Credentials not found in .plan.flow.env
+
+Please add your credentials to .plan.flow.env:
+
+For GitHub:
+  GITHUB_TOKEN=ghp_your_token_here
+
+For Azure DevOps:
+  AZURE_DEVOPS_PAT=your_pat_here
+
+See .example.plan.flow.env for the template.
+```
+
+**If authentication fails:**
+
+```
+⚠️ Authentication failed
+
+Please verify your credentials in .plan.flow.env are valid.
+
+For GitHub:
+  - Check your GITHUB_TOKEN is valid
+  - Create a new token at: https://github.com/settings/tokens
+
+For Azure DevOps:
+  - Check your AZURE_DEVOPS_PAT is valid
+  - Create a new token at: https://dev.azure.com/{org}/_usersSettings/tokens
+```
+
+## Authentication Methods
+
+### GitHub Authentication
+
+#### Method 1: GitHub CLI (gh) - Recommended
+
+```bash
+# Authenticate using token from .plan.flow.env
+echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+# Verify access
+gh auth status
+
+# Use gh commands
+gh pr view {pr_number} --repo {owner/repo}
+gh api repos/{owner}/{repo}/pulls/{pr_number}
+```
+
+#### Method 2: Direct API Calls with curl
+
+```bash
+curl -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.v3+json" \
+  "https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
+```
+
+### Azure DevOps Authentication
+
+#### Method 1: Azure DevOps CLI (az)
+
+```bash
+# Set PAT for Azure DevOps CLI
+export AZURE_DEVOPS_EXT_PAT="$AZURE_DEVOPS_PAT"
+
+# Use az commands
+az repos pr show --id {pr_id} --organization {org} --project {project}
+```
+
+#### Method 2: Direct API Calls with curl (Basic Auth)
+
+```bash
+# Using Basic Auth with PAT
+curl -u ":$AZURE_DEVOPS_PAT" \
+  "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
+```
+
+#### Method 3: Direct API Calls with curl (Bearer Token)
+
+```bash
+# Using Bearer token
+curl -H "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64)" \
+  -H "Content-Type: application/json" \
+  "https://dev.azure.com/{org}/{project}/_apis/git/pullrequests/{pr_id}?api-version=7.0"
+```
+
+## Allowed Commands
+
+### GitHub Commands
+
+| Allowed Action               | Purpose                                      |
+| ---------------------------- | -------------------------------------------- |
+| `gh auth status`             | Check authentication status                  |
+| `gh auth login --with-token` | Authenticate using PAT from `.plan.flow.env` |
+| `gh pr view`                 | Read PR information                          |
+| `gh pr diff`                 | Read PR diff/changes                         |
+| `gh pr files`                | List files changed in PR                     |
+| `gh api` (GET requests only) | Fetch additional PR data                     |
+
+### Azure DevOps Commands
+
+| Allowed Action                                        | Purpose                                 |
+| ----------------------------------------------------- | --------------------------------------- |
+| `az devops configure`                                 | Configure Azure DevOps defaults         |
+| `az devops invoke --area git --resource pullRequests` | Fetch PR details                        |
+| `az devops invoke --area git --resource blobs`        | Fetch file contents                     |
+| `az devops invoke --area git --resource diffs`        | Fetch PR diff                           |
+| `az devops invoke --area git --resource commits`      | Fetch commit information                |
+| `az repos pr show`                                    | Show PR details                         |
+| `az repos pr list`                                    | List PRs (for finding existing reviews) |
+| `curl` with GET + PAT auth                            | Direct API calls to Azure DevOps        |
+
+## Security Notes
+
+- **NEVER** commit `.plan.flow.env` to version control
+- **NEVER** use browser authentication or interactive login (`gh auth login`) in automated contexts
+- **ALWAYS** use PAT from `.plan.flow.env` for programmatic access
+- **ALWAYS** try `.plan.flow.env` credentials FIRST before any other method
+- Tokens should have minimal required scopes for the operation
+
+## Required Scopes
+
+### GitHub
+
+Common scopes needed:
+
+- `repo` - Full control of private repositories (for private repos)
+- `public_repo` - Access public repositories (for public repos)
+- `read:org` - Read org membership (if reviewing org repos)
+
+### Azure DevOps
+
+Common scopes needed:
+
+- `Code (read)` - Read code and pull requests
+- `Code (read & write)` - Read and write code (if needed)
+- `Pull Request Threads (read & write)` - Read and write PR comments (if needed)
+
+## Example Usage in Skills/Commands
+
+```markdown
+### Step 0: Authenticate for PR Access
+
+Use the PR authentication tool:
+
+1. Provide PR URL: `{pr_link}`
+2. Tool detects platform (GitHub or Azure DevOps)
+3. Tool loads credentials from `.plan.flow.env`
+4. Tool authenticates using appropriate method
+5. Tool verifies access by fetching PR
+
+After authentication, you can proceed to fetch PR information.
+```
+
+## Error Handling
+
+### Missing Credentials
+
+If credentials are not found in `.plan.flow.env`:
+
+```
+⚠️ Credentials not found in .plan.flow.env
+
+Please add your credentials to .plan.flow.env:
+
+For GitHub:
+  GITHUB_TOKEN=ghp_your_token_here
+
+For Azure DevOps:
+  AZURE_DEVOPS_PAT=your_pat_here
+
+See .example.plan.flow.env for the template.
+```
+
+### Invalid Credentials
+
+If authentication fails:
+
+```
+⚠️ Authentication failed
+
+Please verify your credentials in .plan.flow.env are valid.
+
+For GitHub:
+  - Check your GITHUB_TOKEN is valid
+  - Create a new token at: https://github.com/settings/tokens
+
+For Azure DevOps:
+  - Check your AZURE_DEVOPS_PAT is valid
+  - Create a new token at: https://dev.azure.com/{org}/_usersSettings/tokens
+```
+
+### Platform Detection Failure
+
+If the platform cannot be determined from the URL:
+
+```
+⚠️ Unable to determine platform from PR URL
+
+Please provide a valid PR URL from:
+- GitHub: https://github.com/{owner}/{repo}/pull/{number}
+- Azure DevOps: https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{id}
+```
+
+## Output
+
+After successful authentication, the tool provides:
+
+- **Platform**: Detected platform (GitHub or Azure DevOps)
+- **Authentication Status**: Confirmed authenticated
+- **Ready for PR Operations**: Can now fetch PR information, diffs, files, etc.
+
+## Related Files
+
+| File                            | Purpose                              |
+| ------------------------------- | ------------------------------------ |
+| `.plan.flow.env`                | Authentication tokens (gitignored)   |
+| `.example.plan.flow.env`        | Example env file template            |
+
+---
+
+## Examples
+
+For detailed error handling examples, see the Error Handling section above.
+
+### Correct Usage (GOOD)
+
+```bash
+# Always load credentials from .plan.flow.env first
+source .plan.flow.env
+
+# Then authenticate using the loaded token
+echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+# Verify access before proceeding
+gh auth status
+```
+
+### Incorrect Usage (BAD - NEVER Do This)
+
+```bash
+# BAD - Using interactive login
+gh auth login  # Never use interactive login in automated contexts
+
+# BAD - Hardcoding tokens
+GITHUB_TOKEN="ghp_hardcoded_token"  # Never hardcode tokens
+
+# BAD - Skipping .plan.flow.env
+gh auth login --with-token <<< "ghp_token"  # Always use .plan.flow.env
+```

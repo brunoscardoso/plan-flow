@@ -1,0 +1,229 @@
+---
+description: "Include when switching to Plan mode is needed for collaborative phase execution"
+alwaysApply: false
+---
+
+# Plan Mode Tool
+
+## Purpose
+
+Provides a standardized way to automatically switch to Plan mode before executing implementation plan phases. This ensures collaborative design and user approval before implementation begins.
+
+## Usage
+
+This tool is used by:
+- Commands that execute plans (e.g., `execute-plan`)
+- Skills that need collaborative approval before proceeding
+- Any process that requires switching to Plan mode
+
+**Example**: Used by the `execute-plan` command to switch to Plan mode before each phase execution.
+
+---
+
+## How to Switch to Plan Mode
+
+**⚠️ CRITICAL INSTRUCTION**: You must **ACTUALLY CALL** the `SwitchMode` tool using the tool calling mechanism. Do NOT write text describing what you would do. Do NOT say "Switching to Plan mode" or "I will switch". **ACTUALLY INVOKE** the `SwitchMode` tool. If you cannot call the tool, use the fallback instructions provided.
+
+**MANDATORY - AUTO-SWITCH**: Before executing **each individual phase**, **IMMEDIATELY CALL** the `SwitchMode` tool to switch to Plan mode. Do not describe switching. Do not say "Switching to Plan mode". **ACTUALLY CALL THE TOOL**. Do not ask the user if they want to switch - just call the tool:
+
+**YOU MUST ACTUALLY CALL THIS TOOL - DO NOT JUST DESCRIBE IT**:
+
+```
+SwitchMode(target_mode_id: "plan", explanation: "Phase X: [Phase Name] - Complexity: Y/10")
+```
+
+**CRITICAL**: You must use the tool calling mechanism to invoke `SwitchMode`. Do not write text saying you're switching. Actually make the tool call.
+
+**DO NOT check if tools are available. DO NOT ask permission. DO NOT describe the action. Just call the tool directly.**
+
+**Parameters**:
+- `target_mode_id`: Always `"plan"` for Plan mode
+- `explanation`: Brief description of why switching (include phase name and complexity)
+
+**Example Usage**:
+
+```
+// Before executing Phase 1
+SwitchMode(target_mode_id: "plan", explanation: "Phase 1: Types and Schemas - Complexity: 3/10")
+
+// Before executing Phase 2
+SwitchMode(target_mode_id: "plan", explanation: "Phase 2: Backend Implementation - Complexity: 7/10")
+```
+
+**Fallback (if SwitchMode tool not available)**:
+If the `SwitchMode` tool is not available or the tool call fails, provide clear instructions to the user:
+
+```markdown
+## Switching to Plan Mode
+
+**Action Required**: Please switch to Plan mode to proceed with this phase.
+
+**Phase**: Phase X - [Phase Name]
+**Complexity**: X/10
+**Scope**: [Brief description]
+
+Once in Plan mode, I will present the phase details and approach for your approval.
+```
+
+---
+
+## Plan Mode Workflow
+
+### Step 1: Automatically Switch to Plan Mode
+
+**MANDATORY - AUTO-SWITCH**: Before each phase, **IMMEDIATELY CALL** the `SwitchMode` tool. Do not describe switching. **ACTUALLY CALL THE TOOL**.
+
+**YOU MUST ACTUALLY CALL THIS TOOL - DO NOT JUST DESCRIBE IT**:
+
+```
+SwitchMode(target_mode_id: "plan", explanation: "[Context] - [Phase/Task Name]")
+```
+
+### Step 2: Present Phase Details
+
+Once in Plan mode, present the phase to be executed:
+
+```markdown
+## Phase Execution: Phase X - [Phase Name]
+
+**Complexity**: X/10
+**Scope**: [Phase scope description]
+
+### Tasks to Complete:
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+### Implementation Approach:
+[Discuss the approach, patterns to follow, and any decisions needed]
+
+### Cursor Rules Checklist:
+- [ ] Using nullish coalescing (`??`) instead of logical OR (`||`)
+- [ ] Using Zod schemas for API validation
+- [ ] Following view/logic separation pattern for components
+- [ ] Using semantic Tailwind color variables
+- [ ] Using shadcn components instead of raw HTML elements
+- [ ] Using `ReturnType` for view props in logic hooks
+- [ ] Removing unused imports
+- [ ] Using command pattern for API routes
+
+---
+
+**Ready to implement this phase?**
+```
+
+### Step 3: Wait for User Approval
+
+The user must approve the plan before implementation begins. This is the collaborative aspect of Plan mode.
+
+### Step 4: Implement After Approval
+
+After user approval, proceed with implementation following the discussed approach.
+
+### Step 5: Update Progress
+
+Mark completed tasks in the plan file immediately after completing the phase.
+
+---
+
+## When to Use Plan Mode
+
+### Always Switch For:
+
+1. **Each Implementation Phase**: Before executing any phase from an implementation plan
+2. **High Complexity Tasks**: Before tasks with complexity ≥ 7
+3. **Critical Decisions**: Before making architectural or design decisions
+4. **User Approval Required**: When user input is needed before proceeding
+
+### Don't Switch For:
+
+1. **Simple Mechanical Tasks**: Tasks with complexity ≤ 2
+2. **Read-Only Operations**: Reading files, searching codebase
+3. **Information Gathering**: Discovery, analysis, documentation
+
+---
+
+## Integration with Execute Plan Command
+
+The `execute-plan` command uses this tool for each phase:
+
+1. **Auto-switch to Plan mode** - Immediately call `SwitchMode` tool for each phase
+2. **Present phase details** - Show scope, tasks, and approach
+3. **Wait for approval** - Get user confirmation before proceeding
+4. **Implement** - Execute the phase following the approved approach
+5. **Update progress** - Mark tasks complete in plan file
+6. **Continue** - Proceed to next phase (NO BUILD between phases)
+
+---
+
+## Benefits of Plan Mode
+
+1. **Collaborative Design**: Discuss approach before implementation
+2. **Risk Mitigation**: Catch issues early
+3. **User Control**: Approve each phase before changes are made
+4. **Better Decisions**: Time to consider alternatives and trade-offs
+5. **Documentation**: Planning discussions serve as decision records
+6. **Granular Progress**: Clear visibility into which phase is being worked on
+
+---
+
+## Error Handling
+
+### If SwitchMode Tool Fails
+
+If the `SwitchMode` tool is not available or fails:
+
+1. **Inform the user** that manual mode switch is required
+2. **Provide clear instructions** on how to switch
+3. **Wait for confirmation** before proceeding
+4. **Continue with the workflow** once in Plan mode
+
+### If User Rejects Plan
+
+If the user rejects the plan in Plan mode:
+
+1. **Ask for feedback** on what needs to change
+2. **Revise the approach** based on feedback
+3. **Present revised plan** for approval
+4. **Only proceed** after approval
+
+---
+
+## Example: Complete Workflow
+
+```markdown
+## Executing Phase 1: Types and Schemas
+
+**Step 1**: [SwitchMode tool called - actually invoked, not described]
+
+**Step 2**: Presenting phase details in Plan mode...
+
+## Phase Execution: Phase 1 - Types and Schemas
+
+**Complexity**: 3/10
+**Scope**: Define all TypeScript types and Zod schemas needed for the feature.
+
+### Tasks to Complete:
+- [ ] Create type definitions in `/src/types/`
+- [ ] Create Zod validation schemas in `/src/types/rest-inputs.ts`
+
+### Implementation Approach:
+- Follow existing type patterns in the codebase
+- Use Zod for all API input validation
+- Ensure types are exported for reuse
+
+**Ready to implement this phase?**
+
+**Step 3**: Waiting for user approval...
+
+**Step 4**: User approved. Implementing...
+
+**Step 5**: Phase complete. Updating plan file...
+```
+
+---
+
+## Related Rules
+
+- Plan execution patterns: `.cursor/rules/patterns/plans-patterns.mdc`
+- Execute plan command: `.cursor/commands/execute-plan.md`

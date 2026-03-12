@@ -1,0 +1,84 @@
+---
+description: "Learn skill - extract reusable patterns from the current session. Invoked via /learn command."
+alwaysApply: false
+---
+
+# Learn Skill
+
+## Purpose
+
+Extract reusable patterns from the current session and save them as learned pattern files in `flow/resources/`. Analyzes the conversation for error resolutions, debugging techniques, workarounds, and project-specific conventions.
+
+This skill **only writes to `flow/resources/`**. It does NOT:
+- Write any source code
+- Modify any configuration files
+- Execute any commands
+- Create files outside `flow/resources/`
+
+---
+
+## What to Extract
+
+| Priority | Category | Example |
+|----------|----------|---------|
+| **High** | `error-resolution` | Fixed a non-obvious error |
+| **High** | `debugging` | Multi-step diagnosis technique |
+| **Medium** | `workaround` | Bypassed a tool/platform limitation |
+| **Medium** | `convention` | Discovered project-specific pattern |
+| **Low** | `architecture` | Structural decision made during work |
+| **Low** | `integration` | Service connection pattern |
+
+## What NOT to Extract
+
+- **Trivial fixes**: typos, missing imports, obvious syntax errors
+- **One-time issues**: environment-specific problems unlikely to recur
+- **Generic knowledge**: standard features documented in official docs
+- **Already captured**: patterns in existing `flow/resources/learned-*.md`
+
+---
+
+## Workflow
+
+1. Scan conversation for non-obvious resolutions, multi-step diagnoses, user corrections
+2. Filter: skip trivial, one-time, generic, and already-captured patterns
+3. Draft pattern file with `[[wiki-links]]`, present to user for confirmation
+4. On approval, save to `flow/resources/learned-{kebab-case-name}.md`
+
+---
+
+## Output Format
+
+```markdown
+# {Pattern Name}
+
+**Project**: [[{project-name}]]
+**Learned**: {YYYY-MM-DD}
+**Category**: {category}
+
+## Problem
+{What problem this solves}
+
+## Solution
+{The pattern/technique/workaround}
+
+## Example
+{Code example if applicable}
+
+## When to Use
+{Trigger conditions}
+
+## Related
+- [[{feature-name}]]
+```
+
+---
+
+## Validation
+
+- Pattern is non-trivial and reusable across sessions
+- User explicitly approved before saving
+- File saved to `flow/resources/learned-{name}.md`
+- All `[[wiki-links]]` reference valid kebab-case names
+- No duplicate of existing `learned-*.md` file
+- No source code written
+- No files created outside `flow/resources/`

@@ -1,0 +1,188 @@
+---
+description: "Python best practices including type hints and PEP 8 conventions"
+globs: ["**/*.py"]
+alwaysApply: false
+---
+
+# Python Best Practices & Patterns
+
+## 1. Follow PEP 8 Style Guide
+
+Follow PEP 8 conventions. Key naming reminders:
+
+- Variables and functions: `lower_case_with_underscores`
+- Classes: `CapWords`
+- Constants: `UPPER_CASE_WITH_UNDERSCORES`
+- Private members: `_leading_underscore`
+
+## 2. Use Type Hints
+
+Add type annotations for clarity and IDE support:
+
+```python
+from typing import Optional, List, Dict
+
+def get_user(user_id: int) -> Optional[Dict[str, str]]:
+    """Fetch user by ID, returns None if not found."""
+    ...
+
+def process_items(items: List[str]) -> Dict[str, int]:
+    return {item: len(item) for item in items}
+```
+
+## 3. Utilize Dataclasses for Structured Data
+
+```python
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str
+    active: bool = True
+    roles: List[str] = field(default_factory=list)
+
+@dataclass(frozen=True)  # Immutable
+class Config:
+    api_url: str
+    timeout: int = 30
+```
+
+## 4. Write Modular Functions
+
+Break down code into focused functions with single responsibility:
+
+```python
+def calculate_total_price(items: List[Item]) -> float:
+    return sum(item.price for item in items)
+
+def validate_order(customer: Customer, items: List[Item]) -> bool:
+    return customer.is_active and len(items) > 0
+```
+
+## 5. Avoid Magic Numbers and Strings
+
+Use enums and named constants:
+
+```python
+from enum import Enum, auto
+from http import HTTPStatus
+
+class OrderStatus(Enum):
+    PENDING = auto()
+    APPROVED = auto()
+
+if status == OrderStatus.APPROVED:
+    send_email()
+
+if response.status_code == HTTPStatus.OK:
+    process_data()
+```
+
+## 6. Use Context Managers for Resource Management
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def database_connection(url: str):
+    conn = create_connection(url)
+    try:
+        yield conn
+    finally:
+        conn.close()
+```
+
+## 7. Implement Custom Exceptions
+
+```python
+class ValidationError(Exception):
+    def __init__(self, message: str, field: str = None):
+        self.message = message
+        self.field = field
+        super().__init__(self.message)
+
+class NotFoundError(Exception):
+    pass
+```
+
+## 8. Async/Await for I/O Operations
+
+```python
+import asyncio
+
+async def fetch_data(url: str) -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
+
+async def fetch_all(urls: List[str]) -> List[dict]:
+    tasks = [fetch_data(url) for url in urls]
+    return await asyncio.gather(*tasks)
+```
+
+## 9. Use Dependency Injection
+
+Favor dependency injection for testable code:
+
+```python
+from abc import ABC, abstractmethod
+
+class EmailService(ABC):
+    @abstractmethod
+    def send(self, to: str, subject: str, body: str) -> bool:
+        pass
+
+class UserService:
+    def __init__(self, email_service: EmailService):
+        self._email_service = email_service
+```
+
+## 10. Use Logging Instead of Print
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+def process_data(data: dict) -> None:
+    logger.debug(f"Processing data: {data}")
+    try:
+        result = transform(data)
+        logger.info(f"Successfully processed {len(result)} items")
+    except Exception as e:
+        logger.exception(f"Error processing data: {e}")
+        raise
+```
+
+## 11. Use Pydantic for Data Validation
+
+```python
+from pydantic import BaseModel, EmailStr, validator
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+
+    @validator("name")
+    def name_must_not_be_empty(cls, v):
+        if not v.strip():
+            raise ValueError("Name cannot be empty")
+        return v.strip()
+```
+
+## 12. Use Pathlib for File Operations
+
+```python
+from pathlib import Path
+
+file_path = Path(__file__).parent / "data" / "file.txt"
+
+if file_path.exists():
+    content = file_path.read_text()
+
+for py_file in Path(".").glob("**/*.py"):
+    print(py_file.name)
+```

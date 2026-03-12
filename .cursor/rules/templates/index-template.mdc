@@ -1,0 +1,126 @@
+---
+description: "Template for creating folder index files - copy and customize for each folder"
+alwaysApply: false
+---
+
+# Index Template
+
+Use this template when creating `_index.mdc` files for each folder. Copy and customize the sections below.
+
+---
+
+## Template
+
+```markdown
+---
+description: "Summary index for [FOLDER_NAME] - load this to see available references"
+alwaysApply: false
+---
+
+# [Folder Name] Index
+
+## Overview
+
+Brief description of what this folder contains and when these rules/patterns are used.
+
+**Total Files**: X files, ~Y lines
+**Reference Codes**: [PREFIX]-1 through [PREFIX]-N
+
+---
+
+## Reference Codes
+
+| Code  | Description                    | Source         | Lines         |
+| ----- | ------------------------------ | -------------- | ------------- |
+| XXX-1 | [Brief description of section] | [filename.mdc] | [start]-[end] |
+| XXX-2 | [Brief description of section] | [filename.mdc] | [start]-[end] |
+
+---
+
+## When to Expand
+
+Use these guidelines to determine when to load full content:
+
+| Code  | Expand When                    |
+| ----- | ------------------------------ |
+| XXX-1 | [Specific use case or trigger] |
+| XXX-2 | [Specific use case or trigger] |
+
+---
+
+## Quick Reference
+
+### [Category 1]
+
+- **XXX-1**: [One-line summary]
+- **XXX-2**: [One-line summary]
+
+### [Category 2]
+
+- **XXX-3**: [One-line summary]
+```
+
+---
+
+## Naming Conventions
+
+### Reference Code Prefixes
+
+| Prefix | Folder     | Example              |
+| ------ | ---------- | -------------------- |
+| COR-   | core/      | COR-1, COR-2         |
+| LNG-   | languages/ | LNG-TS-1, LNG-PY-1   |
+| PTN-   | patterns/  | PTN-DIS-1, PTN-PLN-1 |
+| SKL-   | skills/    | SKL-DIS-1, SKL-PLN-1 |
+| TLS-   | tools/     | TLS-AUTH-1, TLS-AQ-1 |
+
+### Sub-Category Codes
+
+For folders with multiple files, use sub-categories:
+
+| Pattern    | Meaning                         | Example                   |
+| ---------- | ------------------------------- | ------------------------- |
+| LNG-TS-1   | Language: TypeScript, Section 1 | TypeScript best practices |
+| LNG-PY-1   | Language: Python, Section 1     | Python best practices     |
+| PTN-DIS-1  | Pattern: Discovery, Section 1   | Discovery patterns        |
+| SKL-EXEC-1 | Skill: Execute, Section 1       | Execute plan workflow     |
+
+---
+
+## Section Identification Guidelines
+
+When analyzing a file to create reference codes:
+
+1. **Look for major headings** (## or ### level)
+2. **Identify self-contained sections** that can stand alone
+3. **Target 3-5 sections per file** (avoid over-fragmentation)
+4. **Include complete context** in each section
+
+### Good Section Boundaries
+
+- Complete examples with explanation
+- Full workflow steps
+- Entire tables with headers
+- Template blocks with instructions
+
+### Bad Section Boundaries
+
+- Partial code blocks
+- Headers without content
+- Single lines or small fragments
+- Sections that reference other sections heavily
+
+---
+
+## Line Range Format
+
+Use the format `start-end` for line ranges:
+
+- `1-50` - Lines 1 through 50
+- `100-150` - Lines 100 through 150
+
+**Tips**:
+
+- Include a few lines before/after for context
+- Start at section headers
+- End at the next section header minus 1
