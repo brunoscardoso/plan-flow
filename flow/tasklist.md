@@ -5,7 +5,7 @@
 **Last Updated**: 2026-03-11
 
 ## In Progress
-- [ ] **Execute: UI design awareness** — Executing implementation plan
+
 
 ## To Do
 - [ ] **Review: Verification pass** — Add a second-pass verification step to `/review-code` and `/review-pr` that re-examines each finding against surrounding context to filter false positives. Ref: `flow/resources/review-verification-pass.md`
@@ -17,3 +17,4 @@
 
 - [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
 - [x] **Brainstorm interactive questions** — Batched `AskUserQuestion` with options + commentary (2026-03-11)
+- [x] **UI design awareness** — Design context capture in discovery + auto-injection in execute-plan (2026-03-11)

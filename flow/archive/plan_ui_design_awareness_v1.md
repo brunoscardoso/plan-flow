@@ -121,13 +121,13 @@ Make plan-flow design-aware by capturing design context (colors, typography, spa
 **Scope**: Verify the feature works end-to-end by validating file structure and content.
 **Complexity**: 3/10
 
-- [ ] Verify design-awareness.md has all required sections (personalities, token format, detection rules, injection rules)
-- [ ] Verify discovery-skill.md has design question flow integrated
-- [ ] Verify discovery-templates.md has Design Context section
-- [ ] Verify execute-plan-skill.md has design injection logic
-- [ ] Verify command files have Design Awareness sections
-- [ ] Verify indexes are updated with new reference codes
-- [ ] Run `npm run build && npm run test` to confirm no regressions
+- [x] Verify design-awareness.md has all required sections (personalities, token format, detection rules, injection rules)
+- [x] Verify discovery-skill.md has design question flow integrated
+- [x] Verify discovery-templates.md has Design Context section
+- [x] Verify execute-plan-skill.md has design injection logic
+- [x] Verify command files have Design Awareness sections
+- [x] Verify indexes are updated with new reference codes
+- [x] Run `npm run build && npm run test` to confirm no regressions
 
 ## Complexity Summary
 
