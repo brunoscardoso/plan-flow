@@ -1,6 +1,6 @@
 # Plan-Flow: Structured AI-Assisted Development
 
-This project provides a structured workflow system for AI-assisted development with 8 skills for discovery, planning, execution, contracts, code reviews, and testing. It also includes the **Project Ledger** - a persistent learning journal that builds institutional memory across sessions.
+This project provides a structured workflow system for AI-assisted development with 12+ skills for discovery, planning, execution, brainstorming, contracts, code reviews, and testing. It also includes the **Project Ledger**, **Pattern Capture**, **Model Routing**, and **Design Awareness** — building institutional memory and optimizing execution across sessions.
 
 ## Quick Start
 
@@ -34,7 +34,40 @@ The recommended workflow is:
 5. `/execute-plan` - Execute the plan phase by phase
 6. `/review-code` or `/review-pr` - Review changes before merging
 
-## Core Patterns
+## Core Features
+
+### Model Routing
+
+When `model_routing: true` in `flow/.flowconfig` (default), each phase in `/execute-plan` is automatically routed to the most cost-effective model based on its complexity score:
+
+| Complexity | Tier | Model |
+|-----------|------|-------|
+| 0-3 | Fast | haiku |
+| 4-5 | Standard | sonnet |
+| 6-10 | Powerful | opus |
+
+See `.claude/resources/core/model-routing.md` for full rules.
+
+### Design Awareness
+
+Discovery always asks whether a feature involves UI work. If confirmed, it captures structured design tokens (colors, typography, spacing, component patterns) into a `## Design Context` section. During execution, these tokens are auto-injected into UI phase prompts.
+
+Features:
+- 6 built-in design personalities (Stark, Aura, Neo, Zen, Flux, Terra)
+- Screenshot analysis for token extraction
+- Optional `interface-design` plugin integration (works without it)
+
+See `.claude/resources/core/design-awareness.md` for full rules.
+
+### Pattern Capture
+
+During execution, discovery, and code review, the LLM silently buffers coding patterns and anti-patterns. At the end of each skill, captured patterns are presented for user approval and written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`.
+
+See `.claude/resources/core/pattern-capture.md` for full rules.
+
+### Brainstorm with Interactive Questions
+
+`/brainstorm` uses batched `AskUserQuestion` with 3-4 structured questions per round, each with recommended options. Commentary between rounds connects dots and challenges assumptions. Produces optional markdown files for `/discovery-plan`.
 
 ### Complexity Scoring
 
@@ -91,11 +124,11 @@ Always-loaded rules are in `.claude/rules/core/`:
 - `forbidden-patterns.md` - Anti-patterns to avoid
 
 On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
-- `core/` - Complexity scoring, project ledger rules, autopilot mode, reference index
-- `patterns/` - Templates and patterns for plans, discovery, contracts
-- `skills/` - Skill implementation details
+- `core/` - Complexity scoring, model routing, design awareness, pattern capture, project ledger, autopilot mode
+- `patterns/` - Templates and patterns for plans, discovery, contracts, brainstorms
+- `skills/` - Skill implementation details (12 skills)
 - `languages/` - Language-specific patterns (TypeScript, Python)
-- `tools/` - Tool-specific patterns (Jest, Pytest, auth)
+- `tools/` - Tool-specific patterns (Jest, Pytest, auth, interactive questions)
 
 ## Critical Rules
 
@@ -175,16 +208,19 @@ npm run test
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brainstorm` | Free-form idea exploration with interactive questions |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
-| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
+| `/learn` | Extract reusable patterns from current session |
+| `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 
 ## Recommended Workflow
 
 1. `/setup` - Run once to index project patterns
-2. `/discovery-plan` - Gather requirements for a new feature
-3. `/create-plan` - Create structured implementation plan
-4. `/execute-plan` - Execute the plan phase by phase
-5. `/review-code` or `/review-pr` - Review changes before merging
+2. `/brainstorm` - (Optional) Explore and crystallize a vague idea
+3. `/discovery-plan` - Gather requirements for a new feature
+4. `/create-plan` - Create structured implementation plan
+5. `/execute-plan` - Execute the plan phase by phase
+6. `/review-code` or `/review-pr` - Review changes before merging
 
 ## Session Start Behaviors
 
@@ -211,10 +247,12 @@ flow/
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
 │   └── errors/        # Reusable error patterns
+├── brainstorms/       # Brainstorm exploration documents
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
-├── references/        # Reference materials
+├── references/        # Auto-generated reference materials
+├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
 ├── tasklist.md        # Project todo list (updated in real-time during execution)
@@ -229,6 +267,18 @@ flow/
 ## Central Vault
 
 All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, discovery, plans, archive, contracts). Daily session logs live globally at `~/plan-flow/brain/daily/`. Open `~/plan-flow/brain/` as your Obsidian vault to see all projects in one graph with path-based color-coded groups.
+
+## Model Routing
+
+When `model_routing: true` in `flow/.flowconfig` (default), `/execute-plan` auto-selects the most cost-effective model per phase: 0-3 → haiku, 4-5 → sonnet, 6-10 → opus. Disable with `/flow model_routing=false`.
+
+## Design Awareness
+
+Discovery asks whether features involve UI work. If confirmed, captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, tokens are auto-injected into UI phase prompts. Includes 6 built-in design personalities and screenshot-based token extraction. See `.claude/resources/core/design-awareness.md`.
+
+## Pattern Capture
+
+During skill execution, the LLM silently buffers patterns and anti-patterns, presenting them for approval at the end. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`. See `.claude/resources/core/pattern-capture.md`.
 
 ## Complexity Scoring
 
@@ -249,9 +299,9 @@ Always-loaded rules are in `.claude/rules/core/`:
 - `forbidden-patterns.md` - Anti-patterns to avoid
 
 On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
-- `core/` - Complexity scoring, project ledger rules, autopilot mode, reference index
-- `patterns/` - Templates and patterns for plans, discovery, contracts
-- `skills/` - Skill implementation details
+- `core/` - Complexity scoring, model routing, design awareness, pattern capture, project ledger, autopilot mode
+- `patterns/` - Templates and patterns for plans, discovery, contracts, brainstorms
+- `skills/` - Skill implementation details (12 skills)
 - `languages/` - Language-specific patterns (TypeScript, Python)
-- `tools/` - Tool-specific patterns (Jest, Pytest, auth)
+- `tools/` - Tool-specific patterns (Jest, Pytest, auth, interactive questions)
 <!-- plan-flow-end -->

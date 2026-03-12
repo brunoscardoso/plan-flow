@@ -12,16 +12,19 @@
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
+| `/brainstorm` | Free-form idea exploration with interactive questions |
 | `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
-| `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
+| `/learn` | Extract reusable patterns from current session |
+| `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 
 ## Recommended Workflow
 
 1. `/setup` - Run once to index project patterns
-2. `/discovery-plan` - Gather requirements for a new feature
-3. `/create-plan` - Create structured implementation plan
-4. `/execute-plan` - Execute the plan phase by phase
-5. `/review-code` or `/review-pr` - Review changes before merging
+2. `/brainstorm` - (Optional) Explore and crystallize a vague idea
+3. `/discovery-plan` - Gather requirements for a new feature
+4. `/create-plan` - Create structured implementation plan
+5. `/execute-plan` - Execute the plan phase by phase
+6. `/review-code` or `/review-pr` - Review changes before merging
 
 ## Session Start Behaviors
 
@@ -48,10 +51,12 @@ flow/
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
 │   └── errors/        # Reusable error patterns
+├── brainstorms/       # Brainstorm exploration documents
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
-├── references/        # Reference materials
+├── references/        # Auto-generated reference materials
+├── resources/         # Valuable artifacts captured during skill execution
 ├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
 ├── tasklist.md        # Project todo list (updated in real-time during execution)
@@ -66,6 +71,18 @@ flow/
 ## Central Vault
 
 All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, discovery, plans, archive, contracts). Daily session logs live globally at `~/plan-flow/brain/daily/`. Open `~/plan-flow/brain/` as your Obsidian vault to see all projects in one graph with path-based color-coded groups.
+
+## Model Routing
+
+When `model_routing: true` in `flow/.flowconfig` (default), `/execute-plan` auto-selects the most cost-effective model per phase: 0-3 → haiku, 4-5 → sonnet, 6-10 → opus. Disable with `/flow model_routing=false`.
+
+## Design Awareness
+
+Discovery asks whether features involve UI work. If confirmed, captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, tokens are auto-injected into UI phase prompts. Includes 6 built-in design personalities and screenshot-based token extraction. See `.claude/resources/core/design-awareness.md`.
+
+## Pattern Capture
+
+During skill execution, the LLM silently buffers patterns and anti-patterns, presenting them for approval at the end. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`. See `.claude/resources/core/pattern-capture.md`.
 
 ## Complexity Scoring
 
@@ -86,8 +103,8 @@ Always-loaded rules are in `.claude/rules/core/`:
 - `forbidden-patterns.md` - Anti-patterns to avoid
 
 On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
-- `core/` - Complexity scoring, project ledger rules, autopilot mode, reference index
-- `patterns/` - Templates and patterns for plans, discovery, contracts
-- `skills/` - Skill implementation details
+- `core/` - Complexity scoring, model routing, design awareness, pattern capture, project ledger, autopilot mode
+- `patterns/` - Templates and patterns for plans, discovery, contracts, brainstorms
+- `skills/` - Skill implementation details (12 skills)
 - `languages/` - Language-specific patterns (TypeScript, Python)
-- `tools/` - Tool-specific patterns (Jest, Pytest, auth)
+- `tools/` - Tool-specific patterns (Jest, Pytest, auth, interactive questions)
