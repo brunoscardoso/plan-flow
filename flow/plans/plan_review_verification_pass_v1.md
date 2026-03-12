@@ -100,10 +100,10 @@ Add a second-pass verification step to both `/review-code` and `/review-pr` that
 **Scope**: Add verification references to command files and update indexes.
 **Complexity**: 2/10
 
-- [ ] Add verification note to `.claude/commands/review-code.md`
-- [ ] Add verification note to `.claude/commands/review-pr.md`
-- [ ] Update `.claude/resources/core/_index.md` with review-verification.md reference codes
-- [ ] Update `.claude/resources/skills/_index.md` to note verification pass in review skills
+- [x] Add verification note to `.claude/commands/review-code.md`
+- [x] Add verification note to `.claude/commands/review-pr.md`
+- [x] Update `.claude/resources/core/_index.md` with review-verification.md reference codes
+- [x] Update `.claude/resources/skills/_index.md` to note verification pass in review skills
 
 ### Phase 5: Tests and Verification
 

@@ -241,6 +241,14 @@ Only save if the user approves. Do not re-ask if declined.
 
 ---
 
+## Verification Pass
+
+After initial analysis, all findings undergo a second-pass verification. Each finding is re-examined against 15 lines of surrounding context and classified as Confirmed, Likely, or Dismissed. False positives are filtered before output. A Verification Summary shows filter stats.
+
+See `.claude/resources/core/review-verification.md` for classification criteria, category-specific questions, and output format.
+
+---
+
 ## Pattern Capture
 
 During code review, silently watch for anti-patterns found in changed code, good patterns that should be documented, and pattern conflicts between new and existing code. Append captured patterns to `flow/resources/pending-patterns.md` without interrupting work.

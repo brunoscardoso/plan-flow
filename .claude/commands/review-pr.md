@@ -238,3 +238,11 @@ During this skill's execution, watch for valuable reference materials worth pres
 At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
 
 Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Verification Pass
+
+After initial analysis, all findings undergo a second-pass verification. Each finding is re-examined against 15 lines of surrounding context and classified as Confirmed, Likely, or Dismissed. False positives are filtered before output. A Verification Summary shows filter stats.
+
+See `.claude/resources/core/review-verification.md` for classification criteria, category-specific questions, and output format.

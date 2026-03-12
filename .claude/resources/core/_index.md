@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 14 files, ~2310 lines
-**Reference Codes**: COR-AP-1 through COR-DA-3
+**Total Files**: 15 files, ~2430 lines
+**Reference Codes**: COR-AP-1 through COR-RV-2
 
 ---
 
@@ -118,6 +118,13 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-DA-2 | Token extraction and UI detection rules | design-awareness.md | 182-260 |
 | COR-DA-3 | Discovery question flow and execution injection | design-awareness.md | 262-350 |
 
+### Review Verification (`review-verification.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-RV-1 | Verification logic, questions, and classification criteria | review-verification.md | 1-120 |
+| COR-RV-2 | Output format and insertion points | review-verification.md | 122-200 |
+
 ---
 
 ## When to Expand
@@ -160,6 +167,8 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-DA-1 | Need design context template or personality options |
 | COR-DA-2 | Need token extraction or UI detection heuristics |
 | COR-DA-3 | Need design question flow or execution injection rules |
+| COR-RV-1 | Need verification questions or classification criteria |
+| COR-RV-2 | Need verification output format or skill insertion points |
 
 ---
 

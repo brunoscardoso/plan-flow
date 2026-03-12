@@ -15,6 +15,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 > **Note**: The execute-plan skill supports **Model Routing** — automatic model selection per phase based on complexity scores (0-3 → haiku, 4-5 → sonnet, 6-10 → opus). Controlled by `model_routing` in `flow/.flowconfig`. See `.claude/resources/core/model-routing.md` for full rules.
 >
 > **Note**: The discovery skill also includes **Design Awareness**. During discovery, the LLM asks whether the feature involves UI work and captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, these tokens are auto-injected into UI phase prompts. See `.claude/resources/core/design-awareness.md` for full rules.
+>
+> **Note**: The review-code and review-pr skills include a **Verification Pass**. After initial analysis, each finding is re-examined against surrounding code context and classified as Confirmed, Likely, or Dismissed. False positives are filtered before output. See `.claude/resources/core/review-verification.md` for full rules.
 
 ---
 
