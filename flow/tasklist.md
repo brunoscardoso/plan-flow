@@ -5,7 +5,7 @@
 **Last Updated**: 2026-03-11
 
 ## In Progress
-- [ ] **Execute: Review verification pass** — Executing implementation plan
+
 
 ## To Do
 - [ ] **Review: Adaptive depth by PR size** — Scale review depth based on changeset size: lightweight (<50 lines), standard (50-500), deep (500+). Ref: `flow/resources/review-adaptive-depth.md`
@@ -17,3 +17,4 @@
 - [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
 - [x] **Brainstorm interactive questions** — Batched `AskUserQuestion` with options + commentary (2026-03-11)
 - [x] **UI design awareness** — Design context capture in discovery + auto-injection in execute-plan (2026-03-11)
+- [x] **Review: Verification pass** — Second-pass verification filters false positives in review-code and review-pr (2026-03-12)

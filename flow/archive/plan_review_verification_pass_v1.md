@@ -110,12 +110,12 @@ Add a second-pass verification step to both `/review-code` and `/review-pr` that
 **Scope**: Verify all changes are consistent and build passes.
 **Complexity**: 2/10
 
-- [ ] Verify review-verification.md has all required sections
-- [ ] Verify both review skills have verification step in correct position
-- [ ] Verify output template includes Verification Summary
-- [ ] Verify command files reference verification
-- [ ] Verify indexes are updated
-- [ ] Run `npm run build && npm run test` to confirm no regressions
+- [x] Verify review-verification.md has all required sections
+- [x] Verify both review skills have verification step in correct position
+- [x] Verify output template includes Verification Summary
+- [x] Verify command files reference verification
+- [x] Verify indexes are updated
+- [x] Run `npm run build && npm run test` to confirm no regressions
 
 ## Complexity Summary
 
