@@ -110,11 +110,11 @@ Make plan-flow design-aware by capturing design context (colors, typography, spa
 **Scope**: Add Design Awareness sections to command files and update resource indexes.
 **Complexity**: 3/10
 
-- [ ] Add `## Design Awareness` section to `.claude/commands/discovery-plan.md` (same pattern as Brain Capture, Resource Capture sections)
-- [ ] Add `## Design Awareness` section to `.claude/commands/execute-plan.md`
-- [ ] Update `.claude/resources/core/_index.md` with design-awareness.md reference codes (COR-DA-1 through COR-DA-3)
-- [ ] Update `.claude/resources/skills/_index.md` overview note to mention Design Awareness alongside other cross-cutting concerns
-- [ ] Update `CLAUDE.md` if needed
+- [x] Add `## Design Awareness` section to `.claude/commands/discovery-plan.md` (same pattern as Brain Capture, Resource Capture sections)
+- [x] Add `## Design Awareness` section to `.claude/commands/execute-plan.md`
+- [x] Update `.claude/resources/core/_index.md` with design-awareness.md reference codes (COR-DA-1 through COR-DA-3)
+- [x] Update `.claude/resources/skills/_index.md` overview note to mention Design Awareness alongside other cross-cutting concerns
+- [x] Update `CLAUDE.md` if needed
 
 ### Phase 6: Tests
 

@@ -389,6 +389,14 @@ Only save if the user approves. Do not re-ask if declined.
 
 ---
 
+## Design Awareness
+
+During discovery, always ask whether the feature involves UI work. If confirmed, follow the design question flow to capture structured design tokens (colors, typography, spacing, component patterns) into a `## Design Context` section in the discovery document.
+
+See `.claude/resources/core/design-awareness.md` for the full question flow, personality options, token extraction rules, and Design Context template.
+
+---
+
 ## Pattern Capture
 
 During discovery, silently watch for conventions found in existing code, anti-patterns in referenced documents, and patterns identified during technical analysis. Append captured patterns to `flow/resources/pending-patterns.md` without interrupting work.

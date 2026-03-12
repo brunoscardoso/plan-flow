@@ -13,6 +13,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 > **Note**: The execute-plan, discovery, and review-code skills also include Pattern Capture. During execution, the LLM silently buffers coding patterns and anti-patterns, then presents them for user approval at the end. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`. See `.claude/resources/core/pattern-capture.md` for full rules.
 >
 > **Note**: The execute-plan skill supports **Model Routing** — automatic model selection per phase based on complexity scores (0-3 → haiku, 4-5 → sonnet, 6-10 → opus). Controlled by `model_routing` in `flow/.flowconfig`. See `.claude/resources/core/model-routing.md` for full rules.
+>
+> **Note**: The discovery skill also includes **Design Awareness**. During discovery, the LLM asks whether the feature involves UI work and captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, these tokens are auto-injected into UI phase prompts. See `.claude/resources/core/design-awareness.md` for full rules.
 
 ---
 

@@ -443,6 +443,14 @@ See `.claude/resources/core/pattern-capture.md` for buffer format, capture trigg
 
 ---
 
+## Design Awareness
+
+During execution, when a phase involves UI work and the discovery document contains a `## Design Context` section, auto-inject the design tokens into the phase implementation prompt. This ensures UI phases follow the established design system.
+
+See `.claude/resources/core/design-awareness.md` for UI phase detection heuristics and injection rules.
+
+---
+
 ## Model Routing
 
 When `model_routing: true` in `flow/.flowconfig` (default), each phase is automatically routed to the most cost-effective model based on its complexity score:

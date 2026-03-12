@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 13 files, ~2030 lines
-**Reference Codes**: COR-AP-1 through COR-MR-3
+**Total Files**: 14 files, ~2310 lines
+**Reference Codes**: COR-AP-1 through COR-DA-3
 
 ---
 
@@ -110,6 +110,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-MR-2 | Aggregation behavior and plan mode exception | model-routing.md | 62-85 |
 | COR-MR-3 | Cost impact estimates and execution summary format | model-routing.md | 87-115 |
 
+### Design Awareness (`design-awareness.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-DA-1 | Design Context template and personalities | design-awareness.md | 14-180 |
+| COR-DA-2 | Token extraction and UI detection rules | design-awareness.md | 182-260 |
+| COR-DA-3 | Discovery question flow and execution injection | design-awareness.md | 262-350 |
+
 ---
 
 ## When to Expand
@@ -149,6 +157,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-MR-1 | Need model tier definitions and platform mappings |
 | COR-MR-2 | Need aggregation behavior for model routing |
 | COR-MR-3 | Need cost impact estimates or execution summary format |
+| COR-DA-1 | Need design context template or personality options |
+| COR-DA-2 | Need token extraction or UI detection heuristics |
+| COR-DA-3 | Need design question flow or execution injection rules |
 
 ---
 
