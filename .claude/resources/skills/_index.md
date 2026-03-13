@@ -17,6 +17,12 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 > **Note**: The discovery skill also includes **Design Awareness**. During discovery, the LLM asks whether the feature involves UI work and captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, these tokens are auto-injected into UI phase prompts. See `.claude/resources/core/design-awareness.md` for full rules.
 >
 > **Note**: The review-code and review-pr skills include a **Verification Pass**. After initial analysis, each finding is re-examined against surrounding code context and classified as Confirmed, Likely, or Dismissed. False positives are filtered before output. See `.claude/resources/core/review-verification.md` for full rules.
+>
+> **Note**: The review-code and review-pr skills include **Multi-Agent Parallel Review** for Deep mode (500+ lines). Four specialized subagents (security, logic, performance, patterns) run in parallel, and the coordinator deduplicates, verifies, and ranks the merged results. See `.claude/resources/core/review-multi-agent.md` for full rules.
+>
+> **Note**: The review-code and review-pr skills include **Severity Re-Ranking**. After verification, findings are re-ranked by severity → confidence → fix complexity, related findings across files are grouped, and an executive summary is added when ≥ 5 findings. See `.claude/resources/core/review-severity-ranking.md` for full rules.
+>
+> **Note**: The review-code and review-pr skills include **Adaptive Depth**. Review depth scales automatically based on changeset size: < 50 lines → Lightweight (quick-scan), 50–500 → Standard (no change), 500+ → Deep (multi-pass with executive summary). See `.claude/resources/core/review-adaptive-depth.md` for full rules.
 
 ---
 

@@ -162,6 +162,26 @@ After successful authentication, proceed to fetch PR information.
 2. Extract the PR title, description, and list of changed files
 3. Identify the primary language(s) used in the PR
 
+### Step 1b: Determine Review Depth
+
+Determine the review mode based on changeset size. See `.claude/resources/core/review-adaptive-depth.md` for full rules.
+
+1. Count total lines changed (additions + deletions) from `gh pr diff --stat` or Azure DevOps diff API
+2. Exclude lock files, generated files, and pure whitespace changes from the count
+3. Classify into tier:
+   - **Small** (< 50 lines) → **Lightweight** mode
+   - **Medium** (50–500 lines) → **Standard** mode (no behavior change)
+   - **Large** (500+ lines) → **Deep** mode
+4. Display: `**Review mode**: {Lightweight|Standard|Deep} ({N} lines changed across {M} files)`
+
+**If Lightweight**: Skip Steps 2–3 (pattern loading, full analysis). Perform abbreviated analysis checking ONLY security issues, obvious logic bugs, and breaking changes. Skip verification pass (Step 3b). Generate compact output with no Pattern Conflicts or Reference Implementations sections.
+
+**If Deep**: Activate multi-agent parallel review. See `.claude/resources/core/review-multi-agent.md`. Categorize files by type (Core Logic, Infrastructure, UI/Presentation, Tests), then spawn 4 specialized subagents in parallel (security, logic & bugs, performance, pattern compliance). The coordinator collects results, deduplicates overlapping findings, then proceeds to Step 3b (verification), Step 3c (re-ranking), and Step 4 (output using deep template with severity grouping and executive summary). Steps 2–3 are handled by subagents instead of the main agent.
+
+**If Standard**: Proceed with all steps as defined below (no behavior change).
+
+---
+
 ### Step 2: Load Review Patterns
 
 1. Read `.claude/resources/patterns/review-pr-patterns.md` for general review guidelines
@@ -206,6 +226,17 @@ After collecting all findings from Step 3, run a second-pass verification to fil
 - NEVER dismiss a Critical severity finding (downgrade to Likely at most)
 
 **After verification**: Remove Dismissed findings, tag Likely findings, generate Verification Summary stats.
+
+### Step 3c: Re-Rank and Group Findings
+
+After verification, re-rank all remaining findings by impact. See `.claude/resources/core/review-severity-ranking.md` for full rules.
+
+1. **Sort findings**: Severity (Critical → Major → Minor → Suggestion), then Confidence (Confirmed → Likely), then Fix Complexity (lower first)
+2. **Group related findings**: Scan for same issue type across files, same root cause, or causal chains. Only group when genuinely related (≥ 2 findings). Skip grouping for small reviews (1-3 findings).
+3. **Executive summary**: If total findings ≥ 5 (standard mode) or always (deep mode), prepend an executive summary with risk level and top 3 findings. Skip for lightweight mode.
+4. **Structure output by severity**: Use severity-grouped sections (Critical → Major → Minor → Suggestions) instead of per-file ordering. Omit empty severity sections.
+
+---
 
 ### Step 4: Generate or Update Review Document
 

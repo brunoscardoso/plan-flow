@@ -6,11 +6,7 @@
 
 ## In Progress
 
-
 ## To Do
-- [ ] **Review: Adaptive depth by PR size** — Scale review depth based on changeset size: lightweight (<50 lines), standard (50-500), deep (500+). Ref: `flow/resources/review-adaptive-depth.md`
-- [ ] **Review: Severity re-ranking** — Re-rank findings by impact (critical first), group related findings across files, add executive summary for 5+ findings. Ref: `flow/resources/review-severity-ranking.md`
-- [ ] **Review: Multi-agent parallel review** — For large PRs (500+ lines), spawn specialized subagents (security, logic, performance, patterns) in parallel, then merge/deduplicate/verify. Depends on adaptive depth + verification pass. Ref: `flow/resources/review-multi-agent.md`
 
 ## Done
 
@@ -18,3 +14,6 @@
 - [x] **Brainstorm interactive questions** — Batched `AskUserQuestion` with options + commentary (2026-03-11)
 - [x] **UI design awareness** — Design context capture in discovery + auto-injection in execute-plan (2026-03-11)
 - [x] **Review: Verification pass** — Second-pass verification filters false positives in review-code and review-pr (2026-03-12)
+- [x] **Review: Adaptive depth by PR size** — Scale review depth based on changeset size: lightweight (<50 lines), standard (50-500), deep (500+) (2026-03-12)
+- [x] **Review: Severity re-ranking** — Re-rank findings by impact, group related findings, executive summary for 5+ findings (2026-03-12)
+- [x] **Review: Multi-agent parallel review** — 4 specialized subagents (security, logic, performance, patterns) for Deep mode 500+ line reviews (2026-03-12)

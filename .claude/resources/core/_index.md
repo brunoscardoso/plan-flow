@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 15 files, ~2430 lines
-**Reference Codes**: COR-AP-1 through COR-RV-2
+**Total Files**: 18 files, ~3020 lines
+**Reference Codes**: COR-AP-1 through COR-AD-4
 
 ---
 
@@ -125,6 +125,33 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-RV-1 | Verification logic, questions, and classification criteria | review-verification.md | 1-120 |
 | COR-RV-2 | Output format and insertion points | review-verification.md | 122-200 |
 
+### Review Multi-Agent (`review-multi-agent.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-MA-1 | Subagent definitions (security, logic, performance, patterns) with prompts and models | review-multi-agent.md | 30-130 |
+| COR-MA-2 | Coordinator behavior (spawn, collect, deduplicate, verify, rank, output) | review-multi-agent.md | 132-195 |
+| COR-MA-3 | Subagent input rules and diff splitting for very large changesets | review-multi-agent.md | 100-130 |
+| COR-MA-4 | Insertion points for review-code and review-pr skills | review-multi-agent.md | 197-220 |
+
+### Review Severity Re-Ranking (`review-severity-ranking.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-SR-1 | Ranking algorithm (severity → confidence → complexity) | review-severity-ranking.md | 14-26 |
+| COR-SR-2 | Grouping related findings (patterns, rules, format) | review-severity-ranking.md | 28-88 |
+| COR-SR-3 | Executive summary trigger and risk level derivation | review-severity-ranking.md | 90-120 |
+| COR-SR-4 | Output structure and insertion points | review-severity-ranking.md | 122-150 |
+
+### Review Adaptive Depth (`review-adaptive-depth.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AD-1 | Size detection, line counting rules, and tier definitions | review-adaptive-depth.md | 14-47 |
+| COR-AD-2 | Lightweight review mode (< 50 lines) — checks, skips, output | review-adaptive-depth.md | 51-101 |
+| COR-AD-3 | Deep review mode (500+ lines) — categorization, passes, executive summary | review-adaptive-depth.md | 103-187 |
+| COR-AD-4 | Insertion points for review-code and review-pr skills | review-adaptive-depth.md | 189-205 |
+
 ---
 
 ## When to Expand
@@ -169,6 +196,18 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-DA-3 | Need design question flow or execution injection rules |
 | COR-RV-1 | Need verification questions or classification criteria |
 | COR-RV-2 | Need verification output format or skill insertion points |
+| COR-MA-1 | Need subagent definitions or prompt templates for deep review |
+| COR-MA-2 | Need coordinator dedup/merge behavior |
+| COR-MA-3 | Need subagent input rules or diff splitting strategy |
+| COR-MA-4 | Need multi-agent insertion points for review skills |
+| COR-SR-1 | Need ranking algorithm for review findings |
+| COR-SR-2 | Need grouping rules for related findings |
+| COR-SR-3 | Need executive summary trigger conditions |
+| COR-SR-4 | Need severity re-ranking output structure or insertion points |
+| COR-AD-1 | Need size detection thresholds or line counting rules |
+| COR-AD-2 | Need lightweight review mode behavior |
+| COR-AD-3 | Need deep review mode behavior (categorization, passes, executive summary) |
+| COR-AD-4 | Need insertion points for adaptive depth in review skills |
 
 ---
 

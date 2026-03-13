@@ -73,18 +73,36 @@ For each changed file, similar implementations in the codebase:
 
 ---
 
+## Executive Summary
+
+> Only include when total findings ≥ 5. Omit for smaller reviews.
+
+**Risk level**: {Low | Medium | High}
+
+**Top issues to address**:
+
+1. {Finding title} ({Severity}) — `{file}:{line}`
+2. {Finding title} ({Severity}) — `{file}:{line}`
+3. {Finding title} ({Severity}) — `{file}:{line}`
+
+---
+
 ## Findings
 
-> For findings classified as "Likely" during verification, prepend `[Likely]` to the heading:
-> ### [Likely] Finding Title
+> Findings are grouped by severity (Critical → Major → Minor → Suggestion).
+> For findings classified as "Likely" during verification, prepend `[Likely]` to the heading.
+> Omit empty severity sections.
+> Related findings across files may be grouped — see review-severity-ranking.md.
 
-### Finding 1: {Finding Name}
+### Critical Findings
+
+#### Finding 1: {Finding Name}
 
 | Field          | Value                                            |
 | -------------- | ------------------------------------------------ |
 | File           | `{file_path}`                                    |
 | Line           | {line_number}                                    |
-| Severity       | {Critical/Major/Minor/Suggestion}                |
+| Severity       | Critical                                         |
 | Fix Complexity | {X/10} - {Level}                                 |
 | Pattern        | {Reference to pattern from rules, if applicable} |
 
@@ -98,6 +116,24 @@ See `{reference_file_path}` for how this is handled elsewhere in the codebase.
 \`\`\`{language}
 // Suggested code improvement
 \`\`\`
+
+### Major Findings
+
+#### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
+
+### Minor Findings
+
+#### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
+
+### Suggestions
+
+#### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
 
 ---
 
@@ -196,6 +232,268 @@ List any particularly well-written code or good practices observed:
 - [ ] Review Pattern Conflicts and decide on resolution
 - [ ] Update rules files if new patterns should be documented
 ```
+
+---
+
+## Lightweight Review Template (< 50 lines)
+
+Use this compact template when the changeset is under 50 lines.
+
+```markdown
+# Local Code Review: {Description}
+
+**Project**: [[{project-name}]]
+
+## Review Information
+
+| Field          | Value                 |
+| -------------- | --------------------- |
+| Date           | {date}                |
+| Files Reviewed | {number_of_files}     |
+| Scope          | {all/staged/unstaged} |
+| Language(s)    | {detected_languages}  |
+
+---
+
+## Review Summary
+
+| Metric | Value |
+|--------|-------|
+| **Review Mode** | Lightweight (< 50 lines) |
+| **Total Findings** | {count} |
+| **Status** | {LGTM / Needs Changes} |
+
+---
+
+## Findings
+
+> Only present if issues were found. Skip this section entirely for LGTM reviews.
+
+### Finding 1: {Finding Name}
+
+| Field          | Value                                            |
+| -------------- | ------------------------------------------------ |
+| File           | `{file_path}`                                    |
+| Line           | {line_number}                                    |
+| Severity       | {Critical/Major/Minor}                           |
+| Fix Complexity | {X/10} - {Level}                                 |
+
+**Description**:
+{Detailed explanation of the issue found}
+
+**Suggested Fix**:
+\`\`\`{language}
+// Suggested code improvement
+\`\`\`
+
+---
+
+## Positive Highlights
+
+- {Highlight 1}
+- {Highlight 2}
+- {Highlight 3}
+
+---
+
+## Commit Readiness
+
+| Status | {Ready to Commit / Needs Changes} |
+| ------ | --------------------------------- |
+| Reason | {Brief explanation}               |
+```
+
+> **Note**: Lightweight reviews skip Reference Implementations, Pattern Conflicts, Rule Update Recommendations, and Verification Summary sections.
+
+---
+
+## Deep Review Template (500+ lines)
+
+Use this template for large changesets. Findings are grouped by severity instead of by file, and an executive summary is prepended.
+
+```markdown
+# Local Code Review: {Description}
+
+**Project**: [[{project-name}]]
+
+## Review Information
+
+| Field          | Value                 |
+| -------------- | --------------------- |
+| Date           | {date}                |
+| Files Reviewed | {number_of_files}     |
+| Scope          | {all/staged/unstaged} |
+| Language(s)    | {detected_languages}  |
+
+---
+
+## Executive Summary
+
+### Files Changed by Category
+
+| Category | Files | Lines Changed |
+|----------|-------|--------------|
+| Core Logic | {N} | +{add}/-{del} |
+| Infrastructure | {N} | +{add}/-{del} |
+| UI/Presentation | {N} | +{add}/-{del} |
+| Tests | {N} | +{add}/-{del} |
+
+### Risk Assessment
+
+**Overall Risk**: {Low | Medium | High}
+
+{1-2 sentence justification based on scope, categories affected, and finding severity distribution}
+
+### Top 3 Findings
+
+1. **[{Severity}]** {Finding title} — {one-line description} (`{file}:{line}`)
+2. **[{Severity}]** {Finding title} — {one-line description} (`{file}:{line}`)
+3. **[{Severity}]** {Finding title} — {one-line description} (`{file}:{line}`)
+
+---
+
+## Review Agents
+
+> Multi-agent parallel review section. Only present in Deep mode (500+ lines).
+
+| Agent | Model | Findings | After Dedup |
+|-------|-------|----------|-------------|
+| Security | sonnet | {N} | {N} |
+| Logic & Bugs | sonnet | {N} | {N} |
+| Performance | sonnet | {N} | {N} |
+| Pattern Compliance | haiku | {N} | {N} |
+| **Total** | | **{N}** | **{N}** |
+
+Duplicates removed: {N}
+
+---
+
+## Changed Files
+
+| File          | Category       | Status     | Lines Changed |
+| ------------- | -------------- | ---------- | ------------- |
+| `{file_path}` | {Core/Infra/UI/Tests} | {modified} | +{add}/-{del} |
+| ...           | ...            | ...        | ...           |
+
+---
+
+## Reference Implementations Found
+
+> Same format as standard template — per changed file, similar implementations in the codebase.
+
+---
+
+## Review Summary
+
+| Metric                | Value              |
+| --------------------- | ------------------ |
+| **Review Mode**       | Deep (500+ lines)  |
+| **Total Findings**    | {count}            |
+| Critical              | {critical_count}   |
+| Major                 | {major_count}      |
+| Minor                 | {minor_count}      |
+| Suggestion            | {suggestion_count} |
+| **Pattern Conflicts** | {conflict_count}   |
+| **Total Fix Effort**  | {sum_of_scores}/X  |
+
+---
+
+## Verification Summary
+
+| Metric | Count |
+|--------|-------|
+| Initial findings | {N} |
+| Confirmed | {N} |
+| Likely (needs human judgment) | {N} |
+| Dismissed (false positives filtered) | {N} |
+| **False positive rate** | **{N}%** |
+
+---
+
+## Critical Findings
+
+### Finding 1: {Finding Name}
+
+| Field          | Value                                            |
+| -------------- | ------------------------------------------------ |
+| File           | `{file_path}`                                    |
+| Line           | {line_number}                                    |
+| Severity       | Critical                                         |
+| Fix Complexity | {X/10} - {Level}                                 |
+| Category       | {Core Logic/Infrastructure/UI/Tests}             |
+| Pattern        | {Reference to pattern from rules, if applicable} |
+
+**Description**:
+{Detailed explanation}
+
+**Reference Implementation**:
+See `{reference_file_path}` for how this is handled elsewhere.
+
+**Suggested Fix**:
+\`\`\`{language}
+// Suggested code improvement
+\`\`\`
+
+---
+
+## Major Findings
+
+### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
+
+---
+
+## Minor Findings
+
+### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
+
+---
+
+## Suggestions
+
+### Finding N: {Finding Name}
+
+> Same format as Critical Findings.
+
+---
+
+## Pattern Conflicts
+
+> Same format as standard template.
+
+---
+
+## Rule Update Recommendations
+
+> Same format as standard template.
+
+---
+
+## Positive Highlights
+
+- {Highlight 1}
+- {Highlight 2}
+
+---
+
+## Commit Readiness
+
+| Status | {Ready to Commit/Needs Changes/Needs Discussion} |
+| ------ | ------------------------------------------------ |
+| Reason | {Brief explanation}                              |
+
+### Before Committing
+
+- [ ] Address all Critical findings
+- [ ] Address all Major findings
+- [ ] Review Pattern Conflicts and decide on resolution
+- [ ] Update rules files if new patterns should be documented
+```
+
+> **Note**: Deep reviews always include the Verification Summary, group findings by severity, and prepend an Executive Summary with risk assessment. The Changed Files table includes a Category column.
 
 ---
 

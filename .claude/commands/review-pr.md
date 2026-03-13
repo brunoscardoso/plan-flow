@@ -49,6 +49,11 @@ WORKFLOW:
   5. Analyzes code changes
   6. Generates review document
 
+ADAPTIVE DEPTH:
+  < 50 lines    Lightweight (security, logic bugs, breaking changes only)
+  50-500 lines  Standard (full review)
+  500+ lines    Deep (multi-pass, severity-grouped, executive summary)
+
 REVIEW INCLUDES:
   - Summary of changes
   - Pattern compliance check
@@ -146,6 +151,13 @@ This command uses hierarchical context loading to reduce context consumption. In
 | PTN-PR-1 | PR review patterns | Creating review output |
 | COR-AP-1 | Allowed patterns overview | Checking pattern compliance |
 | COR-FP-1 | Forbidden patterns overview | Identifying anti-patterns |
+| COR-MA-1 | Multi-agent subagent definitions | Deep mode parallel review setup |
+| COR-MA-2 | Coordinator dedup and merge | Deep mode result processing |
+| COR-SR-1 | Severity re-ranking algorithm | Ordering findings by impact |
+| COR-SR-2 | Finding grouping rules | Grouping related findings |
+| COR-AD-1 | Adaptive depth size detection | Determining review mode |
+| COR-AD-2 | Lightweight review mode | Changeset < 50 lines |
+| COR-AD-3 | Deep review mode | Changeset 500+ lines |
 
 ### Expansion Instructions
 
@@ -238,6 +250,39 @@ During this skill's execution, watch for valuable reference materials worth pres
 At natural break points, if you encounter information that could be useful for future development (API specs, architecture notes, config references, domain knowledge, etc.), ask the user: "I found something that could be useful for future reference: _{brief description}_. Should I save it to `flow/resources/`?"
 
 Only save if the user approves. Do not re-ask if declined.
+
+---
+
+## Multi-Agent Parallel Review
+
+For Deep mode reviews (500+ lines), the review is split into 4 specialized subagents running in parallel:
+
+| Agent | Focus | Model |
+|-------|-------|-------|
+| Security | Vulnerabilities, secrets, injection, auth bypass | sonnet |
+| Logic & Bugs | Edge cases, null handling, race conditions, wrong logic | sonnet |
+| Performance | N+1 queries, memory leaks, blocking I/O, re-renders | sonnet |
+| Pattern Compliance | Forbidden/allowed patterns, naming, consistency | haiku |
+
+The coordinator merges results, deduplicates overlapping findings, then runs verification and re-ranking.
+
+See `.claude/resources/core/review-multi-agent.md` for full rules.
+
+---
+
+## Adaptive Depth
+
+Review depth scales automatically based on changeset size:
+
+| Lines Changed | Mode | Behavior |
+|--------------|------|----------|
+| < 50 | **Lightweight** | Quick-scan for security, logic bugs, breaking changes only. Skips pattern loading, full analysis, verification pass. |
+| 50–500 | **Standard** | Full review (current behavior, no changes). |
+| 500+ | **Deep** | Multi-pass review with file categorization, severity-grouped output, executive summary, and mandatory verification pass. |
+
+Thresholds are hardcoded. The detected mode is displayed before the review starts.
+
+See `.claude/resources/core/review-adaptive-depth.md` for full rules.
 
 ---
 

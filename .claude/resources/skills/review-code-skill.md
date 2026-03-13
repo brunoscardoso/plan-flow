@@ -75,6 +75,26 @@ This skill is **strictly read-only analysis**. The review process:
 4. If `file_path` is provided, filter to only those files
 5. If `scope` is provided, filter to staged or unstaged only
 
+### Step 1b: Determine Review Depth
+
+Determine the review mode based on changeset size. See `.claude/resources/core/review-adaptive-depth.md` for full rules.
+
+1. Count total lines changed (additions + deletions) from `git diff --stat`
+2. Exclude lock files, generated files, and pure whitespace changes from the count
+3. Classify into tier:
+   - **Small** (< 50 lines) → **Lightweight** mode
+   - **Medium** (50–500 lines) → **Standard** mode (no behavior change)
+   - **Large** (500+ lines) → **Deep** mode
+4. Display: `**Review mode**: {Lightweight|Standard|Deep} ({N} lines changed across {M} files)`
+
+**If Lightweight**: Skip Steps 2–5 (pattern loading, similar implementations, full analysis, pattern conflicts). Perform abbreviated analysis checking ONLY security issues, obvious logic bugs, and breaking changes. Skip verification pass (Step 5b). Generate output using the lightweight template from `review-code-templates.md`.
+
+**If Deep**: Activate multi-agent parallel review. See `.claude/resources/core/review-multi-agent.md`. Categorize files by type (Core Logic, Infrastructure, UI/Presentation, Tests), then spawn 4 specialized subagents in parallel (security, logic & bugs, performance, pattern compliance). The coordinator collects results, deduplicates overlapping findings, then proceeds to Step 5b (verification), Step 5c (re-ranking), Step 6b (pattern review), and Step 6 (output using deep template). Steps 2–5 are handled by subagents instead of the main agent.
+
+**If Standard**: Proceed with all steps as defined below (no behavior change).
+
+---
+
 ### Step 2: Load Review Patterns
 
 1. Read `.claude/resources/patterns/review-pr-patterns.md` for general review guidelines
@@ -184,6 +204,17 @@ After collecting all findings from Steps 4 and 5, run a second-pass verification
 - NEVER dismiss a Critical severity finding (downgrade to Likely at most)
 
 **After verification**: Remove Dismissed findings, tag Likely findings, generate Verification Summary stats.
+
+### Step 5c: Re-Rank and Group Findings
+
+After verification, re-rank all remaining findings by impact. See `.claude/resources/core/review-severity-ranking.md` for full rules.
+
+1. **Sort findings**: Severity (Critical → Major → Minor → Suggestion), then Confidence (Confirmed → Likely), then Fix Complexity (lower first)
+2. **Group related findings**: Scan for same issue type across files, same root cause, or causal chains. Only group when genuinely related (≥ 2 findings). Skip grouping for small reviews (1-3 findings).
+3. **Executive summary**: If total findings ≥ 5 (standard mode) or always (deep mode), prepend an executive summary with risk level and top 3 findings. Skip for lightweight mode.
+4. **Structure output by severity**: Use severity-grouped sections (Critical → Major → Minor → Suggestions) instead of per-file ordering. Omit empty severity sections.
+
+---
 
 ### Step 6b: Pattern Review
 
@@ -356,3 +387,6 @@ After running this command:
 - [ ] Dismissed findings removed from output
 - [ ] Likely findings tagged with `[Likely]`
 - [ ] Verification Summary section included
+- [ ] Findings sorted by severity (Critical → Major → Minor → Suggestion)
+- [ ] Related findings grouped when applicable (≥ 2 related)
+- [ ] Executive summary included when ≥ 5 findings (standard) or always (deep)
