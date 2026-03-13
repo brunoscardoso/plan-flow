@@ -12,7 +12,7 @@
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
-| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/flow` | Toggle autopilot mode (auto-chains discovery → plan → execute → review) |
 
 ## Recommended Workflow

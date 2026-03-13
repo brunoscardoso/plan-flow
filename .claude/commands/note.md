@@ -1,8 +1,8 @@
 ---
-description: Manual brain entry - capture meeting notes, ideas, brainstorms, and insights into the project brain
+description: Manual note entry - capture meeting notes, ideas, brainstorms, and insights into the project brain
 ---
 
-# Brain: Manual Knowledge Capture
+# Note: Manual Knowledge Capture
 
 ## Command Description
 
@@ -18,25 +18,25 @@ This command allows manual brain entries for capturing meeting notes, brainstorm
 **If the user invokes this command with `-help`, display only this section and stop:**
 
 ```
-/brain - Manual Brain Entry
+/note - Manual Brain Entry
 
 DESCRIPTION:
   Capture meeting notes, brainstorms, ideas, and insights into the
   project brain. Creates Obsidian-compatible markdown with [[wiki-links]].
 
 USAGE:
-  /brain <free text>        Free-text mode (default)
-  /brain -guided            Guided mode with structured questions
-  /brain -help              Show this help
+  /note <free text>        Free-text mode (default)
+  /note -guided            Guided mode with structured questions
+  /note -help              Show this help
 
 ARGUMENTS:
   free text     Unstructured text to parse and categorize
   -guided       Triggers structured question mode
 
 EXAMPLES:
-  /brain Had a call with the team about auth flow. Decision: use JWT with refresh tokens.
-  /brain Discovered that the API rate limits at 100 req/min. Need to add throttling.
-  /brain -guided
+  /note Had a call with the team about auth flow. Decision: use JWT with refresh tokens.
+  /note Discovered that the API rate limits at 100 req/min. Need to add throttling.
+  /note -guided
 
 OUTPUT:
   - Writes to appropriate flow/brain/ subdirectory
@@ -90,7 +90,7 @@ If no content and no `-guided` flag, ask:
 ```markdown
 What would you like to capture? You can:
 1. Type free text and I'll categorize it automatically
-2. Use `/brain -guided` for structured prompts
+2. Use `/note -guided` for structured prompts
 ```
 
 ---
@@ -175,7 +175,7 @@ Brain entry captured!
 
 ```
 +------------------------------------------+
-|           /brain COMMAND                 |
+|           /note COMMAND                  |
 +------------------------------------------+
                     |
                     v
@@ -214,7 +214,7 @@ Brain entry captured!
 
 ### Recommended Loading Order
 
-1. **Always load first**: This command file (`commands/brain.md`)
+1. **Always load first**: This command file (`commands/note.md`)
 2. **Load indexes**: Load `_index.md` files for relevant folders
 3. **Expand on-demand**: Use reference codes to load specific sections when needed
 

@@ -79,7 +79,7 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 | `/review-pr` | Review a Pull Request (adaptive depth + multi-agent) |
 | `/write-tests` | Generate tests for coverage target |
 | `/flow` | Configure plan-flow settings (autopilot, git control, runtime options) |
-| `/brain` | Capture meeting notes, ideas, brainstorms |
+| `/note` | Capture meeting notes, ideas, brainstorms |
 | `/learn` | Extract reusable patterns or learn a topic step-by-step |
 | `/pattern-validate` | Scan and index global brain patterns |
 | `/heartbeat` | Manage scheduled automated tasks |

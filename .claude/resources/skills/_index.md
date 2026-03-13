@@ -196,7 +196,7 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | Command | Skill | Key Codes |
 |---------|-------|-----------|
 | `/brainstorm` | brainstorm-skill | SKL-BS-1 through SKL-BS-3 |
-| `/brain` | brain-skill | SKL-BR-1 through SKL-BR-3 |
+| `/note` | brain-skill | SKL-BR-1 through SKL-BR-3 |
 | `/flow cost` | flow-cost | SKL-COST-1 through SKL-COST-4 |
 | `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-4 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |

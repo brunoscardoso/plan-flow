@@ -48,7 +48,7 @@ OUTPUT:
   - One pattern per file
 
 RELATED COMMANDS:
-  /brain           Capture meeting notes, ideas, brainstorms
+  /note            Capture meeting notes, ideas, brainstorms
   /setup           Generate project pattern files
   /review-code     Review local uncommitted changes
 ```

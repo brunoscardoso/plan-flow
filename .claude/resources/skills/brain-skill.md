@@ -49,7 +49,7 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 
 ### Free-Text Mode (Default)
 
-When user runs `/brain {free text}`:
+When user runs `/note {free text}`:
 
 1. **Parse input** - Read the user's unstructured text
 2. **Extract entities** - Identify:
@@ -63,9 +63,9 @@ When user runs `/brain {free text}`:
 4. **Write** - Create/update the appropriate brain file with `[[wiki-links]]`
 5. **Update index** - Update `flow/brain/index.md` if needed (new feature, error, or decision)
 
-### Guided Mode (`/brain -guided`)
+### Guided Mode (`/note -guided`)
 
-When user runs `/brain -guided`:
+When user runs `/note -guided`:
 
 1. **Ask structured questions** using `AskUserQuestion`:
 

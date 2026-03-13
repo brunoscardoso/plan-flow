@@ -14,7 +14,7 @@ Automatic knowledge capture that builds a secondary brain during skill execution
 The brain operates in two modes:
 
 1. **Automatic Capture**: After each skill completes, process `<!-- brain-capture -->` blocks to record facts
-2. **Manual Entry**: Users can invoke `/brain` to capture meeting notes, ideas, and brainstorms
+2. **Manual Entry**: Users can invoke `/note` to capture meeting notes, ideas, and brainstorms
 
 ## File Location
 

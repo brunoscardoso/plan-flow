@@ -1,5 +1,5 @@
 ---
-description: "Manual brain entry skill - capture meeting notes, ideas, brainstorms, and insights. Invoked via /brain command."
+description: "Manual brain entry skill - capture meeting notes, ideas, brainstorms, and insights. Invoked via /note command."
 alwaysApply: false
 ---
 
@@ -21,7 +21,7 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 
 ### Free-Text Mode (Default)
 
-When user runs `/brain {free text}`:
+When user runs `/note {free text}`:
 
 1. Parse input text
 2. Extract entities (features, technologies, people, errors, decisions)
@@ -29,9 +29,9 @@ When user runs `/brain {free text}`:
 4. Create/update brain files with `[[wiki-links]]`
 5. Update `flow/brain/index.md` if needed
 
-### Guided Mode (`/brain -guided`)
+### Guided Mode (`/note -guided`)
 
-When user runs `/brain -guided`:
+When user runs `/note -guided`:
 
 1. Ask structured questions about work, insights, meetings, decisions
 2. Gather responses and follow-up text

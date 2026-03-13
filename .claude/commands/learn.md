@@ -81,7 +81,7 @@ TEACHING MODE (/learn about <topic>):
   Index:  ~/plan-flow/brain/learns/_index.md (LRN-* codes)
 
 RELATED COMMANDS:
-  /brain           Capture meeting notes, ideas, brainstorms
+  /note            Capture meeting notes, ideas, brainstorms
   /setup           Generate project pattern files
   /review-code     Review local uncommitted changes
 ```

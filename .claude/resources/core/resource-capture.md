@@ -13,7 +13,7 @@ During any skill execution, the LLM watches for information that could be valuab
 
 ### During Any Skill Execution
 
-While executing any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute-plan`, `/review-code`, `/review-pr`, `/write-tests`, `/create-contract`, `/brain`), watch for information that meets the capture criteria below.
+While executing any plan-flow skill (`/setup`, `/discovery-plan`, `/create-plan`, `/execute-plan`, `/review-code`, `/review-pr`, `/write-tests`, `/create-contract`, `/note`), watch for information that meets the capture criteria below.
 
 When you identify something worth preserving:
 

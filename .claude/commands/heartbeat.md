@@ -53,7 +53,7 @@ TASKLIST INTEGRATION:
 
 RELATED COMMANDS:
   /flow           Configure plan-flow settings
-  /brain          Manual brain entry
+  /note           Manual brain entry
 ```
 
 ---

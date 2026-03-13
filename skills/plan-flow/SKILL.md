@@ -23,7 +23,7 @@ A comprehensive skill set for AI-assisted software development with structured w
 | `/review-code` | Review local uncommitted changes |
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
-| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
 | `/flow` | Toggle autopilot mode (auto-chains the full workflow) |
 

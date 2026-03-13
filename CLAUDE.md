@@ -17,7 +17,7 @@ Use slash commands to invoke skills:
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brainstorm` | Free-form idea exploration with collaborative dialogue |
-| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
@@ -209,7 +209,7 @@ npm run test
 | `/review-pr` | Review a Pull Request |
 | `/write-tests` | Write tests to achieve coverage target |
 | `/brainstorm` | Free-form idea exploration with interactive questions |
-| `/brain` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
+| `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
 | `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 

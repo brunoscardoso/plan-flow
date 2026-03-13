@@ -58,7 +58,7 @@ WHAT IT IS:
 
 WHAT IT IS NOT:
   - Not /discovery-plan — no codebase scanning, no requirements docs
-  - Not /brain — no knowledge capture, no wiki-links
+  - Not /note — no knowledge capture, no wiki-links
   - Not a plan — no phases, no complexity scores
 
 RECOMMENDED MODEL:
@@ -67,7 +67,7 @@ RECOMMENDED MODEL:
 RELATED COMMANDS:
   /discovery-plan   Ground the brainstorm idea into the project
   /create-plan      Create plan from discovery document
-  /brain            Capture knowledge (different purpose)
+  /note             Capture knowledge (different purpose)
 ```
 
 ---
