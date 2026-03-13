@@ -75,8 +75,8 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 | `/create-plan` | Create implementation plan with phases |
 | `/execute-plan` | Execute plan phases with verification |
 | `/create-contract` | Create integration contract from API docs |
-| `/review-code` | Review local uncommitted changes |
-| `/review-pr` | Review a Pull Request |
+| `/review-code` | Review local uncommitted changes (adaptive depth + multi-agent) |
+| `/review-pr` | Review a Pull Request (adaptive depth + multi-agent) |
 | `/write-tests` | Generate tests for coverage target |
 | `/flow` | Configure plan-flow settings (autopilot, git control, runtime options) |
 | `/brain` | Capture meeting notes, ideas, brainstorms |
@@ -208,6 +208,41 @@ Tasks with `in {N} hours/minutes` schedules run once and auto-disable after exec
 ### Retry on Active Session
 
 If a task fails because a Claude Code session is already active, the daemon retries up to 5 times at 60-second intervals instead of failing permanently.
+
+## Code Review
+
+`/review-code` and `/review-pr` include three layers of intelligence:
+
+### Adaptive Depth
+
+Review depth scales automatically based on changeset size:
+
+| Lines Changed | Mode | Behavior |
+|--------------|------|----------|
+| < 50 | Lightweight | Quick-scan for security, logic bugs, and breaking changes only |
+| 50–500 | Standard | Full review with pattern matching and similar implementation search |
+| 500+ | Deep | Multi-pass review with file categorization, executive summary, and multi-agent analysis |
+
+### Verification Pass
+
+Every finding goes through a second-pass verification that re-reads surrounding context and asks structured questions to classify findings as Confirmed, Likely, or Dismissed. False positives are filtered before output.
+
+### Severity Re-Ranking
+
+Findings are sorted by impact (Critical > Major > Minor > Suggestion), related findings across files are grouped, and an executive summary is added when there are 5+ findings.
+
+### Multi-Agent Parallel Review
+
+In Deep mode (500+ lines), the review is split into 4 specialized subagents running in parallel:
+
+| Agent | Focus | Model |
+|-------|-------|-------|
+| Security | Vulnerabilities, secrets, injection, auth bypass | sonnet |
+| Logic & Bugs | Edge cases, null handling, race conditions | sonnet |
+| Performance | N+1 queries, memory leaks, blocking I/O | sonnet |
+| Pattern Compliance | Forbidden/allowed patterns, naming consistency | haiku |
+
+The coordinator merges results, deduplicates overlapping findings, then runs verification and re-ranking.
 
 ## Complexity Scoring
 
