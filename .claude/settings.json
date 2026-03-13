@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/cost-tracker.cjs",
+            "command": "test -f .claude/hooks/cost-tracker.cjs && node .claude/hooks/cost-tracker.cjs || true",
             "async": true
           }
         ]
@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/cost-display.cjs"
+            "command": "test -f .claude/hooks/cost-display.cjs && node .claude/hooks/cost-display.cjs || true"
           }
         ]
       },
@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/suggest-compact.cjs"
+            "command": "test -f .claude/hooks/suggest-compact.cjs && node .claude/hooks/suggest-compact.cjs || true"
           }
         ]
       }
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-compact-save.cjs"
+            "command": "test -f .claude/hooks/pre-compact-save.cjs && node .claude/hooks/pre-compact-save.cjs || true"
           }
         ]
       }
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/session-summary.cjs"
+            "command": "test -f .claude/hooks/session-summary.cjs && node .claude/hooks/session-summary.cjs || true"
           }
         ]
       }

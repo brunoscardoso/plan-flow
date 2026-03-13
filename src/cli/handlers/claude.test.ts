@@ -171,19 +171,25 @@ describe('initClaude', () => {
       expect(settings.hooks.SessionEnd).toBeDefined();
 
       // Verify Stop hooks: cost-tracker (async), cost-display (sync), suggest-compact (sync)
+      // All wrapped with guard: test -f <script> && node <script> || true
       expect(settings.hooks.Stop.length).toBe(3);
-      expect(settings.hooks.Stop[0].hooks[0].command).toBe('.claude/hooks/cost-tracker.cjs');
+      expect(settings.hooks.Stop[0].hooks[0].command).toContain('cost-tracker.cjs');
+      expect(settings.hooks.Stop[0].hooks[0].command).toMatch(/^test -f .+ && node .+ \|\| true$/);
       expect(settings.hooks.Stop[0].hooks[0].async).toBe(true);
-      expect(settings.hooks.Stop[1].hooks[0].command).toBe('.claude/hooks/cost-display.cjs');
-      expect(settings.hooks.Stop[2].hooks[0].command).toBe('.claude/hooks/suggest-compact.cjs');
+      expect(settings.hooks.Stop[1].hooks[0].command).toContain('cost-display.cjs');
+      expect(settings.hooks.Stop[1].hooks[0].command).toMatch(/^test -f .+ && node .+ \|\| true$/);
+      expect(settings.hooks.Stop[2].hooks[0].command).toContain('suggest-compact.cjs');
+      expect(settings.hooks.Stop[2].hooks[0].command).toMatch(/^test -f .+ && node .+ \|\| true$/);
 
       // Verify PreCompact hook
       expect(settings.hooks.PreCompact.length).toBe(1);
-      expect(settings.hooks.PreCompact[0].hooks[0].command).toBe('.claude/hooks/pre-compact-save.cjs');
+      expect(settings.hooks.PreCompact[0].hooks[0].command).toContain('pre-compact-save.cjs');
+      expect(settings.hooks.PreCompact[0].hooks[0].command).toMatch(/^test -f .+ && node .+ \|\| true$/);
 
       // Verify SessionEnd hook
       expect(settings.hooks.SessionEnd.length).toBe(1);
-      expect(settings.hooks.SessionEnd[0].hooks[0].command).toBe('.claude/hooks/session-summary.cjs');
+      expect(settings.hooks.SessionEnd[0].hooks[0].command).toContain('session-summary.cjs');
+      expect(settings.hooks.SessionEnd[0].hooks[0].command).toMatch(/^test -f .+ && node .+ \|\| true$/);
     });
 
     it('should preserve existing hooks in settings.json', async () => {
@@ -210,9 +216,9 @@ describe('initClaude', () => {
       // Existing hook + cost-tracker + cost-display + suggest-compact = 4
       expect(settings.hooks.Stop.length).toBe(4);
       expect(settings.hooks.Stop[0].hooks[0].command).toBe('my-custom-hook.sh');
-      expect(settings.hooks.Stop[1].hooks[0].command).toBe('.claude/hooks/cost-tracker.cjs');
-      expect(settings.hooks.Stop[2].hooks[0].command).toBe('.claude/hooks/cost-display.cjs');
-      expect(settings.hooks.Stop[3].hooks[0].command).toBe('.claude/hooks/suggest-compact.cjs');
+      expect(settings.hooks.Stop[1].hooks[0].command).toContain('cost-tracker.cjs');
+      expect(settings.hooks.Stop[2].hooks[0].command).toContain('cost-display.cjs');
+      expect(settings.hooks.Stop[3].hooks[0].command).toContain('suggest-compact.cjs');
 
       // Other settings preserved
       expect(settings.otherSetting).toBe(true);

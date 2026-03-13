@@ -297,9 +297,13 @@ function installHooks(
     const hooks = (settings.hooks || {}) as Record<string, unknown[]>;
     let updated = false;
 
+    // Guard wrapper: silently exit 0 if hook script doesn't exist
+    const guard = (cmd: string) => `test -f ${cmd} && node ${cmd} || true`;
+
     // Register Stop hook for cost-tracker (async — background file write)
-    const costTrackerCmd = '.claude/hooks/cost-tracker.cjs';
-    if (!hasHookCommand(hooks, 'Stop', costTrackerCmd)) {
+    const costTrackerScript = '.claude/hooks/cost-tracker.cjs';
+    const costTrackerCmd = guard(costTrackerScript);
+    if (!hasHookCommand(hooks, 'Stop', costTrackerScript)) {
       if (!hooks['Stop']) hooks['Stop'] = [];
       (hooks['Stop'] as unknown[]).push({
         hooks: [{ type: 'command', command: costTrackerCmd, async: true }],
@@ -308,8 +312,9 @@ function installHooks(
     }
 
     // Register Stop hook for cost-display (synchronous — shows after each response)
-    const costDisplayCmd = '.claude/hooks/cost-display.cjs';
-    if (!hasHookCommand(hooks, 'Stop', costDisplayCmd)) {
+    const costDisplayScript = '.claude/hooks/cost-display.cjs';
+    const costDisplayCmd = guard(costDisplayScript);
+    if (!hasHookCommand(hooks, 'Stop', costDisplayScript)) {
       if (!hooks['Stop']) hooks['Stop'] = [];
       (hooks['Stop'] as unknown[]).push({
         hooks: [{ type: 'command', command: costDisplayCmd }],
@@ -318,8 +323,9 @@ function installHooks(
     }
 
     // Register Stop hook for suggest-compact (synchronous — displays immediately)
-    const suggestCompactCmd = '.claude/hooks/suggest-compact.cjs';
-    if (!hasHookCommand(hooks, 'Stop', suggestCompactCmd)) {
+    const suggestCompactScript = '.claude/hooks/suggest-compact.cjs';
+    const suggestCompactCmd = guard(suggestCompactScript);
+    if (!hasHookCommand(hooks, 'Stop', suggestCompactScript)) {
       if (!hooks['Stop']) hooks['Stop'] = [];
       (hooks['Stop'] as unknown[]).push({
         hooks: [{ type: 'command', command: suggestCompactCmd }],
@@ -328,8 +334,9 @@ function installHooks(
     }
 
     // Register PreCompact hook for pre-compact-save (both auto and manual triggers)
-    const preCompactCmd = '.claude/hooks/pre-compact-save.cjs';
-    if (!hasHookCommand(hooks, 'PreCompact', preCompactCmd)) {
+    const preCompactScript = '.claude/hooks/pre-compact-save.cjs';
+    const preCompactCmd = guard(preCompactScript);
+    if (!hasHookCommand(hooks, 'PreCompact', preCompactScript)) {
       if (!hooks['PreCompact']) hooks['PreCompact'] = [];
       (hooks['PreCompact'] as unknown[]).push({
         hooks: [{ type: 'command', command: preCompactCmd }],
@@ -338,8 +345,9 @@ function installHooks(
     }
 
     // Register SessionEnd hook for session-summary
-    const sessionSummaryCmd = '.claude/hooks/session-summary.cjs';
-    if (!hasHookCommand(hooks, 'SessionEnd', sessionSummaryCmd)) {
+    const sessionSummaryScript = '.claude/hooks/session-summary.cjs';
+    const sessionSummaryCmd = guard(sessionSummaryScript);
+    if (!hasHookCommand(hooks, 'SessionEnd', sessionSummaryScript)) {
       if (!hooks['SessionEnd']) hooks['SessionEnd'] = [];
       (hooks['SessionEnd'] as unknown[]).push({
         hooks: [{ type: 'command', command: sessionSummaryCmd }],
@@ -367,7 +375,7 @@ function installHooks(
 function hasHookCommand(
   hooks: Record<string, unknown[]>,
   event: string,
-  command: string
+  scriptPath: string
 ): boolean {
   const eventHooks = hooks[event];
   if (!Array.isArray(eventHooks)) return false;
@@ -376,7 +384,8 @@ function hasHookCommand(
     const hookEntry = entry as { hooks?: Array<{ command?: string }> };
     if (hookEntry.hooks) {
       for (const h of hookEntry.hooks) {
-        if (h.command === command) return true;
+        // Match both old bare-path format and new guarded format
+        if (h.command && h.command.includes(scriptPath)) return true;
       }
     }
   }
