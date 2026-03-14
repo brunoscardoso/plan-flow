@@ -98,6 +98,47 @@ This skill is **strictly for gathering and documenting requirements**. The proce
 
 ---
 
+### Step 1b: Spawn Exploration Sub-Agents
+
+After reading referenced documents, spawn three parallel Agent sub-agents to explore the codebase. These run in parallel and return condensed findings that inform the clarifying questions in Step 2.
+
+**Actions**:
+
+1. **Prepare context summary**: Distill Step 1 findings into a brief context paragraph (feature name, key requirements, relevant technologies mentioned)
+2. **Spawn 3 sub-agents in parallel** using the Agent tool:
+   - **Similar Features** agent — finds existing code with related functionality
+   - **API/Data Patterns** agent — maps API endpoints, service patterns, data flow
+   - **Schema/Types** agent — explores type definitions, schemas, shared interfaces
+3. Each sub-agent uses `model: "haiku"` and `subagent_type: "Explore"`
+4. Each receives: feature name, context summary, and agent-specific exploration instructions
+
+See `.claude/resources/core/discovery-sub-agents.md` for prompt templates, return format schema, and full agent definitions (`COR-DSA-1`).
+
+**Spawning pattern**:
+```
+Launch in parallel:
+- Agent(model: "haiku", subagent_type: "Explore", prompt: similar_features_prompt)
+- Agent(model: "haiku", subagent_type: "Explore", prompt: api_data_prompt)
+- Agent(model: "haiku", subagent_type: "Explore", prompt: schema_types_prompt)
+```
+
+---
+
+### Step 1c: Collect and Merge Exploration Findings
+
+After all sub-agents return, process their findings:
+
+1. **Parse returns**: Extract JSON from each sub-agent response
+2. **Handle failures**: If a sub-agent returns `status: "failure"` or invalid JSON, skip its findings and continue. Log the failure but do not block discovery.
+3. **Filter**: If more than 15 total findings, remove `relevance: "low"` entries
+4. **Merge patterns**: Collect all `patterns_noticed` entries, deduplicate, and append to `flow/resources/pending-patterns.md`
+5. **Build Codebase Analysis**: Format merged findings into a `## Codebase Analysis` section (see template in `COR-DSA-2`)
+6. **Inform Step 2**: Use findings to formulate better clarifying questions — reference specific existing code when asking about patterns to follow
+
+If all sub-agents fail or return no findings, skip the Codebase Analysis section entirely. Discovery continues normally — findings are supplementary, not required.
+
+---
+
 ### Step 2: Ask Clarifying Questions
 
 Ask questions about gaps identified in documents and unclear requirements.
@@ -273,12 +314,15 @@ Create the discovery markdown file:
 
 1. Context
 2. Referenced Documents
-3. Requirements Gathered (FR, NFR, Constraints)
-4. Open Questions (all answered)
-5. Technical Considerations
-6. Proposed Approach
-7. Risks and Unknowns
-8. Next Steps
+3. Codebase Analysis (from Step 1c — omit if no findings)
+4. Requirements Gathered (FR, NFR, Constraints)
+5. Open Questions (all answered)
+6. Technical Considerations
+7. Proposed Approach
+8. Risks and Unknowns
+9. Next Steps
+
+**Codebase Analysis**: Include the merged findings from Step 1c. Use the Codebase Analysis section format from `.claude/resources/core/discovery-sub-agents.md` (`COR-DSA-2`). Omit this section if all sub-agents failed or returned no findings.
 
 **Design Context**: If UI work was confirmed during questioning, append a `## Design Context` section to the discovery document using the template from `.claude/resources/core/design-awareness.md`. Populate with extracted tokens (from screenshots), personality defaults, or existing design system values.
 
