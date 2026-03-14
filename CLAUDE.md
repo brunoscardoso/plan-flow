@@ -65,6 +65,12 @@ During execution, discovery, and code review, the LLM silently buffers coding pa
 
 See `.claude/resources/core/pattern-capture.md` for full rules.
 
+### Phase Isolation
+
+When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase implementation runs in an isolated Agent sub-agent with a clean context window. The sub-agent receives only the context it needs (phase spec, file list, patterns) and returns a structured JSON summary (1-2K tokens). This eliminates context rot — phase 7 has the same quality as phase 1.
+
+Planning/approval stays in the main session; only the implementation step is isolated. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for full rules.
+
 ### Brainstorm with Interactive Questions
 
 `/brainstorm` uses batched `AskUserQuestion` with 3-4 structured questions per round, each with recommended options. Commentary between rounds connects dots and challenges assumptions. Produces optional markdown files for `/discovery-plan`.
@@ -283,6 +289,10 @@ Discovery asks whether features involve UI work. If confirmed, captures structur
 ## Pattern Capture
 
 During skill execution, the LLM silently buffers patterns and anti-patterns, presenting them for approval at the end. Approved patterns are written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`. See `.claude/resources/core/pattern-capture.md`.
+
+## Phase Isolation
+
+When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
 
 ## Complexity Scoring
 

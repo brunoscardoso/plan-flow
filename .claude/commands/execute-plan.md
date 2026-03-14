@@ -343,6 +343,10 @@ This command uses hierarchical context loading to reduce context consumption. In
 | COR-CG-2 | Preserve rules | Crafting compact summary — what to keep |
 | COR-CG-3 | Discard rules | Crafting compact summary — what to drop |
 | COR-CG-4 | Compact summary template | Structuring compact instructions |
+| COR-PI-1 | Phase isolation architecture | Understanding isolated sub-agent flow |
+| COR-PI-2 | Sub-agent context template | Preparing focused prompt for sub-agent |
+| COR-PI-3 | Return format schema | Parsing sub-agent JSON response |
+| COR-PI-4 | Coordinator processing rules | Handling success/failure/partial returns |
 
 ### Expansion Instructions
 
@@ -474,4 +478,14 @@ When `model_routing: true` in `flow/.flowconfig` (default), each phase is automa
 Routing happens at Step 4 of the execution skill — the phase implementation is spawned as an Agent subagent with the appropriate `model` parameter. Planning/approval steps always use the session model.
 
 Disable with `/flow model_routing=false`. See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and aggregation rules.
+
+---
+
+## Phase Isolation
+
+When `phase_isolation: true` in `flow/.flowconfig` (default), each phase implementation runs in an **isolated Agent sub-agent** with a clean context window. The sub-agent receives only: phase spec, files modified so far, pattern file paths, and design context (if UI phase). It returns a structured JSON summary (1-2K tokens) with status, files changed, decisions, errors, and captured patterns.
+
+This eliminates context rot — phase 7 has the same quality as phase 1. Planning/approval stays in the main session; only the implementation step is isolated.
+
+Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for the full context template, return format schema, and coordinator processing rules.
 

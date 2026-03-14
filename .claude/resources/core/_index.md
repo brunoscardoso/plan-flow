@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 20 files, ~3220 lines
-**Reference Codes**: COR-AP-1 through COR-SS-3
+**Total Files**: 21 files, ~3380 lines
+**Reference Codes**: COR-AP-1 through COR-PI-4
 
 ---
 
@@ -160,6 +160,15 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-SS-2 | File format and 50-line limit | session-scratchpad.md | 47-68 |
 | COR-SS-3 | Promotion rules, targets, and compaction integration | session-scratchpad.md | 70-95 |
 
+### Phase Isolation (`phase-isolation.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-PI-1 | Purpose, architecture overview, and coordinator flow | phase-isolation.md | 3-40 |
+| COR-PI-2 | Context template — what to include in sub-agent prompt | phase-isolation.md | 42-85 |
+| COR-PI-3 | Return format schema (JSON), field descriptions, failure example | phase-isolation.md | 87-140 |
+| COR-PI-4 | Coordinator processing (success/failure/partial), config, and rules | phase-isolation.md | 142-180 |
+
 ### Review Adaptive Depth (`review-adaptive-depth.md`)
 
 | Code | Description | Source | Lines |
@@ -232,6 +241,10 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-SS-1 | Need scratchpad purpose, session start behavior, or write triggers |
 | COR-SS-2 | Need scratchpad file format or size limit |
 | COR-SS-3 | Need scratchpad promotion rules or compaction integration |
+| COR-PI-1 | Need phase isolation architecture or coordinator flow |
+| COR-PI-2 | Need sub-agent context template (what to include in prompt) |
+| COR-PI-3 | Need return format schema or field descriptions |
+| COR-PI-4 | Need coordinator processing rules or config settings |
 
 ---
 
@@ -274,5 +287,6 @@ Core rules define the foundational coding standards that apply across the entire
 - `project-tasklist.md` is loaded on-demand - session start tasklist behavior
 - `compaction-guide.md` is loaded on-demand - preserve/discard rules and summary template for `/compact`
 - `session-scratchpad.md` is loaded on-demand - ephemeral per-session notes with promotion to permanent storage
+- `phase-isolation.md` is loaded on-demand - isolated sub-agent execution per phase during `/execute-plan`
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration
