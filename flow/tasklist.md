@@ -6,12 +6,10 @@
 
 ## In Progress
 
-- [x] **Discovery: session-scratchpad** — Ephemeral per-session notes with end-of-session promotion (2026-03-13)
-- [x] **Plan: session-scratchpad** — 4 phases, combined complexity 8 (2026-03-13)
+(none)
 
 ## To Do
 
-- [ ] **Session scratchpad** — Ephemeral per-session notes file with end-of-session promotion to memory/brain/ledger (Priority 3, Medium effort)
 - [ ] **Sub-agent execute-plan** — Run each plan phase in isolated sub-agent with clean context, return 1-2K token summary (Priority 4, High effort)
 - [ ] **Discovery sub-agents** — Parallel codebase exploration during /discovery-plan with condensed findings (Priority 5, Medium effort)
 
@@ -26,3 +24,4 @@
 - [x] **Review: Multi-agent parallel review** — 4 specialized subagents (security, logic, performance, patterns) for Deep mode 500+ line reviews (2026-03-12)
 - [x] **Smart compaction prompt** — Core resource file + hook update to guide compaction on what to preserve vs discard (2026-03-13)
 - [x] **Micro-section skill loading** — Step-level reference codes for top 4 skills in _index.md + command file updates (2026-03-13)
+- [x] **Session scratchpad** — Ephemeral per-session notes with promotion to ledger/brain, core resource + CLAUDE.md updates (2026-03-13)
