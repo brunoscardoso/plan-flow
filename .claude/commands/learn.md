@@ -26,11 +26,10 @@ This command has two modes:
 | User Input | Mode | What To Do |
 |------------|------|------------|
 | `/learn` (no arguments) | **Pattern Extraction** | Scan session for reusable patterns (Steps 1-4 below) |
-| `/learn about <topic>` | **Teaching Mode** | Create a step-by-step curriculum to TEACH the user about `<topic>` |
-| `/learn <topic>` (any text after /learn) | **Teaching Mode** | Same as above — treat any argument as a topic to teach |
+| `/learn <topic>` (any text after /learn) | **Teaching Mode** | Create a step-by-step curriculum to TEACH the user about `<topic>` |
 | `/learn -help` | Help | Show help and stop |
 
-**Rule**: If the user provides ANY topic after `/learn`, you are in **Teaching Mode**. The ONLY way to trigger Pattern Extraction is `/learn` with no arguments.
+**Rule**: If the user provides ANY text after `/learn`, you are in **Teaching Mode**. The ONLY way to trigger Pattern Extraction is `/learn` with no arguments.
 
 **Teaching Mode means**: You are a TEACHER. You create a structured curriculum and teach the user step by step. You do NOT extract patterns from the session. You do NOT create `learned-*.md` files. You CREATE a curriculum and TEACH.
 
@@ -49,8 +48,7 @@ DESCRIPTION:
 
 USAGE:
   /learn                  Analyze session and suggest patterns to extract
-  /learn about <topic>    Teach me about <topic> step by step
-  /learn <topic>          Same as above — teach me about <topic>
+  /learn <topic>          Teach me about <topic> step by step
   /learn -help            Show this help
 
 PATTERN EXTRACTION MODE (/learn):
