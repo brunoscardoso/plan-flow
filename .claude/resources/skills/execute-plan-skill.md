@@ -193,13 +193,19 @@ Wait for user confirmation before proceeding.
    - Read the phase's complexity score
    - Look up model tier: **0-3 → Fast (haiku)**, **4-5 → Standard (sonnet)**, **6-10 → Powerful (opus)**
    - For aggregated phases, use the **highest individual phase complexity** to determine the tier
-   - Spawn implementation as an **Agent subagent** with `model={tier}` parameter
-   - Include in Agent prompt: plan file path, current phase details, files modified so far, allowed/forbidden patterns
-   - If `model_routing` is `false` or key is missing, skip routing and implement directly (use session model)
+   - If `model_routing` is `false` or key is missing, skip routing (use session model)
    - See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and rules
-5. **Inject design context** - Before implementing, check if the discovery doc (from plan's "Based on Discovery" field) has a `## Design Context` section. If present and the phase involves UI work (see UI Phase Detection Heuristics in `.claude/resources/core/design-awareness.md`), prepend the Design Context to the implementation prompt with: "Follow these design tokens when implementing UI elements. Use the exact color values, typography, and spacing from the Design Context." If no Design Context or phase is not UI-related, skip this step.
-6. **Implement** - Execute the phase following approved approach (via subagent if model routing is active, or directly if not)
-7. **Capture patterns** - While implementing, watch for recurring conventions, anti-patterns, and workarounds. Silently append to `flow/resources/pending-patterns.md`. See `.claude/resources/core/pattern-capture.md` for buffer format and capture triggers.
+5. **Inject design context** - Before implementing, check if the discovery doc (from plan's "Based on Discovery" field) has a `## Design Context` section. If present and the phase involves UI work (see UI Phase Detection Heuristics in `.claude/resources/core/design-awareness.md`), include the Design Context in the implementation prompt. If no Design Context or phase is not UI-related, skip this step.
+6. **Implement (with phase isolation)** - Check `phase_isolation` in `flow/.flowconfig` (default: `true`):
+   - **If `phase_isolation: true`**: Prepare an isolated context prompt and spawn as Agent subagent. See `.claude/resources/core/phase-isolation.md` for the full context template and return format schema. The prompt includes: phase spec (scope + tasks), files modified so far (paths only), pattern file paths (allowed/forbidden), design context (if UI phase), plan file path. The sub-agent returns a structured JSON summary.
+   - **If `phase_isolation: false`**: Execute inline in the main session (legacy behavior). Pattern capture happens inline via step 7.
+   - **Agent spawning** combines model routing AND isolation: use `model={tier}` parameter (from step 4) AND the focused context prompt (from isolation). If model routing is disabled, use session model with isolation. If both are disabled, execute inline.
+7. **Process sub-agent return** (isolation mode only) - Parse the JSON summary returned by the sub-agent:
+   - Check `status` field: `success` → continue; `failure` → present errors to user, ask retry/skip/stop; `partial` → present deviations, ask user
+   - Accumulate `files_created` and `files_modified` into the running file list
+   - Append `patterns_captured` entries to `flow/resources/pending-patterns.md`
+   - Log `decisions` in phase completion message
+   - If inline mode (no isolation), capture patterns directly per `.claude/resources/core/pattern-capture.md`
 8. **Update progress** - Mark tasks complete in plan file
 9. **Record model used** - Track which model tier was used for this phase (for the completion summary)
 10. **Continue to next phase** - NO BUILD between phases
