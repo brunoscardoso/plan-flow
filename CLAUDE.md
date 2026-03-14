@@ -71,6 +71,12 @@ When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-pla
 
 Planning/approval stays in the main session; only the implementation step is isolated. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for full rules.
 
+### Discovery Sub-Agents
+
+During `/discovery-plan`, three parallel haiku sub-agents explore the codebase simultaneously: Similar Features, API/Data Patterns, and Schema/Types. Each returns condensed JSON findings merged into a Codebase Analysis section in the discovery document. Always-on, no configuration needed.
+
+See `.claude/resources/core/discovery-sub-agents.md` for full rules.
+
 ### Brainstorm with Interactive Questions
 
 `/brainstorm` uses batched `AskUserQuestion` with 3-4 structured questions per round, each with recommended options. Commentary between rounds connects dots and challenges assumptions. Produces optional markdown files for `/discovery-plan`.
@@ -293,6 +299,10 @@ During skill execution, the LLM silently buffers patterns and anti-patterns, pre
 ## Phase Isolation
 
 When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
+
+## Discovery Sub-Agents
+
+During `/discovery-plan`, three parallel haiku sub-agents explore the codebase (similar features, API/data patterns, schema/types). Returns condensed JSON findings merged into a Codebase Analysis section. Always-on. See `.claude/resources/core/discovery-sub-agents.md`.
 
 ## Complexity Scoring
 

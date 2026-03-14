@@ -25,6 +25,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 > **Note**: The review-code and review-pr skills include **Adaptive Depth**. Review depth scales automatically based on changeset size: < 50 lines → Lightweight (quick-scan), 50–500 → Standard (no change), 500+ → Deep (multi-pass with executive summary). See `.claude/resources/core/review-adaptive-depth.md` for full rules.
 >
 > **Note**: All long-running skills (execute-plan, review-code, discovery) support **Context Compaction**. When compacting mid-skill, load `.claude/resources/core/compaction-guide.md` for preserve/discard rules and the compact summary template. See `COR-CG-1` through `COR-CG-4`.
+>
+> **Note**: The discovery skill uses **Discovery Sub-Agents** for parallel codebase exploration. Three haiku sub-agents (similar features, API/data patterns, schema/types) run in parallel after reading referenced docs, returning condensed JSON findings merged into a Codebase Analysis section. See `.claude/resources/core/discovery-sub-agents.md` for full rules.
 
 ---
 

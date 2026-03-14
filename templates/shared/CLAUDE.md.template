@@ -90,6 +90,10 @@ During skill execution, the LLM silently buffers patterns and anti-patterns, pre
 
 When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
 
+## Discovery Sub-Agents
+
+During `/discovery-plan`, three parallel haiku sub-agents explore the codebase (similar features, API/data patterns, schema/types). Returns condensed JSON findings merged into a Codebase Analysis section. Always-on. See `.claude/resources/core/discovery-sub-agents.md`.
+
 ## Complexity Scoring
 
 Every plan phase has a complexity score (0-10):

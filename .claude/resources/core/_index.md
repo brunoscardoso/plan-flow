@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 21 files, ~3380 lines
-**Reference Codes**: COR-AP-1 through COR-PI-4
+**Total Files**: 22 files, ~3580 lines
+**Reference Codes**: COR-AP-1 through COR-DSA-3
 
 ---
 
@@ -169,6 +169,14 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PI-3 | Return format schema (JSON), field descriptions, failure example | phase-isolation.md | 87-140 |
 | COR-PI-4 | Coordinator processing (success/failure/partial), config, and rules | phase-isolation.md | 142-180 |
 
+### Discovery Sub-Agents (`discovery-sub-agents.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-DSA-1 | Agent definitions with prompt templates (Similar Features, API/Data, Schema/Types) | discovery-sub-agents.md | 30-130 |
+| COR-DSA-2 | Return format schema and Codebase Analysis section template | discovery-sub-agents.md | 132-190 |
+| COR-DSA-3 | Coordinator behavior (spawn, collect, merge, error handling) | discovery-sub-agents.md | 192-240 |
+
 ### Review Adaptive Depth (`review-adaptive-depth.md`)
 
 | Code | Description | Source | Lines |
@@ -245,6 +253,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PI-2 | Need sub-agent context template (what to include in prompt) |
 | COR-PI-3 | Need return format schema or field descriptions |
 | COR-PI-4 | Need coordinator processing rules or config settings |
+| COR-DSA-1 | Need discovery sub-agent definitions or prompt templates |
+| COR-DSA-2 | Need return format schema or Codebase Analysis section template |
+| COR-DSA-3 | Need coordinator spawn/collect/merge behavior or error handling |
 
 ---
 
@@ -290,3 +301,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `phase-isolation.md` is loaded on-demand - isolated sub-agent execution per phase during `/execute-plan`
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration
+- `discovery-sub-agents.md` is loaded on-demand - parallel codebase exploration sub-agents during `/discovery-plan`

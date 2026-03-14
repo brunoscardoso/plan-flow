@@ -390,6 +390,16 @@ Only save if the user approves. Do not re-ask if declined.
 
 ---
 
+## Discovery Sub-Agents
+
+After reading referenced documents (Step 1), three parallel Agent sub-agents explore the codebase simultaneously: **Similar Features** (finds related existing code), **API/Data Patterns** (maps endpoints and service patterns), and **Schema/Types** (explores type definitions and schemas). All use haiku model.
+
+Each sub-agent returns condensed JSON findings (under 2K tokens) that the coordinator merges into a `## Codebase Analysis` section in the discovery document. Findings also inform the clarifying questions in Step 2.
+
+Always-on — no configuration needed. See `.claude/resources/core/discovery-sub-agents.md` for full rules.
+
+---
+
 ## Design Awareness
 
 During discovery, always ask whether the feature involves UI work. If confirmed, follow the design question flow to capture structured design tokens (colors, typography, spacing, component patterns) into a `## Design Context` section in the discovery document.
