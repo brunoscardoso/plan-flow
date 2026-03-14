@@ -6,9 +6,11 @@
 
 ## In Progress
 
-## To Do
+- [x] **Discovery: discovery-sub-agents** — Parallel codebase exploration during /discovery-plan (2026-03-13)
+- [x] **Plan: discovery-sub-agents** — 5 phases, combined complexity 17 (2026-03-13)
+- [ ] **Execute: discovery-sub-agents** — 5 phases, parallel exploration sub-agents
 
-- [ ] **Discovery sub-agents** — Parallel codebase exploration during /discovery-plan with condensed findings (Priority 5, Medium effort)
+## To Do
 
 ## Done
 
