@@ -6,13 +6,8 @@
 
 ## In Progress
 
-- [x] **Discovery: sub-agent-execute-plan** — Isolated sub-agents per phase with clean context (2026-03-13)
-- [x] **Plan: sub-agent-execute-plan** — 5 phases, combined complexity 22 (2026-03-13)
-- [ ] **Execute: sub-agent-execute-plan** — 5 phases, isolated sub-agents per phase
-
 ## To Do
 
-- [ ] **Sub-agent execute-plan** — Run each plan phase in isolated sub-agent with clean context, return 1-2K token summary (Priority 4, High effort)
 - [ ] **Discovery sub-agents** — Parallel codebase exploration during /discovery-plan with condensed findings (Priority 5, Medium effort)
 
 ## Done
@@ -27,3 +22,4 @@
 - [x] **Smart compaction prompt** — Core resource file + hook update to guide compaction on what to preserve vs discard (2026-03-13)
 - [x] **Micro-section skill loading** — Step-level reference codes for top 4 skills in _index.md + command file updates (2026-03-13)
 - [x] **Session scratchpad** — Ephemeral per-session notes with promotion to ledger/brain, core resource + CLAUDE.md updates (2026-03-13)
+- [x] **Sub-agent execute-plan** — Isolated sub-agents per phase with clean context, core resource + skill + command updates (2026-03-13)
