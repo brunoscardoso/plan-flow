@@ -6,10 +6,6 @@
 
 ## In Progress
 
-- [x] **Discovery: discovery-sub-agents** — Parallel codebase exploration during /discovery-plan (2026-03-13)
-- [x] **Plan: discovery-sub-agents** — 5 phases, combined complexity 17 (2026-03-13)
-- [ ] **Execute: discovery-sub-agents** — 5 phases, parallel exploration sub-agents
-
 ## To Do
 
 ## Done
@@ -25,3 +21,4 @@
 - [x] **Micro-section skill loading** — Step-level reference codes for top 4 skills in _index.md + command file updates (2026-03-13)
 - [x] **Session scratchpad** — Ephemeral per-session notes with promotion to ledger/brain, core resource + CLAUDE.md updates (2026-03-13)
 - [x] **Sub-agent execute-plan** — Isolated sub-agents per phase with clean context, core resource + skill + command updates (2026-03-13)
+- [x] **Discovery sub-agents** — Parallel codebase exploration during /discovery-plan, core resource + skill + command updates (2026-03-13)
