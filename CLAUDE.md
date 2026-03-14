@@ -105,6 +105,7 @@ flow/
 ├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
 ├── log.md             # Heartbeat log of important events
 ├── ledger.md          # Persistent project learning journal
+├── .scratchpad.md     # Ephemeral per-session notes (cleared each session)
 ├── .flowconfig        # Central config file (autopilot, git control, settings)
 └── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
@@ -115,6 +116,7 @@ flow/
 - **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Project Tasklist**: If `flow/tasklist.md` exists, read it silently and present a brief summary of active tasks. See `.claude/resources/core/project-tasklist.md` for full rules.
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
+- **Session Scratchpad**: If `flow/.scratchpad.md` exists and has content, read it silently. Promote stale entries to ledger/brain, then clear. During work, write noteworthy observations to the scratchpad. See `.claude/resources/core/session-scratchpad.md` for full rules.
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Rules
@@ -228,6 +230,7 @@ npm run test
 - **Project Brain**: If `flow/brain/index.md` exists, read it silently and internalize active features and recent errors. See `.claude/resources/core/brain-capture.md` for full rules.
 - **Project Tasklist**: If `flow/tasklist.md` exists, read it silently and present a brief summary of active tasks. See `.claude/resources/core/project-tasklist.md` for full rules.
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
+- **Session Scratchpad**: If `flow/.scratchpad.md` exists and has content, read it silently. Promote stale entries to ledger/brain, then clear. During work, write noteworthy observations to the scratchpad. See `.claude/resources/core/session-scratchpad.md` for full rules.
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 
 ## Critical Rules
@@ -260,6 +263,7 @@ flow/
 ├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
 ├── log.md             # Heartbeat log of important events
 ├── ledger.md          # Persistent project learning journal
+├── .scratchpad.md     # Ephemeral per-session notes (cleared each session)
 ├── .flowconfig        # Central config file (autopilot, git control, settings)
 └── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```

@@ -23,6 +23,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 > **Note**: The review-code and review-pr skills include **Severity Re-Ranking**. After verification, findings are re-ranked by severity → confidence → fix complexity, related findings across files are grouped, and an executive summary is added when ≥ 5 findings. See `.claude/resources/core/review-severity-ranking.md` for full rules.
 >
 > **Note**: The review-code and review-pr skills include **Adaptive Depth**. Review depth scales automatically based on changeset size: < 50 lines → Lightweight (quick-scan), 50–500 → Standard (no change), 500+ → Deep (multi-pass with executive summary). See `.claude/resources/core/review-adaptive-depth.md` for full rules.
+>
+> **Note**: All long-running skills (execute-plan, review-code, discovery) support **Context Compaction**. When compacting mid-skill, load `.claude/resources/core/compaction-guide.md` for preserve/discard rules and the compact summary template. See `COR-CG-1` through `COR-CG-4`.
 
 ---
 
@@ -93,44 +95,68 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| SKL-EXEC-1 | Critical rules (build only at end, no DB commands) | execute-plan-skill.md | 22-95 |
-| SKL-EXEC-2 | Workflow steps 1-3 (parse, analyze complexity, present summary) | execute-plan-skill.md | 105-182 |
-| SKL-EXEC-3 | Workflow steps 4-5 (execute phases with Plan mode, update progress) | execute-plan-skill.md | 184-238 |
-| SKL-EXEC-4 | Workflow steps 6-7 (tests phase, completion/verification) | execute-plan-skill.md | 240-281 |
-| SKL-EXEC-5 | Complexity-based behavior (low, medium, high, very high) | execute-plan-skill.md | 303-332 |
-| SKL-EXEC-6 | Error handling (build failures, test failures, cancellation) | execute-plan-skill.md | 334-366 |
+| SKL-EXEC-1 | Purpose and inputs | execute-plan-skill.md | 4-100 |
+| SKL-EXEC-2 | Critical rules (build only at end, no DB commands) | execute-plan-skill.md | 18-92 |
+| SKL-EXEC-3 | Step 1: Parse the plan | execute-plan-skill.md | 103-112 |
+| SKL-EXEC-4 | Step 2: Analyze complexity and determine execution strategy | execute-plan-skill.md | 113-151 |
+| SKL-EXEC-5 | Step 3: Present execution plan summary | execute-plan-skill.md | 152-180 |
+| SKL-EXEC-6 | Step 4: Execute each phase with Plan mode | execute-plan-skill.md | 181-236 |
+| SKL-EXEC-7 | Step 5: Update progress after each phase | execute-plan-skill.md | 237-249 |
+| SKL-EXEC-8 | Step 5b: Phase-boundary context check (compaction) | execute-plan-skill.md | 250-275 |
+| SKL-EXEC-9 | Step 6: Handle tests phase | execute-plan-skill.md | 277-302 |
+| SKL-EXEC-10 | Step 7: Completion — build and test verification | execute-plan-skill.md | 303-364 |
+| SKL-EXEC-11 | Complexity-based behavior (low, medium, high, very high) | execute-plan-skill.md | 365-393 |
+| SKL-EXEC-12 | Error handling (build failures, test failures, cancellation) | execute-plan-skill.md | 395-427 |
 
 ### Review Code Skill (`review-code-skill.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| SKL-REV-1 | Purpose and restrictions (read-only analysis) | review-code-skill.md | 8-58 |
-| SKL-REV-2 | Workflow steps 1-3 (identify files, load patterns, find similar) | review-code-skill.md | 72-130 |
-| SKL-REV-3 | Workflow steps 4-6 (analyze, pattern conflicts, generate doc) | review-code-skill.md | 131-180 |
-| SKL-REV-4 | Severity levels and conflict resolution | review-code-skill.md | 182-231 |
-| SKL-REV-5 | Finding similar implementations (search strategies) | review-code-skill.md | 233-259 |
+| SKL-REV-1 | Purpose and restrictions (read-only, allowed actions) | review-code-skill.md | 4-58 |
+| SKL-REV-2 | Step 1: Identify changed files | review-code-skill.md | 70-77 |
+| SKL-REV-3 | Step 1b: Determine review depth (adaptive depth) | review-code-skill.md | 78-97 |
+| SKL-REV-4 | Step 2: Load review patterns | review-code-skill.md | 98-107 |
+| SKL-REV-5 | Step 3: Find similar implementations in codebase | review-code-skill.md | 108-146 |
+| SKL-REV-6 | Step 4: Analyze code changes | review-code-skill.md | 147-158 |
+| SKL-REV-7 | Step 5: Pattern conflicts + 5b verify + 5c re-rank | review-code-skill.md | 159-231 |
+| SKL-REV-8 | Step 6: Generate review document | review-code-skill.md | 232-260 |
+| SKL-REV-9 | Severity levels and conflict resolution | review-code-skill.md | 252-301 |
+| SKL-REV-10 | Finding similar implementations (search strategies) | review-code-skill.md | 303-330 |
+| SKL-REV-11 | Validation checklist | review-code-skill.md | 379-392 |
 
 ### Review PR Skill (`review-pr-skill.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| SKL-PR-1 | Purpose and restrictions (GitHub/Azure DevOps commands) | review-pr-skill.md | 8-122 |
-| SKL-PR-2 | Workflow (authenticate, fetch, analyze, generate) | review-pr-skill.md | 132-217 |
-| SKL-PR-3 | Output format template with review history | review-pr-skill.md | 219-318 |
-| SKL-PR-4 | Severity levels and fix complexity scoring | review-pr-skill.md | 320-370 |
-| SKL-PR-5 | Link format for GitHub and Azure DevOps | review-pr-skill.md | 372-420 |
+| SKL-PR-1 | Purpose and restrictions (read-only, GitHub/Azure DevOps) | review-pr-skill.md | 4-120 |
+| SKL-PR-2 | Step 0: Authenticate for PR access | review-pr-skill.md | 132-158 |
+| SKL-PR-3 | Step 1: Fetch PR information + 1b determine review depth | review-pr-skill.md | 159-184 |
+| SKL-PR-4 | Step 2: Load review patterns | review-pr-skill.md | 185-194 |
+| SKL-PR-5 | Step 3: Analyze code changes + 3b verify + 3c re-rank | review-pr-skill.md | 195-240 |
+| SKL-PR-6 | Step 4: Generate or update review document | review-pr-skill.md | 241-320 |
+| SKL-PR-7 | Output format template (findings, severity, recommendations) | review-pr-skill.md | 322-376 |
+| SKL-PR-8 | Fix complexity scoring (scale, modifiers, examples) | review-pr-skill.md | 388-426 |
+| SKL-PR-9 | Link format for GitHub and Azure DevOps | review-pr-skill.md | 428-477 |
+| SKL-PR-10 | Example finding and quick reference commands | review-pr-skill.md | 479-552 |
 
 ### Setup Skill (`setup-skill.md`)
 
 | Code | Description | Source | Lines |
 |------|-------------|--------|-------|
-| SKL-SETUP-1 | Purpose and critical approach | setup-skill.md | 8-30 |
-| SKL-SETUP-2 | Steps 1-2 (scan project structure, dependency analysis) | setup-skill.md | 34-106 |
-| SKL-SETUP-3 | Step 3 (deep code analysis, sample files, extract patterns) | setup-skill.md | 108-200 |
-| SKL-SETUP-4 | Steps 4-5 (research best practices, check existing rules) | setup-skill.md | 202-252 |
-| SKL-SETUP-5 | Step 6 (confirming questions via Plan mode) | setup-skill.md | 254-334 |
-| SKL-SETUP-6 | Step 7 (generate framework and library pattern files) | setup-skill.md | 336-493 |
-| SKL-SETUP-7 | Steps 8-11 (update core, create analysis doc, create flow folder, summary) | setup-skill.md | 595-797 |
+| SKL-SETUP-1 | Purpose and critical approach | setup-skill.md | 4-28 |
+| SKL-SETUP-2 | Step 1: Scan project structure | setup-skill.md | 31-57 |
+| SKL-SETUP-3 | Step 2: Deep dependency analysis | setup-skill.md | 58-103 |
+| SKL-SETUP-4 | Step 3: Deep code analysis | setup-skill.md | 104-199 |
+| SKL-SETUP-5 | Step 4: Research best practices | setup-skill.md | 200-222 |
+| SKL-SETUP-6 | Step 5: Check existing rules | setup-skill.md | 223-249 |
+| SKL-SETUP-7 | Step 6: Ask confirming questions (Plan mode) | setup-skill.md | 250-332 |
+| SKL-SETUP-8 | Step 7: Generate pattern files (templates + examples) | setup-skill.md | 333-574 |
+| SKL-SETUP-9 | Step 8: Update core pattern files | setup-skill.md | 575-605 |
+| SKL-SETUP-10 | Step 9: Sync generic patterns to global brain | setup-skill.md | 606-654 |
+| SKL-SETUP-11 | Step 10: Create project analysis document | setup-skill.md | 655-727 |
+| SKL-SETUP-12 | Step 11: Index documentation files | setup-skill.md | 728-816 |
+| SKL-SETUP-13 | Step 12: Create flow folder structure | setup-skill.md | 817-860 |
+| SKL-SETUP-14 | Step 13: Present setup summary | setup-skill.md | 861-955 |
 
 ### Write Tests Skill (`write-tests-skill.md`)
 
@@ -159,26 +185,56 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 
 | Code | Expand When |
 |------|-------------|
-| SKL-EXEC-1 | Need critical rules (build timing, DB commands) |
-| SKL-EXEC-2 | Need complexity analysis and grouping logic |
-| SKL-EXEC-3 | Need phase execution workflow with Plan mode |
-| SKL-EXEC-5 | Need complexity-based behavior details |
+| SKL-EXEC-2 | Need critical rules (build timing, DB commands) |
+| SKL-EXEC-3 | Parsing plan file structure |
+| SKL-EXEC-4 | Analyzing complexity and determining execution strategy |
+| SKL-EXEC-5 | Presenting execution plan summary to user |
+| SKL-EXEC-6 | Executing a phase with Plan mode |
+| SKL-EXEC-7 | Updating progress after a phase |
+| SKL-EXEC-8 | Compacting at phase boundaries |
+| SKL-EXEC-9 | Handling the tests phase |
+| SKL-EXEC-10 | Final build and test verification |
+| SKL-EXEC-11 | Need complexity-based behavior details |
+| SKL-EXEC-12 | Handling build/test failures or cancellation |
 
 ### Code Review
 
 | Code | Expand When |
 |------|-------------|
-| SKL-REV-2 | Need pattern loading and similar implementation search |
-| SKL-REV-4 | Need severity levels and conflict resolution |
-| SKL-PR-3 | Need PR review output template |
-| SKL-PR-5 | Need link format for GitHub/Azure DevOps |
+| SKL-REV-2 | Identifying changed files for review |
+| SKL-REV-3 | Determining review depth (adaptive) |
+| SKL-REV-4 | Loading review patterns |
+| SKL-REV-5 | Finding similar implementations in codebase |
+| SKL-REV-6 | Analyzing code changes |
+| SKL-REV-7 | Pattern conflicts, verification, and re-ranking |
+| SKL-REV-8 | Generating the review document |
+| SKL-REV-9 | Need severity levels and conflict resolution |
+| SKL-REV-10 | Need search strategies for similar code |
+| SKL-PR-2 | Authenticating for PR access |
+| SKL-PR-3 | Fetching PR info and determining depth |
+| SKL-PR-5 | Analyzing PR changes, verification, re-ranking |
+| SKL-PR-6 | Generating PR review document |
+| SKL-PR-7 | Need PR review output template |
+| SKL-PR-8 | Need fix complexity scoring |
+| SKL-PR-9 | Need link format for GitHub/Azure DevOps |
 
 ### Setup and Testing
 
 | Code | Expand When |
 |------|-------------|
-| SKL-SETUP-2 | Need dependency detection tables |
-| SKL-SETUP-6 | Need pattern file generation templates |
+| SKL-SETUP-2 | Scanning project structure |
+| SKL-SETUP-3 | Deep dependency analysis |
+| SKL-SETUP-4 | Deep code analysis |
+| SKL-SETUP-5 | Researching best practices |
+| SKL-SETUP-6 | Checking existing rules |
+| SKL-SETUP-7 | Asking confirming questions via Plan mode |
+| SKL-SETUP-8 | Generating pattern files |
+| SKL-SETUP-9 | Updating core pattern files |
+| SKL-SETUP-10 | Syncing to global brain |
+| SKL-SETUP-11 | Creating project analysis document |
+| SKL-SETUP-12 | Indexing documentation files |
+| SKL-SETUP-13 | Creating flow folder structure |
+| SKL-SETUP-14 | Presenting setup summary |
 | SKL-TEST-2 | Need coverage analysis workflow |
 | SKL-TEST-4 | Need test writing guidelines |
 
@@ -201,10 +257,10 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | `/learn` | learn-skill | SKL-LRN-1 through SKL-LRN-4 |
 | `/discovery-plan` | discovery-skill | SKL-DIS-1 through SKL-DIS-4 |
 | `/create-plan` | create-plan-skill | SKL-PLN-1 through SKL-PLN-4 |
-| `/execute-plan` | execute-plan-skill | SKL-EXEC-1 through SKL-EXEC-6 |
-| `/review-code` | review-code-skill | SKL-REV-1 through SKL-REV-5 |
-| `/review-pr` | review-pr-skill | SKL-PR-1 through SKL-PR-5 |
-| `/setup` | setup-skill | SKL-SETUP-1 through SKL-SETUP-7 |
+| `/execute-plan` | execute-plan-skill | SKL-EXEC-1 through SKL-EXEC-12 |
+| `/review-code` | review-code-skill | SKL-REV-1 through SKL-REV-11 |
+| `/review-pr` | review-pr-skill | SKL-PR-1 through SKL-PR-10 |
+| `/setup` | setup-skill | SKL-SETUP-1 through SKL-SETUP-14 |
 | `/write-tests` | write-tests-skill | SKL-TEST-1 through SKL-TEST-5 |
 | `/create-contract` | create-contract-skill | SKL-CON-1 through SKL-CON-4 |
 
@@ -214,10 +270,10 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 
 | Skill | Lines | Sections | Complexity |
 |-------|-------|----------|------------|
-| setup-skill | 821 | 7 | Highest - deep project analysis |
-| review-pr-skill | 496 | 5 | High - multi-platform support |
-| execute-plan-skill | 388 | 6 | High - phase execution logic |
-| review-code-skill | 308 | 5 | Medium - pattern matching |
+| setup-skill | 955 | 14 | Highest - deep project analysis |
+| review-pr-skill | 552 | 10 | High - multi-platform support |
+| execute-plan-skill | 448 | 12 | High - phase execution logic |
+| review-code-skill | 392 | 11 | Medium - pattern matching |
 | discovery-skill | 295 | 4 | Medium - requirements gathering |
 | brainstorm-skill | 280 | 3 | Medium - structured exploration with interactive questions |
 | write-tests-skill | 294 | 5 | Medium - iterative testing |

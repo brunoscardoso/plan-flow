@@ -328,11 +328,21 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Code | Description | When to Expand |
 |------|-------------|----------------|
-| SKL-EXEC-1 | Execution workflow | Understanding full process |
-| SKL-EXEC-2 | Complexity-based grouping | Determining execution strategy |
+| SKL-EXEC-2 | Critical rules (build, DB) | Need build/DB command restrictions |
+| SKL-EXEC-4 | Analyze complexity | Determining execution strategy |
+| SKL-EXEC-6 | Execute phase with Plan mode | Running a specific phase |
+| SKL-EXEC-8 | Phase-boundary compaction | Compacting between phases |
+| SKL-EXEC-9 | Handle tests phase | Executing the tests phase |
+| SKL-EXEC-10 | Build and test verification | Final verification step |
+| SKL-EXEC-11 | Complexity-based behavior | Need low/medium/high behavior details |
+| SKL-EXEC-12 | Error handling | Build/test failure or cancellation |
 | COR-CS-1 | Complexity scoring table | Interpreting phase complexity |
 | TLS-PLN-1 | Plan mode switching | Before each phase |
 | TLS-PLN-2 | Plan mode workflow | Presenting phase details |
+| COR-CG-1 | Compaction guide purpose | When compacting at phase boundaries |
+| COR-CG-2 | Preserve rules | Crafting compact summary — what to keep |
+| COR-CG-3 | Discard rules | Crafting compact summary — what to drop |
+| COR-CG-4 | Compact summary template | Structuring compact instructions |
 
 ### Expansion Instructions
 

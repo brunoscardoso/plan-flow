@@ -278,6 +278,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 | SKL-DIS-1 | Discovery skill workflow | Understanding full process |
 | TLS-IQ-2 | How to switch to Plan mode | Before asking questions |
 | TLS-IQ-3 | How to ask questions | When gathering requirements |
+| COR-CG-1 | Compaction guide | Load when compacting mid-discovery |
 
 ### Expansion Instructions
 

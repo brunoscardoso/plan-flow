@@ -145,7 +145,14 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Code | Description | When to Expand |
 |------|-------------|----------------|
-| SKL-PR-1 | Review PR skill workflow | Understanding full process |
+| SKL-PR-1 | Purpose and restrictions | Understanding allowed actions |
+| SKL-PR-2 | Authenticate for PR access | Setting up authentication |
+| SKL-PR-3 | Fetch PR info + determine depth | Getting PR data and review mode |
+| SKL-PR-5 | Analyze + verify + re-rank | Processing findings |
+| SKL-PR-6 | Generate review document | Creating the output file |
+| SKL-PR-7 | Output template | Review document structure |
+| SKL-PR-8 | Fix complexity scoring | Severity and complexity details |
+| SKL-PR-9 | Link format (GitHub/Azure DevOps) | Platform-specific link formats |
 | TLS-AUTH-1 | Auth tool configuration | Setting up authentication |
 | TLS-AUTH-2 | Authentication workflow | Authenticating to platform |
 | PTN-PR-1 | PR review patterns | Creating review output |

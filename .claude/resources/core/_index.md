@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 18 files, ~3020 lines
-**Reference Codes**: COR-AP-1 through COR-AD-4
+**Total Files**: 20 files, ~3220 lines
+**Reference Codes**: COR-AP-1 through COR-SS-3
 
 ---
 
@@ -143,6 +143,23 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-SR-3 | Executive summary trigger and risk level derivation | review-severity-ranking.md | 90-120 |
 | COR-SR-4 | Output structure and insertion points | review-severity-ranking.md | 122-150 |
 
+### Compaction Guide (`compaction-guide.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-CG-1 | Purpose, core principle, and when to compact | compaction-guide.md | 3-20 |
+| COR-CG-2 | Preserve rules — what to keep during compaction | compaction-guide.md | 22-38 |
+| COR-CG-3 | Discard rules — what to drop during compaction | compaction-guide.md | 40-55 |
+| COR-CG-4 | Compact summary template and skill-specific examples | compaction-guide.md | 57-110 |
+
+### Session Scratchpad (`session-scratchpad.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-SS-1 | Purpose, session start behavior, and write triggers | session-scratchpad.md | 3-45 |
+| COR-SS-2 | File format and 50-line limit | session-scratchpad.md | 47-68 |
+| COR-SS-3 | Promotion rules, targets, and compaction integration | session-scratchpad.md | 70-95 |
+
 ### Review Adaptive Depth (`review-adaptive-depth.md`)
 
 | Code | Description | Source | Lines |
@@ -204,10 +221,17 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-SR-2 | Need grouping rules for related findings |
 | COR-SR-3 | Need executive summary trigger conditions |
 | COR-SR-4 | Need severity re-ranking output structure or insertion points |
+| COR-CG-1 | Need to understand when and why to compact |
+| COR-CG-2 | Need preserve rules for crafting compact summaries |
+| COR-CG-3 | Need discard rules for dropping low-signal tokens |
+| COR-CG-4 | Need compact summary template or skill-specific examples |
 | COR-AD-1 | Need size detection thresholds or line counting rules |
 | COR-AD-2 | Need lightweight review mode behavior |
 | COR-AD-3 | Need deep review mode behavior (categorization, passes, executive summary) |
 | COR-AD-4 | Need insertion points for adaptive depth in review skills |
+| COR-SS-1 | Need scratchpad purpose, session start behavior, or write triggers |
+| COR-SS-2 | Need scratchpad file format or size limit |
+| COR-SS-3 | Need scratchpad promotion rules or compaction integration |
 
 ---
 
@@ -248,5 +272,7 @@ Core rules define the foundational coding standards that apply across the entire
 - `pattern-capture.md` is loaded on-demand - silently captures patterns during skill execution and presents for approval
 - `model-routing.md` is loaded on-demand - automatic model selection per phase based on complexity scores during `/execute-plan`
 - `project-tasklist.md` is loaded on-demand - session start tasklist behavior
+- `compaction-guide.md` is loaded on-demand - preserve/discard rules and summary template for `/compact`
+- `session-scratchpad.md` is loaded on-demand - ephemeral per-session notes with promotion to permanent storage
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration

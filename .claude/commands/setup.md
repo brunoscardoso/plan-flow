@@ -673,7 +673,17 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Code | Description | When to Expand |
 |------|-------------|----------------|
-| SKL-SETUP-1 | Setup skill workflow | Understanding full process |
+| SKL-SETUP-1 | Purpose and critical approach | Understanding setup goals |
+| SKL-SETUP-2 | Scan project structure | Scanning files and directories |
+| SKL-SETUP-3 | Deep dependency analysis | Analyzing package dependencies |
+| SKL-SETUP-4 | Deep code analysis | Sampling files and extracting patterns |
+| SKL-SETUP-7 | Ask confirming questions | Presenting questions via Plan mode |
+| SKL-SETUP-8 | Generate pattern files | Creating framework/library pattern files |
+| SKL-SETUP-9 | Update core pattern files | Updating allowed/forbidden patterns |
+| SKL-SETUP-11 | Create analysis document | Generating project analysis doc |
+| SKL-SETUP-12 | Index documentation | Indexing project docs with reference codes |
+| SKL-SETUP-13 | Create flow folder | Setting up flow/ directory structure |
+| SKL-SETUP-14 | Present summary | Final setup summary output |
 | TLS-IQ-1 | Interactive questions overview | Before asking questions |
 | TLS-IQ-2 | Switch to Plan mode | Starting question session |
 | TLS-IQ-3 | Ask questions format | Asking confirmation questions |

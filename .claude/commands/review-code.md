@@ -150,7 +150,13 @@ This command uses hierarchical context loading to reduce context consumption. In
 
 | Code | Description | When to Expand |
 |------|-------------|----------------|
-| SKL-REV-1 | Review code skill workflow | Understanding full process |
+| SKL-REV-1 | Purpose and restrictions | Understanding allowed actions |
+| SKL-REV-2 | Identify changed files | Starting the review |
+| SKL-REV-3 | Determine review depth | Adaptive depth selection |
+| SKL-REV-5 | Find similar implementations | Searching for comparable code |
+| SKL-REV-7 | Pattern conflicts + verify + re-rank | Processing findings |
+| SKL-REV-8 | Generate review document | Creating the output file |
+| SKL-REV-9 | Severity and conflict resolution | Severity levels and resolution options |
 | PTN-REV-1 | Review document structure | Creating review output |
 | COR-AP-1 | Allowed patterns overview | Checking pattern compliance |
 | COR-FP-1 | Forbidden patterns overview | Identifying anti-patterns |
@@ -161,6 +167,7 @@ This command uses hierarchical context loading to reduce context consumption. In
 | COR-AD-1 | Adaptive depth size detection | Determining review mode |
 | COR-AD-2 | Lightweight review mode | Changeset < 50 lines |
 | COR-AD-3 | Deep review mode | Changeset 500+ lines |
+| COR-CG-1 | Compaction guide | Load when compacting mid-review |
 
 ### Expansion Instructions
 

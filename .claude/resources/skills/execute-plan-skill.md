@@ -270,6 +270,8 @@ Run `/compact` with instructions that preserve execution state:
 - After compaction, re-read the plan file and continue from the next phase
 - In autopilot mode, compact automatically without asking — this is a maintenance action, not a user decision
 
+**Compaction Guide**: For detailed preserve/discard rules, see `COR-CG-2` and `COR-CG-3`. Use the summary template from `COR-CG-4` to structure your `/compact` instructions.
+
 ---
 
 ### Step 6: Handle Tests Phase
