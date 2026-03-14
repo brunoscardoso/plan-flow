@@ -6,7 +6,9 @@
 
 ## In Progress
 
-(none)
+- [x] **Discovery: sub-agent-execute-plan** — Isolated sub-agents per phase with clean context (2026-03-13)
+- [x] **Plan: sub-agent-execute-plan** — 5 phases, combined complexity 22 (2026-03-13)
+- [ ] **Execute: sub-agent-execute-plan** — 5 phases, isolated sub-agents per phase
 
 ## To Do
 
