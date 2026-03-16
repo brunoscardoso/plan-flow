@@ -105,7 +105,23 @@ function executeTask(task: HeartbeatTask): void {
   const cleanEnv = { ...process.env };
   delete cleanEnv['CLAUDECODE'];
 
-  const child = spawn('claude', ['-p', '--dangerously-skip-permissions', task.command], {
+  const args = [
+    '-p',
+    '--dangerously-skip-permissions',
+    '--append-system-prompt',
+    'You are running autonomously via the heartbeat daemon. There is NO human to ask for permission — you MUST act directly. Use Edit/Write/Bash tools without hesitation. Never say "Could you grant permission" or "I need write access" — you already have full permissions via --dangerously-skip-permissions. If a tool call fails, retry or find an alternative. Complete the task fully.',
+  ];
+
+  // Add extra directories if specified
+  if (task.addDirs?.length) {
+    for (const dir of task.addDirs) {
+      args.push('--add-dir', dir);
+    }
+  }
+
+  args.push(task.command);
+
+  const child = spawn('claude', args, {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd: target,
     env: cleanEnv,
@@ -277,3 +293,22 @@ try {
 } catch {
   log('Warning: could not watch heartbeat.md for changes');
 }
+
+// Keepalive: refresh PID file every 5 minutes so stale detection works
+const KEEPALIVE_MS = 5 * 60 * 1000;
+setInterval(() => {
+  try {
+    writeFileSync(pidPath, String(process.pid), 'utf-8');
+  } catch {
+    // ignore
+  }
+}, KEEPALIVE_MS);
+
+// Handle uncaught errors gracefully — log and continue
+process.on('uncaughtException', (err) => {
+  log(`Uncaught exception: ${err.message}`);
+});
+
+process.on('unhandledRejection', (reason) => {
+  log(`Unhandled rejection: ${String(reason)}`);
+});

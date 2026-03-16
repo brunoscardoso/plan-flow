@@ -157,6 +157,12 @@ export function parseHeartbeatFile(content: string): HeartbeatTask[] {
       currentTask.tasklistLink = tasklistLinkMatch[1].trim();
       continue;
     }
+
+    const addDirsMatch = trimmed.match(/^\-\s+\*\*Add Dirs\*\*:\s*(.+)$/);
+    if (addDirsMatch) {
+      currentTask.addDirs = addDirsMatch[1].trim().split(/[,\s]+/).filter(Boolean);
+      continue;
+    }
   }
 
   // Save the last task
@@ -183,5 +189,6 @@ function finalizeTask(partial: Partial<HeartbeatTask>): HeartbeatTask | null {
     description: partial.description ?? '',
     oneShot: partial.oneShot,
     tasklistLink: partial.tasklistLink,
+    addDirs: partial.addDirs,
   };
 }

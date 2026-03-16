@@ -47,6 +47,7 @@ export interface HeartbeatTask {
   description: string;
   oneShot?: boolean;
   tasklistLink?: string;
+  addDirs?: string[];
 }
 
 export interface HeartbeatOptions {
