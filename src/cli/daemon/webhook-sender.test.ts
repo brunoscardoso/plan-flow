@@ -56,30 +56,30 @@ describe('detectPlatform', () => {
 });
 
 describe('formatTelegram', () => {
-  it('should extract chat_id from URL query parameter', () => {
+  it('should use direct chatId parameter', () => {
     const event = makeEvent();
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=456');
+    const result = formatTelegram(event, '456');
 
     expect(result.chat_id).toBe('456');
   });
 
-  it('should return empty chat_id when not present in URL', () => {
+  it('should return empty chat_id when empty string is passed', () => {
     const event = makeEvent();
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage');
+    const result = formatTelegram(event, '');
 
     expect(result.chat_id).toBe('');
   });
 
   it('should set parse_mode to Markdown', () => {
     const event = makeEvent();
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=1');
+    const result = formatTelegram(event, '123');
 
     expect(result.parse_mode).toBe('Markdown');
   });
 
   it('should include task and message in text', () => {
     const event = makeEvent({ task: 'deploy-api', message: 'Deployment done' });
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=1');
+    const result = formatTelegram(event, '123');
 
     expect(result.text).toContain('deploy-api');
     expect(result.text).toContain('Deployment done');
@@ -87,14 +87,14 @@ describe('formatTelegram', () => {
 
   it('should include phase when present', () => {
     const event = makeEvent({ phase: 'Phase 3' });
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=1');
+    const result = formatTelegram(event, '123');
 
     expect(result.text).toContain('Phase 3');
   });
 
   it('should not include phase line when absent', () => {
     const event = makeEvent();
-    const result = formatTelegram(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=1');
+    const result = formatTelegram(event, '123');
 
     expect(result.text).not.toContain('Phase:');
   });
@@ -344,5 +344,52 @@ describe('sendWebhookNotification', () => {
     const body = JSON.parse(call[1].body as string);
     expect(body).toHaveProperty('chat_id');
     expect(body).toHaveProperty('parse_mode', 'Markdown');
+  });
+
+  it('should send to Telegram via separate bot token and chat ID fields', async () => {
+    const event = makeEvent();
+    sendWebhookNotification(event, '', 'bot999:XYZ', '-100555');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const call = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(call[0]).toBe('https://api.telegram.org/botbot999:XYZ/sendMessage');
+    const body = JSON.parse(call[1].body as string);
+    expect(body.chat_id).toBe('-100555');
+    expect(body.parse_mode).toBe('Markdown');
+  });
+
+  it('should send to both separate Telegram fields AND webhook URLs', async () => {
+    const event = makeEvent();
+    sendWebhookNotification(event, 'https://hooks.slack.com/services/T00/B00/xxx', 'bot999:XYZ', '-100555');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Should have 2 calls: one for Telegram via separate fields, one for Slack via URL
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('should fall back to webhook_url when no separate Telegram fields provided', async () => {
+    const event = makeEvent();
+    sendWebhookNotification(event, 'https://api.telegram.org/bot123:ABC/sendMessage?chat_id=456');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const call = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(call[0]).toBe('https://api.telegram.org/bot123:ABC/sendMessage?chat_id=456');
+    const body = JSON.parse(call[1].body as string);
+    expect(body.chat_id).toBe('456');
+  });
+
+  it('should not send separate Telegram request when only token is provided without chatId', async () => {
+    const event = makeEvent();
+    sendWebhookNotification(event, '', 'bot999:XYZ', '');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Empty webhookUrls and empty chatId — no Telegram call
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });
