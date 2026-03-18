@@ -14,11 +14,13 @@ const DEFAULT_CONFIG: FlowConfig = {
   autopilot: false,
   commit: false,
   push: false,
+  pr: false,
   branch: '',
   wave_execution: true,
   phase_isolation: true,
   model_routing: false,
   max_verify_retries: 2,
+  webhook_url: '',
 };
 
 const MIN_VERIFY_RETRIES = 1;
@@ -120,6 +122,7 @@ export function parseFlowConfig(flowDir: string): FlowConfig {
 
   const commit = extractBoolean(content, 'commit');
   const push = extractBoolean(content, 'push');
+  const pr = extractBoolean(content, 'pr');
   const branch = extractString(content, 'branch');
 
   if (commit !== undefined) {
@@ -127,6 +130,9 @@ export function parseFlowConfig(flowDir: string): FlowConfig {
   }
   if (push !== undefined) {
     config.push = push;
+  }
+  if (pr !== undefined) {
+    config.pr = pr;
   }
   if (branch !== undefined) {
     config.branch = branch;
@@ -149,9 +155,20 @@ export function parseFlowConfig(flowDir: string): FlowConfig {
   const modelRouting = extractBoolean(content, 'model_routing');
   if (modelRouting !== undefined) config.model_routing = modelRouting;
 
+  const webhookUrl = extractString(content, 'webhook_url');
+  if (webhookUrl !== undefined) config.webhook_url = webhookUrl;
+
   const maxVerifyRetries = extractNumber(content, 'max_verify_retries');
   if (maxVerifyRetries !== undefined) {
     config.max_verify_retries = Math.max(MIN_VERIFY_RETRIES, Math.min(MAX_VERIFY_RETRIES, maxVerifyRetries));
+  }
+
+  // Validation cascade: pr → push → commit
+  if (config.pr) {
+    config.push = true;
+    config.commit = true;
+  } else if (config.push) {
+    config.commit = true;
   }
 
   return config;
