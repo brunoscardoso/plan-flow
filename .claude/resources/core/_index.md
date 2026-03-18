@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 24 files, ~4170 lines
-**Reference Codes**: COR-AP-1 through COR-PTV-4
+**Total Files**: 25 files, ~5550 lines
+**Reference Codes**: COR-AP-1 through COR-AC-3
 
 ---
 
@@ -205,6 +205,15 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PTV-3 | Verification loop, retry behavior, and task_verifications return field | per-task-verification.md | 132-200 |
 | COR-PTV-4 | Configuration, error handling, wave mode interaction, and rules | per-task-verification.md | 202-260 |
 
+### Atomic Commits (`atomic-commits.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-AC-1 | Purpose, commit format, and sequential mode behavior | atomic-commits.md | 3-80 |
+| COR-AC-2 | Wave mode behavior, JSON schema extension, and coordinator processing | atomic-commits.md | 82-210 |
+| COR-AC-3 | Interaction with phase isolation, wave execution, verification, and configuration | atomic-commits.md | 212-300 |
+
+---
 ---
 
 ## When to Expand
@@ -284,6 +293,9 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-PTV-2 | Need verify tag syntax, parsing rules, or debug sub-agent schema |
 | COR-PTV-3 | Need verification loop behavior, retry rules, or task_verifications return field |
 | COR-PTV-4 | Need per-task verification configuration, error handling, or wave mode interaction |
+| COR-AC-1 | Need atomic commits architecture, commit format, or sequential mode behavior |
+| COR-AC-2 | Need wave mode commit behavior, JSON schema extension, or coordinator processing |
+| COR-AC-3 | Need atomic commits interaction with phase isolation, wave execution, or config |
 
 ---
 
@@ -332,3 +344,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `discovery-sub-agents.md` is loaded on-demand - parallel codebase exploration sub-agents during `/discovery-plan`
 - `wave-execution.md` is loaded on-demand - wave-based parallel phase execution during `/execute-plan`
 - `per-task-verification.md` is loaded on-demand - per-task verification with debug sub-agents during `/execute-plan`
+- `atomic-commits.md` is loaded on-demand - per-task commit format and coordinator behavior during `/execute-plan`

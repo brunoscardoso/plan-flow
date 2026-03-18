@@ -98,7 +98,7 @@ export function parsePlanContent(content: string): PlanPhase[] {
     const taskMatch = trimmed.match(TASK_RE);
     if (taskMatch) {
       const taskName = taskMatch[1].trim();
-      currentPhase.tasks.push({ name: taskName, verify_command: null });
+      currentPhase.tasks.push({ index: currentPhase.tasks.length + 1, name: taskName, verify_command: null });
       lastTaskIndex = currentPhase.tasks.length - 1;
       continue;
     }
