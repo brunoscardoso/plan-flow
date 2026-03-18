@@ -132,12 +132,12 @@
 
 ### Tasks
 
-- [ ] Create `src/cli/daemon/event-writer.test.ts` — test JSONL append, file creation, atomic write
-- [ ] Create `src/cli/daemon/log-writer.test.ts` — test one-liner format, file auto-creation, append behavior
-- [ ] Create `src/cli/daemon/desktop-notifier.test.ts` — test notification dispatch, graceful fallback on error
-- [ ] Create `src/cli/daemon/notification-router.test.ts` — test severity routing (info → log only, error → log + desktop)
-- [ ] Create `src/cli/daemon/prompt-manager.test.ts` — test write, read, archive, hasPrompt, atomic write safety
-- [ ] Add notification integration tests to `src/cli/daemon/heartbeat-daemon.test.ts` — test exit code handling (0, 1, 2), event emission, autopilot-driven blocking
+- [x] Create `src/cli/daemon/event-writer.test.ts` — test JSONL append, file creation, atomic write
+- [x] Create `src/cli/daemon/log-writer.test.ts` — test one-liner format, file auto-creation, append behavior
+- [x] Create `src/cli/daemon/desktop-notifier.test.ts` — test notification dispatch, graceful fallback on error
+- [x] Create `src/cli/daemon/notification-router.test.ts` — test severity routing (info → log only, error → log + desktop)
+- [x] Create `src/cli/daemon/prompt-manager.test.ts` — test write, read, archive, hasPrompt, atomic write safety
+- [x] Add notification integration tests to `src/cli/daemon/heartbeat-daemon.test.ts` — test exit code handling (0, 1, 2), event emission, autopilot-driven blocking
 
 ### Files
 
