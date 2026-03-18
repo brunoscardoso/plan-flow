@@ -22,7 +22,7 @@ Use slash commands to invoke skills:
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
 | `/resume-work` | Resume interrupted work using saved execution state |
-| `/flow` | Configure plan-flow settings — autopilot, git control, model routing, runtime options (`key=value` syntax) |
+| `/flow` | Configure plan-flow settings — autopilot, git control, model routing, PR creation, runtime options (`key=value` syntax) |
 
 ## Workflow
 
@@ -70,7 +70,7 @@ See `.claude/resources/core/pattern-capture.md` for full rules.
 
 When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase implementation runs in an isolated Agent sub-agent with a clean context window. The sub-agent receives only the context it needs (phase spec, file list, patterns) and returns a structured JSON summary (1-2K tokens). This eliminates context rot — phase 7 has the same quality as phase 1.
 
-Planning/approval stays in the main session; only the implementation step is isolated. When combined with wave execution (`wave_execution: true`), multiple isolated sub-agents run in parallel within each wave.
+Planning/approval stays in the main session; only the implementation step is isolated. When combined with wave execution (`wave_execution: true`), multiple isolated sub-agents run in parallel within each wave. Supports per-task commits — sub-agents in sequential mode commit after each task, while the coordinator commits per-task in wave mode.
 
 Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for full rules.
 
@@ -98,6 +98,40 @@ Features:
 - Configurable retries via `max_verify_retries` in `flow/.flowconfig` (default: 2, range: 1-5)
 
 See `.claude/resources/core/per-task-verification.md` for full rules.
+
+### Atomic Commits Per Task
+
+When `commit: true` in `flow/.flowconfig`, `/execute-plan` creates a **git commit after each individual task** completes, rather than one commit per phase. This enables fine-grained git bisect operations, independent reverts of specific changes, and clearer history alignment with task completion.
+
+Features:
+- Per-task commits with format: `feat(phase-N.task-M): <description> — <feature>`
+- Sequential mode: sub-agents commit directly after each task
+- Wave mode: coordinator commits per-task after wave completes in deterministic phase/task order
+- Verification runs before task commit; failed tasks still commit after max retries
+- Backward compatible — `commit: false` disables commits entirely
+
+See `.claude/resources/core/atomic-commits.md` for full rules.
+
+### Auto-PR on Push Completion
+
+When `pr: true` in `flow/.flowconfig` (requires `push: true` and `commit: true`), `/execute-plan` automatically creates a Pull Request after successful push. The feature branch is created from the current branch with the naming pattern `feat/<feature-name>`. The PR is opened via `gh pr create` and the URL is captured for reference.
+
+Features:
+- Auto-enables `push: true` and `commit: true` if not already set
+- Creates feature branch: `feat/<feature>`
+- Opens PR via GitHub CLI (`gh pr create`)
+- Captures PR URL for completion summary
+- Backward compatible — `pr: false` disables auto-PR creation
+
+### Webhook Notifications
+
+When `webhook_url` is set in `flow/.flowconfig`, notification events (errors, blocks, task completions) are also sent as HTTP POST requests to external services. Platform is auto-detected from the URL:
+
+- **Telegram**: `https://api.telegram.org/bot<token>/sendMessage?chat_id=<id>`
+- **Discord**: `https://discord.com/api/webhooks/<id>/<token>`
+- **Slack**: `https://hooks.slack.com/services/<T>/<B>/<secret>`
+
+Multiple URLs supported (comma-separated). Configure via `/flow webhook_url=<url>`.
 
 ### Discovery Sub-Agents
 
@@ -137,9 +171,9 @@ flow/
 ├── contracts/         # Integration contracts
 ├── discovery/         # Discovery documents
 ├── plans/             # Active implementation plans
-├── references/        # Auto-generated reference materials (tech-foundation, business-context)
+├── references/        # Auto-generated reference materials
 ├── resources/         # Valuable artifacts captured during skill execution
-├── reviewed-code/     # Local code review documents
+├── reviewed-code/     # Code review documents
 ├── reviewed-pr/       # PR review documents
 ├── tasklist.md        # Project todo list (updated in real-time during execution)
 ├── memory.md          # Persistent artifact tracker (completed skill executions)
@@ -343,7 +377,7 @@ During skill execution, the LLM silently buffers patterns and anti-patterns, pre
 
 ## Phase Isolation
 
-When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. When combined with wave execution, multiple isolated sub-agents run in parallel within each wave. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
+When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. When combined with wave execution, multiple isolated sub-agents run in parallel within each wave. Supports per-task commits — sub-agents commit after each task in sequential mode, coordinator commits per-task in wave mode. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
 
 ## Wave-Based Parallel Execution
 
@@ -352,6 +386,18 @@ When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` ana
 ## Per-Task Verification
 
 Tasks in plan phases can include optional `<verify>` sections with targeted verification commands. After each task, verification runs immediately. Failed verifications trigger a debug sub-agent (haiku) for diagnosis, followed by an auto-repair loop (up to `max_verify_retries`, default: 2, configurable in `flow/.flowconfig`). `/create-plan` auto-generates `<verify>` sections based on task type heuristics. Backward compatible — tasks without `<verify>` skip verification. See `.claude/resources/core/per-task-verification.md`.
+
+## Atomic Commits Per Task
+
+When `commit: true` in `flow/.flowconfig`, `/execute-plan` creates a git commit after each individual task completes. Commit format: `feat(phase-N.task-M): <description> — <feature>`. In sequential mode, sub-agents commit directly. In wave mode, coordinator commits per-task after wave completes in deterministic order. Backward compatible — `commit: false` disables commits. See `.claude/resources/core/atomic-commits.md`.
+
+## Auto-PR on Push Completion
+
+When `pr: true` in `flow/.flowconfig` (requires `push: true` and `commit: true`), `/execute-plan` automatically creates a Pull Request after successful push. The feature branch is created from the current branch with the naming pattern `feat/<feature-name>`. The PR is opened via `gh pr create` and the URL is captured for reference. Auto-enables `push: true` and `commit: true` if not already set. Backward compatible — `pr: false` disables auto-PR creation.
+
+## Webhook Notifications
+
+When `webhook_url` is set in `flow/.flowconfig`, notification events (errors, blocks, task completions) are sent as HTTP POST requests to external services. Auto-detects platform from URL: Telegram (`api.telegram.org`), Discord (`discord.com/api/webhooks`), Slack (`hooks.slack.com`). Multiple URLs supported (comma-separated). Configure via `/flow webhook_url=<url>`.
 
 ## Discovery Sub-Agents
 
