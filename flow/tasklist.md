@@ -2,11 +2,10 @@
 
 **Project**: [[cli]]
 **Created**: 2026-03-11
-**Last Updated**: 2026-03-17
+**Last Updated**: 2026-03-18
 
 ## In Progress
 
-- [ ] **Wave-based parallel execution** — Creating plan and executing
 
 ## To Do
 
@@ -17,6 +16,7 @@
 
 ## Done
 
+- [x] **Wave-based parallel execution** — Dependency-aware parallel phase execution in /execute-plan with wave grouping, coordinator, and file conflict detection (2026-03-18)
 - [x] **Heartbeat notifications** — Notification system with multi-channel routing, desktop alerts, prompt files, session start integration (2026-03-17)
 
 - [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
