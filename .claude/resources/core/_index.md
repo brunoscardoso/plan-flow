@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 22 files, ~3580 lines
-**Reference Codes**: COR-AP-1 through COR-DSA-3
+**Total Files**: 23 files, ~3920 lines
+**Reference Codes**: COR-AP-1 through COR-WAVE-5
 
 ---
 
@@ -177,6 +177,16 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-DSA-2 | Return format schema and Codebase Analysis section template | discovery-sub-agents.md | 132-190 |
 | COR-DSA-3 | Coordinator behavior (spawn, collect, merge, error handling) | discovery-sub-agents.md | 192-240 |
 
+### Wave Execution (`wave-execution.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|---------|
+| COR-WAVE-1 | Architecture, dependency analysis rules, and declaration syntax | wave-execution.md | 14-80 |
+| COR-WAVE-2 | Wave grouping algorithm (topological sort, backward compatibility, example) | wave-execution.md | 82-140 |
+| COR-WAVE-3 | Parallel spawning rules and wave execution summary format | wave-execution.md | 142-195 |
+| COR-WAVE-4 | Wave coordinator behavior (per-wave processing, file conflict detection, failure handling, git commit ordering) | wave-execution.md | 197-270 |
+| COR-WAVE-5 | Configuration (flowconfig, interaction matrix, aggregation, rules) | wave-execution.md | 272-340 |
+
 ### Review Adaptive Depth (`review-adaptive-depth.md`)
 
 | Code | Description | Source | Lines |
@@ -256,6 +266,11 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-DSA-1 | Need discovery sub-agent definitions or prompt templates |
 | COR-DSA-2 | Need return format schema or Codebase Analysis section template |
 | COR-DSA-3 | Need coordinator spawn/collect/merge behavior or error handling |
+| COR-WAVE-1 | Need wave execution architecture or dependency declaration syntax |
+| COR-WAVE-2 | Need wave grouping algorithm or backward compatibility rules |
+| COR-WAVE-3 | Need parallel spawning rules or wave execution summary format |
+| COR-WAVE-4 | Need wave coordinator behavior, file conflict detection, or failure handling |
+| COR-WAVE-5 | Need wave execution configuration, interaction matrix, or aggregation rules |
 
 ---
 
@@ -302,3 +317,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `project-memory.md` is loaded on-demand - artifact tracking and 7-day session loading
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration
 - `discovery-sub-agents.md` is loaded on-demand - parallel codebase exploration sub-agents during `/discovery-plan`
+- `wave-execution.md` is loaded on-demand - wave-based parallel phase execution during `/execute-plan`
