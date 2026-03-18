@@ -1,14 +1,14 @@
 ---
-description: This command executes an implementation plan phase by phase, using complexity scores to determine ex
+description: This command executes an implementation plan phase by phase, using complexity scores and wave-based parallel execution to determine ex
 ---
 
 # Execute Implementation Plan
 
 ## Command Description
 
-This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
+This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. When `wave_execution: true` in `.flowconfig` (default), phases are analyzed for dependencies, grouped into **waves** of independent phases, and executed in parallel within each wave using Agent sub-agents. Tasks with `<verify>` tags are verified immediately after completion — failures are auto-diagnosed by debug sub-agents and repaired in place (up to `max_verify_retries` attempts). The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
 
-**Output**: Implements all phases from the plan, updates progress, and auto-archives the completed plan and its discovery document.
+**Output**: Implements all phases from the plan (sequentially or in parallel waves), updates progress, and auto-archives the completed plan and its discovery document.
 
 ---
 
@@ -22,7 +22,9 @@ This command executes an implementation plan phase by phase, using complexity sc
 
 DESCRIPTION:
   Executes an implementation plan phase by phase, using complexity scores
-  to determine execution strategy. Switches to Plan mode for each phase.
+  to determine execution strategy. Analyzes phase dependencies and groups
+  independent phases into parallel waves for faster execution. Switches
+  to Plan mode for each phase.
 
 USAGE:
   /execute-plan <plan_file>
@@ -44,13 +46,15 @@ OUTPUT:
 WORKFLOW:
   1. Reads and parses the plan file
   2. Groups phases by complexity score
-  3. For EACH phase:
-     - Auto-switches to Plan mode
-     - Presents phase details for approval
-     - Implements after approval
-     - Updates progress in plan file
-  4. Runs npm run build && npm run test (ONLY at the end)
-  5. Auto-archives plan and discovery to flow/archive/
+  2b. Analyzes dependencies and groups into waves (if wave_execution enabled)
+  3. Presents wave execution summary (waves, parallelism, estimated speedup)
+  4. For EACH wave:
+     - Approves each phase in Plan mode (sequential)
+     - Executes wave phases in parallel (or sequential if single phase)
+     - Collects results, detects file conflicts
+     - Commits sequentially in phase order (if git enabled)
+  5. Runs npm run build && npm run test (ONLY at the end)
+  6. Auto-archives plan and discovery to flow/archive/
 
 EXECUTION STRATEGIES:
   Combined Score <= 6   Aggregate phases together
@@ -138,6 +142,24 @@ Please run this command and let me know when it's complete.
 **DO NOT run `npm run build` after each phase or group.**
 
 **`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+
+---
+
+## Per-Task Verification
+
+When plan phases include tasks with `<verify>` tags, each task is verified immediately after completion using targeted commands (e.g., `npx tsc --noEmit <file>`). Failed verifications trigger a debug sub-agent (haiku) for diagnosis, and the implementation sub-agent applies repairs automatically.
+
+### Configuration
+
+| Setting | Default | Range | Description |
+|---------|---------|-------|-------------|
+| `max_verify_retries` | `2` | `1-5` | Max repair attempts per task verification failure |
+
+Set via `/flow max_verify_retries=3` or directly in `flow/.flowconfig`.
+
+Plans without `<verify>` tags work unchanged — verification is fully backward compatible.
+
+See `.claude/resources/core/per-task-verification.md` for verify tag syntax, debug sub-agent details, and JSON schemas.
 
 ---
 
@@ -276,15 +298,24 @@ Execution Complete!
                     |
                     v
 +------------------------------------------+
+| Step 2b: Wave Analysis (if enabled)      |
+| - Parse Dependencies from each phase     |
+| - Build dependency graph                 |
+| - Group independent phases into waves    |
++------------------------------------------+
+                    |
+                    v
++------------------------------------------+
 | Step 3: Invoke Execute Plan Skill        |
-| - Skill handles all execution logic      |
+| - Present wave execution summary         |
+| - Execute waves (parallel or sequential) |
 | - See execute-plan-skill.md             |
 +------------------------------------------+
                     |
                     v
 +------------------------------------------+
 | Step 4: Handle Completion                |
-| - Present summary                        |
+| - Present summary with wave stats        |
 | - Auto-archive plan and discovery        |
 +------------------------------------------+
 ```
@@ -347,6 +378,15 @@ This command uses hierarchical context loading to reduce context consumption. In
 | COR-PI-2 | Sub-agent context template | Preparing focused prompt for sub-agent |
 | COR-PI-3 | Return format schema | Parsing sub-agent JSON response |
 | COR-PI-4 | Coordinator processing rules | Handling success/failure/partial returns |
+| COR-WAVE-1 | Wave execution architecture and dependency syntax | Need wave execution architecture or dependency declaration syntax |
+| COR-WAVE-2 | Wave grouping algorithm (topological sort) | Need wave grouping algorithm or backward compatibility rules |
+| COR-WAVE-3 | Parallel spawning rules and wave summary format | Need parallel spawning rules or wave execution summary format |
+| COR-WAVE-4 | Wave coordinator behavior and failure handling | Need wave coordinator behavior, file conflict detection, or failure handling |
+| COR-WAVE-5 | Wave execution configuration and interaction matrix | Need wave execution configuration, interaction matrix, or aggregation rules |
+| COR-PTV-1 | Per-task verification architecture and verify tag syntax | Need verification system overview or `<verify>` tag parsing rules |
+| COR-PTV-2 | Debug sub-agent prompt template and return schema | Need debug sub-agent configuration or diagnosis JSON format |
+| COR-PTV-3 | Verification loop flow and retry behavior | Need verification loop details or retry/escalation rules |
+| COR-PTV-4 | Task verifications JSON return field schema | Need `task_verifications` array format or field descriptions |
 
 ### Expansion Instructions
 
@@ -366,12 +406,32 @@ When executing this command:
 | `resources/skills/_index.md`  | Index of skills with reference codes |
 | `resources/core/_index.md`    | Index of core rules with reference codes |
 | `resources/tools/_index.md`   | Index of tools with reference codes |
+| `per-task-verification.md` | Per-task verification system, debug sub-agents, JSON schemas |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
 | `plans-patterns.md`       | Rules and patterns for plans      |
 | `complexity-scoring.md`   | Complexity scoring system         |
 | `plan-mode-tool.md`       | Plan mode switching instructions  |
 | `/create-plan` command     | Create a plan first               |
 | `/discovery-plan` command  | Run discovery before planning     |
+
+---
+
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability. Use the Edit tool for single-field updates; overwrite the file on skill start.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Plan start** | Create `flow/STATE.md` with `Active Skill: execute-plan`, `Active Plan: {plan file path}`, `Current Phase: none`, empty Decisions/Blockers/Files Modified, `Next Action: Begin phase execution` |
+| **Phase start** | Update `Current Phase: {N} — {Phase Name}`, `Current Task: first task description`, `Next Action: Implement phase {N}` |
+| **Phase complete** | Append to `Completed Phases` list: `Phase N: Name — {outcome}`, set `Current Phase: none`, `Current Task: none`, `Next Action: Begin next phase` |
+| **Decision made** | Append to `## Decisions`: `{description} (reason: {rationale})` |
+| **Blocker encountered** | Append to `## Blockers`: `{description} (status: open, tried: {what was attempted})` |
+| **Files modified** | Append new file paths to `## Files Modified` (deduplicate) |
+| **Plan complete** | Delete `flow/STATE.md` (execution is done, no state to preserve) |
+| **User cancellation** | Update `Next Action: Resume from phase {N}`, keep STATE.md intact for resumability |
+
+**Wave mode**: Update STATE.md before each wave starts (set current wave info) and after each wave completes (update completed phases for all wave phases).
 
 ---
 
@@ -478,6 +538,23 @@ When `model_routing: true` in `flow/.flowconfig` (default), each phase is automa
 Routing happens at Step 4 of the execution skill — the phase implementation is spawned as an Agent subagent with the appropriate `model` parameter. Planning/approval steps always use the session model.
 
 Disable with `/flow model_routing=false`. See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and aggregation rules.
+
+---
+
+## Wave Execution
+
+When `wave_execution: true` in `flow/.flowconfig` (default), the coordinator analyzes phase dependencies, groups independent phases into **waves**, and executes phases within each wave **in parallel** using Agent sub-agents. Waves are sequenced — Wave N+1 starts only after all Wave N phases complete.
+
+Key behaviors:
+- **Planning stays sequential** — each phase is approved in Plan mode before wave execution begins
+- **Tests never parallel** — tests phase always runs alone in the final wave
+- **Backward compatible** — plans without `Dependencies` fields execute sequentially (no behavior change)
+- **File conflict detection** — overlapping files_modified between parallel phases are flagged for user resolution
+- **Deterministic commits** — git commits happen sequentially in phase order after each wave completes
+
+User can always choose sequential execution at the wave summary prompt. Disable globally with `/flow wave_execution=false`.
+
+See `.claude/resources/core/wave-execution.md` for the full dependency analysis rules, wave grouping algorithm, parallel spawning rules, coordinator behavior, and configuration.
 
 ---
 

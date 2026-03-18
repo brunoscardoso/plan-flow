@@ -41,6 +41,7 @@ SETTINGS:
   branch=<name>          Target branch for git operations (default: current branch)
   model_routing=true|false  Auto-select model per phase based on complexity (default: false)
   phase_isolation=true|false  Run each phase in isolated sub-agent with clean context (default: true)
+  max_verify_retries=1-5     Max repair attempts per task verification failure (default: 2)
 
 COST REPORTING:
   /flow cost                             Last 7 days summary (default)
@@ -59,6 +60,7 @@ EXAMPLES:
   /flow commit=false push=false           # Disable git control
   /flow model_routing=false               # Disable model routing (use session model for all phases)
   /flow phase_isolation=false             # Disable phase isolation (inline execution, for debugging)
+  /flow max_verify_retries=3             # Set max repair attempts per task verification to 3
   /flow cost                              # Show cost report (last 7 days)
   /flow cost --today --detail             # Today's costs with model breakdown
   /flow -status                           # Show current config
@@ -113,6 +115,7 @@ Parse the user input to determine what action to take:
 | `branch` | any string | current branch | Target branch for git ops |
 | `model_routing` | `true`, `false` | `false` | Auto-select model per phase based on complexity |
 | `phase_isolation` | `true`, `false` | `true` | Run each phase in isolated sub-agent with clean context |
+| `max_verify_retries` | `1`-`5` | `2` | Max repair attempts per task verification failure |
 
 ---
 
@@ -131,6 +134,7 @@ Parse the user input to determine what action to take:
 1. If `push=true` but `commit` is not `true`, auto-enable `commit=true` and warn:
    > `push=true` requires `commit=true`. Enabling auto-commit as well.
 2. If `autopilot=false` and `commit=false` and no other settings, consider removing `.flowconfig`
+3. If `max_verify_retries` is set, validate it is an integer between 1 and 5 (inclusive). If out of range, warn and clamp to nearest valid value.
 
 ---
 
@@ -244,6 +248,7 @@ push: false
 branch: ""
 model_routing: false
 phase_isolation: true
+max_verify_retries: 2
 ```
 
 **Location**: `flow/.flowconfig`

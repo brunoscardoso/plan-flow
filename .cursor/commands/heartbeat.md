@@ -9,7 +9,7 @@ description: Manage scheduled automated tasks via the heartbeat daemon
 Manage the heartbeat daemon — a cron-like automation system that runs scheduled tasks defined in `flow/heartbeat.md`. Tasks can include research, feature creation, execution, and pushing to repos.
 
 **Config**: `flow/heartbeat.md`
-**Daemon**: `npx plan-flow heartbeat start|stop|status`
+**Daemon**: `npx planflow-ai heartbeat start|stop|status`
 
 ---
 
@@ -31,9 +31,9 @@ USAGE:
   /heartbeat -help        Show this help
 
 CLI COMMANDS:
-  npx plan-flow heartbeat start    Start the daemon
-  npx plan-flow heartbeat stop     Stop the daemon
-  npx plan-flow heartbeat status   Show daemon status
+  npx planflow-ai heartbeat start    Start the daemon
+  npx planflow-ai heartbeat stop     Stop the daemon
+  npx planflow-ai heartbeat status   Show daemon status
 
 SCHEDULE SYNTAX:
   daily at {HH:MM AM/PM}           Run once daily at the specified time

@@ -1,0 +1,327 @@
+
+# Wave-Based Parallel Execution
+
+## Purpose
+
+When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into **waves**, and executes phases within each wave **in parallel** using Agent sub-agents. Waves are sequenced — Wave N+1 starts only after all Wave N phases complete. This reduces total execution time by 40-60% for plans with independent phases.
+
+**Core principle**: Dependency analysis in, parallel waves out, sequential commits after.
+
+---
+
+## Architecture
+
+```
+Coordinator (main session)
+    │
+    ├─ Step 2b: Wave Analysis
+    │   ├─ Parse Dependencies from each phase
+    │   ├─ Build dependency graph
+    │   ├─ Topological sort → group into waves
+    │   └─ Present wave summary to user
+    │
+    ├─ For each Wave:
+    │   │
+    │   ├─ Sequential: Approve each phase in Plan Mode
+    │   │
+    │   ├─ Parallel: Spawn Agent sub-agents for all wave phases
+    │   │   ├─► Agent: Phase A  (model: [tier from model routing])
+    │   │   ├─► Agent: Phase B  (model: [tier from model routing])
+    │   │   └─► Agent: Phase C  (model: [tier from model routing])
+    │   │
+    │   ├─ Collect JSON returns from all sub-agents
+    │   │
+    │   ├─ Post-wave processing:
+    │   │   ├─ Detect file conflicts (files_modified overlap)
+    │   │   ├─ Accumulate files_modified list
+    │   │   ├─ Buffer patterns from all phases
+    │   │   ├─ Git commit sequentially (Phase A, then B, then C)
+    │   │   └─ Handle failures (present to user)
+    │   │
+    │   └─ Next Wave...
+    │
+    └─ Completion summary with wave execution stats
+```
+
+Planning and user approval always happen **sequentially** in the main session. Only **implementation** is parallelized within waves.
+
+---
+
+## Dependency Analysis
+
+### Dependency Declaration Syntax
+
+Each plan phase may include an optional `**Dependencies**` field after `**Complexity**`:
+
+```markdown
+### Phase 3: API Integration
+
+**Scope**: ...
+**Complexity**: 5/10
+**Dependencies**: Phase 1, Phase 2
+
+- [ ] Task 1
+- [ ] Task 2
+```
+
+### Dependency Rules
+
+| Declaration | Meaning |
+|-------------|---------|
+| `**Dependencies**: Phase 1, Phase 3` | Phase depends on Phase 1 and Phase 3 completing first |
+| `**Dependencies**: None` | Phase has no dependencies — can run in parallel with others |
+| No `Dependencies` field | **Default**: depends on previous phase (backward-compatible sequential) |
+
+**Parsing rules**:
+1. Look for `**Dependencies**:` line in each phase section
+2. Extract phase numbers: parse `Phase N` references (case-insensitive)
+3. `None` (case-insensitive) means explicitly independent
+4. Missing field = implicit dependency on Phase N-1 (Phase 1 has no implicit dependency)
+5. Self-references are ignored
+6. References to non-existent phases are ignored with a warning
+
+### Special Rules
+
+- **Tests phase**: NEVER parallelized, regardless of dependency declaration. Always runs alone in the final wave.
+- **Phase 1**: Always in Wave 1 (no possible predecessors)
+
+---
+
+## Wave Grouping Algorithm
+
+### Topological Sort
+
+1. **Build graph**: For each phase, record its dependencies (explicit or implicit)
+2. **Assign wave numbers**:
+   - Phases with no dependencies → Wave 1
+   - For each remaining phase: wave = max(wave of each dependency) + 1
+3. **Tests phase exception**: Move to its own final wave regardless of computed wave number
+4. **Validate**: Check for circular dependencies — if found, warn user and fall back to sequential
+
+### Example
+
+Given a plan with 5 phases:
+```
+Phase 1: Types and interfaces          Dependencies: None
+Phase 2: Utility functions              Dependencies: None
+Phase 3: API integration                Dependencies: Phase 1, Phase 2
+Phase 4: Configuration updates          Dependencies: Phase 1, Phase 3
+Phase 5: Tests                          Dependencies: Phase 1, Phase 2, Phase 3, Phase 4
+```
+
+Wave grouping result:
+```
+Wave 1: Phase 1, Phase 2    (both independent)
+Wave 2: Phase 3              (depends on Wave 1 phases)
+Wave 3: Phase 4              (depends on Phase 3 in Wave 2)
+Wave 4: Phase 5              (tests — always last, alone)
+```
+
+Sequential execution: 5 phases in sequence
+Wave execution: 4 waves (Wave 1 runs 2 phases in parallel)
+Estimated speedup: ~20% (1 fewer sequential step)
+
+### Backward Compatibility
+
+Plans without any `Dependencies` fields produce a fully sequential wave plan:
+```
+Wave 1: Phase 1
+Wave 2: Phase 2
+Wave 3: Phase 3
+...
+```
+
+This matches existing behavior exactly — no regression.
+
+---
+
+## Wave Execution Summary
+
+Before execution begins, the coordinator presents the wave plan to the user:
+
+```markdown
+## Wave Execution Plan
+
+| Wave | Phases | Parallel |
+|------|--------|----------|
+| 1 | Phase 1: Types, Phase 2: Utilities | Yes (2 parallel) |
+| 2 | Phase 3: API Integration | No (1 phase) |
+| 3 | Phase 4: Config Updates | No (1 phase) |
+| 4 | Phase 5: Tests | No (always sequential) |
+
+**Sequential phases**: 5 → **Waves**: 4 → **Estimated speedup**: ~20%
+
+Proceed with wave execution? (yes/no/sequential)
+```
+
+User options:
+- **yes**: Execute with wave parallelism
+- **no**: Stop execution
+- **sequential**: Fall back to sequential execution (ignore waves)
+
+---
+
+## Parallel Spawning Rules
+
+### Sub-Agent Setup
+
+Each phase within a wave is spawned as an **independent Agent sub-agent** following the phase-isolation context template (see `phase-isolation.md` COR-PI-2). Key additions for wave execution:
+
+1. **Files Modified context**: For Wave N, include files_modified from ALL completed waves (1 through N-1), not just the previous phase
+2. **No cross-phase awareness**: Sub-agents within the same wave do NOT know about each other. They receive no information about sibling phases.
+3. **Model routing**: Each sub-agent uses the model tier from its own phase complexity score (same as phase isolation)
+
+### Spawning Pattern
+
+```
+For Wave N (phases A, B, C):
+  Launch in parallel:
+  - Agent(model: [tier_A], prompt: phase_A_context)
+  - Agent(model: [tier_B], prompt: phase_B_context)
+  - Agent(model: [tier_C], prompt: phase_C_context)
+
+  Wait for all to complete.
+  Process results sequentially.
+```
+
+This mirrors the discovery-sub-agents pattern (see `discovery-sub-agents.md` COR-DSA-3) but with phase-isolation context templates instead of exploration prompts.
+
+### Return Format
+
+Each sub-agent returns the **same JSON format** as phase isolation (see `phase-isolation.md` COR-PI-3). No changes to the return schema.
+
+---
+
+## Wave Coordinator Behavior
+
+### Per-Wave Processing
+
+After all sub-agents in a wave return, the coordinator processes results **sequentially in phase order**:
+
+1. **Collect returns**: Gather JSON from all sub-agents
+2. **Validate JSON**: Parse each return, check for required fields
+3. **Detect file conflicts**: Check for files_modified overlap between phases in this wave
+4. **Process each phase** (in phase number order):
+   - Update plan file (mark tasks `[x]`)
+   - Accumulate files_modified into running list
+   - Buffer patterns_captured entries
+   - Git commit if enabled (sequential, one commit per phase)
+   - Log decisions and deviations
+5. **Report wave completion**: Summary of all phases in this wave, including `task_verifications` results from each phase return (display pass/fail counts and any repairs applied per phase)
+
+### File Conflict Detection
+
+After collecting all wave results, check for **files_modified overlap**:
+
+```
+For each pair of phases (A, B) in the wave:
+  overlap = A.files_modified ∩ B.files_modified
+  if overlap is not empty:
+    → File conflict detected
+```
+
+**On conflict**:
+1. Present the conflicting files and which phases modified them
+2. Offer options:
+   - **(1) Accept as-is**: Last writer wins (the phase with the higher number committed last)
+   - **(2) Re-run conflicting phases sequentially**: Re-execute only the conflicting phases in order
+   - **(3) Stop execution**: Halt for manual resolution
+
+File conflict does NOT affect non-conflicting phases — their results are preserved.
+
+### Failure Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| One phase fails, others succeed | Process successful phases normally. Present failure to user. Offer: retry failed phase, skip it, or stop. |
+| Multiple phases fail | Process any successful phases. Present all failures. Offer same options per failed phase. |
+| All phases in wave fail | Present all failures. Offer: retry wave, skip wave, or stop. |
+| Sub-agent timeout | Treat as failure for that phase. Other phases unaffected. |
+| Invalid JSON return | Treat as failure for that phase. |
+
+**Key rule**: A failed phase in a wave does NOT cancel other phases in the same wave. Parallel phases are independent — let them all complete.
+
+### Git Commit Ordering
+
+When `commit: true` in `.flowconfig`, git commits happen **after** the wave completes, **sequentially in phase order**:
+
+```
+Wave 1 complete:
+  git add -A && git commit -m "Phase 1: Types — feature-name"
+  git add -A && git commit -m "Phase 2: Utilities — feature-name"
+```
+
+This ensures deterministic commit history regardless of which sub-agent finished first.
+
+---
+
+## Configuration
+
+### `.flowconfig` Setting
+
+```yaml
+wave_execution: true    # Enable wave-based parallel execution (default: true)
+```
+
+- `true` (default): Analyze dependencies and execute in parallel waves
+- `false`: Sequential execution (ignore Dependencies, legacy behavior)
+
+### Toggle via `/flow`
+
+```
+/flow wave_execution=true
+/flow wave_execution=false
+```
+
+### Interaction Matrix
+
+| wave_execution | phase_isolation | model_routing | Behavior |
+|---------------|-----------------|---------------|----------|
+| `true` | `true` | `true` | Full parallel: waves + isolated sub-agents + correct tier models |
+| `true` | `true` | `false` | Parallel waves + isolated sub-agents + session model |
+| `true` | `false` | `true` | Parallel waves + inline execution per phase + correct tier models |
+| `true` | `false` | `false` | Parallel waves + inline execution + session model |
+| `false` | `true` | `true` | Sequential + isolated sub-agents + correct tier models (existing behavior) |
+| `false` | `true` | `false` | Sequential + isolated sub-agents + session model |
+| `false` | `false` | `true` | Sequential + inline + correct tier models |
+| `false` | `false` | `false` | Sequential + inline + session model (original behavior) |
+
+**Note**: `wave_execution: true` requires `phase_isolation: true` for best results. Without phase isolation, parallel execution still works but sub-agents share the session context, which may cause interference.
+
+### Interaction with Aggregation
+
+When phases are aggregated (combined complexity ≤ 6), aggregated phases are treated as a **single unit** for wave analysis:
+- They share one dependency set (union of all aggregated phases' dependencies)
+- They produce one wave slot
+- They run as one sub-agent call (same as current aggregation behavior)
+
+---
+
+## Rules
+
+1. **Planning stays sequential** — approve each phase before wave execution begins
+2. **Tests never parallel** — tests phase always runs alone in the final wave
+3. **No cross-phase awareness** — sub-agents in the same wave know nothing about each other
+4. **Deterministic commits** — git commits happen sequentially in phase order after wave completes
+5. **Failures are isolated** — one failed phase does not cancel sibling phases in the same wave
+6. **Backward compatible** — plans without Dependencies fields execute sequentially (no behavior change)
+7. **User controls** — user can always choose sequential execution at the wave summary prompt
+8. **File conflicts are presented** — never silently resolve file conflicts, always ask the user
+9. **Reuse phase-isolation format** — sub-agent prompts and JSON returns follow phase-isolation.md exactly
+10. **Wave analysis is fast** — dependency parsing and topological sort add negligible overhead
+11. **Verification is internal to sub-agents** — per-task verification loops run entirely inside each phase sub-agent. The wave coordinator does not interact with verification; it only processes the final `task_verifications` field from the JSON return. See `.claude/resources/core/per-task-verification.md` for the complete verification system.
+
+---
+
+## Related Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/resources/core/phase-isolation.md` | Sub-agent context template, JSON return format, coordinator processing |
+| `.claude/resources/core/discovery-sub-agents.md` | Parallel spawning pattern (3 agents → collect → merge) |
+| `.claude/resources/core/review-multi-agent.md` | Parallel agents with deduplication |
+| `.claude/resources/core/model-routing.md` | Model tier selection per phase complexity |
+| `.claude/resources/core/complexity-scoring.md` | Complexity scores and aggregation rules |
+| `.claude/resources/core/per-task-verification.md` | Per-task verification system, debug sub-agent, and repair loops |
+| `.claude/resources/skills/execute-plan-skill.md` | Execute-plan skill (Steps 2b, 3, 4 modified for waves) |
+| `.claude/resources/patterns/plans-templates.md` | Plan template with Dependencies field |

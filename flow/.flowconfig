@@ -1,7 +1,9 @@
 # flow/.flowconfig — plan-flow runtime settings
+# Keys: autopilot, commit, push, branch, phase_isolation, model_routing, wave_execution
 # Managed by /flow command. Do not edit manually.
 
 autopilot: true
 commit: true
 push: false
 branch: ""
+wave_execution: true

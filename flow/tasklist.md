@@ -2,13 +2,21 @@
 
 **Project**: [[cli]]
 **Created**: 2026-03-11
-**Last Updated**: 2026-03-13
+**Last Updated**: 2026-03-18
 
 ## In Progress
 
+
 ## To Do
+- [ ] **Atomic commits per task** — Commit after each individual task within a phase (not per phase). Enables `git bisect`, independent reverts, and clearer git history. Format: `feat(phase-task): description`.
 
 ## Done
+
+- [x] **Unified STATE.md for session resumability** — Single file tracking decisions, blockers, current position, and active phase. Enables `/resume-work` to rebuild full context from stored files after context resets. (2026-03-18)
+- [x] **Deterministic state script** — Move config/state parsing (flowconfig, phase calculations, file checks) from LLM prompts to a Node.js script that returns JSON. Deterministic logic in code, not prompts. (2026-03-18)
+- [x] **Per-task verification** — Per-task `<verify>` tags in plan phases with debug sub-agents for auto-diagnosis and repair (2026-03-18)
+- [x] **Wave-based parallel execution** — Dependency-aware parallel phase execution in /execute-plan with wave grouping, coordinator, and file conflict detection (2026-03-18)
+- [x] **Heartbeat notifications** — Notification system with multi-channel routing, desktop alerts, prompt files, session start integration (2026-03-17)
 
 - [x] **Model routing with complexity scores** — Auto-select model per phase in `/execute-plan` (2026-03-11)
 - [x] **Brainstorm interactive questions** — Batched `AskUserQuestion` with options + commentary (2026-03-11)
