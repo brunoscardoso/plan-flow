@@ -1,14 +1,14 @@
 ---
-description: This command executes an implementation plan phase by phase, using complexity scores to determine ex
+description: This command executes an implementation plan phase by phase, using complexity scores and wave-based parallel execution to determine ex
 ---
 
 # Execute Implementation Plan
 
 ## Command Description
 
-This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
+This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. When `wave_execution: true` in `.flowconfig` (default), phases are analyzed for dependencies, grouped into **waves** of independent phases, and executed in parallel within each wave using Agent sub-agents. The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
 
-**Output**: Implements all phases from the plan, updates progress, and auto-archives the completed plan and its discovery document.
+**Output**: Implements all phases from the plan (sequentially or in parallel waves), updates progress, and auto-archives the completed plan and its discovery document.
 
 ---
 
@@ -22,7 +22,9 @@ This command executes an implementation plan phase by phase, using complexity sc
 
 DESCRIPTION:
   Executes an implementation plan phase by phase, using complexity scores
-  to determine execution strategy. Switches to Plan mode for each phase.
+  to determine execution strategy. Analyzes phase dependencies and groups
+  independent phases into parallel waves for faster execution. Switches
+  to Plan mode for each phase.
 
 USAGE:
   /execute-plan <plan_file>
@@ -44,13 +46,15 @@ OUTPUT:
 WORKFLOW:
   1. Reads and parses the plan file
   2. Groups phases by complexity score
-  3. For EACH phase:
-     - Auto-switches to Plan mode
-     - Presents phase details for approval
-     - Implements after approval
-     - Updates progress in plan file
-  4. Runs npm run build && npm run test (ONLY at the end)
-  5. Auto-archives plan and discovery to flow/archive/
+  2b. Analyzes dependencies and groups into waves (if wave_execution enabled)
+  3. Presents wave execution summary (waves, parallelism, estimated speedup)
+  4. For EACH wave:
+     - Approves each phase in Plan mode (sequential)
+     - Executes wave phases in parallel (or sequential if single phase)
+     - Collects results, detects file conflicts
+     - Commits sequentially in phase order (if git enabled)
+  5. Runs npm run build && npm run test (ONLY at the end)
+  6. Auto-archives plan and discovery to flow/archive/
 
 EXECUTION STRATEGIES:
   Combined Score <= 6   Aggregate phases together
@@ -276,15 +280,24 @@ Execution Complete!
                     |
                     v
 +------------------------------------------+
+| Step 2b: Wave Analysis (if enabled)      |
+| - Parse Dependencies from each phase     |
+| - Build dependency graph                 |
+| - Group independent phases into waves    |
++------------------------------------------+
+                    |
+                    v
++------------------------------------------+
 | Step 3: Invoke Execute Plan Skill        |
-| - Skill handles all execution logic      |
+| - Present wave execution summary         |
+| - Execute waves (parallel or sequential) |
 | - See execute-plan-skill.md             |
 +------------------------------------------+
                     |
                     v
 +------------------------------------------+
 | Step 4: Handle Completion                |
-| - Present summary                        |
+| - Present summary with wave stats        |
 | - Auto-archive plan and discovery        |
 +------------------------------------------+
 ```
@@ -347,6 +360,11 @@ This command uses hierarchical context loading to reduce context consumption. In
 | COR-PI-2 | Sub-agent context template | Preparing focused prompt for sub-agent |
 | COR-PI-3 | Return format schema | Parsing sub-agent JSON response |
 | COR-PI-4 | Coordinator processing rules | Handling success/failure/partial returns |
+| COR-WAVE-1 | Wave execution architecture and dependency syntax | Need wave execution architecture or dependency declaration syntax |
+| COR-WAVE-2 | Wave grouping algorithm (topological sort) | Need wave grouping algorithm or backward compatibility rules |
+| COR-WAVE-3 | Parallel spawning rules and wave summary format | Need parallel spawning rules or wave execution summary format |
+| COR-WAVE-4 | Wave coordinator behavior and failure handling | Need wave coordinator behavior, file conflict detection, or failure handling |
+| COR-WAVE-5 | Wave execution configuration and interaction matrix | Need wave execution configuration, interaction matrix, or aggregation rules |
 
 ### Expansion Instructions
 
@@ -478,6 +496,23 @@ When `model_routing: true` in `flow/.flowconfig` (default), each phase is automa
 Routing happens at Step 4 of the execution skill — the phase implementation is spawned as an Agent subagent with the appropriate `model` parameter. Planning/approval steps always use the session model.
 
 Disable with `/flow model_routing=false`. See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and aggregation rules.
+
+---
+
+## Wave Execution
+
+When `wave_execution: true` in `flow/.flowconfig` (default), the coordinator analyzes phase dependencies, groups independent phases into **waves**, and executes phases within each wave **in parallel** using Agent sub-agents. Waves are sequenced — Wave N+1 starts only after all Wave N phases complete.
+
+Key behaviors:
+- **Planning stays sequential** — each phase is approved in Plan mode before wave execution begins
+- **Tests never parallel** — tests phase always runs alone in the final wave
+- **Backward compatible** — plans without `Dependencies` fields execute sequentially (no behavior change)
+- **File conflict detection** — overlapping files_modified between parallel phases are flagged for user resolution
+- **Deterministic commits** — git commits happen sequentially in phase order after each wave completes
+
+User can always choose sequential execution at the wave summary prompt. Disable globally with `/flow wave_execution=false`.
+
+See `.claude/resources/core/wave-execution.md` for the full dependency analysis rules, wave grouping algorithm, parallel spawning rules, coordinator behavior, and configuration.
 
 ---
 

@@ -14,6 +14,8 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 >
 > **Note**: The execute-plan skill supports **Model Routing** — automatic model selection per phase based on complexity scores (0-3 → haiku, 4-5 → sonnet, 6-10 → opus). Controlled by `model_routing` in `flow/.flowconfig`. See `.claude/resources/core/model-routing.md` for full rules.
 >
+> **Note**: The execute-plan skill supports **Wave-Based Parallel Execution** — dependency-aware grouping of independent phases into parallel waves. When `wave_execution: true` in `.flowconfig` (default), phases with explicit `Dependencies` metadata are analyzed, grouped into waves via topological sort, and executed in parallel within each wave. See `.claude/resources/core/wave-execution.md` for full rules.
+>
 > **Note**: The discovery skill also includes **Design Awareness**. During discovery, the LLM asks whether the feature involves UI work and captures structured design tokens (colors, typography, spacing) into a `## Design Context` section. During execution, these tokens are auto-injected into UI phase prompts. See `.claude/resources/core/design-awareness.md` for full rules.
 >
 > **Note**: The review-code and review-pr skills include a **Verification Pass**. After initial analysis, each finding is re-examined against surrounding code context and classified as Confirmed, Likely, or Dismissed. False positives are filtered before output. See `.claude/resources/core/review-verification.md` for full rules.
@@ -100,9 +102,9 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 | SKL-EXEC-1 | Purpose and inputs | execute-plan-skill.md | 4-100 |
 | SKL-EXEC-2 | Critical rules (build only at end, no DB commands) | execute-plan-skill.md | 18-92 |
 | SKL-EXEC-3 | Step 1: Parse the plan | execute-plan-skill.md | 103-112 |
-| SKL-EXEC-4 | Step 2: Analyze complexity and determine execution strategy | execute-plan-skill.md | 113-151 |
-| SKL-EXEC-5 | Step 3: Present execution plan summary | execute-plan-skill.md | 152-180 |
-| SKL-EXEC-6 | Step 4: Execute each phase with Plan mode | execute-plan-skill.md | 181-236 |
+| SKL-EXEC-4 | Step 2: Analyze complexity + Step 2b: Wave analysis (dependency graph, wave grouping) | execute-plan-skill.md | 113-151 |
+| SKL-EXEC-5 | Step 3: Present execution plan summary (with wave groupings and estimated speedup) | execute-plan-skill.md | 152-180 |
+| SKL-EXEC-6 | Step 4: Execute each wave (approve sequentially, spawn parallel sub-agents per wave) | execute-plan-skill.md | 181-236 |
 | SKL-EXEC-7 | Step 5: Update progress after each phase | execute-plan-skill.md | 237-249 |
 | SKL-EXEC-8 | Step 5b: Phase-boundary context check (compaction) | execute-plan-skill.md | 250-275 |
 | SKL-EXEC-9 | Step 6: Handle tests phase | execute-plan-skill.md | 277-302 |
@@ -189,9 +191,9 @@ Skills implement the workflow logic for commands. Each skill orchestrates a spec
 |------|-------------|
 | SKL-EXEC-2 | Need critical rules (build timing, DB commands) |
 | SKL-EXEC-3 | Parsing plan file structure |
-| SKL-EXEC-4 | Analyzing complexity and determining execution strategy |
-| SKL-EXEC-5 | Presenting execution plan summary to user |
-| SKL-EXEC-6 | Executing a phase with Plan mode |
+| SKL-EXEC-4 | Analyzing complexity, wave analysis, or determining execution strategy |
+| SKL-EXEC-5 | Presenting execution plan summary (with wave groupings) to user |
+| SKL-EXEC-6 | Executing a wave (parallel sub-agents) or single phase with Plan mode |
 | SKL-EXEC-7 | Updating progress after a phase |
 | SKL-EXEC-8 | Compacting at phase boundaries |
 | SKL-EXEC-9 | Handling the tests phase |
