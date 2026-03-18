@@ -77,3 +77,8 @@ export interface HeartbeatState {
   lastReadTimestamp: string;
   lastSessionId?: string;
 }
+
+export interface TelegramPollState {
+  lastUpdateId: number;
+  lastActivityTimestamp: number;
+}
