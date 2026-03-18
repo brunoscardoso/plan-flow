@@ -27,15 +27,12 @@ export function detectPlatform(url: string): WebhookPlatform {
 
 /**
  * Format a notification event for the Telegram Bot API.
- * Extracts `chat_id` from the URL query parameter.
+ * Accepts `chatId` directly as a parameter.
  */
 export function formatTelegram(
   event: NotificationEvent,
-  webhookUrl: string,
+  chatId: string,
 ): { chat_id: string; text: string; parse_mode: string } {
-  const url = new URL(webhookUrl);
-  const chatId = url.searchParams.get('chat_id') ?? '';
-
   const levelEmoji =
     event.level === 'error' ? '🔴' : event.level === 'warn' ? '🟡' : '🟢';
 
@@ -154,10 +151,25 @@ export function formatGeneric(event: NotificationEvent): {
 }
 
 /**
+ * Extract chat_id from a Telegram webhook URL query parameter.
+ * Used as a backward-compat fallback when separate config fields are absent.
+ */
+function extractChatIdFromUrl(webhookUrl: string): string {
+  try {
+    const url = new URL(webhookUrl);
+    return url.searchParams.get('chat_id') ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Send a webhook notification for the given event.
  *
  * - Splits comma-separated URLs and sends to each
  * - Detects platform per URL and formats accordingly
+ * - When `telegramBotToken` and `telegramChatId` are provided, constructs
+ *   the Telegram URL from separate fields instead of requiring a full URL
  * - Fire-and-forget — does not await the result
  * - Uses AbortSignal.timeout(5000) for HTTP timeout
  * - Catches ALL errors; logs to console.error but never throws
@@ -165,9 +177,29 @@ export function formatGeneric(event: NotificationEvent): {
 export function sendWebhookNotification(
   event: NotificationEvent,
   webhookUrls: string,
+  telegramBotToken?: string,
+  telegramChatId?: string,
 ): void {
   // Intentionally not awaited — fire-and-forget
   void (async () => {
+    // When separate Telegram fields are provided, send directly without
+    // requiring a Telegram entry in the comma-separated webhook URLs.
+    if (telegramBotToken && telegramChatId) {
+      try {
+        const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+        const body = formatTelegram(event, telegramChatId);
+
+        await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
+        });
+      } catch (error) {
+        console.error('Telegram webhook notification failed (non-fatal):', error);
+      }
+    }
+
     const urls = webhookUrls
       .split(',')
       .map((u) => u.trim())
@@ -179,9 +211,12 @@ export function sendWebhookNotification(
 
         let body: unknown;
         switch (platform) {
-          case 'telegram':
-            body = formatTelegram(event, url);
+          case 'telegram': {
+            // Backward compat: extract chatId from URL query params
+            const chatId = extractChatIdFromUrl(url);
+            body = formatTelegram(event, chatId);
             break;
+          }
           case 'discord':
             body = formatDiscord(event);
             break;
