@@ -139,12 +139,12 @@ Add per-task verification to `/execute-plan` so that each task in a plan phase c
 **Complexity**: 4/10
 **Dependencies**: Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
 
-- [ ] Create test for `per-task-verification.md` resource (exists, has required sections: Purpose, Architecture, Verify Tag Syntax, Debug Sub-Agent, JSON Schema, Configuration, Error Handling)
-- [ ] Create test for updated `phase-isolation.md` (contains `task_verifications` field documentation)
-- [ ] Create test for updated `plans-templates.md` (contains `<verify>` tag documentation)
-- [ ] Create test for updated `execute-plan-skill.md` (contains verification result processing)
-- [ ] Create test for `_index.md` reference codes (COR-PTV-1 through COR-PTV-4 are indexed)
-- [ ] Run full test suite to verify no regressions
+- [x] Create test for `per-task-verification.md` resource (exists, has required sections: Purpose, Architecture, Verify Tag Syntax, Debug Sub-Agent, JSON Schema, Configuration, Error Handling)
+- [x] Create test for updated `phase-isolation.md` (contains `task_verifications` field documentation)
+- [x] Create test for updated `plans-templates.md` (contains `<verify>` tag documentation)
+- [x] Create test for updated `execute-plan-skill.md` (contains verification result processing)
+- [x] Create test for `_index.md` reference codes (COR-PTV-1 through COR-PTV-4 are indexed)
+- [x] Run full test suite to verify no regressions
 
 **Build Verification**: Run `npm run build && npm run test`
 
