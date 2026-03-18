@@ -1,5 +1,5 @@
 ---
-description: Configure plan-flow settings — autopilot mode, git control, and other runtime options. Use key=value syntax.
+description: Configure plan-flow settings — autopilot mode, git control, PR creation, and other runtime options. Use key=value syntax.
 ---
 
 # Flow: Plan-Flow Configuration
@@ -42,6 +42,8 @@ SETTINGS:
   model_routing=true|false  Auto-select model per phase based on complexity (default: false)
   phase_isolation=true|false  Run each phase in isolated sub-agent with clean context (default: true)
   max_verify_retries=1-5     Max repair attempts per task verification failure (default: 2)
+  pr=true|false         Auto-create PR via gh after execution (default: false)
+  webhook_url=<url>     Webhook URL(s) for external notifications, comma-separated (default: "")
 
 COST REPORTING:
   /flow cost                             Last 7 days summary (default)
@@ -61,6 +63,10 @@ EXAMPLES:
   /flow model_routing=false               # Disable model routing (use session model for all phases)
   /flow phase_isolation=false             # Disable phase isolation (inline execution, for debugging)
   /flow max_verify_retries=3             # Set max repair attempts per task verification to 3
+  /flow pr=true                           # Enable auto-PR creation after execute-plan
+  /flow commit=true push=true pr=true     # Full git control with auto-PR
+  /flow webhook_url=https://hooks.slack.com/services/T.../B.../xxx  # Set Slack webhook
+  /flow webhook_url=https://discord.com/api/webhooks/123/abc,https://hooks.slack.com/services/T.../B.../xxx  # Multiple webhooks
   /flow cost                              # Show cost report (last 7 days)
   /flow cost --today --detail             # Today's costs with model breakdown
   /flow -status                           # Show current config
@@ -82,6 +88,7 @@ GIT CONTROL (when commit=true):
   - After all phases + build/test pass: auto-push if push=true
   - If build/test fails: commit is made but push is skipped
   - push=true without commit=true: auto-enables commit=true
+  - If pr=true: after push, create feature branch and open PR via gh pr create
 
 MANDATORY CHECKPOINTS (even in autopilot):
   - Discovery phase: pauses for user Q&A
@@ -116,6 +123,8 @@ Parse the user input to determine what action to take:
 | `model_routing` | `true`, `false` | `false` | Auto-select model per phase based on complexity |
 | `phase_isolation` | `true`, `false` | `true` | Run each phase in isolated sub-agent with clean context |
 | `max_verify_retries` | `1`-`5` | `2` | Max repair attempts per task verification failure |
+| `pr` | `true`, `false` | `false` | Auto-create PR after execution completes (requires push: true) |
+| `webhook_url` | URL string | `""` | Webhook URL(s) for Telegram/Discord/Slack notifications (comma-separated) |
 
 ---
 
@@ -133,8 +142,10 @@ Parse the user input to determine what action to take:
 
 1. If `push=true` but `commit` is not `true`, auto-enable `commit=true` and warn:
    > `push=true` requires `commit=true`. Enabling auto-commit as well.
-2. If `autopilot=false` and `commit=false` and no other settings, consider removing `.flowconfig`
-3. If `max_verify_retries` is set, validate it is an integer between 1 and 5 (inclusive). If out of range, warn and clamp to nearest valid value.
+2. If `pr=true` but `push` is not `true`, auto-enable `push=true` and `commit=true` and warn:
+   > `pr=true` requires `push=true` and `commit=true`. Enabling both.
+3. If `autopilot=false` and `commit=false` and no other settings, consider removing `.flowconfig`
+4. If `max_verify_retries` is set, validate it is an integer between 1 and 5 (inclusive). If out of range, warn and clamp to nearest valid value.
 
 ---
 
@@ -249,6 +260,8 @@ branch: ""
 model_routing: false
 phase_isolation: true
 max_verify_retries: 2
+pr: false
+webhook_url: ""
 ```
 
 **Location**: `flow/.flowconfig`
