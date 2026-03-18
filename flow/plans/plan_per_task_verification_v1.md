@@ -113,12 +113,12 @@ Add per-task verification to `/execute-plan` so that each task in a plan phase c
 **Complexity**: 5/10
 **Dependencies**: Phase 1, Phase 3
 
-- [ ] Update `.claude/resources/skills/execute-plan-skill.md`:
+- [x] Update `.claude/resources/skills/execute-plan-skill.md`:
   - Step 4 (sequential mode): Add verification result processing after sub-agent return
   - Step 4c (wave mode): Add verification result display in wave completion report
   - Step 7 (completion): Include verification stats in completion summary
   - Add verification result display template (pass/fail counts, repairs applied)
-- [ ] Update `.claude/commands/execute-plan.md`:
+- [x] Update `.claude/commands/execute-plan.md`:
   - Add per-task verification to feature descriptions
   - Add `max_verify_retries` to configuration reference
   - Add reference codes for per-task verification sections
