@@ -10,7 +10,8 @@
 // scheduling math here.
 
 import { parseSchedule, parseHeartbeatFile } from './heartbeat-parser.js';
-import type { ScheduleConfig } from '../types.js';
+import { createEvent } from './event-writer.js';
+import type { ScheduleConfig, NotificationEvent } from '../types.js';
 
 describe('heartbeat daemon scheduling', () => {
   describe('msUntilNextOccurrence logic', () => {
@@ -92,6 +93,63 @@ describe('heartbeat daemon scheduling', () => {
       // 5 days
       const expected = 5 * 24 * 60 * 60 * 1000;
       expect(ms).toBe(expected);
+    });
+  });
+
+  describe('notification integration — exit code mapping', () => {
+    /**
+     * Maps daemon exit codes to notification events.
+     * This mirrors the logic in heartbeat-daemon.ts:
+     *   exit 0 → task_complete / info
+     *   exit 1 → task_failed / error
+     *   exit 2 → task_blocked / warn
+     */
+    function exitCodeToEvent(taskName: string, exitCode: number): NotificationEvent {
+      if (exitCode === 0) {
+        return createEvent(taskName, 'task_complete', 'info', `Task "${taskName}" completed successfully`);
+      }
+      if (exitCode === 2) {
+        return createEvent(taskName, 'task_blocked', 'warn', `Task "${taskName}" needs human input (exit 2)`);
+      }
+      return createEvent(taskName, 'task_failed', 'error', `Task "${taskName}" failed with exit code ${exitCode}`);
+    }
+
+    it('should map exit code 0 to task_complete / info', () => {
+      const event = exitCodeToEvent('research', 0);
+      expect(event.type).toBe('task_complete');
+      expect(event.level).toBe('info');
+      expect(event.task).toBe('research');
+      expect(event.message).toContain('completed successfully');
+    });
+
+    it('should map exit code 1 to task_failed / error', () => {
+      const event = exitCodeToEvent('research', 1);
+      expect(event.type).toBe('task_failed');
+      expect(event.level).toBe('error');
+      expect(event.message).toContain('failed');
+      expect(event.message).toContain('exit code 1');
+    });
+
+    it('should map exit code 2 to task_blocked / warn', () => {
+      const event = exitCodeToEvent('research', 2);
+      expect(event.type).toBe('task_blocked');
+      expect(event.level).toBe('warn');
+      expect(event.message).toContain('needs human input');
+    });
+
+    it('should map unknown exit codes to task_failed / error', () => {
+      const event = exitCodeToEvent('research', 137);
+      expect(event.type).toBe('task_failed');
+      expect(event.level).toBe('error');
+      expect(event.message).toContain('exit code 137');
+    });
+
+    it('should produce events with valid id and timestamp', () => {
+      const event = exitCodeToEvent('my-task', 0);
+      expect(event.id).toBeDefined();
+      expect(typeof event.id).toBe('string');
+      expect(event.id.length).toBeGreaterThan(0);
+      expect(event.timestamp).toBeInstanceOf(Date);
     });
   });
 

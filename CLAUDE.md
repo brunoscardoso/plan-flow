@@ -100,6 +100,7 @@ All plan-flow artifacts are stored in `flow/`:
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+│   └── heartbeat-prompts/  # Archived resolved heartbeat prompt files
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
@@ -119,6 +120,9 @@ flow/
 ├── ledger.md          # Persistent project learning journal
 ├── .scratchpad.md     # Ephemeral per-session notes (cleared each session)
 ├── .flowconfig        # Central config file (autopilot, git control, settings)
+├── .heartbeat-events.jsonl  # Machine-readable notification event stream
+├── .heartbeat-state.json    # Session read position for unread event detection
+├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 └── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 
@@ -130,6 +134,8 @@ flow/
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
 - **Session Scratchpad**: If `flow/.scratchpad.md` exists and has content, read it silently. Promote stale entries to ledger/brain, then clear. During work, write noteworthy observations to the scratchpad. See `.claude/resources/core/session-scratchpad.md` for full rules.
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
+- **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
+- **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
 
 ## Rules
 
@@ -244,6 +250,8 @@ npm run test
 - **Project Memory**: If `flow/memory.md` exists, read it silently and internalize the last 7 days of completed work. See `.claude/resources/core/project-memory.md` for full rules.
 - **Session Scratchpad**: If `flow/.scratchpad.md` exists and has content, read it silently. Promote stale entries to ledger/brain, then clear. During work, write noteworthy observations to the scratchpad. See `.claude/resources/core/session-scratchpad.md` for full rules.
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
+- **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
+- **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
 
 ## Critical Rules
 
@@ -258,6 +266,7 @@ npm run test
 ```
 flow/
 ├── archive/           # Completed/abandoned plans
+│   └── heartbeat-prompts/  # Archived resolved heartbeat prompt files
 ├── brain/             # Automatic knowledge capture (Obsidian-compatible)
 │   ├── index.md       # Brain index (loaded at session start)
 │   ├── features/      # Feature history and context
@@ -277,6 +286,9 @@ flow/
 ├── ledger.md          # Persistent project learning journal
 ├── .scratchpad.md     # Ephemeral per-session notes (cleared each session)
 ├── .flowconfig        # Central config file (autopilot, git control, settings)
+├── .heartbeat-events.jsonl  # Machine-readable notification event stream
+├── .heartbeat-state.json    # Session read position for unread event detection
+├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 └── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ```
 

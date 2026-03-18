@@ -129,7 +129,7 @@ function printNextSteps(platforms: Platform[]): void {
   log.blank();
   log.header('Heartbeat Daemon');
   log.info('The heartbeat daemon runs in the background to execute scheduled tasks.');
-  log.info('Manage it with: npx plan-flow heartbeat start|stop|status');
+  log.info('Manage it with: npx planflow-ai heartbeat start|stop|status');
   log.blank();
   log.header('Brain & Obsidian Vault');
   log.info('Your project brain lives at flow/brain/ — features, errors, and decisions are tracked here.');
