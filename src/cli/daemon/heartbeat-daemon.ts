@@ -13,7 +13,9 @@ import { randomUUID } from 'node:crypto';
 import { parseHeartbeatFile } from './heartbeat-parser.js';
 import { notify } from './notification-router.js';
 import { writePrompt } from './prompt-manager.js';
+import { TelegramPoller } from './telegram-poller.js';
 import { parseFlowConfig } from '../state/flowconfig-parser.js';
+import { detectPlatform } from './webhook-sender.js';
 import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
@@ -24,6 +26,9 @@ const logPath = join(target, 'flow', '.heartbeat.log');
 const activeTimers: NodeJS.Timeout[] = [];
 let taskRunning = false;
 let webhookUrls: string | undefined;
+let poller: TelegramPoller | null = null;
+let telegramBotToken: string | undefined;
+let telegramChatId: string | undefined;
 
 const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
 const MAX_RETRIES = 5;
@@ -99,6 +104,7 @@ function truncateLog(): void {
 }
 
 function clearTimers(): void {
+  poller?.stop();
   for (const timer of activeTimers) {
     clearTimeout(timer);
     clearInterval(timer);
@@ -157,6 +163,8 @@ function executeTask(task: HeartbeatTask): void {
     createEvent(task, 'task_started', 'info', `Starting task: ${task.name}`),
     flowDir,
     webhookUrls,
+    telegramBotToken,
+    telegramChatId,
   );
 
   // Strip CLAUDECODE env var to avoid "nested session" detection.
@@ -210,6 +218,9 @@ function executeTask(task: HeartbeatTask): void {
       void notify(
         createEvent(task, 'task_complete', 'info', `Task completed: ${task.name}`),
         flowDir,
+        webhookUrls,
+        telegramBotToken,
+        telegramChatId,
       );
 
       if (task.oneShot) {
@@ -231,10 +242,14 @@ function executeTask(task: HeartbeatTask): void {
           `Task blocked (needs input): ${task.name}${isAutopilot ? ' [autopilot ON]' : ''}`,
         ),
         flowDir,
+        webhookUrls,
+        telegramBotToken,
+        telegramChatId,
       );
 
       if (!isAutopilot) {
         void writePrompt(task.name, outputTail, errorTail, flowDir);
+        poller?.enterConversationMode();
         log(`  prompt written to flow/${'.heartbeat-prompt.md'} — waiting for human input`);
       } else {
         log(`  Autopilot ON — skipping prompt, continuing`);
@@ -255,6 +270,9 @@ function executeTask(task: HeartbeatTask): void {
           `Task failed (exit ${code}): ${task.name}${errorTail ? '\n' + errorTail.slice(0, 300) : ''}`,
         ),
         flowDir,
+        webhookUrls,
+        telegramBotToken,
+        telegramChatId,
       );
     }
     if (stdout) log(`  output: ${stdout.slice(0, 500)}`);
@@ -268,6 +286,9 @@ function executeTask(task: HeartbeatTask): void {
     void notify(
       createEvent(task, 'task_failed', 'error', `Task spawn error: ${task.name} — ${err.message}`),
       flowDir,
+      webhookUrls,
+      telegramBotToken,
+      telegramChatId,
     );
   });
 }
@@ -347,9 +368,30 @@ function scheduleTask(task: HeartbeatTask): void {
 function loadAndSchedule(): void {
   clearTimers();
 
-  // Read webhook_url from flowconfig once per reload
+  // Read config from flowconfig once per reload
   const flowConfig = parseFlowConfig(flowDir);
-  webhookUrls = flowConfig.webhook_url || undefined;
+  telegramBotToken = flowConfig.telegram_bot_token || undefined;
+  telegramChatId = flowConfig.telegram_chat_id || undefined;
+
+  // Filter Telegram URLs from webhook_url when separate Telegram config exists
+  // to avoid duplicate sends (webhook-sender handles separate fields directly)
+  let rawWebhookUrls = flowConfig.webhook_url || '';
+  if (telegramBotToken && telegramChatId && rawWebhookUrls) {
+    rawWebhookUrls = rawWebhookUrls
+      .split(',')
+      .map((u) => u.trim())
+      .filter((u) => u && detectPlatform(u) !== 'telegram')
+      .join(',');
+  }
+  webhookUrls = rawWebhookUrls || undefined;
+
+  // Start/restart Telegram poller if configured
+  if (telegramBotToken && telegramChatId) {
+    poller = new TelegramPoller(telegramBotToken, telegramChatId, flowDir);
+    poller.start();
+  } else {
+    poller = null;
+  }
 
   if (!existsSync(heartbeatPath)) {
     log('No heartbeat.md found');
@@ -368,6 +410,7 @@ function loadAndSchedule(): void {
 
 function cleanup(): void {
   log('Daemon shutting down');
+  poller?.stop();
   clearTimers();
 
   try {
