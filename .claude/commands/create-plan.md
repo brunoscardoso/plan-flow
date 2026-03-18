@@ -301,6 +301,17 @@ Present recommendations after the plan summary.
 
 ---
 
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Plan creation start** | Create `flow/STATE.md` with `Active Skill: create-plan`, `Active Plan: none`, `Current Phase: none`, `Current Task: creating plan from discovery`, `Next Action: Extract requirements and structure phases` |
+| **Plan complete** | Delete `flow/STATE.md` (skill is done, no state to preserve) |
+
+---
+
 ## Brain Capture
 
 After plan creation completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.

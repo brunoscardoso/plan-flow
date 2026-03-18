@@ -355,6 +355,18 @@ These are optional but recommended to reduce implementation friction.
 
 ---
 
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Discovery start** | Create `flow/STATE.md` with `Active Skill: discovery-plan`, `Active Plan: none`, `Current Phase: none`, `Current Task: gathering requirements`, `Next Action: Read references and ask clarifying questions` |
+| **Question batch complete** | Append answered questions to `## Decisions`: `{question} → {answer} (reason: user response)` |
+| **Discovery complete** | Delete `flow/STATE.md` (skill is done, no state to preserve) |
+
+---
+
 ## Brain Capture
 
 After discovery completes successfully, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.
