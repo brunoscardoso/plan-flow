@@ -9,8 +9,10 @@
 import { readFileSync, writeFileSync, existsSync, unlinkSync, watch, appendFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { parseHeartbeatFile } from './heartbeat-parser.js';
-import type { HeartbeatTask, ScheduleConfig } from '../types.js';
+import { notify } from './notification-router.js';
+import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
 const heartbeatPath = join(target, 'flow', 'heartbeat.md');
@@ -23,7 +25,54 @@ let taskRunning = false;
 const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 60_000;
+const TAIL_LINES = 20;
 const retryCountMap = new Map<string, number>();
+const flowDir = join(target, 'flow');
+
+/**
+ * Create a NotificationEvent with consistent structure.
+ */
+function createEvent(
+  task: HeartbeatTask,
+  type: NotificationType,
+  level: NotificationLevel,
+  message: string,
+  phase?: string,
+): NotificationEvent {
+  return {
+    id: randomUUID(),
+    timestamp: new Date(),
+    task: task.name,
+    type,
+    level,
+    message,
+    ...(phase ? { phase } : {}),
+  };
+}
+
+/**
+ * Return the last N lines from a string.
+ */
+function tailLines(text: string, n: number): string {
+  const lines = text.split('\n');
+  return lines.slice(-n).join('\n');
+}
+
+/**
+ * Read the autopilot setting from flow/.flowconfig.
+ * Returns true if autopilot is enabled, false otherwise.
+ */
+function readAutopilot(): boolean {
+  try {
+    const configPath = join(flowDir, '.flowconfig');
+    if (!existsSync(configPath)) return false;
+    const content = readFileSync(configPath, 'utf-8');
+    const match = content.match(/^autopilot:\s*(true|false)/m);
+    return match?.[1] === 'true';
+  } catch {
+    return false;
+  }
+}
 
 function log(message: string): void {
   const timestamp = new Date().toISOString();
@@ -100,6 +149,12 @@ function executeTask(task: HeartbeatTask): void {
   taskRunning = true;
   log(`Executing "${task.name}": ${task.command}`);
 
+  // Emit task_started notification (fire-and-forget)
+  void notify(
+    createEvent(task, 'task_started', 'info', `Starting task: ${task.name}`),
+    flowDir,
+  );
+
   // Strip CLAUDECODE env var to avoid "nested session" detection.
   // The daemon runs detached — it's not actually nested.
   const cleanEnv = { ...process.env };
@@ -140,17 +195,59 @@ function executeTask(task: HeartbeatTask): void {
 
   child.on('close', (code: number | null) => {
     taskRunning = false;
+    const outputTail = tailLines(stdout, TAIL_LINES);
+    const errorTail = tailLines(stderr, TAIL_LINES);
+
     if (code === 0) {
       log(`Task "${task.name}" completed successfully`);
       retryCountMap.delete(task.name);
+
+      // Emit task_complete notification (fire-and-forget)
+      void notify(
+        createEvent(task, 'task_complete', 'info', `Task completed: ${task.name}`),
+        flowDir,
+      );
+
       if (task.oneShot) {
         disableOneShotTask(task.name);
       }
+    } else if (code === 2) {
+      // Exit code 2 — task needs human input
+      log(`Task "${task.name}" blocked — needs input (exit code 2)`);
+      if (stderr) log(`  stderr: ${stderr.slice(0, 500)}`);
+
+      const isAutopilot = readAutopilot();
+
+      // Emit task_blocked notification (fire-and-forget)
+      void notify(
+        createEvent(
+          task,
+          'task_blocked',
+          'error',
+          `Task blocked (needs input): ${task.name}${isAutopilot ? ' [autopilot ON]' : ''}`,
+        ),
+        flowDir,
+      );
+
+      // TODO: Phase 4 — prompt-manager will create a prompt file here
+      // using outputTail / errorTail as context for the human to respond
+      log(`  context (last ${TAIL_LINES} lines): ${outputTail.slice(0, 500)}`);
     } else if (stderr.includes(ACTIVE_SESSION_ERROR)) {
       scheduleRetry(task);
     } else {
       log(`Task "${task.name}" failed with code ${code}`);
       if (stderr) log(`  stderr: ${stderr.slice(0, 500)}`);
+
+      // Emit task_failed notification (fire-and-forget)
+      void notify(
+        createEvent(
+          task,
+          'task_failed',
+          'error',
+          `Task failed (exit ${code}): ${task.name}${errorTail ? '\n' + errorTail.slice(0, 300) : ''}`,
+        ),
+        flowDir,
+      );
     }
     if (stdout) log(`  output: ${stdout.slice(0, 500)}`);
   });
@@ -158,6 +255,12 @@ function executeTask(task: HeartbeatTask): void {
   child.on('error', (err: Error) => {
     taskRunning = false;
     log(`Task "${task.name}" error: ${err.message}`);
+
+    // Emit task_failed notification for spawn errors (fire-and-forget)
+    void notify(
+      createEvent(task, 'task_failed', 'error', `Task spawn error: ${task.name} — ${err.message}`),
+      flowDir,
+    );
   });
 }
 

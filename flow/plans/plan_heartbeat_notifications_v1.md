@@ -62,14 +62,14 @@
 
 ### Tasks
 
-- [ ] Import notification router into `src/cli/daemon/heartbeat-daemon.ts`
-- [ ] Emit `task_started` event when spawning a task
-- [ ] Emit `task_complete` event on exit code 0
-- [ ] Emit `task_failed` event on exit code 1
-- [ ] Add exit code 2 handling — emit `task_blocked` event, trigger prompt file creation
-- [ ] Read `autopilot` setting from `flow/.flowconfig` to determine blocking behavior
-- [ ] Capture last N lines of stdout/stderr from spawned process for prompt context
-- [ ] Ensure all notification calls are non-blocking (don't delay task scheduling)
+- [x] Import notification router into `src/cli/daemon/heartbeat-daemon.ts`
+- [x] Emit `task_started` event when spawning a task
+- [x] Emit `task_complete` event on exit code 0
+- [x] Emit `task_failed` event on exit code 1
+- [x] Add exit code 2 handling — emit `task_blocked` event, trigger prompt file creation
+- [x] Read `autopilot` setting from `flow/.flowconfig` to determine blocking behavior
+- [x] Capture last N lines of stdout/stderr from spawned process for prompt context
+- [x] Ensure all notification calls are non-blocking (don't delay task scheduling)
 
 ### Files
 
