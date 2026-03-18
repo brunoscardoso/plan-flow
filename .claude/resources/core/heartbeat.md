@@ -269,6 +269,7 @@ Two behaviors activate on session start:
 | `flow/.heartbeat-state.json` | Tracks last-read timestamp for session start summaries |
 | `flow/.heartbeat-prompt.md` | Pending user input from blocked task (temporary) |
 | `flow/archive/heartbeat-prompts/` | Archived resolved prompt files |
+| `flow/.telegram-poll-state.json` | Telegram polling state (update offset, mode) |
 
 ---
 
@@ -282,3 +283,63 @@ Two behaviors activate on session start:
 6. **Log rotation**: Keep `flow/.heartbeat.log` under 1000 lines by truncating oldest entries
 7. **One-shot cleanup**: After a one-shot task executes, auto-disable it and update the linked tasklist item
 8. **Vault sync**: Every heartbeat update MUST also update `~/plan-flow/brain/heartbeat.md` — see Vault Sync section
+
+---
+
+## Telegram Two-Way Polling
+
+When `telegram_bot_token` and `telegram_chat_id` are set in `flow/.flowconfig`, the heartbeat daemon enables two-way messaging with Telegram using the Bot API's `getUpdates` long-polling endpoint.
+
+### Adaptive Polling Modes
+
+| Mode | Interval | Trigger |
+|------|----------|---------|
+| Idle | 60 seconds | No pending prompts — lightweight keep-alive |
+| Conversation | 3 seconds | A task is blocked and waiting for user input |
+
+The daemon switches to **conversation mode** when it writes a prompt to Telegram (e.g., a task blocked with exit code 2). Once the user replies and the prompt is resolved, it drops back to **idle mode**.
+
+### State File
+
+Polling state is persisted in `flow/.telegram-poll-state.json`:
+
+```json
+{
+  "lastUpdateId": 123456789,
+  "mode": "idle",
+  "pendingPromptMessageId": null
+}
+```
+
+- `lastUpdateId`: Tracks the Telegram update offset to avoid processing duplicate messages
+- `mode`: Current polling mode (`idle` or `conversation`)
+- `pendingPromptMessageId`: The Telegram message ID of the last prompt sent, used to match replies
+
+### Two-Way Conversation Flow
+
+1. A heartbeat task blocks (exit code 2) and writes `flow/.heartbeat-prompt.md`
+2. The daemon detects the prompt file and sends it to Telegram via `sendMessage`
+3. Polling switches to **conversation mode** (3s interval)
+4. The user replies in Telegram
+5. The daemon detects the reply via `getUpdates`, writes the response to `flow/.heartbeat-prompt.md`
+6. The blocked task resumes with the user's input
+7. Polling switches back to **idle mode** (60s interval)
+
+### Configuration
+
+Set both values in `flow/.flowconfig`:
+
+```yaml
+telegram_bot_token: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+telegram_chat_id: "5635356808"
+```
+
+Configure via `/flow`:
+
+```
+/flow telegram_bot_token=123456:ABC-DEF telegram_chat_id=5635356808
+```
+
+### Auto-Migration from webhook_url
+
+If `webhook_url` contains a Telegram `api.telegram.org` URL with a bot token and chat_id in the query string, the flowconfig parser automatically extracts and populates `telegram_bot_token` and `telegram_chat_id`. The original `webhook_url` is preserved for one-way notification compatibility.
