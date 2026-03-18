@@ -205,9 +205,76 @@ The project log (`flow/log.md`) is also linked into the vault at `~/plan-flow/br
 
 ---
 
+## Notification System
+
+The heartbeat daemon includes a notification system that provides visibility into background task execution.
+
+### Notification Channels
+
+| Channel | What Gets Written | When |
+|---------|------------------|------|
+| `flow/log.md` | Timestamped one-liners | All events (start, complete, fail, blocked) |
+| `flow/.heartbeat-events.jsonl` | Machine-readable JSON events | All events |
+| Desktop notification (node-notifier) | Pop-up alert | Failures and blocked tasks only |
+
+### Log Format (flow/log.md)
+
+```
+[2026-03-17 14:00] ✅ task-name: Started — description
+[2026-03-17 14:12] ✅ task-name: Phase 1/5 complete — description
+[2026-03-17 14:35] ❌ task-name: FAILED at Phase 3 — build error
+[2026-03-17 14:35] ⏸️ task-name: Paused — see .heartbeat-prompt.md
+```
+
+### Event Types
+
+| Type | Level | Desktop Notify |
+|------|-------|---------------|
+| `task_started` | info | No |
+| `phase_complete` | info | No |
+| `task_complete` | info | No |
+| `task_failed` | error | Yes |
+| `task_blocked` | error | Yes |
+
+### Exit Code Convention
+
+| Exit Code | Meaning | Daemon Action |
+|-----------|---------|---------------|
+| 0 | Success | Log ✅, continue |
+| 1 | Failure | Log ❌, desktop notify |
+| 2 | Needs input | Log ⏸️, write prompt file (if autopilot OFF), desktop notify |
+
+### Prompt File System
+
+When a task exits with code 2 and autopilot is OFF:
+1. Daemon writes `flow/.heartbeat-prompt.md` with task context
+2. Desktop notification alerts the user
+3. Task pauses until user responds
+4. On next session start, the prompt is auto-detected and presented
+5. After resolution, prompt is archived to `flow/archive/heartbeat-prompts/`
+
+When autopilot is ON: exit code 2 is logged as a warning but execution continues.
+
+### Session Start Integration
+
+Two behaviors activate on session start:
+1. **Heartbeat Log**: Reads `.heartbeat-events.jsonl`, compares against `.heartbeat-state.json` timestamp, summarizes unread events
+2. **Heartbeat Prompt**: Detects `.heartbeat-prompt.md` and presents pending questions immediately
+
+### Runtime Files
+
+| File | Purpose |
+|------|---------|
+| `flow/.heartbeat-events.jsonl` | Append-only event stream (one JSON per line) |
+| `flow/.heartbeat-state.json` | Tracks last-read timestamp for session start summaries |
+| `flow/.heartbeat-prompt.md` | Pending user input from blocked task (temporary) |
+| `flow/archive/heartbeat-prompts/` | Archived resolved prompt files |
+
+---
+
 ## Rules
 
-1. **No external dependencies**: Daemon uses only Node.js built-in modules
+1. **Minimal dependencies**: Daemon uses Node.js built-in modules plus `node-notifier` for desktop notifications
 2. **Graceful shutdown**: Always clean up timers and PID file on exit
 3. **Stale PID detection**: Verify PID is actually running before assuming daemon is alive
 4. **File-based config**: All configuration lives in `flow/heartbeat.md` — no CLI flags for task config

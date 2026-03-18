@@ -109,12 +109,12 @@
 
 ### Tasks
 
-- [ ] Add **Heartbeat Log** session start behavior to `CLAUDE.md`: read `flow/.heartbeat-events.jsonl`, compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`, summarize unread events, update timestamp
-- [ ] Add **Heartbeat Prompt** session start behavior to `CLAUDE.md`: check for `flow/.heartbeat-prompt.md`, present pending question if found
-- [ ] Document `.heartbeat-state.json` format: `{ "lastReadTimestamp": "ISO8601", "lastSessionId": "string" }`
-- [ ] Update flow directory structure documentation in `CLAUDE.md` with new files (`.heartbeat-events.jsonl`, `.heartbeat-state.json`, `.heartbeat-prompt.md`)
-- [ ] Update `.claude/resources/core/heartbeat.md` with notification system documentation
-- [ ] Add `flow/archive/heartbeat-prompts/` to flow directory structure
+- [x] Add **Heartbeat Log** session start behavior to `CLAUDE.md`: read `flow/.heartbeat-events.jsonl`, compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`, summarize unread events, update timestamp
+- [x] Add **Heartbeat Prompt** session start behavior to `CLAUDE.md`: check for `flow/.heartbeat-prompt.md`, present pending question if found
+- [x] Document `.heartbeat-state.json` format: `{ "lastReadTimestamp": "ISO8601", "lastSessionId": "string" }`
+- [x] Update flow directory structure documentation in `CLAUDE.md` with new files (`.heartbeat-events.jsonl`, `.heartbeat-state.json`, `.heartbeat-prompt.md`)
+- [x] Update `.claude/resources/core/heartbeat.md` with notification system documentation
+- [x] Add `flow/archive/heartbeat-prompts/` to flow directory structure
 
 ### Files
 
