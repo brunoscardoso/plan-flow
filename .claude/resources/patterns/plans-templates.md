@@ -51,6 +51,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
+**Dependencies**: None
 
 - [ ] Task 1
 - [ ] Task 2
@@ -61,6 +62,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: [What this phase covers]
 **Complexity**: X/10
+**Dependencies**: Phase 1
 
 - [ ] Task 1
 - [ ] Task 2
@@ -71,6 +73,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Write comprehensive tests
 **Complexity**: X/10
+**Dependencies**: Phase 1, Phase 2, ..., Phase N-1
 
 - [ ] Unit tests for logic hooks
 - [ ] Unit tests for utilities
@@ -87,6 +90,56 @@ Use this template when creating new implementation plans:
 
 ---
 
+## Dependencies Field
+
+The optional `**Dependencies**` field declares which phases must complete before a phase can start. This enables wave-based parallel execution.
+
+### Syntax
+
+- `**Dependencies**: None` — Phase has no dependencies and can run in the first wave (parallel with other independent phases)
+- `**Dependencies**: Phase 1, Phase 3` — Phase depends on Phases 1 and 3 completing first
+- **Omitting the field entirely** — Backward-compatible default; phase depends on the immediately previous phase (sequential execution)
+
+### Rules
+
+1. The Tests phase (always last) depends on ALL prior phases — it is never parallelized
+2. Phases with `Dependencies: None` form the first execution wave
+3. A phase cannot depend on itself or on phases that come after it
+4. When in doubt, omit the field to default to sequential execution
+
+### Example
+
+```markdown
+### Phase 1: Types and Schemas
+**Scope**: Define TypeScript types
+**Complexity**: 3/10
+**Dependencies**: None
+
+### Phase 2: Config Parser
+**Scope**: Implement config parsing
+**Complexity**: 4/10
+**Dependencies**: Phase 1
+
+### Phase 3: CLI Commands
+**Scope**: Implement CLI interface
+**Complexity**: 4/10
+**Dependencies**: Phase 1
+
+### Phase 4: Integration
+**Scope**: Connect all pieces
+**Complexity**: 5/10
+**Dependencies**: Phase 2, Phase 3
+
+### Phase 5: Tests (Final)
+**Scope**: Write comprehensive tests
+**Complexity**: 5/10
+**Dependencies**: Phase 1, Phase 2, Phase 3, Phase 4
+```
+
+In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1). Phase 4 waits for both 2 and 3. Phase 5 (tests) waits for everything.
+
+---
+
 ## Phase Templates
 
 ### Types and Schemas Phase
@@ -96,6 +149,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Define all TypeScript types and Zod schemas needed for the feature.
 **Complexity**: 3/10
+**Dependencies**: None
 
 - [ ] Create type definitions in `/src/types/`
 - [ ] Create Zod validation schemas in `/src/types/rest-inputs.ts`
@@ -110,6 +164,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Implement API routes and commands.
 **Complexity**: 7/10
+**Dependencies**: Phase 1
 
 - [ ] Create command in `/src/commands/`
 - [ ] Create API route in `/src/app/api/`
@@ -125,6 +180,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Implement Zustand stores for state management.
 **Complexity**: 5/10
+**Dependencies**: Phase 1
 
 - [ ] Create or extend store in `/src/stores/`
 - [ ] Add actions and selectors
@@ -139,6 +195,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Build the user interface components.
 **Complexity**: 6/10
+**Dependencies**: Phase 3
 
 - [ ] Create logic hook (`useFeatureLogic.internal.ts`)
 - [ ] Create view component (`index.tsx`)
@@ -154,6 +211,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Connect all pieces and verify functionality.
 **Complexity**: 4/10
+**Dependencies**: Phase 2, Phase 4
 
 - [ ] Integrate components with pages
 - [ ] Connect to API endpoints
@@ -169,6 +227,7 @@ Use this template when creating new implementation plans:
 
 **Scope**: Write comprehensive tests for all new code.
 **Complexity**: 5/10
+**Dependencies**: Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
 
 - [ ] Unit tests for logic hooks (`*.client.test.ts`)
 - [ ] Unit tests for utility functions
@@ -226,4 +285,11 @@ Based on complexity scores (per `.claude/resources/core/complexity-scoring.md`):
 - **Phases 3-4**: Can be aggregated (combined complexity: 11, but cautious)
 - **Phase 5**: Can aggregate with Phase 6 if simple
 - **Phase 6**: Tests - always execute separately
+
+Based on dependency graph (when Dependencies fields are present):
+
+- **Wave 1**: Phase 1 (no dependencies)
+- **Wave 2**: Phases 2, 3 (both depend only on Phase 1 — run in parallel)
+- **Wave 3**: Phases 4, 5 (depend on earlier waves)
+- **Wave 4**: Phase 6 (Tests — always sequential, always last)
 ```

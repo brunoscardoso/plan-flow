@@ -74,6 +74,7 @@ Every plan must be divided into implementation phases with clear scope boundarie
 
 - **Scope**: What this phase covers
 - **Complexity**: Score from 0-10
+- **Dependencies**: (Optional) Which phases must complete first
 - **Tasks**: Checkboxes for tracking
 - **Build Verification**: Command to verify
 
@@ -127,6 +128,48 @@ When executing a plan, each phase must trigger **Plan mode** before implementati
 6. Update progress in plan file
 
 **Reference**: See `.claude/resources/tools/plan-mode-tool.md` for complete instructions on switching to Plan mode.
+
+---
+
+### 13. Declare Phase Dependencies for Parallel Execution
+
+Phases may include an optional `**Dependencies**` field to declare which prior phases must complete before execution can begin. This enables wave-based parallel execution where independent phases run simultaneously.
+
+**Syntax**:
+
+- `**Dependencies**: None` — No dependencies; can run in the first wave
+- `**Dependencies**: Phase 1, Phase 3` — Depends on specific phases completing first
+- **Omitting the field** — Defaults to depending on the immediately previous phase (sequential)
+
+**Rules**:
+
+1. Mark phases as `Dependencies: None` when they have no data or code dependency on other phases
+2. When two or more phases share the same dependency set, they form a wave and can execute in parallel
+3. The Tests phase always depends on ALL prior phases — never mark it as `Dependencies: None`
+4. Dependencies must only reference phases with lower numbers (no forward or circular dependencies)
+5. When uncertain whether phases are independent, default to sequential (omit the field)
+6. The dependency declaration is metadata for the execution engine — it does not change the phase content
+
+**Example** — independent phases forming a parallel wave:
+
+```markdown
+### Phase 1: Types and Schemas
+**Dependencies**: None
+
+### Phase 2: API Routes
+**Dependencies**: Phase 1
+
+### Phase 3: CLI Commands
+**Dependencies**: Phase 1
+
+### Phase 4: Integration
+**Dependencies**: Phase 2, Phase 3
+
+### Phase 5: Tests (Final)
+**Dependencies**: Phase 1, Phase 2, Phase 3, Phase 4
+```
+
+Phases 2 and 3 can run in parallel (Wave 2). Phase 4 waits for both. Phase 5 waits for all.
 
 ---
 
@@ -210,6 +253,18 @@ Keep discovery documents in `flow/discovery/` and plans in `flow/plans/`.
 
 ---
 
+### 14. DON'T Mark the Tests Phase as Independent
+
+The Tests phase must always depend on ALL prior phases. Never assign `Dependencies: None` to the Tests phase.
+
+---
+
+### 15. DON'T Create Circular or Forward Dependencies
+
+Dependencies must only reference phases with lower numbers. A phase cannot depend on itself or on any phase that comes after it.
+
+---
+
 ## Summary
 
 Following these planning patterns ensures:
@@ -223,3 +278,4 @@ Following these planning patterns ensures:
 - **Clarity**: Archived plans are ignored, only active plans are referenced
 - **Intelligent Pacing**: Complexity scores guide execution strategy
 - **Collaborative Execution**: Plan mode ensures user approval before each phase
+- **Parallel Execution**: Dependency declarations enable wave-based parallel phase execution
