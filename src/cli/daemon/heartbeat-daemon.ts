@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { parseHeartbeatFile } from './heartbeat-parser.js';
 import { notify } from './notification-router.js';
 import { writePrompt } from './prompt-manager.js';
+import { parseFlowConfig } from '../state/flowconfig-parser.js';
 import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
@@ -22,6 +23,7 @@ const logPath = join(target, 'flow', '.heartbeat.log');
 
 const activeTimers: NodeJS.Timeout[] = [];
 let taskRunning = false;
+let webhookUrls: string | undefined;
 
 const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
 const MAX_RETRIES = 5;
@@ -154,6 +156,7 @@ function executeTask(task: HeartbeatTask): void {
   void notify(
     createEvent(task, 'task_started', 'info', `Starting task: ${task.name}`),
     flowDir,
+    webhookUrls,
   );
 
   // Strip CLAUDECODE env var to avoid "nested session" detection.
@@ -343,6 +346,10 @@ function scheduleTask(task: HeartbeatTask): void {
 
 function loadAndSchedule(): void {
   clearTimers();
+
+  // Read webhook_url from flowconfig once per reload
+  const flowConfig = parseFlowConfig(flowDir);
+  webhookUrls = flowConfig.webhook_url || undefined;
 
   if (!existsSync(heartbeatPath)) {
     log('No heartbeat.md found');
