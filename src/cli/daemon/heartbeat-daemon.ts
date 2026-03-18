@@ -12,6 +12,7 @@ import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { parseHeartbeatFile } from './heartbeat-parser.js';
 import { notify } from './notification-router.js';
+import { writePrompt } from './prompt-manager.js';
 import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
@@ -229,8 +230,12 @@ function executeTask(task: HeartbeatTask): void {
         flowDir,
       );
 
-      // TODO: Phase 4 — prompt-manager will create a prompt file here
-      // using outputTail / errorTail as context for the human to respond
+      if (!isAutopilot) {
+        void writePrompt(task.name, outputTail, errorTail, flowDir);
+        log(`  prompt written to flow/${'.heartbeat-prompt.md'} — waiting for human input`);
+      } else {
+        log(`  Autopilot ON — skipping prompt, continuing`);
+      }
       log(`  context (last ${TAIL_LINES} lines): ${outputTail.slice(0, 500)}`);
     } else if (stderr.includes(ACTIVE_SESSION_ERROR)) {
       scheduleRetry(task);

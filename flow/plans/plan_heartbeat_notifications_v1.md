@@ -86,12 +86,12 @@
 
 ### Tasks
 
-- [ ] Create `src/cli/daemon/prompt-manager.ts` with functions: `writePrompt(task, context, options)`, `readPrompt()`, `archivePrompt()`, `hasPrompt()`
-- [ ] `writePrompt`: atomic write (write to temp file, rename) to `flow/.heartbeat-prompt.md`
-- [ ] `archivePrompt`: move to `flow/archive/heartbeat-prompts/prompt_{task}_{timestamp}.md`
-- [ ] Create `flow/archive/heartbeat-prompts/` directory if not exists
-- [ ] Wire into daemon: on exit code 2 + autopilot OFF → `writePrompt()` + desktop notify
-- [ ] Wire into daemon: on exit code 2 + autopilot ON → skip prompt, log warning, continue
+- [x] Create `src/cli/daemon/prompt-manager.ts` with functions: `writePrompt(task, context, options)`, `readPrompt()`, `archivePrompt()`, `hasPrompt()`
+- [x] `writePrompt`: atomic write (write to temp file, rename) to `flow/.heartbeat-prompt.md`
+- [x] `archivePrompt`: move to `flow/archive/heartbeat-prompts/prompt_{task}_{timestamp}.md`
+- [x] Create `flow/archive/heartbeat-prompts/` directory if not exists
+- [x] Wire into daemon: on exit code 2 + autopilot OFF → `writePrompt()` + desktop notify
+- [x] Wire into daemon: on exit code 2 + autopilot ON → skip prompt, log warning, continue
 
 ### Files
 
