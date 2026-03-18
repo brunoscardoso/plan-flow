@@ -97,13 +97,13 @@ Add per-task verification to `/execute-plan` so that each task in a plan phase c
 **Complexity**: 6/10
 **Dependencies**: Phase 1
 
-- [ ] Update `.claude/resources/core/phase-isolation.md`:
+- [x] Update `.claude/resources/core/phase-isolation.md`:
   - Extend context template instructions section to include verification workflow
   - Add `<verify>` parsing instructions to sub-agent prompt
   - Add debug sub-agent spawning instructions (nested haiku agent)
   - Extend return format schema with `task_verifications` field
   - Add verification-related fields to field descriptions table
-- [ ] Update `.claude/resources/core/wave-execution.md`:
+- [x] Update `.claude/resources/core/wave-execution.md`:
   - Note that verification is internal to phase sub-agents (no wave coordinator changes)
   - Add `task_verifications` to coordinator processing documentation (display in wave summary)
 
@@ -129,9 +129,9 @@ Add per-task verification to `/execute-plan` so that each task in a plan phase c
 **Complexity**: 3/10
 **Dependencies**: Phase 1
 
-- [ ] Update CLAUDE.md (both root and cli) to document per-task verification feature
-- [ ] Update `.claude/commands/flow.md` (or flow skill) to support `max_verify_retries` setting
-- [ ] Document default value (`max_verify_retries: 2`) and valid range (1-5)
+- [x] Update CLAUDE.md (both root and cli) to document per-task verification feature
+- [x] Update `.claude/commands/flow.md` (or flow skill) to support `max_verify_retries` setting
+- [x] Document default value (`max_verify_retries: 2`) and valid range (1-5)
 
 ### Phase 6: Tests (Final)
 
