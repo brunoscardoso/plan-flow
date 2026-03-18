@@ -44,6 +44,8 @@ SETTINGS:
   max_verify_retries=1-5     Max repair attempts per task verification failure (default: 2)
   pr=true|false         Auto-create PR via gh after execution (default: false)
   webhook_url=<url>     Webhook URL(s) for external notifications, comma-separated (default: "")
+  telegram_bot_token=<token>  Telegram bot token for two-way messaging (default: "")
+  telegram_chat_id=<id>       Telegram chat ID for two-way messaging (default: "")
 
 COST REPORTING:
   /flow cost                             Last 7 days summary (default)
@@ -67,6 +69,7 @@ EXAMPLES:
   /flow commit=true push=true pr=true     # Full git control with auto-PR
   /flow webhook_url=https://hooks.slack.com/services/T.../B.../xxx  # Set Slack webhook
   /flow webhook_url=https://discord.com/api/webhooks/123/abc,https://hooks.slack.com/services/T.../B.../xxx  # Multiple webhooks
+  /flow telegram_bot_token=123456:ABC-DEF telegram_chat_id=5635356808  # Enable Telegram two-way
   /flow cost                              # Show cost report (last 7 days)
   /flow cost --today --detail             # Today's costs with model breakdown
   /flow -status                           # Show current config
@@ -125,6 +128,8 @@ Parse the user input to determine what action to take:
 | `max_verify_retries` | `1`-`5` | `2` | Max repair attempts per task verification failure |
 | `pr` | `true`, `false` | `false` | Auto-create PR after execution completes (requires push: true) |
 | `webhook_url` | URL string | `""` | Webhook URL(s) for Telegram/Discord/Slack notifications (comma-separated) |
+| `telegram_bot_token` | any string | `""` | Telegram bot token for two-way polling |
+| `telegram_chat_id` | any string | `""` | Telegram chat ID for two-way polling |
 
 ---
 
@@ -262,6 +267,8 @@ phase_isolation: true
 max_verify_retries: 2
 pr: false
 webhook_url: ""
+telegram_bot_token: ""
+telegram_chat_id: ""
 ```
 
 **Location**: `flow/.flowconfig`
