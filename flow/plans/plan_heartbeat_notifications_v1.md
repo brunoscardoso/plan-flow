@@ -39,11 +39,11 @@
 
 ### Tasks
 
-- [ ] Add `node-notifier` as production dependency in `package.json` and install
-- [ ] Add `@types/node-notifier` as dev dependency
-- [ ] Create `src/cli/daemon/desktop-notifier.ts` — node-notifier wrapper, title "Plan-Flow Heartbeat", fire-and-forget, catch errors gracefully (log failure, don't crash)
-- [ ] Create `src/cli/daemon/notification-router.ts` — severity-based dispatcher: all events → log-writer + event-writer; error/blocked events → also desktop-notifier
-- [ ] Export a single `notify(event: NotificationEvent)` function from the router
+- [x] Add `node-notifier` as production dependency in `package.json` and install
+- [x] Add `@types/node-notifier` as dev dependency
+- [x] Create `src/cli/daemon/desktop-notifier.ts` — node-notifier wrapper, title "Plan-Flow Heartbeat", fire-and-forget, catch errors gracefully (log failure, don't crash)
+- [x] Create `src/cli/daemon/notification-router.ts` — severity-based dispatcher: all events → log-writer + event-writer; error/blocked events → also desktop-notifier
+- [x] Export a single `notify(event: NotificationEvent)` function from the router
 
 ### Files
 
