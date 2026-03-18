@@ -52,7 +52,7 @@ WORKFLOW:
      - Approves each phase in Plan mode (sequential)
      - Executes wave phases in parallel (or sequential if single phase)
      - Collects results, detects file conflicts
-     - Commits sequentially in phase order (if git enabled)
+     - Commits per-task in phase/task order (if git enabled)
   5. Runs npm run build && npm run test (ONLY at the end)
   6. Auto-archives plan and discovery to flow/archive/
 
@@ -171,20 +171,23 @@ On execution start, check if `flow/.flowconfig` exists — if yes, read git cont
 
 ```yaml
 # flow/.gitcontrol
-commit: true     # Auto-commit after each completed phase
+commit: true     # Auto-commit after each completed task (per-task atomic commits)
 push: true       # Auto-push after all phases complete (requires commit: true)
 branch: develop  # Target branch (optional, defaults to current branch)
+pr: true         # Auto-create PR via gh after push (requires push: true)
 ```
 
 ### Git Behavior During Execution
 
 | Setting | Behavior |
 |---------|----------|
-| `commit: true` | After each phase completes successfully, run `git add -A && git commit -m "Phase N: <phase name> — <feature>"` |
+| `commit: true` | After each task completes successfully, commit: `git add -A && git commit -m "feat(phase-N.task-M): <desc> — <feature>"` |
 | `commit: false` or no `.gitcontrol` | No automatic git operations (default behavior) |
 | `push: true` | After ALL phases complete AND build/test pass, run `git push origin <branch>` |
 | `push: false` or not set | No automatic push |
 | `branch: <name>` | Use this branch for push (default: current branch) |
+| `pr: true` | After push, create feature branch feat/<feature> and open PR via gh pr create |
+| `pr: false` or not set | No automatic PR creation |
 
 ### Git Safety Rules
 
@@ -193,21 +196,31 @@ branch: develop  # Target branch (optional, defaults to current branch)
 | **Commit only on success** | Only commit after a phase completes successfully. Never commit broken code. |
 | **Push only after build+test** | Push only after `npm run build && npm run test` pass at the very end. |
 | **No force push** | NEVER use `--force`. If push fails, stop and ask the user. |
-| **Commit message format** | `Phase N: <phase name> — <feature>` (e.g., "Phase 2: API endpoints — user-auth") |
+| **Commit message format** | `feat(phase-N.task-M): <desc> — <feature>` (e.g., "feat(phase-2.task-1): Implement auth middleware — user-auth") |
 | **Final commit** | After build+test pass, make one final commit: `Complete: <feature> — all phases done, build passing` |
 | **Include flow artifacts** | Commits should include updated plan files with progress markers |
+| **PR best-effort** | If gh CLI is missing or PR creation fails, warn and continue. Never block completion. |
+| **Branch naming** | Feature branches use feat/<sanitized-feature-name> (lowercase, hyphens only) |
 
-### Example Flow with `commit=true push=true`
+### Example Flow with `commit=true push=true pr=true`
 
 ```
-Phase 1: Setup types → completes → git commit "Phase 1: Setup types — user-auth"
-Phase 2: API endpoints → completes → git commit "Phase 2: API endpoints — user-auth"
-Phase 3: Frontend UI → completes → git commit "Phase 3: Frontend UI — user-auth"
-Phase 4: Tests → completes → git commit "Phase 4: Tests — user-auth"
-Build + Test → pass → git commit "Complete: user-auth — all phases done, build passing"
+Phase 1: Setup types (2 tasks)
+  → git commit "feat(phase-1.task-1): Define user and session types — user-auth"
+  → git commit "feat(phase-1.task-2): Create user schema with Prisma — user-auth"
+Phase 2: API endpoints (2 tasks)
+  → git commit "feat(phase-2.task-1): Implement auth middleware — user-auth"
+  → git commit "feat(phase-2.task-2): Add rate limiting to API routes — user-auth"
+Phase 3: Frontend UI (1 task)
+  → git commit "feat(phase-3.task-1): Create login form component — user-auth"
+Phase 4: Tests (1 task)
+  → git commit "feat(phase-4.task-1): Add unit tests for auth flow — user-auth"
+Build + Test → pass → git commit "Complete: user-auth — all phases done, build passing (vX.Y.Z)"
                      → git push origin development
+                     → git checkout -b feat/user-auth
+                     → git push -u origin feat/user-auth
+                     → gh pr create --title "feat: user-auth" --body "..."
 ```
-
 ---
 
 ## Instructions
@@ -271,6 +284,7 @@ Execution Complete!
 - X phases completed
 - All tests passing
 - Build successful
+- PR: <url> (or "PR creation skipped" if pr=false)
 - Archived: plan and discovery moved to flow/archive/
 ```
 
@@ -550,7 +564,7 @@ Key behaviors:
 - **Tests never parallel** — tests phase always runs alone in the final wave
 - **Backward compatible** — plans without `Dependencies` fields execute sequentially (no behavior change)
 - **File conflict detection** — overlapping files_modified between parallel phases are flagged for user resolution
-- **Deterministic commits** — git commits happen sequentially in phase order after each wave completes
+- **Deterministic commits** — git commits happen per-task in phase/task order after each wave completes: `feat(phase-N.task-M): <desc> — <feature>`
 
 User can always choose sequential execution at the wave summary prompt. Disable globally with `/flow wave_execution=false`.
 

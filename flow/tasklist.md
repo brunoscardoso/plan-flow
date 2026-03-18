@@ -10,6 +10,7 @@
 
 ## To Do
 
+- [ ] **Two-way Telegram conversation via adaptive polling** — Add `getUpdates` polling to the heartbeat daemon with two modes: idle (every 60s) and conversation (every 3-5s). When a task blocks and sends a Telegram prompt, user replies directly in Telegram. Daemon detects reply, processes it, sends response back — enabling ping-pong conversation. After 2-3 min of silence, drops back to idle polling. Matches replies to pending prompts, writes to `flow/.heartbeat-prompt.md`, resumes blocked tasks. Also refactor Telegram config in `.flowconfig` from embedded URL to separate fields (`telegram_bot_token`, `telegram_chat_id`) so both `sendMessage` and `getUpdates` can be called cleanly. Keep `webhook_url` for Discord/Slack (generic webhooks). Update `/flow` command, daemon, webhook-sender, and docs. No webhook server needed. Complexity ~5/10.
 
 ## Done
 

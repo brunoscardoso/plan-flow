@@ -108,6 +108,26 @@ Read these files before implementing:
 {Only if UI phase — include design tokens from discovery doc}
 {Otherwise omit this section entirely}
 
+## Commit Instructions
+{Only include this section when `commit: true` in `.flowconfig`}
+
+### Sequential Mode (wave_execution: false)
+- After each task completes and verification passes (if applicable):
+  1. Stage changed files: `git add -A`
+  2. Create atomic commit: `git commit -m "feat(phase-N.task-M): <truncated description> — <feature>"`
+     - Use format: feat(phase-{phase_number}.task-{task_number_in_phase}): <description> — <feature>
+     - Truncate description to 50 chars (use ellipsis if truncated)
+     - Task numbers are 1-indexed within each phase
+  3. Continue to next task
+- Return `tasks_completed` array in JSON with files_created/files_modified per task
+- Do NOT create a final phase commit (coordinator will not create one either)
+
+### Wave Mode (wave_execution: true)
+- Do NOT create any commits during task implementation
+- The coordinator will commit your changes after this wave completes
+- Return `tasks_completed` array with per-task file lists (see Return Format below)
+- Coordinator will iterate tasks and commit: feat(phase-N.task-M): ... per task
+
 ## Instructions
 1. Read the plan file to understand the full feature context
 2. Implement all tasks listed above
@@ -187,6 +207,20 @@ The sub-agent must return a JSON object with this structure:
       "attempts": 1,
       "repairs_applied": []
     }
+  ],
+  "tasks_completed": [
+    {
+      "task_number": 1,
+      "task_name": "Create user authentication middleware",
+      "files_created": ["src/middleware/auth.ts"],
+      "files_modified": []
+    },
+    {
+      "task_number": 2,
+      "task_name": "Add rate limiting to API routes",
+      "files_created": ["src/middleware/rate-limit.ts"],
+      "files_modified": ["src/api/routes.ts"]
+    }
   ]
 }
 ```
@@ -205,6 +239,7 @@ The sub-agent must return a JSON object with this structure:
 | `errors` | string[] | No | Errors encountered (even if resolved) |
 | `patterns_captured` | object[] | No | Patterns observed during implementation |
 | `task_verifications` | object[] | No | Array of per-task verification results. Only present when at least one task had a `<verify>` tag. Each entry contains: `task` (string), `verify_command` (string), `status` (`"pass" \| "fail"`), `attempts` (number), `repairs_applied` (string[]), and optionally `last_diagnosis` (object, only when status is `"fail"`). See `.claude/resources/core/per-task-verification.md` for full schema. |
+| `tasks_completed` | object[] | No | Array of per-task file tracking for atomic commits. Each entry: `task_number` (number, 1-indexed within phase), `task_name` (string), `files_created` (string[]), `files_modified` (string[]). Present when any tasks ran. Used by coordinator for per-task commit messages. See `.claude/resources/core/atomic-commits.md` for full schema. |
 
 ### Failure Return Example
 
@@ -236,7 +271,12 @@ After receiving the sub-agent's JSON summary, the coordinator:
 1. **Update plan file**: Mark all phase tasks as `[x]`
 2. **Accumulate file list**: Merge `files_created` and `files_modified` into running list
 3. **Buffer patterns**: Append `patterns_captured` entries to `flow/resources/pending-patterns.md`
-4. **Git commit**: If `commit: true`, run `git add -A && git commit -m "Phase N: {name} — {feature}"`
+4. **Git commit (per-task)**: If `commit: true` and `tasks_completed` is present:
+   - **Sequential mode**: Sub-agent already created per-task commits — verify they exist, do NOT create phase commit
+   - **Wave mode**: Coordinator iterates `tasks_completed` in task_number order and creates per-task commits:
+     - For each task: `git add -A && git commit -m "feat(phase-N.task-M): <truncated task_name> — <feature>"`
+     - Truncate `task_name` to 50 chars if needed
+   - **Fallback**: If `tasks_completed` is absent (legacy sub-agent), fall back to single phase commit: `git add -A && git commit -m "Phase N: {name} — {feature}"`
 5. **Log decisions**: Include `decisions` in phase completion message
 6. **Display verification results**: If `task_verifications` is present, show pass/fail counts and any repairs applied
 7. **Proceed**: Move to next phase
@@ -260,6 +300,8 @@ After receiving the sub-agent's JSON summary, the coordinator:
 ## Wave Coordinator Processing
 
 When multiple sub-agents return simultaneously from a wave, the coordinator handles them differently from sequential mode. See `.claude/resources/core/wave-execution.md` for the full wave system and `.claude/resources/skills/execute-plan-skill.md` Step 4c for the detailed processing flow.
+
+**Per-task commits in wave mode**: After collecting all JSON returns from a wave, the coordinator commits per-task (not per-phase). For each phase in phase-number order, iterate `tasks_completed` and create atomic commits: `feat(phase-N.task-M): <desc> — <feature>`. See `.claude/resources/core/atomic-commits.md` for the complete commit format and coordinator processing rules.
 
 ### Collecting Multiple JSON Returns
 

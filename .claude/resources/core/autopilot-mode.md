@@ -97,8 +97,9 @@ Check `flow/contracts/` for any relevant integration contracts. If found, note t
 5. If `commit: true`: auto-commit after each completed phase
 6. Run build + test verification at the end
 7. If `push: true` and build+test pass: auto-push
-8. Write transition summary
-9. **Auto-proceed** to Step 5
+8. If `pr: true` and push succeeds: create feature branch `feat/<feature>`, open PR via `gh pr create`, capture PR URL
+9. Write transition summary
+10. **Auto-proceed** to Step 5
 
 ### Step 5: Review Code
 

@@ -7,3 +7,4 @@ commit: true
 push: false
 branch: ""
 wave_execution: true
+webhook_url: "https://api.telegram.org/bot8782755262:AAHfohGNSYwYd0LIwcU_VPCh-AUH696Zw2M/sendMessage?chat_id=5635356808"

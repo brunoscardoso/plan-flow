@@ -290,6 +290,7 @@ Wait for user confirmation before proceeding.
        2. Stop and fix manually
        ```
 8. **Update progress** - Mark tasks complete in plan file
+   - **Note**: Sub-agent creates per-task commits directly (if `commit: true`). Coordinator does NOT create a phase-level commit. See `.claude/resources/core/atomic-commits.md` for commit format: `feat(phase-N.task-M): <desc> — <feature>`
 9. **Record model used** - Track which model tier was used for this phase (for the completion summary)
 10. **Continue to next phase** - NO BUILD between phases
 
@@ -341,7 +342,7 @@ After all sub-agents in the wave return, process results **sequentially in phase
    - Update plan file (mark tasks `[x]`)
    - Accumulate `files_created` and `files_modified` into running list
    - Buffer `patterns_captured` entries to `flow/resources/pending-patterns.md`
-   - Git commit if enabled (sequential, one commit per phase, in phase number order)
+   - Git commit if enabled (sequential, one commit **per task** in phase/task order — see `.claude/resources/core/atomic-commits.md`). For each phase (in phase number order), iterate `tasks_completed` and commit: `git add -A && git commit -m "feat(phase-N.task-M): <desc> — <feature>"`
    - Log `decisions` in phase completion message
 6. **Report wave completion**: Present summary of all phases in this wave, including task verification stats:
    - For each phase in the wave that returned `task_verifications`, include pass/fail counts and repairs applied
@@ -487,6 +488,82 @@ After all phases are complete but **before** build/test verification, run the pa
 
 See `.claude/resources/core/pattern-capture.md` for the full end-of-skill review protocol.
 
+### Step 7c: Auto-PR Creation
+
+After pattern review completes, optionally create and push a Pull Request if enabled:
+
+1. **Check if PR creation is enabled**: Read `flow/.flowconfig` and look for `pr: true`
+   - If `pr` is not set or is `false`, skip this entire step
+   - If `pr: true`, proceed to branch creation
+
+2. **Create and push feature branch**:
+   - Sanitize feature name: Convert plan name to lowercase, replace spaces and special characters (except hyphens) with hyphens, trim leading/trailing hyphens
+   - Example: "Add User Authentication" → `add-user-authentication`, "Feature (WIP)" → `feature-wip`
+   - Create branch: `git checkout -b feat/<sanitized-feature-name>`
+   - Check for pre-existing branch: If the branch already exists, warn the user and skip branch creation — proceed with PR creation using the existing branch
+   - Push branch: `git push -u origin feat/<sanitized-feature-name>`
+
+3. **Determine base branch**:
+   - Read `flow/.flowconfig` and check for `branch` setting
+   - If `branch` is set, use that as the base branch
+   - If `branch` is not set, detect the repository's default branch:
+     ```bash
+     gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'
+     ```
+   - If `gh` CLI is not found or the command fails, default to `main`
+
+4. **Create Pull Request**:
+   - Title format: `feat: <plan-name>` (use the plan's name from the plan file)
+   - Body format: Include plan overview and list of completed phases:
+     ```markdown
+     ## Overview
+     <Summary of the plan>
+
+     ## Completed Phases
+     - Phase 1: <Phase Name>
+     - Phase 2: <Phase Name>
+     - Phase 3: <Phase Name>
+     ```
+   - Command:
+     ```bash
+     gh pr create --base <base-branch> --head feat/<sanitized-feature-name> --title "feat: <plan-name>" --body "<body>"
+     ```
+   - Capture the PR URL from the command output (format: `https://github.com/<owner>/<repo>/pull/<number>`)
+
+5. **Handle PR creation errors gracefully**:
+   - If `gh` CLI is not found or not installed, warn the user: `⚠️ GitHub CLI (gh) not found. Please create a PR manually: git push -u origin feat/<branch-name>`
+   - If `gh pr create` fails with any error, warn the user with the error message and continue: `⚠️ Failed to create PR: <error message>. You can create it manually on GitHub.`
+   - This is a best-effort feature — do not block execution if PR creation fails
+
+6. **Store PR URL**: If PR is created successfully, store the URL for use in Step 7 completion summary
+
+**Branch Naming Convention**:
+
+Feature branches follow the pattern: `feat/<sanitized-feature-name>`
+
+Sanitization rules:
+- Convert to lowercase
+- Replace spaces with hyphens
+- Replace special characters (`/`, `\`, `.`, `@`, etc.) with hyphens (except leading/trailing)
+- Collapse consecutive hyphens into a single hyphen
+- Trim leading and trailing hyphens
+- Result must be a valid git branch name
+
+**PR Metadata**:
+
+- **Title**: `feat: <plan-name>` — descriptive, follows conventional commits
+- **Body**: Structured markdown with Overview and Completed Phases sections
+- **Base branch**: Either from `.flowconfig` `branch` setting or detected default
+- **Head branch**: `feat/<sanitized-feature-name>`
+
+**Notification Enrichment**:
+
+When a PR is successfully created, the completion notification event message should be enriched with the PR URL:
+- Without PR: `"All done — plan execution complete"`
+- With PR: `"All done — PR: https://github.com/owner/repo/pull/123"`
+
+This allows users to quickly jump to the PR from notifications without needing to search for it.
+
 ---
 
 ### Step 7: Completion - Build and Test Verification
@@ -519,7 +596,9 @@ npm run build && npm run test
 | 4. Tests | 4/10 | sonnet | — | Done |
 
 **Task verification totals**: 8 verified, 7 passed, 1 failed, 1 repair applied
+**Commits**: 8 atomic commits (per-task)
 **Model routing**: Saved ~X% vs all-opus execution
+**PR**: https://github.com/owner/repo/pull/123
 ```
 
 **Wave mode summary** (when wave execution was used):
@@ -541,7 +620,9 @@ npm run build && npm run test
 - Estimated speedup: ~20%
 
 **Task verification totals**: 8 verified, 7 passed, 1 failed, 1 repair applied
+**Commits**: 8 atomic commits (per-task)
 **Model routing**: Saved ~X% vs all-opus execution
+**PR**: https://github.com/owner/repo/pull/123
 ```
 
 4. **List all key changes** made
@@ -598,8 +679,8 @@ Wave 1: Phase 1 + Phase 2 (parallel, no dependencies)
 +-- POST-WAVE PROCESSING (sequential):
 |   +-- Collect JSON returns
 |   +-- Check for file conflicts
-|   +-- Process Phase 1 result → update plan → git commit
-|   +-- Process Phase 2 result → update plan → git commit
+|   +-- Process Phase 1 result → update plan → git commit per task
+|   +-- Process Phase 2 result → update plan → git commit per task
 |   +-- Report wave completion
 |
 +-- Continue to Wave 2 (NO BUILD HERE)
@@ -698,7 +779,7 @@ If the user wants to stop execution:
 | **Update progress**          | Mark tasks complete in plan file after each phase           |
 | **Wave fallback**            | When wave_execution disabled or all phases dependent, execute sequentially (no behavior change) |
 | **Approve then spawn**       | In wave mode, approve ALL wave phases before spawning any   |
-| **Deterministic commits**    | Git commits happen sequentially in phase order after wave completes |
+| **Deterministic commits**    | Git commits happen per-task in phase/task order after wave completes: `feat(phase-N.task-M): <desc> — <feature>` |
 | **Failures are isolated**    | One failed phase does not cancel sibling phases in the same wave |
 | **File conflicts presented** | Never silently resolve file conflicts, always ask the user  |
 

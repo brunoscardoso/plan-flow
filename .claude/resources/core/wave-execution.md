@@ -35,7 +35,7 @@ Coordinator (main session)
     │   │   ├─ Detect file conflicts (files_modified overlap)
     │   │   ├─ Accumulate files_modified list
     │   │   ├─ Buffer patterns from all phases
-    │   │   ├─ Git commit sequentially (Phase A, then B, then C)
+    │   │   ├─ Git commit per-task (iterate tasks within each phase, in phase order)
     │   │   └─ Handle failures (present to user)
     │   │
     │   └─ Next Wave...
@@ -188,7 +188,7 @@ This mirrors the discovery-sub-agents pattern (see `discovery-sub-agents.md` COR
 
 ### Return Format
 
-Each sub-agent returns the **same JSON format** as phase isolation (see `phase-isolation.md` COR-PI-3). No changes to the return schema.
+Each sub-agent returns the **same JSON format** as phase isolation (see `phase-isolation.md`), including the `tasks_completed` array for per-task file tracking. The `tasks_completed` field enables the wave coordinator to create atomic per-task commits after the wave completes. See `.claude/resources/core/atomic-commits.md` for the full `tasks_completed` schema.
 
 ---
 
@@ -205,7 +205,7 @@ After all sub-agents in a wave return, the coordinator processes results **seque
    - Update plan file (mark tasks `[x]`)
    - Accumulate files_modified into running list
    - Buffer patterns_captured entries
-   - Git commit if enabled (sequential, one commit per phase)
+   - Git commit per-task if enabled: iterate `tasks_completed` array and create one commit per task (`feat(phase-N.task-M): <desc> — <feature>`). See `.claude/resources/core/atomic-commits.md` for format.
    - Log decisions and deviations
 5. **Report wave completion**: Summary of all phases in this wave, including `task_verifications` results from each phase return (display pass/fail counts and any repairs applied per phase)
 
@@ -243,15 +243,17 @@ File conflict does NOT affect non-conflicting phases — their results are prese
 
 ### Git Commit Ordering
 
-When `commit: true` in `.flowconfig`, git commits happen **after** the wave completes, **sequentially in phase order**:
+When `commit: true` in `.flowconfig`, git commits happen **after** the wave completes, **per-task in phase order then task order**:
 
 ```
 Wave 1 complete:
-  git add -A && git commit -m "Phase 1: Types — feature-name"
-  git add -A && git commit -m "Phase 2: Utilities — feature-name"
+  Phase 1, Task 1: git add -A && git commit -m "feat(phase-1.task-1): Define user and session types — feature-name"
+  Phase 1, Task 2: git add -A && git commit -m "feat(phase-1.task-2): Create user schema with Prisma — feature-name"
+  Phase 2, Task 1: git add -A && git commit -m "feat(phase-2.task-1): Implement utility helpers — feature-name"
+  Phase 2, Task 2: git add -A && git commit -m "feat(phase-2.task-2): Add string formatting utils — feature-name"
 ```
 
-This ensures deterministic commit history regardless of which sub-agent finished first.
+The coordinator iterates each phase's `tasks_completed` array (from the JSON return) in task_number order. This ensures **deterministic, fine-grained commit history** regardless of which sub-agent finished first. See `.claude/resources/core/atomic-commits.md` for the full commit format spec.
 
 ---
 
