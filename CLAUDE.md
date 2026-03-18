@@ -21,6 +21,7 @@ Use slash commands to invoke skills:
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
+| `/resume-work` | Resume interrupted work using saved execution state |
 | `/flow` | Configure plan-flow settings — autopilot, git control, model routing, runtime options (`key=value` syntax) |
 
 ## Workflow
@@ -86,6 +87,18 @@ Features:
 
 Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md` for full rules.
 
+### Per-Task Verification
+
+Tasks in plan phases can include optional `<verify>` sections with targeted verification commands (e.g., `npx tsc --noEmit <file>`, `npx jest <test-file>`). After completing each task, the verification command runs immediately. If verification fails, a debug sub-agent (haiku) diagnoses the failure and a repair loop applies fixes with up to N retries before escalating to the user.
+
+Features:
+- Automatic — tasks with `<verify>` tags are verified; tasks without them skip verification (backward compatible)
+- Debug sub-agents use haiku for cost-effective diagnosis
+- `/create-plan` auto-generates `<verify>` sections based on task type heuristics
+- Configurable retries via `max_verify_retries` in `flow/.flowconfig` (default: 2, range: 1-5)
+
+See `.claude/resources/core/per-task-verification.md` for full rules.
+
 ### Discovery Sub-Agents
 
 During `/discovery-plan`, three parallel haiku sub-agents explore the codebase simultaneously: Similar Features, API/Data Patterns, and Schema/Types. Each returns condensed JSON findings merged into a Codebase Analysis section in the discovery document. Always-on, no configuration needed.
@@ -138,7 +151,8 @@ flow/
 ├── .heartbeat-events.jsonl  # Machine-readable notification event stream
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
-└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+└── STATE.md           # Execution state snapshot for session resumability
 ```
 
 ## Session Start Behaviors
@@ -151,6 +165,7 @@ flow/
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 - **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
 - **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
+- **Execution State**: If `flow/STATE.md` exists, read it silently. If active work is detected (status is not `idle`), present a brief summary and suggest `/resume-work`.
 
 ## Rules
 
@@ -246,6 +261,7 @@ npm run test
 | `/brainstorm` | Free-form idea exploration with interactive questions |
 | `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
+| `/resume-work` | Resume interrupted work using saved execution state |
 | `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 
 ## Recommended Workflow
@@ -267,6 +283,7 @@ npm run test
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 - **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
 - **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
+- **Execution State**: If `flow/STATE.md` exists, read it silently. If active work is detected (status is not `idle`), present a brief summary and suggest `/resume-work`.
 
 ## Critical Rules
 
@@ -304,7 +321,8 @@ flow/
 ├── .heartbeat-events.jsonl  # Machine-readable notification event stream
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
-└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+└── STATE.md           # Execution state snapshot for session resumability
 ```
 
 ## Central Vault
@@ -330,6 +348,10 @@ When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-pla
 ## Wave-Based Parallel Execution
 
 When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into waves, and executes in parallel. Plans with explicit `Dependencies` metadata enable parallelism; plans without it execute sequentially (backward-compatible). Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md`.
+
+## Per-Task Verification
+
+Tasks in plan phases can include optional `<verify>` sections with targeted verification commands. After each task, verification runs immediately. Failed verifications trigger a debug sub-agent (haiku) for diagnosis, followed by an auto-repair loop (up to `max_verify_retries`, default: 2, configurable in `flow/.flowconfig`). `/create-plan` auto-generates `<verify>` sections based on task type heuristics. Backward compatible — tasks without `<verify>` skip verification. See `.claude/resources/core/per-task-verification.md`.
 
 ## Discovery Sub-Agents
 

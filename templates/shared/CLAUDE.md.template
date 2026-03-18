@@ -90,6 +90,10 @@ During skill execution, the LLM silently buffers patterns and anti-patterns, pre
 
 When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
 
+## Per-Task Verification
+
+Tasks in plan phases can include optional `<verify>` sections with targeted verification commands. After each task, verification runs immediately. Failed verifications trigger a debug sub-agent (haiku) for diagnosis, followed by an auto-repair loop (up to `max_verify_retries`, default: 2, configurable in `flow/.flowconfig`). `/create-plan` auto-generates `<verify>` sections based on task type heuristics. Backward compatible — tasks without `<verify>` skip verification. See `.claude/resources/core/per-task-verification.md`.
+
 ## Discovery Sub-Agents
 
 During `/discovery-plan`, three parallel haiku sub-agents explore the codebase (similar features, API/data patterns, schema/types). Returns condensed JSON findings merged into a Codebase Analysis section. Always-on. See `.claude/resources/core/discovery-sub-agents.md`.

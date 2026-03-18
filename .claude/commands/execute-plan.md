@@ -6,7 +6,7 @@ description: This command executes an implementation plan phase by phase, using 
 
 ## Command Description
 
-This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. When `wave_execution: true` in `.flowconfig` (default), phases are analyzed for dependencies, grouped into **waves** of independent phases, and executed in parallel within each wave using Agent sub-agents. The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
+This command executes an implementation plan phase by phase, using complexity scores to determine execution strategy. When `wave_execution: true` in `.flowconfig` (default), phases are analyzed for dependencies, grouped into **waves** of independent phases, and executed in parallel within each wave using Agent sub-agents. Tasks with `<verify>` tags are verified immediately after completion — failures are auto-diagnosed by debug sub-agents and repaired in place (up to `max_verify_retries` attempts). The command validates inputs and orchestrates the execution process by invoking the `execute-plan` skill.
 
 **Output**: Implements all phases from the plan (sequentially or in parallel waves), updates progress, and auto-archives the completed plan and its discovery document.
 
@@ -142,6 +142,24 @@ Please run this command and let me know when it's complete.
 **DO NOT run `npm run build` after each phase or group.**
 
 **`npm run build` and `npm run test` MUST ONLY be executed at the very end, after ALL phases (including Tests) are complete.**
+
+---
+
+## Per-Task Verification
+
+When plan phases include tasks with `<verify>` tags, each task is verified immediately after completion using targeted commands (e.g., `npx tsc --noEmit <file>`). Failed verifications trigger a debug sub-agent (haiku) for diagnosis, and the implementation sub-agent applies repairs automatically.
+
+### Configuration
+
+| Setting | Default | Range | Description |
+|---------|---------|-------|-------------|
+| `max_verify_retries` | `2` | `1-5` | Max repair attempts per task verification failure |
+
+Set via `/flow max_verify_retries=3` or directly in `flow/.flowconfig`.
+
+Plans without `<verify>` tags work unchanged — verification is fully backward compatible.
+
+See `.claude/resources/core/per-task-verification.md` for verify tag syntax, debug sub-agent details, and JSON schemas.
 
 ---
 
@@ -365,6 +383,10 @@ This command uses hierarchical context loading to reduce context consumption. In
 | COR-WAVE-3 | Parallel spawning rules and wave summary format | Need parallel spawning rules or wave execution summary format |
 | COR-WAVE-4 | Wave coordinator behavior and failure handling | Need wave coordinator behavior, file conflict detection, or failure handling |
 | COR-WAVE-5 | Wave execution configuration and interaction matrix | Need wave execution configuration, interaction matrix, or aggregation rules |
+| COR-PTV-1 | Per-task verification architecture and verify tag syntax | Need verification system overview or `<verify>` tag parsing rules |
+| COR-PTV-2 | Debug sub-agent prompt template and return schema | Need debug sub-agent configuration or diagnosis JSON format |
+| COR-PTV-3 | Verification loop flow and retry behavior | Need verification loop details or retry/escalation rules |
+| COR-PTV-4 | Task verifications JSON return field schema | Need `task_verifications` array format or field descriptions |
 
 ### Expansion Instructions
 
@@ -384,12 +406,32 @@ When executing this command:
 | `resources/skills/_index.md`  | Index of skills with reference codes |
 | `resources/core/_index.md`    | Index of core rules with reference codes |
 | `resources/tools/_index.md`   | Index of tools with reference codes |
+| `per-task-verification.md` | Per-task verification system, debug sub-agents, JSON schemas |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
 | `plans-patterns.md`       | Rules and patterns for plans      |
 | `complexity-scoring.md`   | Complexity scoring system         |
 | `plan-mode-tool.md`       | Plan mode switching instructions  |
 | `/create-plan` command     | Create a plan first               |
 | `/discovery-plan` command  | Run discovery before planning     |
+
+---
+
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability. Use the Edit tool for single-field updates; overwrite the file on skill start.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Plan start** | Create `flow/STATE.md` with `Active Skill: execute-plan`, `Active Plan: {plan file path}`, `Current Phase: none`, empty Decisions/Blockers/Files Modified, `Next Action: Begin phase execution` |
+| **Phase start** | Update `Current Phase: {N} — {Phase Name}`, `Current Task: first task description`, `Next Action: Implement phase {N}` |
+| **Phase complete** | Append to `Completed Phases` list: `Phase N: Name — {outcome}`, set `Current Phase: none`, `Current Task: none`, `Next Action: Begin next phase` |
+| **Decision made** | Append to `## Decisions`: `{description} (reason: {rationale})` |
+| **Blocker encountered** | Append to `## Blockers`: `{description} (status: open, tried: {what was attempted})` |
+| **Files modified** | Append new file paths to `## Files Modified` (deduplicate) |
+| **Plan complete** | Delete `flow/STATE.md` (execution is done, no state to preserve) |
+| **User cancellation** | Update `Next Action: Resume from phase {N}`, keep STATE.md intact for resumability |
+
+**Wave mode**: Update STATE.md before each wave starts (set current wave info) and after each wave completes (update completed phases for all wave phases).
 
 ---
 

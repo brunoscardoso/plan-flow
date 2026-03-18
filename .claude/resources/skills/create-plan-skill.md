@@ -22,7 +22,8 @@ This skill is **strictly for creating plan documents**. The process:
 2. **Analyzes** complexity and scope
 3. **Structures** phases with complexity scores
 4. **Analyzes** phase independence for parallel execution
-5. **Generates** a plan markdown file
+5. **Generates** verify sections for applicable tasks
+6. **Generates** a plan markdown file
 
 **No code, no implementation, no source file modifications.**
 
@@ -100,6 +101,7 @@ Create phases following these guidelines:
 **Dependencies**: [None | Phase N, Phase M | omit for sequential default]
 
 - [ ] Task 1
+  <verify>npx tsc --noEmit src/path/to/file.ts</verify>
 - [ ] Task 2
 
 **Build Verification**: Run `npm run build`
@@ -123,6 +125,27 @@ Create phases following these guidelines:
 | 5-6   | Medium    | Moderate effort, some decisions  |
 | 7-8   | High      | Complex, multiple considerations |
 | 9-10  | Very High | Significant complexity/risk      |
+
+#### Auto-Generating Verify Sections
+
+When creating tasks within phases, auto-generate `<verify>` tags based on the task type using these heuristics:
+
+| Task Type | Verify Command | When to Apply |
+|-----------|---------------|---------------|
+| File creation (`.ts`, `.tsx`) | `npx tsc --noEmit <file>` | Task creates or modifies a TypeScript source file |
+| Test writing | `npx jest <test-file> --no-coverage` | Task creates or modifies a test file |
+| Schema/type definition | `npx tsc --noEmit <type-file>` | Task creates or modifies type definitions or schemas |
+| Config file changes | No verify | Task modifies `.flowconfig`, `tsconfig.json`, or similar config files |
+| Documentation/markdown | No verify | Task creates or updates `.md` files |
+| Generic/ambiguous tasks | No verify | Task description does not clearly indicate a verifiable output file |
+
+**Rules for auto-generation:**
+
+1. Only generate `<verify>` when the task clearly references a specific file path
+2. Use the file path from the task description in the verify command
+3. Prefer `npx tsc --noEmit` for source files and `npx jest --no-coverage` for test files
+4. When in doubt, omit the `<verify>` tag — false verification commands are worse than no verification
+5. Never generate full-build commands (`npm run build`) as verify tags — those belong in Build Verification
 
 ---
 
@@ -256,6 +279,7 @@ The plan document should follow the template in `.claude/resources/patterns/plan
 **Dependencies**: None
 
 - [ ] Task 1
+  <verify>npx tsc --noEmit src/path/to/file.ts</verify>
 - [ ] Task 2
 
 **Build Verification**: Run `npm run build`
@@ -267,6 +291,7 @@ The plan document should follow the template in `.claude/resources/patterns/plan
 **Dependencies**: Phase 1, Phase 2, ..., Phase N-1
 
 - [ ] Unit tests
+  <verify>npx jest src/path/to/test.ts --no-coverage</verify>
 - [ ] Integration tests
 
 **Build Verification**: Run `npm run build && npm run test`
@@ -289,6 +314,8 @@ Before completing the plan, verify:
 - [ ] Tests are the LAST phase with dependencies on ALL prior phases
 - [ ] Key Changes section is populated
 - [ ] Discovery document is referenced (discovery is required, never skipped)
+- [ ] Verify sections are generated for applicable tasks (file creation, test writing, schema/type tasks)
+- [ ] Verify sections are omitted for config, documentation, and generic tasks
 - [ ] **NO implementation code is included**
 - [ ] **NO source files were created or modified**
 

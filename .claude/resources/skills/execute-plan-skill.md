@@ -271,6 +271,24 @@ Wait for user confirmation before proceeding.
    - Append `patterns_captured` entries to `flow/resources/pending-patterns.md`
    - Log `decisions` in phase completion message
    - If inline mode (no isolation), capture patterns directly per `.claude/resources/core/pattern-capture.md`
+   - **Process task verifications** (if `task_verifications` array is present in the return):
+     - Count pass/fail totals and sum repairs applied
+     - Display a brief verification summary after the phase completion message:
+       ```
+       Task Verification: X/Y passed | Z repairs applied
+       ```
+     - If any task verification has `status: "fail"`, present each failed task with its last diagnosis and offer options:
+       ```
+       ⚠️ Task verification failed after N retries:
+       **Task**: <task description>
+       **Command**: <verify command>
+       **Last diagnosis**: <root_cause from last_diagnosis>
+       **Category**: <category from last_diagnosis>
+
+       Options:
+       1. Continue with remaining phases (issue noted)
+       2. Stop and fix manually
+       ```
 8. **Update progress** - Mark tasks complete in plan file
 9. **Record model used** - Track which model tier was used for this phase (for the completion summary)
 10. **Continue to next phase** - NO BUILD between phases
@@ -325,7 +343,16 @@ After all sub-agents in the wave return, process results **sequentially in phase
    - Buffer `patterns_captured` entries to `flow/resources/pending-patterns.md`
    - Git commit if enabled (sequential, one commit per phase, in phase number order)
    - Log `decisions` in phase completion message
-6. **Report wave completion**: Present summary of all phases in this wave
+6. **Report wave completion**: Present summary of all phases in this wave, including task verification stats:
+   - For each phase in the wave that returned `task_verifications`, include pass/fail counts and repairs applied
+   - Wave completion report template:
+     ```
+     Wave N complete: X phases finished
+     - Phase A: success (Task Verification: 3/3 passed | 1 repair applied)
+     - Phase B: success (no verifications)
+     - Phase C: partial (Task Verification: 2/3 passed, 1 failed | 0 repairs applied)
+     ```
+   - If any task verification failed, display the failed task details (same format as sequential mode step 7)
 
 ##### 4d. Wave Failure Handling
 
@@ -372,6 +399,20 @@ After post-wave processing is complete (all commits done, failures handled), pro
 
 **Ready to implement this phase?**
 ```
+
+---
+
+### Step 4f: STATE.md Phase Lifecycle Updates
+
+Update `flow/STATE.md` at each phase transition to enable session resumability:
+
+1. **Before phase starts**: Update `Current Phase: {N} — {Phase Name}`, `Current Task: first task`, `Next Action: Implement phase {N}`
+2. **During phase** (inline mode only): Update `Current Task` as tasks progress; append decisions/blockers as they occur
+3. **After phase completes**: Append to `Completed Phases`: `Phase N: Name — {outcome}`. Set `Current Phase: none`, `Current Task: none`. Append new files to `Files Modified`. Set `Next Action: Begin phase {N+1}` (or `Run build verification` if last phase)
+4. **On phase failure**: Append to `Blockers`: `Phase {N} failed: {error} (status: open, tried: {attempts})`
+5. **Wave mode**: Update STATE.md once before each wave (set current wave phases) and once after each wave completes (batch-update completed phases)
+
+**Important**: In isolation mode, the coordinator (main session) handles STATE.md updates — sub-agents do not write to STATE.md.
 
 ---
 
@@ -470,13 +511,14 @@ npm run build && npm run test
 **Sequential mode summary**:
 
 ```markdown
-| Phase | Complexity | Model | Status |
-|-------|-----------|-------|--------|
-| 1. Setup types | 2/10 | haiku | Done |
-| 2. Core logic | 5/10 | sonnet | Done |
-| 3. Integration | 7/10 | opus | Done |
-| 4. Tests | 4/10 | sonnet | Done |
+| Phase | Complexity | Model | Verification | Status |
+|-------|-----------|-------|--------------|--------|
+| 1. Setup types | 2/10 | haiku | 2/2 passed | Done |
+| 2. Core logic | 5/10 | sonnet | 3/3 passed (1 repair) | Done |
+| 3. Integration | 7/10 | opus | 1/2 passed (1 failed) | Partial |
+| 4. Tests | 4/10 | sonnet | — | Done |
 
+**Task verification totals**: 8 verified, 7 passed, 1 failed, 1 repair applied
 **Model routing**: Saved ~X% vs all-opus execution
 ```
 
@@ -498,6 +540,7 @@ npm run build && npm run test
 - Failed phases: 0
 - Estimated speedup: ~20%
 
+**Task verification totals**: 8 verified, 7 passed, 1 failed, 1 repair applied
 **Model routing**: Saved ~X% vs all-opus execution
 ```
 
@@ -594,6 +637,21 @@ Wave 1: Phase 1 + Phase 2 (parallel, no dependencies)
 
 ---
 
+## Per-Task Verification
+
+When plans include tasks with `<verify>` tags, phase sub-agents run targeted verification after each task. If verification fails, a debug sub-agent (haiku) diagnoses the issue and the implementation sub-agent applies repairs automatically (up to `max_verify_retries` attempts, default: 2).
+
+The execute-plan skill processes verification results at two levels:
+
+1. **Phase level** (Steps 4/4c): After each sub-agent returns, display per-phase verification summaries and present failed tasks to the user
+2. **Completion level** (Step 7): Aggregate verification stats across all phases in the final summary
+
+Verification is internal to phase sub-agents — the coordinator and main session see only the `task_verifications` array in the JSON return. Plans without `<verify>` tags work unchanged (backward compatible).
+
+See `.claude/resources/core/per-task-verification.md` for the full system reference: verify tag syntax, debug sub-agent prompt template, verification loop flow, JSON schemas, and configuration.
+
+---
+
 ## Error Handling
 
 ### Build Failures (at Completion)
@@ -654,6 +712,7 @@ If the user wants to stop execution:
 | `.claude/resources/core/complexity-scoring.md`  | Complexity scoring system        |
 | `.claude/resources/core/wave-execution.md`  | Wave-based parallel execution system |
 | `.claude/resources/core/phase-isolation.md` | Phase isolation and sub-agent spawning |
+| `.claude/resources/core/per-task-verification.md` | Per-task verification system and debug sub-agents |
 | `.claude/resources/tools/plan-mode-tool.md` | Plan mode switching instructions |
 | `flow/plans/`                               | Input plan documents             |
 | `flow/archive/`                             | Completed plans destination      |
