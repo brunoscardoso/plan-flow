@@ -402,6 +402,20 @@ After post-wave processing is complete (all commits done, failures handled), pro
 
 ---
 
+### Step 4f: STATE.md Phase Lifecycle Updates
+
+Update `flow/STATE.md` at each phase transition to enable session resumability:
+
+1. **Before phase starts**: Update `Current Phase: {N} — {Phase Name}`, `Current Task: first task`, `Next Action: Implement phase {N}`
+2. **During phase** (inline mode only): Update `Current Task` as tasks progress; append decisions/blockers as they occur
+3. **After phase completes**: Append to `Completed Phases`: `Phase N: Name — {outcome}`. Set `Current Phase: none`, `Current Task: none`. Append new files to `Files Modified`. Set `Next Action: Begin phase {N+1}` (or `Run build verification` if last phase)
+4. **On phase failure**: Append to `Blockers`: `Phase {N} failed: {error} (status: open, tried: {attempts})`
+5. **Wave mode**: Update STATE.md once before each wave (set current wave phases) and once after each wave completes (batch-update completed phases)
+
+**Important**: In isolation mode, the coordinator (main session) handles STATE.md updates — sub-agents do not write to STATE.md.
+
+---
+
 ### Step 5: Update Progress After Each Phase
 
 Mark completed tasks in the plan file:

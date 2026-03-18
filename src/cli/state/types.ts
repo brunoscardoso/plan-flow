@@ -26,6 +26,7 @@ export interface SessionState {
     heartbeat_events: boolean;
     heartbeat_state: boolean;
     heartbeat_prompt: boolean;
+    state_md: boolean;
   };
 }
 
@@ -35,7 +36,15 @@ export interface HeartbeatSummary {
   last_read_timestamp: string | null;
 }
 
+export interface TaskCompletion {
+  task_number: number;
+  task_name: string;
+  files_created: string[];
+  files_modified: string[];
+}
+
 export interface PlanTask {
+  index: number;
   name: string;
   verify_command: string | null;
 }
@@ -62,10 +71,42 @@ export interface ModelTier {
   model: string;
 }
 
+export interface CompletedPhase {
+  number: number;
+  name: string;
+  outcome: string;
+}
+
+export interface Decision {
+  decision: string;
+  choice: string;
+  reason: string;
+}
+
+export interface Blocker {
+  issue: string;
+  status: string;
+  tried: string;
+}
+
+export interface ExecutionState {
+  active_skill: string | null;
+  active_plan: string | null;
+  current_phase: { number: number; name: string } | null;
+  current_task: string | null;
+  completed_phases: CompletedPhase[];
+  decisions: Decision[];
+  blockers: Blocker[];
+  files_modified: string[];
+  next_action: string | null;
+  updated_at: string | null;
+}
+
 export interface StateOutput {
   config: FlowConfig;
   session: SessionState;
   heartbeat: HeartbeatSummary;
+  execution?: ExecutionState;
   plan?: {
     phases: PlanPhase[];
     waves: WaveGroup[];

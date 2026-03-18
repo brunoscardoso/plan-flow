@@ -21,6 +21,7 @@ Use slash commands to invoke skills:
 | `/learn` | Extract reusable patterns from current session |
 | `/pattern-validate` | Scan and index global brain patterns for on-demand loading |
 | `/heartbeat` | Manage scheduled automated tasks via the heartbeat daemon |
+| `/resume-work` | Resume interrupted work using saved execution state |
 | `/flow` | Configure plan-flow settings — autopilot, git control, model routing, runtime options (`key=value` syntax) |
 
 ## Workflow
@@ -150,7 +151,8 @@ flow/
 ├── .heartbeat-events.jsonl  # Machine-readable notification event stream
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
-└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+└── STATE.md           # Execution state snapshot for session resumability
 ```
 
 ## Session Start Behaviors
@@ -163,6 +165,7 @@ flow/
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 - **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
 - **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
+- **Execution State**: If `flow/STATE.md` exists, read it silently. If active work is detected (status is not `idle`), present a brief summary and suggest `/resume-work`.
 
 ## Rules
 
@@ -258,6 +261,7 @@ npm run test
 | `/brainstorm` | Free-form idea exploration with interactive questions |
 | `/note` | Manual brain entry (capture meeting notes, ideas, brainstorms) |
 | `/learn` | Extract reusable patterns from current session |
+| `/resume-work` | Resume interrupted work using saved execution state |
 | `/flow` | Configure plan-flow settings — autopilot, git control, model routing (`key=value` syntax) |
 
 ## Recommended Workflow
@@ -279,6 +283,7 @@ npm run test
 - **Autopilot Mode**: If `flow/.flowconfig` has `autopilot: true` (or `flow/.autopilot` exists for backward compat), read `.claude/resources/core/autopilot-mode.md` and follow its workflow for every user input.
 - **Heartbeat Log**: If `flow/.heartbeat-events.jsonl` exists, read it and compare against `lastReadTimestamp` in `flow/.heartbeat-state.json`. Summarize unread events (group by task, show counts and any failures/blocks). Update `lastReadTimestamp` to now. If `.heartbeat-state.json` doesn't exist or is corrupted, treat all events as unread and create the state file.
 - **Heartbeat Prompt**: If `flow/.heartbeat-prompt.md` exists, read it and present the pending question to the user immediately. This means a background task is waiting for input. After the user responds, archive the prompt file to `flow/archive/heartbeat-prompts/` and the daemon will resume the task.
+- **Execution State**: If `flow/STATE.md` exists, read it silently. If active work is detected (status is not `idle`), present a brief summary and suggest `/resume-work`.
 
 ## Critical Rules
 
@@ -316,7 +321,8 @@ flow/
 ├── .heartbeat-events.jsonl  # Machine-readable notification event stream
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
-└── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+└── STATE.md           # Execution state snapshot for session resumability
 ```
 
 ## Central Vault
