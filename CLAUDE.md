@@ -133,6 +133,8 @@ When `webhook_url` is set in `flow/.flowconfig`, notification events (errors, bl
 
 Multiple URLs supported (comma-separated). Configure via `/flow webhook_url=<url>`.
 
+When `telegram_bot_token` and `telegram_chat_id` are set in `flow/.flowconfig`, the heartbeat daemon also polls for incoming Telegram messages using `getUpdates`. Two polling modes: idle (every 60s) and conversation (every 3s when a task blocks). User replies in Telegram are matched to pending prompts and written to `flow/.heartbeat-prompt.md`. Configure via `/flow telegram_bot_token=<token> telegram_chat_id=<id>`.
+
 ### Discovery Sub-Agents
 
 During `/discovery-plan`, three parallel haiku sub-agents explore the codebase simultaneously: Similar Features, API/Data Patterns, and Schema/Types. Each returns condensed JSON findings merged into a Codebase Analysis section in the discovery document. Always-on, no configuration needed.
@@ -186,6 +188,7 @@ flow/
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -356,6 +359,7 @@ flow/
 ├── .heartbeat-state.json    # Session read position for unread event detection
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
+├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -398,6 +402,8 @@ When `pr: true` in `flow/.flowconfig` (requires `push: true` and `commit: true`)
 ## Webhook Notifications
 
 When `webhook_url` is set in `flow/.flowconfig`, notification events (errors, blocks, task completions) are sent as HTTP POST requests to external services. Auto-detects platform from URL: Telegram (`api.telegram.org`), Discord (`discord.com/api/webhooks`), Slack (`hooks.slack.com`). Multiple URLs supported (comma-separated). Configure via `/flow webhook_url=<url>`.
+
+When `telegram_bot_token` and `telegram_chat_id` are set in `flow/.flowconfig`, the heartbeat daemon also polls for incoming Telegram messages using `getUpdates`. Two polling modes: idle (every 60s) and conversation (every 3s when a task blocks). User replies in Telegram are matched to pending prompts and written to `flow/.heartbeat-prompt.md`. Configure via `/flow telegram_bot_token=<token> telegram_chat_id=<id>`.
 
 ## Discovery Sub-Agents
 
