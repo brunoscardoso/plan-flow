@@ -41,4 +41,7 @@ flow/
 !.claude/rules/core/allowed-patterns.md
 !.claude/rules/core/forbidden-patterns.md
 CLAUDE.md
+# Heartbeat runtime files
+.heartbeat-events.jsonl
+.heartbeat-state.json
 # <<< plan-flow

@@ -53,3 +53,27 @@ export interface HeartbeatTask {
 export interface HeartbeatOptions {
   target: string;
 }
+
+export type NotificationLevel = 'info' | 'warn' | 'error';
+
+export type NotificationType =
+  | 'task_started'
+  | 'phase_complete'
+  | 'task_complete'
+  | 'task_failed'
+  | 'task_blocked';
+
+export interface NotificationEvent {
+  id: string;
+  timestamp: Date;
+  task: string;
+  type: NotificationType;
+  level: NotificationLevel;
+  phase?: string;
+  message: string;
+}
+
+export interface HeartbeatState {
+  lastReadTimestamp: string;
+  lastSessionId?: string;
+}
