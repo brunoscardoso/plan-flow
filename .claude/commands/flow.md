@@ -39,7 +39,7 @@ SETTINGS:
   commit=true|false      Auto-commit after each completed phase (default: false)
   push=true|false        Auto-push after all phases + build/test pass (default: false)
   branch=<name>          Target branch for git operations (default: current branch)
-  model_routing=true|false  Auto-select model per phase based on complexity (default: true)
+  model_routing=true|false  Auto-select model per phase based on complexity (default: false)
   phase_isolation=true|false  Run each phase in isolated sub-agent with clean context (default: true)
 
 COST REPORTING:
@@ -111,7 +111,7 @@ Parse the user input to determine what action to take:
 | `commit` | `true`, `false` | `false` | Auto-commit after each phase |
 | `push` | `true`, `false` | `false` | Auto-push after completion |
 | `branch` | any string | current branch | Target branch for git ops |
-| `model_routing` | `true`, `false` | `true` | Auto-select model per phase based on complexity |
+| `model_routing` | `true`, `false` | `false` | Auto-select model per phase based on complexity |
 | `phase_isolation` | `true`, `false` | `true` | Run each phase in isolated sub-agent with clean context |
 
 ---
@@ -242,7 +242,7 @@ autopilot: false
 commit: false
 push: false
 branch: ""
-model_routing: true
+model_routing: false
 phase_isolation: true
 ```
 

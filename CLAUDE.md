@@ -38,7 +38,7 @@ The recommended workflow is:
 
 ### Model Routing
 
-When `model_routing: true` in `flow/.flowconfig` (default), each phase in `/execute-plan` is automatically routed to the most cost-effective model based on its complexity score:
+By default, all phases use the **most capable/recent model** from the active provider (e.g., opus for Anthropic, o3 for OpenAI). Enable with `/flow model_routing=true` to route phases to cost-effective models based on complexity:
 
 | Complexity | Tier | Model |
 |-----------|------|-------|
@@ -286,7 +286,7 @@ All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. E
 
 ## Model Routing
 
-When `model_routing: true` in `flow/.flowconfig` (default), `/execute-plan` auto-selects the most cost-effective model per phase: 0-3 → haiku, 4-5 → sonnet, 6-10 → opus. Disable with `/flow model_routing=false`.
+By default, all phases use the most capable/recent model from the active provider. Enable cost-based routing with `/flow model_routing=true` to auto-select models per phase: 0-3 → haiku, 4-5 → sonnet, 6-10 → opus.
 
 ## Design Awareness
 

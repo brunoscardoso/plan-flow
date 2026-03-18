@@ -256,4 +256,42 @@ const badExample = problematicCode()
 
 ## Project Anti-Patterns
 
+### 6. DON'T Execute ORM/Database Migration Commands Directly
+
+**Problem**: Running ORM tools (Prisma, Drizzle, TypeORM, Sequelize, Knex, Django ORM, Alembic, etc.) directly can cause irreversible data loss, schema corruption, or unintended migrations in production environments.
+
+```bash
+# BAD - Never run these directly
+npx prisma migrate dev
+npx prisma db push
+npx prisma db seed
+npx drizzle-kit push
+npx drizzle-kit migrate
+npx typeorm migration:run
+python manage.py migrate
+alembic upgrade head
+npx knex migrate:latest
+```
+
+**Why This is Wrong**:
+
+- Database migrations can be destructive and irreversible (dropping columns, tables, data)
+- ORM commands may connect to production databases if environment is misconfigured
+- Schema changes need human review before execution
+- Seed commands can overwrite existing data
+- The AI agent has no way to verify which database environment it's targeting
+
+**Fix**: Always present the command to the user and ask them to execute it manually.
+
+```markdown
+<!-- GOOD - Ask the user to run it -->
+"Please run the following command to apply the migration:"
+
+`npx prisma migrate dev --name add_users_table`
+
+"Review the generated migration SQL before confirming."
+```
+
+**Scope**: This applies to ALL ORM and database tools — Prisma, Drizzle, TypeORM, Sequelize, Knex, Django ORM, Alembic, SQLAlchemy, ActiveRecord, and any other database migration or seeding tool.
+
 <!-- auto-captured anti-patterns below this line -->

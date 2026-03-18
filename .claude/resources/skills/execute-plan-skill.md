@@ -189,11 +189,11 @@ Wait for user confirmation before proceeding.
 1. **Auto-switch to Plan mode** - Call `SwitchMode` tool
 2. **Present phase details** - Show scope, tasks, and approach
 3. **Wait for approval** - Get user confirmation
-4. **Select model tier** - If `model_routing` is enabled in `flow/.flowconfig` (default: `true`):
+4. **Select model tier** - If `model_routing` is enabled in `flow/.flowconfig` (default: `false` — uses the most capable session model):
    - Read the phase's complexity score
    - Look up model tier: **0-3 → Fast (haiku)**, **4-5 → Standard (sonnet)**, **6-10 → Powerful (opus)**
    - For aggregated phases, use the **highest individual phase complexity** to determine the tier
-   - If `model_routing` is `false` or key is missing, skip routing (use session model)
+   - If `model_routing` is `false` or key is missing, skip routing (use the most capable model from the active provider — e.g., opus for Anthropic, o3 for OpenAI)
    - See `.claude/resources/core/model-routing.md` for full tier table, platform mappings, and rules
 5. **Inject design context** - Before implementing, check if the discovery doc (from plan's "Based on Discovery" field) has a `## Design Context` section. If present and the phase involves UI work (see UI Phase Detection Heuristics in `.claude/resources/core/design-awareness.md`), include the Design Context in the implementation prompt. If no Design Context or phase is not UI-related, skip this step.
 6. **Implement (with phase isolation)** - Check `phase_isolation` in `flow/.flowconfig` (default: `true`):

@@ -7,7 +7,7 @@ Automatic model selection at phase boundaries during `/execute-plan`. Each phase
 
 **Scope**: `/execute-plan` only. Other skills (discovery, review, brainstorm) do not have pre-defined complexity scores and are not routed.
 
-**Config**: Controlled by `model_routing` key in `flow/.flowconfig` (default: `true`). Set `model_routing: false` to disable.
+**Config**: Controlled by `model_routing` key in `flow/.flowconfig` (default: `false`). Set `model_routing: true` to enable.
 
 ---
 
@@ -23,11 +23,15 @@ Automatic model selection at phase boundaries during `/execute-plan`. Each phase
 
 ## Platform Mappings
 
+Always use the **latest and most capable model** from each provider. Model names below are examples — always prefer the most recent version available at runtime.
+
 | Tier | Claude Code | Codex (OpenAI) | Cursor |
 |------|------------|----------------|--------|
 | Fast | `haiku` | `gpt-4.1-mini` | auto (fast) |
 | Standard | `sonnet` | `gpt-4.1` | auto (normal) |
 | Powerful | `opus` | `o3` | auto (max) |
+
+**Default model (when routing is OFF)**: Always use the most capable/recent model from the active provider — e.g., `opus` for Anthropic, `o3` for OpenAI. This is the default behavior.
 
 **Fallback rule**: If a platform doesn't support a tier, fall back to the next tier up (e.g., if no haiku equivalent, use Standard).
 
@@ -37,7 +41,7 @@ Automatic model selection at phase boundaries during `/execute-plan`. Each phase
 
 ### At Each Phase Boundary
 
-1. **Check config**: Read `model_routing` from `flow/.flowconfig`. If `false` or missing key, skip routing (use session default).
+1. **Check config**: Read `model_routing` from `flow/.flowconfig`. If `false`, missing key, or not set, skip routing (use the most capable session model — this is the default).
 2. **Read complexity**: Get the phase's complexity score from the plan file.
 3. **Look up tier**: Map score to tier using the table above.
 4. **Spawn subagent**: Use the Agent tool with `model={tier_model}` to implement the phase.
