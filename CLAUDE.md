@@ -69,7 +69,22 @@ See `.claude/resources/core/pattern-capture.md` for full rules.
 
 When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase implementation runs in an isolated Agent sub-agent with a clean context window. The sub-agent receives only the context it needs (phase spec, file list, patterns) and returns a structured JSON summary (1-2K tokens). This eliminates context rot — phase 7 has the same quality as phase 1.
 
-Planning/approval stays in the main session; only the implementation step is isolated. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for full rules.
+Planning/approval stays in the main session; only the implementation step is isolated. When combined with wave execution (`wave_execution: true`), multiple isolated sub-agents run in parallel within each wave.
+
+Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md` for full rules.
+
+### Wave-Based Parallel Execution
+
+When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into **waves**, and executes phases within each wave in parallel using Agent sub-agents. Waves are sequenced — Wave N+1 starts only after all Wave N phases complete. This can reduce total execution time by 40-60% for plans with independent phases.
+
+Features:
+- Explicit `Dependencies` metadata per phase (optional — omit for backward-compatible sequential)
+- Topological sort into waves of independent phases
+- Parallel Agent sub-agents per wave, reusing phase-isolation context template
+- File conflict detection between parallel phases
+- Deterministic git commits (sequential in phase order after each wave)
+
+Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md` for full rules.
 
 ### Discovery Sub-Agents
 
@@ -310,7 +325,11 @@ During skill execution, the LLM silently buffers patterns and anti-patterns, pre
 
 ## Phase Isolation
 
-When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
+When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-plan` phase runs in an isolated Agent sub-agent with a clean context window. Sub-agent receives focused context (phase spec, file list, patterns) and returns structured JSON summary. Eliminates context rot. When combined with wave execution, multiple isolated sub-agents run in parallel within each wave. Disable with `/flow phase_isolation=false`. See `.claude/resources/core/phase-isolation.md`.
+
+## Wave-Based Parallel Execution
+
+When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into waves, and executes in parallel. Plans with explicit `Dependencies` metadata enable parallelism; plans without it execute sequentially (backward-compatible). Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md`.
 
 ## Discovery Sub-Agents
 
