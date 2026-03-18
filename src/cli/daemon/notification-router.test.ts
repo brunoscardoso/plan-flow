@@ -123,7 +123,7 @@ describe('notification-router', () => {
     await notify(event, flowDir, webhookUrls);
 
     expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
-    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls, undefined, undefined);
   });
 
   it('should NOT send webhook notification when webhookUrls is undefined', async () => {
@@ -159,6 +159,44 @@ describe('notification-router', () => {
 
     expect(mockSendDesktopNotification).toHaveBeenCalledTimes(1);
     expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
-    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls, undefined, undefined);
+  });
+
+  it('should pass telegramBotToken and telegramChatId to sendWebhookNotification', async () => {
+    const event = makeEvent({ level: 'error', type: 'task_failed' });
+
+    await notify(event, flowDir, '', 'bot999:XYZ', '-100555');
+
+    expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, '', 'bot999:XYZ', '-100555');
+  });
+
+  it('should send webhook with both webhookUrls and Telegram fields', async () => {
+    const event = makeEvent({ level: 'error', type: 'task_failed' });
+    const webhookUrls = 'https://hooks.slack.com/services/test';
+
+    await notify(event, flowDir, webhookUrls, 'bot111:ABC', '-200');
+
+    expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls, 'bot111:ABC', '-200');
+  });
+
+  it('should work without telegram fields (backward compat)', async () => {
+    const event = makeEvent({ level: 'error', type: 'task_failed' });
+    const webhookUrls = 'https://hooks.slack.com/services/test';
+
+    await notify(event, flowDir, webhookUrls);
+
+    expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, webhookUrls, undefined, undefined);
+  });
+
+  it('should send webhook when only Telegram fields are provided (no webhookUrls)', async () => {
+    const event = makeEvent({ level: 'error', type: 'task_blocked' });
+
+    await notify(event, flowDir, undefined, 'bot999:XYZ', '-100555');
+
+    expect(mockSendWebhookNotification).toHaveBeenCalledTimes(1);
+    expect(mockSendWebhookNotification).toHaveBeenCalledWith(event, '', 'bot999:XYZ', '-100555');
   });
 });
