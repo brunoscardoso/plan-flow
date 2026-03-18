@@ -9,11 +9,13 @@ export interface FlowConfig {
   autopilot: boolean;
   commit: boolean;
   push: boolean;
+  pr: boolean;
   branch: string;
   wave_execution: boolean;
   phase_isolation: boolean;
   model_routing: boolean;
   max_verify_retries: number;
+  webhook_url: string;
 }
 
 export interface SessionState {
