@@ -23,14 +23,18 @@ function shouldNotifyDesktop(event: NotificationEvent): boolean {
 /**
  * Dispatch a notification event to all relevant channels.
  *
- * @param event       - The notification event to route
- * @param flowDir     - The flow directory (for log-writer and event-writer)
- * @param webhookUrls - Optional comma-separated webhook URLs for external notifications
+ * @param event             - The notification event to route
+ * @param flowDir           - The flow directory (for log-writer and event-writer)
+ * @param webhookUrls       - Optional comma-separated webhook URLs for external notifications
+ * @param telegramBotToken  - Optional Telegram bot token (separate field, avoids full-URL requirement)
+ * @param telegramChatId    - Optional Telegram chat ID (separate field, avoids full-URL requirement)
  */
 export async function notify(
   event: NotificationEvent,
   flowDir: string,
   webhookUrls?: string,
+  telegramBotToken?: string,
+  telegramChatId?: string,
 ): Promise<void> {
   // Always write to log and event store (run in parallel)
   await Promise.all([
@@ -43,8 +47,8 @@ export async function notify(
     sendDesktopNotification(event);
 
     // Webhook notification for the same qualifying events (fire-and-forget)
-    if (webhookUrls) {
-      sendWebhookNotification(event, webhookUrls);
+    if (webhookUrls || (telegramBotToken && telegramChatId)) {
+      sendWebhookNotification(event, webhookUrls ?? '', telegramBotToken, telegramChatId);
     }
   }
 }
