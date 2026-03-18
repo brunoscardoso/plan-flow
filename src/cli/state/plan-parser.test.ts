@@ -47,8 +47,8 @@ describe('parsePlanContent', () => {
       complexity: 3,
       dependencies: [],
       tasks: [
-        { name: 'Create project structure', verify_command: null },
-        { name: 'Add configuration files', verify_command: null },
+        { index: 1, name: 'Create project structure', verify_command: null },
+        { index: 2, name: 'Add configuration files', verify_command: null },
       ],
     });
 
@@ -58,8 +58,8 @@ describe('parsePlanContent', () => {
       complexity: 7,
       dependencies: [1],
       tasks: [
-        { name: 'Implement core logic', verify_command: 'npx tsc --noEmit src/core.ts' },
-        { name: 'Add error handling', verify_command: null },
+        { index: 1, name: 'Implement core logic', verify_command: 'npx tsc --noEmit src/core.ts' },
+        { index: 2, name: 'Add error handling', verify_command: null },
       ],
     });
 
@@ -69,7 +69,7 @@ describe('parsePlanContent', () => {
       complexity: 4,
       dependencies: [1, 2],
       tasks: [
-        { name: 'Write unit tests', verify_command: 'npx jest src/core.test.ts --no-coverage' },
+        { index: 1, name: 'Write unit tests', verify_command: 'npx jest src/core.test.ts --no-coverage' },
       ],
     });
   });
@@ -149,9 +149,9 @@ This is a plan description with no phase headers.
 
     const phases = parsePlanContent(content);
     expect(phases[0].tasks).toHaveLength(3);
-    expect(phases[0].tasks[0].verify_command).toBe('npx tsc --noEmit');
-    expect(phases[0].tasks[1].verify_command).toBeNull();
-    expect(phases[0].tasks[2].verify_command).toBe('npx jest --no-coverage');
+    expect(phases[0].tasks[0]).toEqual({ index: 1, name: 'Create module', verify_command: 'npx tsc --noEmit' });
+    expect(phases[0].tasks[1]).toEqual({ index: 2, name: 'Add exports', verify_command: null });
+    expect(phases[0].tasks[2]).toEqual({ index: 3, name: 'Write tests', verify_command: 'npx jest --no-coverage' });
   });
 
   it('should handle completed task checkboxes', () => {
@@ -165,8 +165,8 @@ This is a plan description with no phase headers.
 
     const phases = parsePlanContent(content);
     expect(phases[0].tasks).toHaveLength(2);
-    expect(phases[0].tasks[0].name).toBe('Already completed task');
-    expect(phases[0].tasks[1].name).toBe('Pending task');
+    expect(phases[0].tasks[0]).toEqual({ index: 1, name: 'Already completed task', verify_command: null });
+    expect(phases[0].tasks[1]).toEqual({ index: 2, name: 'Pending task', verify_command: null });
   });
 
   it('should parse multiple dependency references', () => {
@@ -185,6 +185,46 @@ This is a plan description with no phase headers.
 
     const phases = parsePlanContent(content);
     expect(phases[2].dependencies).toEqual([1, 2]);
+  });
+});
+
+  it('should assign 1-indexed task numbers that reset per phase', () => {
+    const content = `### Phase 1: First
+**Complexity**: 3/10
+**Dependencies**: None
+
+- [ ] Task A
+- [ ] Task B
+- [ ] Task C
+
+### Phase 2: Second
+**Complexity**: 4/10
+**Dependencies**: Phase 1
+
+- [ ] Task D
+- [ ] Task E
+`;
+
+    const phases = parsePlanContent(content);
+    expect(phases[0].tasks[0].index).toBe(1);
+    expect(phases[0].tasks[1].index).toBe(2);
+    expect(phases[0].tasks[2].index).toBe(3);
+    // Task numbering resets for Phase 2
+    expect(phases[1].tasks[0].index).toBe(1);
+    expect(phases[1].tasks[1].index).toBe(2);
+  });
+
+  it('should assign index to single-task phases', () => {
+    const content = `### Phase 1: Solo
+**Complexity**: 2/10
+**Dependencies**: None
+
+- [ ] Only task
+`;
+
+    const phases = parsePlanContent(content);
+    expect(phases[0].tasks).toHaveLength(1);
+    expect(phases[0].tasks[0].index).toBe(1);
   });
 });
 

@@ -36,7 +36,15 @@ export interface HeartbeatSummary {
   last_read_timestamp: string | null;
 }
 
+export interface TaskCompletion {
+  task_number: number;
+  task_name: string;
+  files_created: string[];
+  files_modified: string[];
+}
+
 export interface PlanTask {
+  index: number;
   name: string;
   verify_command: string | null;
 }
