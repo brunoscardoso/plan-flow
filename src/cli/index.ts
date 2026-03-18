@@ -90,4 +90,23 @@ program
     await runHeartbeat(action, options);
   });
 
+program
+  .command('state')
+  .description(
+    'Output deterministic JSON representing current plan-flow state'
+  )
+  .option(
+    '--plan <path>',
+    'Path to a plan file to include plan/wave/tier data'
+  )
+  .option(
+    '--target <dir>',
+    'Target directory (defaults to current directory)',
+    process.cwd()
+  )
+  .action(async (options: { plan?: string; target: string }) => {
+    const { runState } = await import('./commands/state.js');
+    await runState(options);
+  });
+
 program.parse();
