@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { parseFlowConfig } from '../state/flowconfig-parser.js';
 import { getSessionState } from '../state/session-state.js';
 import { getHeartbeatSummary } from '../state/heartbeat-state.js';
+import { parseStateMd } from '../state/state-md-parser.js';
 import { parsePlan } from '../state/plan-parser.js';
 import { calculateWaves } from '../state/wave-calculator.js';
 import { calculateModelTiers } from '../state/model-router.js';
@@ -26,10 +27,13 @@ export async function runState(options: {
     const session = getSessionState(flowDir);
     const heartbeat = getHeartbeatSummary(flowDir);
 
+    const execution = parseStateMd(flowDir);
+
     const output: StateOutput = {
       config,
       session,
       heartbeat,
+      ...(execution ? { execution } : {}),
     };
 
     if (options.plan) {

@@ -225,6 +225,17 @@ Run any of these to build structured understanding before or after merging.
 
 ---
 
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Review start** | Create `flow/STATE.md` with `Active Skill: review-pr`, `Active Plan: none`, `Current Phase: none`, `Current Task: reviewing PR #{number}`, `Next Action: Authenticate, fetch PR, and analyze` |
+| **Review complete** | Delete `flow/STATE.md` (skill is done, no state to preserve) |
+
+---
+
 ## Brain Capture
 
 After PR review completes, append a brain-capture block. See `.claude/resources/core/brain-capture.md` for processing rules.

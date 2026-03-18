@@ -416,6 +416,25 @@ When executing this command:
 
 ---
 
+## STATE.md Updates
+
+Update `flow/STATE.md` at these transition points to enable session resumability. Use the Edit tool for single-field updates; overwrite the file on skill start.
+
+| Transition Point | Action |
+|-----------------|--------|
+| **Plan start** | Create `flow/STATE.md` with `Active Skill: execute-plan`, `Active Plan: {plan file path}`, `Current Phase: none`, empty Decisions/Blockers/Files Modified, `Next Action: Begin phase execution` |
+| **Phase start** | Update `Current Phase: {N} — {Phase Name}`, `Current Task: first task description`, `Next Action: Implement phase {N}` |
+| **Phase complete** | Append to `Completed Phases` list: `Phase N: Name — {outcome}`, set `Current Phase: none`, `Current Task: none`, `Next Action: Begin next phase` |
+| **Decision made** | Append to `## Decisions`: `{description} (reason: {rationale})` |
+| **Blocker encountered** | Append to `## Blockers`: `{description} (status: open, tried: {what was attempted})` |
+| **Files modified** | Append new file paths to `## Files Modified` (deduplicate) |
+| **Plan complete** | Delete `flow/STATE.md` (execution is done, no state to preserve) |
+| **User cancellation** | Update `Next Action: Resume from phase {N}`, keep STATE.md intact for resumability |
+
+**Wave mode**: Update STATE.md before each wave starts (set current wave info) and after each wave completes (update completed phases for all wave phases).
+
+---
+
 ## Brain Capture
 
 After each phase completes (and after full execution), append brain-capture blocks. See `.claude/resources/core/brain-capture.md` for processing rules.

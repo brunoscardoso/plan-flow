@@ -34,6 +34,7 @@ describe('getSessionState', () => {
         heartbeat_events: false,
         heartbeat_state: false,
         heartbeat_prompt: false,
+        state_md: false,
       },
     });
   });
@@ -48,6 +49,7 @@ describe('getSessionState', () => {
     writeFileSync(join(tempDir, '.heartbeat-events.jsonl'), '');
     writeFileSync(join(tempDir, '.heartbeat-state.json'), '{}');
     writeFileSync(join(tempDir, '.heartbeat-prompt.md'), '# Prompt');
+    writeFileSync(join(tempDir, 'STATE.md'), '# Session State');
 
     const state = getSessionState(tempDir);
     expect(state).toEqual({
@@ -60,6 +62,7 @@ describe('getSessionState', () => {
         heartbeat_events: true,
         heartbeat_state: true,
         heartbeat_prompt: true,
+        state_md: true,
       },
     });
   });

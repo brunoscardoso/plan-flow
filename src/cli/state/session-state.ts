@@ -19,6 +19,7 @@ import type { SessionState } from './types.js';
  * - .heartbeat-events.jsonl
  * - .heartbeat-state.json
  * - .heartbeat-prompt.md
+ * - STATE.md
  */
 export function getSessionState(flowDir: string): SessionState {
   return {
@@ -31,6 +32,7 @@ export function getSessionState(flowDir: string): SessionState {
       heartbeat_events: existsSync(join(flowDir, '.heartbeat-events.jsonl')),
       heartbeat_state: existsSync(join(flowDir, '.heartbeat-state.json')),
       heartbeat_prompt: existsSync(join(flowDir, '.heartbeat-prompt.md')),
+      state_md: existsSync(join(flowDir, 'STATE.md')),
     },
   };
 }
