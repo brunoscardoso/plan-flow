@@ -54,6 +54,7 @@ Use this template when creating new implementation plans:
 **Dependencies**: None
 
 - [ ] Task 1
+  <verify>npx tsc --noEmit src/path/to/file.ts</verify>
 - [ ] Task 2
 
 **Build Verification**: Run `npm run build`
@@ -140,6 +141,80 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 
 ---
 
+## Verify Tag
+
+The optional `<verify>` tag allows tasks to include a verification command that runs immediately after the task completes. This enables early error detection — failures are caught per-task instead of waiting until the final build step.
+
+### Syntax
+
+Add a `<verify>` tag indented under a task checkbox:
+
+```markdown
+- [ ] Create type definitions in `/src/types/workflow.ts`
+  <verify>npx tsc --noEmit src/types/workflow.ts</verify>
+```
+
+The `<verify>` tag contains a single shell command that validates the task's output. The command should be **targeted** (single file or narrow scope) rather than a full build.
+
+### Rules
+
+1. **Optional**: Tasks without a `<verify>` tag skip verification entirely (backward compatible)
+2. **One command per tag**: Each `<verify>` tag contains exactly one shell command
+3. **Targeted checks only**: Use single-file or narrow-scope commands — never full builds
+4. **Indented under the task**: The `<verify>` tag must be indented under its parent task checkbox
+5. **No verify for manual-review tasks**: Config files, documentation, and other tasks requiring human judgment should omit `<verify>`
+
+### Examples
+
+**Task with verification:**
+
+```markdown
+- [ ] Create `UserProfile` type in `/src/types/user.ts`
+  <verify>npx tsc --noEmit src/types/user.ts</verify>
+- [ ] Write unit tests for user validation
+  <verify>npx jest src/types/__tests__/user.test.ts --no-coverage</verify>
+```
+
+**Task without verification (backward compatible):**
+
+```markdown
+- [ ] Update `.flowconfig` with new setting
+- [ ] Add documentation for the new feature
+```
+
+**Mixed phase (some tasks verified, some not):**
+
+```markdown
+### Phase 2: Backend Implementation
+
+**Scope**: Implement API routes and data layer.
+**Complexity**: 6/10
+**Dependencies**: Phase 1
+
+- [ ] Create API route handler in `/src/routes/workflow.ts`
+  <verify>npx tsc --noEmit src/routes/workflow.ts</verify>
+- [ ] Add database migration for `workflow_steps` table
+- [ ] Create service layer in `/src/services/workflow.ts`
+  <verify>npx tsc --noEmit src/services/workflow.ts</verify>
+
+**Build Verification**: Run `npm run build`
+```
+
+### Heuristic Reference
+
+When writing plans, use these heuristics to decide which tasks get `<verify>` tags:
+
+| Task Type | Verify Command | Example |
+|-----------|---------------|---------|
+| File creation (`.ts`) | `npx tsc --noEmit <file>` | `npx tsc --noEmit src/types/user.ts` |
+| Test writing | `npx jest <test-file> --no-coverage` | `npx jest src/__tests__/user.test.ts --no-coverage` |
+| Schema/type definition | `npx tsc --noEmit <type-file>` | `npx tsc --noEmit src/types/schema.ts` |
+| Config file changes | No verify (manual review) | — |
+| Documentation | No verify (manual review) | — |
+| Generic/ambiguous tasks | No verify (default) | — |
+
+---
+
 ## Phase Templates
 
 ### Types and Schemas Phase
@@ -152,7 +227,9 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 **Dependencies**: None
 
 - [ ] Create type definitions in `/src/types/`
+  <verify>npx tsc --noEmit src/types/feature.ts</verify>
 - [ ] Create Zod validation schemas in `/src/types/rest-inputs.ts`
+  <verify>npx tsc --noEmit src/types/rest-inputs.ts</verify>
 
 **Build Verification**: Run `npm run build`
 ```
@@ -167,7 +244,9 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 **Dependencies**: Phase 1
 
 - [ ] Create command in `/src/commands/`
+  <verify>npx tsc --noEmit src/commands/feature.ts</verify>
 - [ ] Create API route in `/src/app/api/`
+  <verify>npx tsc --noEmit src/app/api/feature/route.ts</verify>
 - [ ] Add database operations if needed
 
 **Build Verification**: Run `npm run build`
@@ -183,6 +262,7 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 **Dependencies**: Phase 1
 
 - [ ] Create or extend store in `/src/stores/`
+  <verify>npx tsc --noEmit src/stores/featureStore.ts</verify>
 - [ ] Add actions and selectors
 
 **Build Verification**: Run `npm run build`
@@ -198,7 +278,9 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 **Dependencies**: Phase 3
 
 - [ ] Create logic hook (`useFeatureLogic.internal.ts`)
+  <verify>npx tsc --noEmit src/components/feature/useFeatureLogic.internal.ts</verify>
 - [ ] Create view component (`index.tsx`)
+  <verify>npx tsc --noEmit src/components/feature/index.tsx</verify>
 - [ ] Follow view/logic separation pattern
 
 **Build Verification**: Run `npm run build`
@@ -230,9 +312,13 @@ In this example, Phases 2 and 3 can run in parallel (both only depend on Phase 1
 **Dependencies**: Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
 
 - [ ] Unit tests for logic hooks (`*.client.test.ts`)
+  <verify>npx jest src/components/feature/__tests__/useFeatureLogic.test.ts --no-coverage</verify>
 - [ ] Unit tests for utility functions
+  <verify>npx jest src/utils/__tests__/feature.test.ts --no-coverage</verify>
 - [ ] Integration tests for API routes
+  <verify>npx jest src/app/api/feature/__tests__/route.test.ts --no-coverage</verify>
 - [ ] Command tests
+  <verify>npx jest src/commands/__tests__/feature.test.ts --no-coverage</verify>
 
 **Build Verification**: Run `npm run build && npm run test`
 ```

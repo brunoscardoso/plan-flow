@@ -6,10 +6,10 @@
 
 ## In Progress
 
+- [ ] **Execute: per-task verification** — Executing plan (6 phases, 4 waves)
 
 ## To Do
 
-- [ ] **Per-task verification** — Each task in a plan phase includes a `<verify>` section. Run verification immediately after each task, not just at the end. Auto-diagnose failures with debug sub-agents and create repair plans.
 - [ ] **Deterministic state script** — Move config/state parsing (flowconfig, phase calculations, file checks) from LLM prompts to a Node.js script that returns JSON. Deterministic logic in code, not prompts.
 - [ ] **Unified STATE.md for session resumability** — Single file tracking decisions, blockers, current position, and active phase. Enables `/resume-work` to rebuild full context from stored files after context resets.
 - [ ] **Atomic commits per task** — Commit after each individual task within a phase (not per phase). Enables `git bisect`, independent reverts, and clearer git history. Format: `feat(phase-task): description`.

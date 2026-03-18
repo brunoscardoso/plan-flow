@@ -5,8 +5,8 @@
 
 Core rules define the foundational coding standards that apply across the entire project. These include best practices to follow (allowed patterns), anti-patterns to avoid (forbidden patterns), and complexity scoring for implementation planning.
 
-**Total Files**: 23 files, ~3920 lines
-**Reference Codes**: COR-AP-1 through COR-WAVE-5
+**Total Files**: 24 files, ~4170 lines
+**Reference Codes**: COR-AP-1 through COR-PTV-4
 
 ---
 
@@ -196,6 +196,15 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-AD-3 | Deep review mode (500+ lines) — categorization, passes, executive summary | review-adaptive-depth.md | 103-187 |
 | COR-AD-4 | Insertion points for review-code and review-pr skills | review-adaptive-depth.md | 189-205 |
 
+### Per-Task Verification (`per-task-verification.md`)
+
+| Code | Description | Source | Lines |
+|------|-------------|--------|-------|
+| COR-PTV-1 | Purpose, architecture, and verify-diagnose-repair loop flow | per-task-verification.md | 3-40 |
+| COR-PTV-2 | Verify tag syntax, parsing rules, and debug sub-agent prompt/schema | per-task-verification.md | 42-130 |
+| COR-PTV-3 | Verification loop, retry behavior, and task_verifications return field | per-task-verification.md | 132-200 |
+| COR-PTV-4 | Configuration, error handling, wave mode interaction, and rules | per-task-verification.md | 202-260 |
+
 ---
 
 ## When to Expand
@@ -271,6 +280,10 @@ Core rules define the foundational coding standards that apply across the entire
 | COR-WAVE-3 | Need parallel spawning rules or wave execution summary format |
 | COR-WAVE-4 | Need wave coordinator behavior, file conflict detection, or failure handling |
 | COR-WAVE-5 | Need wave execution configuration, interaction matrix, or aggregation rules |
+| COR-PTV-1 | Need per-task verification architecture or verify-diagnose-repair loop |
+| COR-PTV-2 | Need verify tag syntax, parsing rules, or debug sub-agent schema |
+| COR-PTV-3 | Need verification loop behavior, retry rules, or task_verifications return field |
+| COR-PTV-4 | Need per-task verification configuration, error handling, or wave mode interaction |
 
 ---
 
@@ -318,3 +331,4 @@ Core rules define the foundational coding standards that apply across the entire
 - `heartbeat.md` is loaded on-demand - scheduled task daemon configuration
 - `discovery-sub-agents.md` is loaded on-demand - parallel codebase exploration sub-agents during `/discovery-plan`
 - `wave-execution.md` is loaded on-demand - wave-based parallel phase execution during `/execute-plan`
+- `per-task-verification.md` is loaded on-demand - per-task verification with debug sub-agents during `/execute-plan`
