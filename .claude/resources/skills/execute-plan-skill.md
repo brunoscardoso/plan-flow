@@ -9,6 +9,7 @@ This skill **implements the plan** by:
 
 - Reading and parsing the plan file
 - Grouping phases by complexity
+- Analyzing dependencies and grouping into parallel waves (when enabled)
 - Switching to Plan mode for each phase
 - Implementing after user approval
 - Updating progress in the plan file
@@ -149,9 +150,41 @@ Execution Groups:
 
 ---
 
+### Step 2b: Wave Analysis (Wave Execution)
+
+**Condition**: Only run this step when `wave_execution` is `true` in `flow/.flowconfig` (default: `true`). If `wave_execution` is `false` or the key is missing, skip entirely — proceed to Step 3 with sequential grouping only.
+
+Read `.claude/resources/core/wave-execution.md` for the full system reference.
+
+1. **Parse Dependencies**: For each phase, look for a `**Dependencies**:` line:
+   - `Phase 1, Phase 3` → depends on those phases completing first
+   - `None` → explicitly independent, can run in Wave 1 (if no other constraints)
+   - Missing field → implicit dependency on Phase N-1 (Phase 1 has no implicit dependency)
+   - Self-references and references to non-existent phases are ignored (warn on non-existent)
+
+2. **Build dependency graph**: Map each phase to its dependency set (after applying defaults).
+
+3. **Topological sort → assign wave numbers**:
+   - Phases with no dependencies → Wave 1
+   - For each remaining phase: `wave = max(wave of each dependency) + 1`
+   - Tests phase exception: Move to its own final wave regardless of computed wave number
+   - On circular dependency: warn user and **fall back to sequential execution**
+
+4. **Apply aggregation to waves**: If phases within the same wave are adjacent and their combined complexity ≤ 6, aggregate them into a single sub-agent call (same aggregation rules as Step 2). Aggregated phases share one wave slot and one dependency set (union of all their dependencies).
+
+5. **Estimate speedup**: Compare number of sequential phases vs number of waves.
+
+6. **Store wave plan** for use in Steps 3 and 4.
+
+**Backward compatibility**: Plans without any `Dependencies` fields produce a fully sequential wave plan (one phase per wave). This matches existing behavior exactly — no regression.
+
+---
+
 ### Step 3: Present Execution Plan Summary
 
-Before starting, present the execution plan to the user:
+Before starting, present the execution plan to the user.
+
+**When wave execution is disabled** (or wave plan is fully sequential), present the standard summary:
 
 ```markdown
 ## Execution Plan Summary
@@ -174,6 +207,36 @@ Before starting, present the execution plan to the user:
 Ready to begin execution?
 ```
 
+**When wave execution is enabled** and the wave plan contains at least one wave with multiple phases, present the wave execution summary:
+
+```markdown
+## Execution Plan Summary
+
+**Plan**: [Plan Name]
+**Total Phases**: X
+**Total Complexity**: XX/XX
+**Execution Mode**: Wave-based parallel
+
+### Wave Execution Plan:
+
+| Wave | Phases | Parallel |
+|------|--------|----------|
+| 1 | Phase 1: Types, Phase 2: Utilities | Yes (2 parallel) |
+| 2 | Phase 3: API Integration | No (1 phase) |
+| 3 | Phase 4: Config Updates | No (1 phase) |
+| 4 | Phase 5: Tests | No (always sequential) |
+
+**Sequential phases**: 5 → **Waves**: 4 → **Estimated speedup**: ~20%
+**Build Verification**: Only at the end, after ALL phases complete
+
+Proceed with wave execution? (yes/no/sequential)
+```
+
+User response options for wave execution:
+- **yes**: Execute with wave parallelism
+- **no**: Stop execution
+- **sequential**: Fall back to sequential execution (ignore waves, use standard Step 4)
+
 Wait for user confirmation before proceeding.
 
 ---
@@ -183,6 +246,8 @@ Wait for user confirmation before proceeding.
 **CRITICAL RULE**: Use the [Plan Mode Tool](../tools/plan-mode-tool.md) to switch to Plan mode for **EACH individual phase**.
 
 **REMINDER**: Do NOT run `npm run build` between phases.
+
+#### Step 4 — Sequential Mode (default, or when wave_execution is disabled)
 
 **For Each Phase**:
 
@@ -210,6 +275,74 @@ Wait for user confirmation before proceeding.
 9. **Record model used** - Track which model tier was used for this phase (for the completion summary)
 10. **Continue to next phase** - NO BUILD between phases
 
+#### Step 4 — Wave Mode (when wave_execution is enabled and user chose "yes")
+
+Execute phases **wave by wave**. Within each wave, approve phases sequentially in Plan Mode, then spawn all wave phases as parallel Agent sub-agents.
+
+**For Each Wave**:
+
+##### 4a. Sequential Approval (Plan Mode)
+
+For each phase in the current wave (in phase number order):
+
+1. **Auto-switch to Plan mode** - Call `SwitchMode` tool
+2. **Present phase details** - Show scope, tasks, approach, and wave context (e.g., "Wave 2 of 4, running in parallel with Phase 5")
+3. **Wait for approval** - Get user confirmation
+4. **Select model tier** - Same rules as sequential mode (step 4.4 above)
+5. **Inject design context** - Same rules as sequential mode (step 4.5 above)
+
+After ALL phases in the wave are approved, proceed to parallel spawning.
+
+##### 4b. Parallel Spawning
+
+Launch all approved wave phases simultaneously as independent Agent sub-agents:
+
+1. **Prepare context for each phase**: Use the phase-isolation context template (see `.claude/resources/core/phase-isolation.md`). Key addition for wave execution: the `Files Modified in Previous Phases` section includes files from ALL completed waves (1 through N-1), not just the immediately preceding phase.
+2. **No cross-phase awareness**: Sub-agents within the same wave do NOT know about each other. They receive no information about sibling phases.
+3. **Spawn all in parallel**: Launch all wave phases simultaneously using Agent sub-agents with their respective model tiers.
+4. **Wait for all to complete**: All sub-agents must return before post-wave processing.
+
+##### 4c. Wave Coordinator — Post-Wave Processing
+
+After all sub-agents in the wave return, process results **sequentially in phase number order**:
+
+1. **Collect JSON returns**: Gather the structured JSON summary from each sub-agent
+2. **Validate JSON**: Parse each return, check for required fields (status, phase, summary, files_created, files_modified)
+3. **Detect file conflicts**: Check for `files_modified` overlap between phases in this wave:
+   - For each pair of phases (A, B) in the wave: compute `overlap = A.files_modified ∩ B.files_modified`
+   - If overlap is not empty → file conflict detected
+4. **Handle file conflicts** (if any):
+   - Present the conflicting files and which phases modified them
+   - Offer options:
+     - **(1) Accept as-is**: Last writer wins (the phase with the higher number committed last)
+     - **(2) Re-run conflicting phases sequentially**: Re-execute only the conflicting phases in order
+     - **(3) Stop execution**: Halt for manual resolution
+   - File conflicts do NOT affect non-conflicting phases — their results are preserved
+5. **Process each phase** (in phase number order):
+   - Check `status` field: `success` → continue; `failure` → present errors, ask retry/skip/stop; `partial` → present deviations, ask user
+   - Update plan file (mark tasks `[x]`)
+   - Accumulate `files_created` and `files_modified` into running list
+   - Buffer `patterns_captured` entries to `flow/resources/pending-patterns.md`
+   - Git commit if enabled (sequential, one commit per phase, in phase number order)
+   - Log `decisions` in phase completion message
+6. **Report wave completion**: Present summary of all phases in this wave
+
+##### 4d. Wave Failure Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| One phase fails, others succeed | Process successful phases normally. Present failure to user. Offer: retry failed phase, skip it, or stop. |
+| Multiple phases fail | Process any successful phases. Present all failures. Offer same options per failed phase. |
+| All phases in wave fail | Present all failures. Offer: retry wave, skip wave, or stop. |
+| Sub-agent timeout | Treat as failure for that phase. Other phases unaffected. |
+| Invalid JSON return | Treat as failure for that phase. |
+
+**Key rule**: A failed phase in a wave does NOT cancel other phases in the same wave. Parallel phases are independent — let them all complete.
+
+##### 4e. Continue to Next Wave
+
+After post-wave processing is complete (all commits done, failures handled), proceed to the next wave. Repeat from Step 4a.
+
 **Phase Presentation Template**:
 
 ```markdown
@@ -218,6 +351,8 @@ Wait for user confirmation before proceeding.
 **Complexity**: X/10
 **Scope**: [Phase scope description]
 **Design Context**: Available / Not applicable
+**Wave**: [Wave N of M] / [Sequential]
+**Parallel with**: [Phase Y, Phase Z] / [None]
 
 ### Tasks to Complete:
 - [ ] Task 1
@@ -251,6 +386,8 @@ Mark completed tasks in the plan file:
 
 Then continue to the next phase (NO BUILD HERE).
 
+**Note**: In wave mode, progress updates happen during post-wave processing (Step 4c.5) rather than after each individual phase spawn. The coordinator handles updates sequentially in phase order after all wave sub-agents return.
+
 ---
 
 ### Step 5b: Phase-Boundary Context Check
@@ -262,16 +399,19 @@ Then continue to the next phase (NO BUILD HERE).
 - Multiple phases completed and more remain
 - You're about to start a complex phase (complexity >= 6)
 
+**In wave mode**: Compact at **wave boundaries** (between waves), not between phases within a wave. Include wave progress in the compact summary.
+
 **How to compact at a phase boundary**:
 
 Run `/compact` with instructions that preserve execution state:
 
 ```
-/compact Executing plan: [plan file path]. Completed phases: [list]. Next phase: [name and scope]. Key files modified: [list]. Active tasklist items: [list from flow/tasklist.md]. Resume execution from phase [N].
+/compact Executing plan: [plan file path]. Completed phases: [list]. Completed waves: [N of M]. Next wave: [wave N, phases: list]. Key files modified: [list]. Active tasklist items: [list from flow/tasklist.md]. Resume execution from wave [N] / phase [N].
 ```
 
 **Rules**:
 - NEVER compact mid-phase — only at phase boundaries (between phases)
+- In wave mode, NEVER compact mid-wave — only at wave boundaries (between waves)
 - Always include enough context in the compact instructions to resume
 - After compaction, re-read the plan file and continue from the next phase
 - In autopilot mode, compact automatically without asking — this is a maintenance action, not a user decision
@@ -290,6 +430,8 @@ The Tests phase is **always executed separately**, regardless of complexity scor
 4. Get user approval
 5. Implement tests
 6. **DO NOT run tests yet** - Continue to Step 7
+
+**Wave mode note**: The tests phase always runs alone in its own final wave. This is enforced during wave analysis (Step 2b.3) — the tests phase is moved to a dedicated final wave regardless of its computed wave number.
 
 ---
 
@@ -323,7 +465,9 @@ npm run build && npm run test
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes
 
-3. **Present summary** of completed work, including model routing info if enabled:
+3. **Present summary** of completed work, including model routing and wave execution info if enabled:
+
+**Sequential mode summary**:
 
 ```markdown
 | Phase | Complexity | Model | Status |
@@ -332,6 +476,27 @@ npm run build && npm run test
 | 2. Core logic | 5/10 | sonnet | Done |
 | 3. Integration | 7/10 | opus | Done |
 | 4. Tests | 4/10 | sonnet | Done |
+
+**Model routing**: Saved ~X% vs all-opus execution
+```
+
+**Wave mode summary** (when wave execution was used):
+
+```markdown
+| Wave | Phases | Parallel | Status |
+|------|--------|----------|--------|
+| 1 | Phase 1: Types (haiku), Phase 2: Utilities (haiku) | Yes (2 parallel) | Done |
+| 2 | Phase 3: API Integration (opus) | No | Done |
+| 3 | Phase 4: Config Updates (sonnet) | No | Done |
+| 4 | Phase 5: Tests (sonnet) | No | Done |
+
+**Wave execution stats**:
+- Sequential phases: 5
+- Waves executed: 4
+- Parallel phases: 2 (in Wave 1)
+- File conflicts: 0
+- Failed phases: 0
+- Estimated speedup: ~20%
 
 **Model routing**: Saved ~X% vs all-opus execution
 ```
@@ -347,6 +512,8 @@ mv flow/plans/plan_feature_name_v1.md flow/archive/
 ---
 
 ## Execution Flow Within a Group
+
+### Sequential Mode
 
 ```
 Group 1: Phase 1 + Phase 2 (combined complexity: 5)
@@ -364,6 +531,35 @@ Group 1: Phase 1 + Phase 2 (combined complexity: 5)
 +-- Update Phase 2 progress in plan file
 |
 +-- Continue to next group (NO BUILD HERE)
+```
+
+### Wave Mode
+
+```
+Wave 1: Phase 1 + Phase 2 (parallel, no dependencies)
+|
++-- APPROVAL PHASE (sequential):
+|   +-- AUTO-SWITCH to Plan Mode for Phase 1
+|   +-- Present Phase 1 details (Wave 1 of 4, parallel with Phase 2)
+|   +-- Get user approval
+|   |
+|   +-- AUTO-SWITCH to Plan Mode for Phase 2
+|   +-- Present Phase 2 details (Wave 1 of 4, parallel with Phase 1)
+|   +-- Get user approval
+|
++-- EXECUTION PHASE (parallel):
+|   +-- Spawn Agent: Phase 1 (model: haiku)  ──┐
+|   +-- Spawn Agent: Phase 2 (model: haiku)  ──┤ (running simultaneously)
+|   +-- Wait for all to return               ──┘
+|
++-- POST-WAVE PROCESSING (sequential):
+|   +-- Collect JSON returns
+|   +-- Check for file conflicts
+|   +-- Process Phase 1 result → update plan → git commit
+|   +-- Process Phase 2 result → update plan → git commit
+|   +-- Report wave completion
+|
++-- Continue to Wave 2 (NO BUILD HERE)
 ```
 
 ---
@@ -429,6 +625,8 @@ If the user wants to stop execution:
 3. The plan can be resumed later from the last completed phase
 4. When resuming, run build verification first
 
+**Wave mode cancellation**: If cancelled mid-wave, all running sub-agents complete (cannot be interrupted), but their results are discarded. Progress is saved up to the last fully completed wave.
+
 ---
 
 ## Summary of Key Rules
@@ -438,8 +636,13 @@ If the user wants to stop execution:
 | **Auto-switch to Plan mode** | Switch immediately for each phase, no asking                |
 | **Build ONLY at end**        | `npm run build && npm run test` runs once, after ALL phases |
 | **No intermediate builds**   | Never run build between phases or groups                    |
-| **Tests phase separate**     | Always execute Tests phase individually                     |
+| **Tests phase separate**     | Always execute Tests phase individually, in its own final wave |
 | **Update progress**          | Mark tasks complete in plan file after each phase           |
+| **Wave fallback**            | When wave_execution disabled or all phases dependent, execute sequentially (no behavior change) |
+| **Approve then spawn**       | In wave mode, approve ALL wave phases before spawning any   |
+| **Deterministic commits**    | Git commits happen sequentially in phase order after wave completes |
+| **Failures are isolated**    | One failed phase does not cancel sibling phases in the same wave |
+| **File conflicts presented** | Never silently resolve file conflicts, always ask the user  |
 
 ---
 
@@ -449,6 +652,8 @@ If the user wants to stop execution:
 | ------------------------------------------- | -------------------------------- |
 | `.claude/resources/patterns/plans-patterns.md` | Plan patterns and rules          |
 | `.claude/resources/core/complexity-scoring.md`  | Complexity scoring system        |
+| `.claude/resources/core/wave-execution.md`  | Wave-based parallel execution system |
+| `.claude/resources/core/phase-isolation.md` | Phase isolation and sub-agent spawning |
 | `.claude/resources/tools/plan-mode-tool.md` | Plan mode switching instructions |
 | `flow/plans/`                               | Input plan documents             |
 | `flow/archive/`                             | Completed plans destination      |
