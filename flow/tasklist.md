@@ -4,14 +4,20 @@
 **Created**: 2026-03-11
 **Last Updated**: 2026-03-18
 
+
 ## In Progress
 
 
 ## To Do
-- [ ] **Atomic commits per task** — Commit after each individual task within a phase (not per phase). Enables `git bisect`, independent reverts, and clearer git history. Format: `feat(phase-task): description`.
+
 
 ## Done
 
+- [x] **Webhook notifications (Telegram/Discord/Slack)** — Webhook URL config, platform auto-detection, per-platform formatting (Telegram markdown, Discord embeds, Slack blocks), fire-and-forget HTTP dispatch via native fetch (2026-03-18)
+
+- [x] **Auto-PR on task completion** — Add `pr=true|false` setting to `.flowconfig` (default: false). When enabled, after `/execute-plan` completes (build+test pass), automatically create a feature branch and open a PR via `gh pr create`. (2026-03-18)
+
+- [x] **Atomic commits per task** — Commit after each individual task within a phase (not per phase). Enables `git bisect`, independent reverts, and clearer git history. Format: `feat(phase-task): description`. (2026-03-18)
 - [x] **Unified STATE.md for session resumability** — Single file tracking decisions, blockers, current position, and active phase. Enables `/resume-work` to rebuild full context from stored files after context resets. (2026-03-18)
 - [x] **Deterministic state script** — Move config/state parsing (flowconfig, phase calculations, file checks) from LLM prompts to a Node.js script that returns JSON. Deterministic logic in code, not prompts. (2026-03-18)
 - [x] **Per-task verification** — Per-task `<verify>` tags in plan phases with debug sub-agents for auto-diagnosis and repair (2026-03-18)
