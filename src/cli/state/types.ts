@@ -15,9 +15,6 @@ export interface FlowConfig {
   phase_isolation: boolean;
   model_routing: boolean;
   max_verify_retries: number;
-  webhook_url: string;
-  telegram_bot_token: string;
-  telegram_chat_id: string;
 }
 
 export interface SessionState {

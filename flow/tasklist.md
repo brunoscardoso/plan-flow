@@ -5,14 +5,19 @@
 **Last Updated**: 2026-03-18
 
 
+
 ## In Progress
 
 
 ## To Do
 
-- [ ] **Two-way Telegram conversation via adaptive polling** — Add `getUpdates` polling to the heartbeat daemon with two modes: idle (every 60s) and conversation (every 3-5s). When a task blocks and sends a Telegram prompt, user replies directly in Telegram. Daemon detects reply, processes it, sends response back — enabling ping-pong conversation. After 2-3 min of silence, drops back to idle polling. Matches replies to pending prompts, writes to `flow/.heartbeat-prompt.md`, resumes blocked tasks. Also refactor Telegram config in `.flowconfig` from embedded URL to separate fields (`telegram_bot_token`, `telegram_chat_id`) so both `sendMessage` and `getUpdates` can be called cleanly. Keep `webhook_url` for Discord/Slack (generic webhooks). Update `/flow` command, daemon, webhook-sender, and docs. No webhook server needed. Complexity ~5/10.
-
 ## Done
+
+- [x] **Telegram typing indicator** — sendChatAction keepalive loop (4s), TTL safety net (5 min), try/finally cleanup, 428 tests passing (2026-03-19)
+- [x] **Test blocked-task Telegram flow** — One-shot test task with exit code 2 to verify prompt → Telegram → reply → resume flow (2026-03-19)
+
+- [x] **Two-way Telegram conversation via adaptive polling** — Add `getUpdates` polling to the heartbeat daemon with two modes: idle (every 60s) and conversation (every 3-5s). Refactored Telegram config to separate `telegram_bot_token` and `telegram_chat_id` fields. Auto-migration from embedded URL. 417 tests passing. (2026-03-18)
+
 
 - [x] **Webhook notifications (Telegram/Discord/Slack)** — Webhook URL config, platform auto-detection, per-platform formatting (Telegram markdown, Discord embeds, Slack blocks), fire-and-forget HTTP dispatch via native fetch (2026-03-18)
 

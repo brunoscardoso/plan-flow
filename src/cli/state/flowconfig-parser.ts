@@ -20,9 +20,6 @@ const DEFAULT_CONFIG: FlowConfig = {
   phase_isolation: true,
   model_routing: false,
   max_verify_retries: 2,
-  webhook_url: '',
-  telegram_bot_token: '',
-  telegram_chat_id: '',
 };
 
 const MIN_VERIFY_RETRIES = 1;
@@ -156,26 +153,6 @@ export function parseFlowConfig(flowDir: string): FlowConfig {
 
   const modelRouting = extractBoolean(content, 'model_routing');
   if (modelRouting !== undefined) config.model_routing = modelRouting;
-
-  const webhookUrl = extractString(content, 'webhook_url');
-  if (webhookUrl !== undefined) config.webhook_url = webhookUrl;
-
-  const telegramBotToken = extractString(content, 'telegram_bot_token');
-  if (telegramBotToken !== undefined) config.telegram_bot_token = telegramBotToken;
-
-  const telegramChatId = extractString(content, 'telegram_chat_id');
-  if (telegramChatId !== undefined) config.telegram_chat_id = telegramChatId;
-
-  // Auto-migrate: extract Telegram credentials from webhook_url if separate fields are empty
-  if (!config.telegram_bot_token && config.webhook_url) {
-    const telegramUrlMatch = config.webhook_url.match(
-      /https?:\/\/api\.telegram\.org\/bot([^/]+)\/sendMessage\?chat_id=(-?\d+)/
-    );
-    if (telegramUrlMatch) {
-      config.telegram_bot_token = telegramUrlMatch[1];
-      config.telegram_chat_id = telegramUrlMatch[2];
-    }
-  }
 
   const maxVerifyRetries = extractNumber(content, 'max_verify_retries');
   if (maxVerifyRetries !== undefined) {

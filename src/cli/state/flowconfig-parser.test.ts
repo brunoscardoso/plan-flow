@@ -34,9 +34,6 @@ describe('parseFlowConfig', () => {
       phase_isolation: true,
       model_routing: false,
       max_verify_retries: 2,
-      webhook_url: '',
-      telegram_bot_token: '',
-      telegram_chat_id: '',
     });
   });
 
@@ -67,9 +64,6 @@ describe('parseFlowConfig', () => {
       phase_isolation: false,
       model_routing: true,
       max_verify_retries: 4,
-      webhook_url: '',
-      telegram_bot_token: '',
-      telegram_chat_id: '',
     });
   });
 
@@ -231,124 +225,4 @@ describe('parseFlowConfig', () => {
     expect(config.commit).toBe(false);
   });
 
-  it('should return empty string for webhook_url by default', () => {
-    const config = parseFlowConfig(tempDir);
-    expect(config.webhook_url).toBe('');
-  });
-
-  it('should parse a single webhook_url from .flowconfig', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'webhook_url: https://hooks.slack.com/services/T00/B00/xxx\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.webhook_url).toBe('https://hooks.slack.com/services/T00/B00/xxx');
-  });
-
-  it('should parse comma-separated webhook URLs from .flowconfig', () => {
-    const urls = 'https://hooks.slack.com/services/T00/B00/xxx,https://discord.com/api/webhooks/123/abc';
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      `webhook_url: ${urls}\n`,
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.webhook_url).toBe(urls);
-  });
-
-  it('should return empty webhook_url when key is missing from .flowconfig', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'autopilot: true\ncommit: false\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.webhook_url).toBe('');
-  });
-
-  // --- Telegram polling fields ---
-
-  it('should parse telegram_bot_token from .flowconfig', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'telegram_bot_token: 123456:ABC-DEF\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('123456:ABC-DEF');
-  });
-
-  it('should parse telegram_chat_id from .flowconfig', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'telegram_chat_id: -100987654\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_chat_id).toBe('-100987654');
-  });
-
-  it('should return empty strings for telegram fields when not in config', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'autopilot: false\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('');
-    expect(config.telegram_chat_id).toBe('');
-  });
-
-  it('should return empty telegram fields when no .flowconfig exists', () => {
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('');
-    expect(config.telegram_chat_id).toBe('');
-  });
-
-  it('should auto-migrate: extract bot token from Telegram webhook_url', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'webhook_url: https://api.telegram.org/bot123456:ABC-DEF/sendMessage?chat_id=-100999\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('123456:ABC-DEF');
-  });
-
-  it('should auto-migrate: extract chat_id from Telegram webhook_url query params', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'webhook_url: https://api.telegram.org/bot123456:ABC-DEF/sendMessage?chat_id=-100999\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_chat_id).toBe('-100999');
-  });
-
-  it('should auto-migrate: NOT overwrite explicitly set telegram_bot_token', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      [
-        'webhook_url: https://api.telegram.org/botOLD:TOKEN/sendMessage?chat_id=-111',
-        'telegram_bot_token: EXPLICIT:TOKEN',
-        'telegram_chat_id: -222',
-      ].join('\n'),
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('EXPLICIT:TOKEN');
-    expect(config.telegram_chat_id).toBe('-222');
-  });
-
-  it('should NOT auto-migrate from non-Telegram webhook_url', () => {
-    writeFileSync(
-      join(tempDir, '.flowconfig'),
-      'webhook_url: https://hooks.slack.com/services/T00/B00/xxx\n',
-    );
-
-    const config = parseFlowConfig(tempDir);
-    expect(config.telegram_bot_token).toBe('');
-    expect(config.telegram_chat_id).toBe('');
-  });
 });

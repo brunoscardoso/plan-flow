@@ -13,10 +13,6 @@ import { randomUUID } from 'node:crypto';
 import { parseHeartbeatFile } from './heartbeat-parser.js';
 import { notify } from './notification-router.js';
 import { writePrompt } from './prompt-manager.js';
-import { TelegramPoller } from './telegram-poller.js';
-import { parseFlowConfig } from '../state/flowconfig-parser.js';
-import { detectPlatform } from './webhook-sender.js';
-import { startTyping } from './telegram-typing.js';
 import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
@@ -26,10 +22,6 @@ const logPath = join(target, 'flow', '.heartbeat.log');
 
 const activeTimers: NodeJS.Timeout[] = [];
 let taskRunning = false;
-let webhookUrls: string | undefined;
-let poller: TelegramPoller | null = null;
-let telegramBotToken: string | undefined;
-let telegramChatId: string | undefined;
 
 const ACTIVE_SESSION_ERROR = 'cannot be launched inside another Claude Code session';
 const MAX_RETRIES = 5;
@@ -105,7 +97,6 @@ function truncateLog(): void {
 }
 
 function clearTimers(): void {
-  poller?.stop();
   for (const timer of activeTimers) {
     clearTimeout(timer);
     clearInterval(timer);
@@ -159,13 +150,13 @@ function executeTask(task: HeartbeatTask): void {
   taskRunning = true;
   log(`Executing "${task.name}": ${task.command}`);
 
+  // Snapshot prompt file state before task runs
+  const promptExistedBefore = existsSync(join(flowDir, '.heartbeat-prompt.md'));
+
   // Emit task_started notification (fire-and-forget)
   void notify(
     createEvent(task, 'task_started', 'info', `Starting task: ${task.name}`),
     flowDir,
-    webhookUrls,
-    telegramBotToken,
-    telegramChatId,
   );
 
   // Strip CLAUDECODE env var to avoid "nested session" detection.
@@ -195,9 +186,6 @@ function executeTask(task: HeartbeatTask): void {
     env: cleanEnv,
   });
 
-  // Show typing indicator while the task runs
-  const typingHandle = startTyping(telegramBotToken, telegramChatId);
-
   let stdout = '';
   let stderr = '';
 
@@ -210,23 +198,31 @@ function executeTask(task: HeartbeatTask): void {
   });
 
   child.on('close', (code: number | null) => {
-    typingHandle.stop();
     taskRunning = false;
     const outputTail = tailLines(stdout, TAIL_LINES);
     const errorTail = tailLines(stderr, TAIL_LINES);
 
     if (code === 0) {
-      log(`Task "${task.name}" completed successfully`);
       retryCountMap.delete(task.name);
 
-      // Emit task_complete notification (fire-and-forget)
-      void notify(
-        createEvent(task, 'task_complete', 'info', `Task completed: ${task.name}`),
-        flowDir,
-        webhookUrls,
-        telegramBotToken,
-        telegramChatId,
-      );
+      // Check if the task created a NEW prompt file (blocked via file, not exit code)
+      const promptPath = join(flowDir, '.heartbeat-prompt.md');
+      if (!promptExistedBefore && existsSync(promptPath)) {
+        log(`Task "${task.name}" completed but created prompt file — treating as blocked`);
+
+        void notify(
+          createEvent(task, 'task_blocked', 'error', `Task needs input: ${task.name}`),
+          flowDir,
+        );
+      } else {
+        log(`Task "${task.name}" completed successfully`);
+
+        // Emit task_complete notification (fire-and-forget)
+        void notify(
+          createEvent(task, 'task_complete', 'info', `Task completed: ${task.name}`),
+          flowDir,
+        );
+      }
 
       if (task.oneShot) {
         disableOneShotTask(task.name);
@@ -247,14 +243,10 @@ function executeTask(task: HeartbeatTask): void {
           `Task blocked (needs input): ${task.name}${isAutopilot ? ' [autopilot ON]' : ''}`,
         ),
         flowDir,
-        webhookUrls,
-        telegramBotToken,
-        telegramChatId,
       );
 
       if (!isAutopilot) {
         void writePrompt(task.name, outputTail, errorTail, flowDir);
-        poller?.enterConversationMode();
         log(`  prompt written to flow/${'.heartbeat-prompt.md'} — waiting for human input`);
       } else {
         log(`  Autopilot ON — skipping prompt, continuing`);
@@ -275,16 +267,12 @@ function executeTask(task: HeartbeatTask): void {
           `Task failed (exit ${code}): ${task.name}${errorTail ? '\n' + errorTail.slice(0, 300) : ''}`,
         ),
         flowDir,
-        webhookUrls,
-        telegramBotToken,
-        telegramChatId,
       );
     }
     if (stdout) log(`  output: ${stdout.slice(0, 500)}`);
   });
 
   child.on('error', (err: Error) => {
-    typingHandle.stop();
     taskRunning = false;
     log(`Task "${task.name}" error: ${err.message}`);
 
@@ -292,9 +280,6 @@ function executeTask(task: HeartbeatTask): void {
     void notify(
       createEvent(task, 'task_failed', 'error', `Task spawn error: ${task.name} — ${err.message}`),
       flowDir,
-      webhookUrls,
-      telegramBotToken,
-      telegramChatId,
     );
   });
 }
@@ -374,31 +359,6 @@ function scheduleTask(task: HeartbeatTask): void {
 function loadAndSchedule(): void {
   clearTimers();
 
-  // Read config from flowconfig once per reload
-  const flowConfig = parseFlowConfig(flowDir);
-  telegramBotToken = flowConfig.telegram_bot_token || undefined;
-  telegramChatId = flowConfig.telegram_chat_id || undefined;
-
-  // Filter Telegram URLs from webhook_url when separate Telegram config exists
-  // to avoid duplicate sends (webhook-sender handles separate fields directly)
-  let rawWebhookUrls = flowConfig.webhook_url || '';
-  if (telegramBotToken && telegramChatId && rawWebhookUrls) {
-    rawWebhookUrls = rawWebhookUrls
-      .split(',')
-      .map((u) => u.trim())
-      .filter((u) => u && detectPlatform(u) !== 'telegram')
-      .join(',');
-  }
-  webhookUrls = rawWebhookUrls || undefined;
-
-  // Start/restart Telegram poller if configured
-  if (telegramBotToken && telegramChatId) {
-    poller = new TelegramPoller(telegramBotToken, telegramChatId, flowDir);
-    poller.start();
-  } else {
-    poller = null;
-  }
-
   if (!existsSync(heartbeatPath)) {
     log('No heartbeat.md found');
     return;
@@ -416,7 +376,6 @@ function loadAndSchedule(): void {
 
 function cleanup(): void {
   log('Daemon shutting down');
-  poller?.stop();
   clearTimers();
 
   try {
