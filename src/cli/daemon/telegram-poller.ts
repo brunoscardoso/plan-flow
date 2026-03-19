@@ -14,6 +14,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { writePrompt } from './prompt-manager.js';
+import { startTyping } from './telegram-typing.js';
 import type { TelegramPollState } from '../types.js';
 
 const IDLE_INTERVAL_MS = 60_000;
@@ -133,6 +134,7 @@ export class TelegramPoller {
       return;
     }
 
+    const typingHandle = startTyping(this.botToken, this.chatId);
     try {
       // Write the reply as a prompt file for the daemon to pick up
       await writePrompt(
@@ -146,6 +148,8 @@ export class TelegramPoller {
       this.sendReply(`Received: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"`);
     } catch (error) {
       console.error('Telegram processUpdate failed (non-fatal):', error);
+    } finally {
+      typingHandle.stop();
     }
   }
 

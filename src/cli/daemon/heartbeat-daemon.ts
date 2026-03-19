@@ -16,6 +16,7 @@ import { writePrompt } from './prompt-manager.js';
 import { TelegramPoller } from './telegram-poller.js';
 import { parseFlowConfig } from '../state/flowconfig-parser.js';
 import { detectPlatform } from './webhook-sender.js';
+import { startTyping } from './telegram-typing.js';
 import type { HeartbeatTask, NotificationEvent, NotificationLevel, NotificationType, ScheduleConfig } from '../types.js';
 
 const target = process.argv[2] || process.cwd();
@@ -194,6 +195,9 @@ function executeTask(task: HeartbeatTask): void {
     env: cleanEnv,
   });
 
+  // Show typing indicator while the task runs
+  const typingHandle = startTyping(telegramBotToken, telegramChatId);
+
   let stdout = '';
   let stderr = '';
 
@@ -206,6 +210,7 @@ function executeTask(task: HeartbeatTask): void {
   });
 
   child.on('close', (code: number | null) => {
+    typingHandle.stop();
     taskRunning = false;
     const outputTail = tailLines(stdout, TAIL_LINES);
     const errorTail = tailLines(stderr, TAIL_LINES);
@@ -279,6 +284,7 @@ function executeTask(task: HeartbeatTask): void {
   });
 
   child.on('error', (err: Error) => {
+    typingHandle.stop();
     taskRunning = false;
     log(`Task "${task.name}" error: ${err.message}`);
 
