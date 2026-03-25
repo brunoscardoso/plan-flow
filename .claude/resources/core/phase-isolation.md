@@ -108,6 +108,20 @@ Read these files before implementing:
 {Only if UI phase — include design tokens from discovery doc}
 {Otherwise omit this section entirely}
 
+## Shared Context from Sibling Phases
+
+{Only included for multi-phase waves. Omitted for single-phase waves and sequential execution.}
+
+The following contracts, decisions, and progress updates were emitted by other phases running in parallel with yours. Use these to inform your implementation:
+
+{Injected context entries as formatted text}
+
+**Instructions**:
+- Before each task, review shared context entries for relevant contracts or decisions
+- If a sibling phase defined an API endpoint you consume, match its signature exactly
+- If a sibling phase made an architectural decision, follow it for consistency
+- If you define a new API endpoint, type interface, or make an architectural decision, include it in your `context_entries` return array
+
 ## Commit Instructions
 {Only include this section when `commit: true` in `.flowconfig`}
 
@@ -156,6 +170,21 @@ When spawning sub-agents within a wave, the context template is **identical** to
 - **`Files Modified in Previous Phases`**: Include files from ALL completed waves (Wave 1 through Wave N-1), not just the immediately preceding phase. This gives each sub-agent awareness of everything that changed before the current wave.
 
 Sub-agents within the same wave do NOT receive information about each other — no cross-phase awareness. Each sub-agent operates as if it is the only phase running.
+
+**Exception**: When shared context is available from sibling phases (via `.wave-context.jsonl`), the coordinator injects a "Shared Context from Sibling Phases" section into the context template. See below for details.
+
+### Shared Context Injection
+
+**When shared context is injected**:
+- Multi-phase waves only (2+ phases in the same wave)
+- Coordinator reads `.wave-context.jsonl` before spawning each sub-agent
+- Entries from OTHER phases in the wave are injected (not the agent's own)
+- Single-phase waves and sequential mode: section is omitted entirely
+
+**When to emit context entries**:
+- After implementing a task that creates or modifies an API endpoint, type interface, function signature, or makes an architectural decision
+- Include in the `context_entries` array of your JSON return
+- Format as ContextEntry objects (see `shared-context.md` COR-SC-2 for schema)
 
 ---
 
@@ -221,6 +250,20 @@ The sub-agent must return a JSON object with this structure:
       "files_created": ["src/middleware/rate-limit.ts"],
       "files_modified": ["src/api/routes.ts"]
     }
+  ],
+  "context_entries": [
+    {
+      "agent": "phase-N",
+      "type": "contract",
+      "timestamp": "ISO8601",
+      "data": { "name": "GET /users", "kind": "endpoint", "signature": "GET /users → { id, name, email }", "fields": ["id", "name", "email"] }
+    },
+    {
+      "agent": "phase-N",
+      "type": "decision",
+      "timestamp": "ISO8601",
+      "data": { "choice": "Using Redis for session caching", "reason": "Low latency requirement" }
+    }
   ]
 }
 ```
@@ -240,6 +283,7 @@ The sub-agent must return a JSON object with this structure:
 | `patterns_captured` | object[] | No | Patterns observed during implementation |
 | `task_verifications` | object[] | No | Array of per-task verification results. Only present when at least one task had a `<verify>` tag. Each entry contains: `task` (string), `verify_command` (string), `status` (`"pass" \| "fail"`), `attempts` (number), `repairs_applied` (string[]), and optionally `last_diagnosis` (object, only when status is `"fail"`). See `.claude/resources/core/per-task-verification.md` for full schema. |
 | `tasks_completed` | object[] | No | Array of per-task file tracking for atomic commits. Each entry: `task_number` (number, 1-indexed within phase), `task_name` (string), `files_created` (string[]), `files_modified` (string[]). Present when any tasks ran. Used by coordinator for per-task commit messages. See `.claude/resources/core/atomic-commits.md` for full schema. |
+| `context_entries` | object[] | No | Array of context entries emitted by this phase for sibling phases. Each entry: `agent` (string, e.g. "phase-3"), `type` (`"contract" \| "decision" \| "progress"`), `timestamp` (ISO8601 string), `data` (object with type-specific fields). Only relevant in multi-phase waves. See `.claude/resources/core/shared-context.md` COR-SC-2 for full schema. |
 
 ### Failure Return Example
 
@@ -392,7 +436,7 @@ Phase isolation is the **foundation** for wave execution — wave mode spawns mu
 5. **Never auto-retry** — on failure, present to user and ask
 6. **Pass paths, not content** — give file paths, sub-agent reads them
 7. **Each phase gets own sub-agent** — even in wave mode, phases are never merged into one sub-agent (except for aggregated phases per complexity rules)
-8. **No cross-wave awareness** — sub-agents in the same wave know nothing about each other
+8. **No cross-wave awareness** — sub-agents in the same wave know nothing about each other unless shared context entries are injected from `.wave-context.jsonl`
 9. **Deterministic processing** — wave results are always processed in phase number order
 10. **Collect before commit** — in wave mode, all JSON returns are collected before any commits happen
 11. **Verification is internal** — per-task verification loops run inside the phase sub-agent; the coordinator sees only the final `task_verifications` results
@@ -407,4 +451,5 @@ Phase isolation is the **foundation** for wave execution — wave mode spawns mu
 | `.claude/resources/core/model-routing.md` | Model tier selection per phase complexity |
 | `.claude/resources/core/discovery-sub-agents.md` | Parallel spawning pattern reference |
 | `.claude/resources/core/per-task-verification.md` | Per-task verification system, debug sub-agent, and repair loops |
+| `.claude/resources/core/shared-context.md` | Shared context schema, JSONL format, and coordinator injection rules |
 | `.claude/resources/skills/execute-plan-skill.md` | Execute-plan skill with wave integration (Steps 2b, 3, 4) |

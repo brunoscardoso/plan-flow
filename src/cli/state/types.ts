@@ -63,6 +63,39 @@ export interface WaveGroup {
   phase_numbers: number[];
 }
 
+export type ContextEntryType = 'contract' | 'decision' | 'progress';
+export type ContractKind = 'endpoint' | 'interface' | 'function' | 'type';
+
+export interface ContractData {
+  name: string;
+  kind: ContractKind;
+  signature: string;
+  fields?: string[];
+}
+
+export interface DecisionData {
+  choice: string;
+  reason?: string;
+}
+
+export interface ProgressData {
+  task: number;
+  status: 'complete' | 'in-progress';
+  summary?: string;
+}
+
+export interface ContextEntry {
+  agent: string;
+  type: ContextEntryType;
+  timestamp: string;
+  data: ContractData | DecisionData | ProgressData;
+}
+
+export interface ContractConflict {
+  name: string;
+  entries: { agent: string; signature: string; fields?: string[] }[];
+}
+
 export type ModelTierLevel = 'fast' | 'standard' | 'powerful';
 
 export interface ModelTier {

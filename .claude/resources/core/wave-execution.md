@@ -24,19 +24,24 @@ Coordinator (main session)
     │   │
     │   ├─ Sequential: Approve each phase in Plan Mode
     │   │
+    │   ├─ Create shared context file (flow/.wave-context.jsonl)
+    │   │
     │   ├─ Parallel: Spawn Agent sub-agents for all wave phases
     │   │   ├─► Agent: Phase A  (model: [tier from model routing])
     │   │   ├─► Agent: Phase B  (model: [tier from model routing])
     │   │   └─► Agent: Phase C  (model: [tier from model routing])
+    │   │   (agents read/append to .wave-context.jsonl during execution)
     │   │
     │   ├─ Collect JSON returns from all sub-agents
     │   │
     │   ├─ Post-wave processing:
     │   │   ├─ Detect file conflicts (files_modified overlap)
+    │   │   ├─ Detect contract conflicts (same name, different signatures)
     │   │   ├─ Accumulate files_modified list
     │   │   ├─ Buffer patterns from all phases
     │   │   ├─ Git commit per-task (iterate tasks within each phase, in phase order)
-    │   │   └─ Handle failures (present to user)
+    │   │   ├─ Handle failures (present to user)
+    │   │   └─ Delete .wave-context.jsonl (clean slate for next wave)
     │   │
     │   └─ Next Wave...
     │
@@ -44,6 +49,56 @@ Coordinator (main session)
 ```
 
 Planning and user approval always happen **sequentially** in the main session. Only **implementation** is parallelized within waves.
+
+---
+
+## Shared Context
+
+### Overview
+
+During wave execution, parallel phases share a context file (`flow/.wave-context.jsonl`) that enables real-time coordination. Agents share API contracts, architectural decisions, and progress status via append-only JSONL entries. Before each task, sub-agents receive shared context from sibling phases, preventing broken contracts and duplicate decisions.
+
+### Lifecycle
+
+1. **Wave start**: Coordinator creates `flow/.wave-context.jsonl` (empty file) before spawning sub-agents
+2. **During execution**: Sub-agents append entries as they make decisions, define contracts, or complete tasks
+3. **Before each task**: Sub-agents read the shared context file to pick up entries from sibling phases
+4. **Wave end**: Coordinator reads the final context file for post-wave conflict detection
+5. **Cleanup**: Context file is deleted after the wave completes (each wave gets a fresh file)
+
+### Entry Format
+
+Each line in `.wave-context.jsonl` is a JSON object with one of three types:
+
+```jsonl
+{"type":"contract","phase":2,"task":1,"name":"UserAPI","signature":{"endpoint":"/api/users","method":"GET","response":"User[]"},"timestamp":"2024-01-15T10:30:00Z"}
+{"type":"decision","phase":1,"task":2,"name":"auth-strategy","value":"JWT with refresh tokens","reason":"Aligns with existing session management","timestamp":"2024-01-15T10:31:00Z"}
+{"type":"progress","phase":3,"task":1,"status":"complete","files_modified":["src/utils/helpers.ts"],"timestamp":"2024-01-15T10:32:00Z"}
+```
+
+| Type | Purpose | Key Fields |
+|------|---------|------------|
+| `contract` | API shapes, interfaces, shared types | `name`, `signature` |
+| `decision` | Architecture choices, technology selections | `name`, `value`, `reason` |
+| `progress` | Task completion status, files touched | `status`, `files_modified` |
+
+### Sub-Agent Context Injection
+
+When spawning each sub-agent, the coordinator includes in the context template:
+
+```
+## Shared Context (from sibling phases)
+
+[Contents of flow/.wave-context.jsonl, if any entries exist]
+
+RULES:
+- Read shared context before starting each task
+- Append contract/decision/progress entries as you work
+- If a sibling defined a contract, use that exact signature
+- If a sibling made an architecture decision, follow it
+```
+
+For the first task in a wave, the context file may be empty. As phases progress, entries accumulate and inform subsequent tasks.
 
 ---
 
@@ -229,6 +284,25 @@ For each pair of phases (A, B) in the wave:
 
 File conflict does NOT affect non-conflicting phases — their results are preserved.
 
+### Contract Conflict Detection
+
+After collecting all wave results, parse `flow/.wave-context.jsonl` and check for **contract conflicts**:
+
+```
+For each pair of "contract" entries with the same name:
+  if entry_A.signature != entry_B.signature:
+    → Contract conflict detected
+```
+
+**On contract conflict**:
+1. Present the conflicting contract definitions — show the name, the two signatures, and which phases defined them
+2. Offer options:
+   - **(1) Pick one**: User selects which phase's contract to use; the other phase must be re-run with the chosen contract injected
+   - **(2) Re-run conflicting phases sequentially**: Re-execute only the conflicting phases in order, so the second phase sees the first's contract
+   - **(3) Stop execution**: Halt for manual resolution
+
+Contract conflicts are checked **after** file conflicts. Both may exist simultaneously — present all conflicts before asking for resolution.
+
 ### Failure Handling
 
 | Scenario | Behavior |
@@ -312,6 +386,9 @@ When phases are aggregated (combined complexity ≤ 6), aggregated phases are tr
 9. **Reuse phase-isolation format** — sub-agent prompts and JSON returns follow phase-isolation.md exactly
 10. **Wave analysis is fast** — dependency parsing and topological sort add negligible overhead
 11. **Verification is internal to sub-agents** — per-task verification loops run entirely inside each phase sub-agent. The wave coordinator does not interact with verification; it only processes the final `task_verifications` field from the JSON return. See `.claude/resources/core/per-task-verification.md` for the complete verification system.
+12. **Shared context per wave** — each wave creates a fresh `.wave-context.jsonl` file, deleted after post-wave processing
+13. **Contract conflicts require user intervention** — never silently resolve conflicting contract signatures between parallel phases
+14. **Append-only context** — sub-agents only append to `.wave-context.jsonl`, never edit or delete existing entries
 
 ---
 
@@ -323,6 +400,7 @@ When phases are aggregated (combined complexity ≤ 6), aggregated phases are tr
 | `.claude/resources/core/discovery-sub-agents.md` | Parallel spawning pattern (3 agents → collect → merge) |
 | `.claude/resources/core/review-multi-agent.md` | Parallel agents with deduplication |
 | `.claude/resources/core/model-routing.md` | Model tier selection per phase complexity |
+| `.claude/resources/core/shared-context.md` | Shared context file format, entry types, and coordination rules |
 | `.claude/resources/core/complexity-scoring.md` | Complexity scores and aggregation rules |
 | `.claude/resources/core/per-task-verification.md` | Per-task verification system, debug sub-agent, and repair loops |
 | `.claude/resources/skills/execute-plan-skill.md` | Execute-plan skill (Steps 2b, 3, 4 modified for waves) |
