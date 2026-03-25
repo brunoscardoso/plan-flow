@@ -89,19 +89,22 @@ export async function queryProjectBrain(
 
   const limit = opts?.limit ?? DEFAULT_LIMIT;
   const chunkTypes = opts?.type ? [opts.type] : undefined;
+  const scopeDirs = SCOPE_TO_DIRS[opts?.scope ?? 'all'] ?? [];
+  const hasScope = scopeDirs.length > 0;
 
   try {
-    const raw: any[] = await brain.search(query, { limit, chunkTypes });
+    // When scope filtering, request more results so post-filter has enough
+    const searchLimit = hasScope ? limit * 5 : limit;
+    const raw: any[] = await brain.search(query, { limit: searchLimit, chunkTypes });
 
     // Apply scope filtering based on sourceFile prefix
-    const scopeDirs = SCOPE_TO_DIRS[opts?.scope ?? 'all'] ?? [];
-    const filtered = scopeDirs.length === 0
+    const filtered = !hasScope
       ? raw
       : raw.filter((r: any) =>
           scopeDirs.some((dir) => r.sourceFile?.startsWith(dir)),
         );
 
-    return filtered.map((r: any) => ({
+    return filtered.slice(0, limit).map((r: any) => ({
       file: r.sourceFile ?? '',
       heading: r.heading ?? undefined,
       content: r.text ?? '',
