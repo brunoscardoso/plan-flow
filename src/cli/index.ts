@@ -110,6 +110,36 @@ program
   });
 
 program
+  .command('state-query <query>')
+  .description(
+    'Search the project brain index for relevant context'
+  )
+  .option(
+    '--scope <scope>',
+    'Filter by scope: resources, rules, brain, plans, discovery, all',
+    'all'
+  )
+  .option(
+    '--type <chunkType>',
+    'Filter by chunk type'
+  )
+  .option(
+    '--limit <n>',
+    'Max results',
+    (v: string) => parseInt(v, 10),
+    10
+  )
+  .option(
+    '--target <dir>',
+    'Target directory (defaults to current directory)',
+    process.cwd()
+  )
+  .action(async (query: string, options: { scope?: string; type?: string; limit?: number; target: string }) => {
+    const { runStateQuery } = await import('./commands/state-query.js');
+    await runStateQuery({ query, ...options });
+  });
+
+program
   .command('brain <action> [args...]')
   .description(
     'Interact with the planflow-brain knowledge base (search, ingest, rebuild, stats, sync)'

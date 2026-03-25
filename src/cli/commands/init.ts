@@ -14,6 +14,7 @@ import { initClawHub } from '../handlers/clawhub.js';
 import { initCodex } from '../handlers/codex.js';
 import { initShared } from '../handlers/shared.js';
 import { startHeartbeatIfNeeded } from './heartbeat.js';
+import { openProjectBrain } from '../state/brain-query.js';
 
 function printBanner(): void {
   log.header('Plan-Flow Setup');
@@ -194,6 +195,15 @@ export async function runInit(options: InitOptions): Promise<void> {
 
   // Start heartbeat daemon in background
   await startHeartbeatIfNeeded(target);
+
+  // Build brain index in background (fire-and-forget)
+  const brain = await openProjectBrain(target);
+  if (brain) {
+    log.info('Brain index building in background (hybrid search will be available shortly)...');
+    void brain.rebuild()
+      .then(() => brain.close())
+      .catch(() => brain.close());
+  }
 
   // Print summary and next steps
   printSummary(results, target);

@@ -51,7 +51,7 @@ const PLATFORM_GITIGNORE_ENTRIES: Record<Platform, string[]> = {
 /**
  * Paths that should always be gitignored regardless of platform.
  */
-const SHARED_GITIGNORE_ENTRIES = ['flow/', '.plan-flow.yml', '.plan.flow.env'];
+const SHARED_GITIGNORE_ENTRIES = ['flow/', '.plan-flow.yml', '.plan.flow.env', '.brain.sqlite'];
 
 /**
  * Builds the plan-flow .gitignore block with markers.
