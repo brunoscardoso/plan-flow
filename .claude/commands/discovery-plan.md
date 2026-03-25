@@ -248,13 +248,23 @@ The user will read the `.md` file themselves and decide when to proceed.
 6. User reviews and requests refinements (if any)
 7. User invokes `/create-plan` when ready
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "discovery workflow" --scope resources`
+- `planflow-ai state-query "requirements gathering" --scope resources`
+- `planflow-ai state-query "codebase analysis" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/patterns/_index.md`    | Index of patterns with reference codes |
-| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `discovery-skill.md`          | Skill that executes the discovery      |
 | `discovery-patterns.md`       | Rules and patterns for discovery       |
 | `discovery-templates.md`      | Document templates                     |

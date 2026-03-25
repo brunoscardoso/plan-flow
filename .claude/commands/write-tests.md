@@ -199,13 +199,23 @@ All metrics (Lines, Branches, Functions, Statements) meet the target.
 3. Invoke write-tests skill
 4. Present final coverage summary
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "test writing" --scope resources`
+- `planflow-ai state-query "jest patterns" --scope resources`
+- `planflow-ai state-query "pytest patterns" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                  | Purpose                         |
 | ------------------------- | ------------------------------- |
-| `resources/skills/_index.md` | Index of skills with reference codes |
-| `resources/patterns/_index.md` | Index of patterns with reference codes |
-| `resources/tools/_index.md`  | Index of tools with reference codes |
 | `write-tests-skill.md`   | Skill that writes the tests     |
 | `jest-patterns.md`       | Jest testing patterns           |
 | `pytest-patterns.md`     | Pytest testing patterns         |

@@ -220,12 +220,7 @@ Always-loaded rules are in `.claude/rules/core/`:
 - `allowed-patterns.md` - Coding standards to follow
 - `forbidden-patterns.md` - Anti-patterns to avoid
 
-On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
-- `core/` - Complexity scoring, model routing, design awareness, pattern capture, project ledger, autopilot mode
-- `patterns/` - Templates and patterns for plans, discovery, contracts, brainstorms
-- `skills/` - Skill implementation details (12 skills)
-- `languages/` - Language-specific patterns (TypeScript, Python)
-- `tools/` - Tool-specific patterns (Jest, Pytest, auth, interactive questions)
+On-demand reference files are in `.claude/resources/` and indexed by the **brain query system**. Commands use `planflow-ai state-query "<topic>" --scope resources` to retrieve relevant context from indexed markdown files instead of loading full files by reference code. The brain returns ranked chunks for: core rules, skill details, patterns, language-specific guidance, and tool documentation.
 
 ## Critical Rules
 
@@ -446,10 +441,5 @@ Always-loaded rules are in `.claude/rules/core/`:
 - `allowed-patterns.md` - Coding standards to follow
 - `forbidden-patterns.md` - Anti-patterns to avoid
 
-On-demand reference files (loaded by commands when needed) are in `.claude/resources/`:
-- `core/` - Complexity scoring, model routing, design awareness, pattern capture, project ledger, autopilot mode
-- `patterns/` - Templates and patterns for plans, discovery, contracts, brainstorms
-- `skills/` - Skill implementation details (12 skills)
-- `languages/` - Language-specific patterns (TypeScript, Python)
-- `tools/` - Tool-specific patterns (Jest, Pytest, auth, interactive questions)
+On-demand reference files are in `.claude/resources/` and indexed by the **brain query system**. Commands use `planflow-ai state-query "<topic>" --scope resources` to retrieve relevant context from indexed markdown files instead of loading full files by reference code. The brain returns ranked chunks for: core rules, skill details, patterns, language-specific guidance, and tool documentation.
 <!-- plan-flow-end -->

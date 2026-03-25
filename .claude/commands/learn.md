@@ -76,7 +76,7 @@ TEACHING MODE (/learn about <topic>):
   Completed curricula are saved globally and reused across projects.
 
   Output: ~/plan-flow/brain/learns/{topic-kebab}.md (global)
-  Index:  ~/plan-flow/brain/learns/_index.md (LRN-* codes)
+  Index:  Indexed via brain query system (searchable with state-query)
 
 RELATED COMMANDS:
   /note            Capture meeting notes, ideas, brainstorms
@@ -248,7 +248,7 @@ Before designing the curriculum:
 
 1. **Use web search** to get up-to-date information (official docs, latest version, recent changes)
 2. **Read the project's stack** from `flow/brain/index.md` and `flow/references/tech-foundation.md`
-3. **Check existing learns** at `~/plan-flow/brain/learns/_index.md` — if the topic already exists, offer to resume, expand, or start fresh
+3. **Check existing learns** via `planflow-ai state-query "{topic}" --scope learns` — if the topic already exists, offer to resume, expand, or start fresh
 
 ### Step 3: Design an Adaptive Curriculum
 
@@ -305,7 +305,7 @@ After all steps are confirmed (or user stops early):
 
 **For general knowledge / concept:**
 1. Save to `~/plan-flow/brain/learns/{topic-kebab}.md`
-2. Auto-index with `LRN-*` codes in `~/plan-flow/brain/learns/_index.md`
+2. Auto-indexed by the brain query system (searchable via `planflow-ai state-query`)
 3. Update `flow/brain/index.md` with `## Global Learns` section
 
 **For project implementation:**
@@ -370,65 +370,15 @@ After all steps are confirmed (or user stops early):
 - [[{project-name}]]
 ```
 
-### Learns Index Template (`~/plan-flow/brain/learns/_index.md`)
+### Learns Index
 
-```markdown
-# Global Learns Index
+Learns are automatically indexed by the brain query system. Query existing curricula with:
 
-## Overview
-
-Shared learning curricula accumulated across all projects. Use reference codes to load specific sections on-demand.
-
-**Total Files**: X files
-**Reference Codes**: LRN-{ABBR}-1 through LRN-{ABBR}-N
-**Last Updated**: YYYY-MM-DD
-
----
-
-## Reference Codes
-
-### MCP (`mcp.md`)
-
-| Code | Description | Lines |
-|------|-------------|-------|
-| LRN-MCP-1 | What is MCP and why it matters | 10-35 |
-| LRN-MCP-2 | MCP server architecture | 36-70 |
-| LRN-MCP-3 | Building your first MCP server | 71-120 |
-
----
-
-## When to Expand
-
-| Code | Expand When |
-|------|-------------|
-| LRN-MCP-1 | Need to understand MCP fundamentals |
-| LRN-MCP-2 | Designing an MCP server |
-
----
-
-## Projects Using Learns
-
-| Learn | Projects |
-|-------|----------|
-| mcp | [[project-1]], [[project-2]] |
+```
+planflow-ai state-query "{topic}" --scope learns
 ```
 
-### Reference Code Convention for Learns
-
-| Learn File | Code Prefix | Example Codes |
-|---|---|---|
-| `mcp.md` | `LRN-MCP` | LRN-MCP-1, LRN-MCP-2, LRN-MCP-3 |
-| `docker.md` | `LRN-DK` | LRN-DK-1, LRN-DK-2 |
-| `graphql.md` | `LRN-GQ` | LRN-GQ-1, LRN-GQ-2 |
-| Other `<name>.md` | `LRN-XX` | Use first 2-3 consonants or unique abbreviation |
-
-### Reference Codes for Teaching
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-LRN-3 | Teaching mode restrictions and workflow | Starting teaching mode |
-| SKL-LRN-4 | Curriculum template and global storage | Generating curriculum |
-| SKL-LRN-5 | Learns index template and LRN-* code convention | Updating learns index |
+Learns are stored at `~/plan-flow/brain/learns/{topic-kebab}.md` and automatically discoverable via brain queries. No manual index maintenance required.
 
 ---
 
@@ -488,11 +438,20 @@ During pattern extraction, if you encounter valuable reference materials (API sp
 
 ---
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "learn skill" --scope resources`
+- `planflow-ai state-query "pattern extraction" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                    | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `resources/skills/_index.md`   | Index of skills with reference codes |
 | `resources/skills/learn-skill.md` | Detailed skill implementation |
-| `resources/patterns/_index.md` | Index of patterns with reference codes |
-| `resources/core/_index.md`     | Index of core rules with reference codes |

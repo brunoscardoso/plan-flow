@@ -648,14 +648,22 @@ flow/
    - Component structure
    - Error handling approach
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "project setup" --scope resources`
+- `planflow-ai state-query "pattern generation" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/tools/_index.md`       | Index of tools with reference codes    |
-| `resources/core/_index.md`        | Index of core rules with reference codes |
-| `resources/languages/_index.md`   | Index of language patterns with reference codes |
 | `setup-skill.md`              | Detailed execution logic               |
 | `interactive-questions-tool.md` | Questions UI for confirmations       |
 | `allowed-patterns.md`         | Core allowed patterns                  |

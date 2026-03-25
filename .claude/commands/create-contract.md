@@ -193,13 +193,22 @@ The user will read the `.md` file themselves and decide when to proceed.
 4. Present contract summary
 5. User reviews and proceeds to `/discovery-plan`
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "contract creation" --scope resources`
+- `planflow-ai state-query "contract patterns" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/patterns/_index.md`    | Index of patterns with reference codes |
-| `resources/tools/_index.md`       | Index of tools with reference codes    |
 | `create-contract-skill.md`    | Skill that creates the contract        |
 | `contract-patterns.md`        | Rules and patterns for contracts       |
 | `interactive-questions-tool.md` | Interactive Questions UI workflow    |

@@ -349,13 +349,25 @@ Execution Complete!
 5. Final build and test verification
 6. Auto-archive plan and discovery to flow/archive/
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "phase execution" --scope resources`
+- `planflow-ai state-query "wave execution" --scope resources`
+- `planflow-ai state-query "phase isolation" --scope resources`
+- `planflow-ai state-query "per-task verification" --scope resources`
+- `planflow-ai state-query "atomic commits" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                   | Purpose                           |
 | -------------------------- | --------------------------------- |
-| `resources/skills/_index.md`  | Index of skills with reference codes |
-| `resources/core/_index.md`    | Index of core rules with reference codes |
-| `resources/tools/_index.md`   | Index of tools with reference codes |
 | `per-task-verification.md` | Per-task verification system, debug sub-agents, JSON schemas |
 | `execute-plan-skill.md`   | Skill that executes the plan      |
 | `plans-patterns.md`       | Rules and patterns for plans      |

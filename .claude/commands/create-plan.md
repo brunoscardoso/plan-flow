@@ -221,13 +221,23 @@ The user will read the `.md` file themselves and decide when to proceed.
 5. Present plan summary
 6. User reviews and proceeds to `/execute-plan`
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "plan creation" --scope resources`
+- `planflow-ai state-query "complexity scoring" --scope resources`
+- `planflow-ai state-query "phase structure" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                    | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `resources/skills/_index.md`   | Index of skills with reference codes |
-| `resources/patterns/_index.md` | Index of patterns with reference codes |
-| `resources/core/_index.md`     | Index of core rules with reference codes |
 | `create-plan-skill.md`     | Skill that creates the plan       |
 | `plans-patterns.md`        | Rules and patterns for plans      |
 | `plans-templates.md`       | Plan templates                    |

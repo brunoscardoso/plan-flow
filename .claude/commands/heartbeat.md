@@ -104,9 +104,20 @@ captures:
 
 ---
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "heartbeat daemon" --scope resources`
+- `planflow-ai state-query "scheduled tasks" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource | Purpose |
 |----------|---------|
 | `resources/core/heartbeat.md` | File format rules and daemon architecture |
-| `resources/core/_index.md` | Index of core rules with reference codes |

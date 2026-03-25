@@ -120,14 +120,24 @@ review-pr https://github.com/org/repo/pull/123
 review-pr https://dev.azure.com/org/project/_git/repo/pullrequest/456
 ```
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "PR review workflow" --scope resources`
+- `planflow-ai state-query "adaptive depth" --scope resources`
+- `planflow-ai state-query "severity ranking" --scope resources`
+- `planflow-ai state-query "PR authentication" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/tools/_index.md`       | Index of tools with reference codes    |
-| `resources/patterns/_index.md`    | Index of patterns with reference codes |
-| `resources/core/_index.md`        | Index of core rules with reference codes |
 | `review-pr-skill.md`          | Skill that executes the review         |
 | `auth-pr-tool.md`             | Authentication tool for PR platforms   |
 | `review-pr-patterns.md`       | Review patterns and guidelines         |

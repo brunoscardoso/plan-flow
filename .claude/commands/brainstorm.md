@@ -179,11 +179,22 @@ After the skill completes:
 +------------------------------------------+
 ```
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "brainstorm workflow" --scope resources`
+- `planflow-ai state-query "interactive questions" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource | Purpose |
 |----------|---------|
-| `resources/skills/_index.md` | Index of skills with reference codes |
 | `brainstorm-skill.md` | Skill that runs the brainstorm |
 | `brainstorm-templates.md` | Output file template |
 | `/discovery-plan` command | Next step after brainstorm |

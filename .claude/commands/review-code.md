@@ -126,13 +126,24 @@ review-code --scope staged
 review-code src/services/userService.ts
 ```
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "code review workflow" --scope resources`
+- `planflow-ai state-query "adaptive depth" --scope resources`
+- `planflow-ai state-query "severity ranking" --scope resources`
+- `planflow-ai state-query "multi-agent review" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                       | Purpose                                |
 | ------------------------------ | -------------------------------------- |
-| `resources/skills/_index.md`      | Index of skills with reference codes   |
-| `resources/patterns/_index.md`    | Index of patterns with reference codes |
-| `resources/core/_index.md`        | Index of core rules with reference codes |
 | `review-code-skill.md`        | Skill that executes the review         |
 | `review-pr-patterns.md`       | Review patterns and guidelines         |
 

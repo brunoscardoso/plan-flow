@@ -208,13 +208,22 @@ Brain entry captured!
 +------------------------------------------+
 ```
 
+## Context Loading
+
+This command uses the **brain index** for context retrieval. Before executing, query the project brain for relevant documentation:
+
+**Queries**:
+- `planflow-ai state-query "brain capture" --scope resources`
+- `planflow-ai state-query "brain patterns" --scope resources`
+
+The brain returns ranked chunks from indexed markdown files. Use the top results to inform execution.
+
+---
+
 ## Related Resources
 
 | Resource                    | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `resources/skills/_index.md`   | Index of skills with reference codes |
-| `resources/patterns/_index.md` | Index of patterns with reference codes |
-| `resources/core/_index.md`     | Index of core rules with reference codes |
 | `brain-skill.md`           | Skill that processes brain entries |
 | `brain-patterns.md`        | File naming and link conventions  |
 | `brain-capture.md`         | Processing rules and templates    |
