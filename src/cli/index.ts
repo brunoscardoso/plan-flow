@@ -109,4 +109,28 @@ program
     await runState(options);
   });
 
+program
+  .command('brain <action> [args...]')
+  .description(
+    'Interact with the planflow-brain knowledge base (search, ingest, rebuild, stats, sync)'
+  )
+  .option(
+    '--brain-dir <dir>',
+    `Brain directory (defaults to ~/plan-flow/brain)`
+  )
+  .option(
+    '--limit <n>',
+    'Max results for search',
+    (v) => parseInt(v, 10),
+    10
+  )
+  .option(
+    '--type <chunkType>',
+    'Filter search by chunk type (e.g. plan, pattern, discovery, memory)'
+  )
+  .action(async (action: string, args: string[], options: { brainDir?: string; limit?: number; type?: string }) => {
+    const { runBrain } = await import('./commands/brain.js');
+    await runBrain(action, args, options);
+  });
+
 program.parse();
