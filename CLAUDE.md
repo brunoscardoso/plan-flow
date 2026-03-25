@@ -82,10 +82,19 @@ Features:
 - Explicit `Dependencies` metadata per phase (optional — omit for backward-compatible sequential)
 - Topological sort into waves of independent phases
 - Parallel Agent sub-agents per wave, reusing phase-isolation context template
-- File conflict detection between parallel phases
+- Shared context coordination between parallel phases via `.wave-context.jsonl`
+- File conflict detection and contract conflict detection between parallel phases
 - Deterministic git commits (sequential in phase order after each wave)
 
 Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md` for full rules.
+
+### Multi-Agent Coordination
+
+During wave execution, parallel phases share a context file (`flow/.wave-context.jsonl`) that enables real-time coordination. Agents share API contracts, architectural decisions, and progress status via append-only JSONL entries. Before each task, sub-agents receive shared context from sibling phases, preventing broken contracts and duplicate decisions.
+
+Entry types: `contract` (API shapes, interfaces), `decision` (architecture choices), `progress` (task status). Post-wave processing includes contract conflict detection — same API name with different signatures triggers user intervention.
+
+Activates automatically during multi-phase waves. No configuration needed. See `.claude/resources/core/shared-context.md` for full rules.
 
 ### Per-Task Verification
 
@@ -189,6 +198,7 @@ flow/
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
+├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -360,6 +370,7 @@ flow/
 ├── .heartbeat-prompt.md     # Pending user input from blocked task (temporary)
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
+├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -385,7 +396,15 @@ When `phase_isolation: true` in `flow/.flowconfig` (default), each `/execute-pla
 
 ## Wave-Based Parallel Execution
 
-When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into waves, and executes in parallel. Plans with explicit `Dependencies` metadata enable parallelism; plans without it execute sequentially (backward-compatible). Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md`.
+When `wave_execution: true` in `flow/.flowconfig` (default), `/execute-plan` analyzes phase dependencies, groups independent phases into waves, and executes in parallel. Parallel phases share context via `.wave-context.jsonl` for cross-phase coordination. Plans with explicit `Dependencies` metadata enable parallelism; plans without it execute sequentially (backward-compatible). Disable with `/flow wave_execution=false`. See `.claude/resources/core/wave-execution.md`.
+
+## Multi-Agent Coordination
+
+During wave execution, parallel phases share a context file (`flow/.wave-context.jsonl`) that enables real-time coordination. Agents share API contracts, architectural decisions, and progress status via append-only JSONL entries. Before each task, sub-agents receive shared context from sibling phases, preventing broken contracts and duplicate decisions.
+
+Entry types: `contract` (API shapes, interfaces), `decision` (architecture choices), `progress` (task status). Post-wave processing includes contract conflict detection — same API name with different signatures triggers user intervention.
+
+Activates automatically during multi-phase waves. No configuration needed. See `.claude/resources/core/shared-context.md` for full rules.
 
 ## Per-Task Verification
 
