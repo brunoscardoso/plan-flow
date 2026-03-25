@@ -78,11 +78,12 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 | `/review-code` | Review local uncommitted changes (adaptive depth + multi-agent) |
 | `/review-pr` | Review a Pull Request (adaptive depth + multi-agent) |
 | `/write-tests` | Generate tests for coverage target |
+| `/brainstorm` | Free-form idea exploration with interactive questions |
 | `/flow` | Configure plan-flow settings (autopilot, git control, runtime options) |
 | `/note` | Capture meeting notes, ideas, brainstorms |
 | `/learn` | Extract reusable patterns or learn a topic step-by-step |
-| `/pattern-validate` | Scan and index global brain patterns |
 | `/heartbeat` | Manage scheduled automated tasks |
+| `/resume-work` | Resume interrupted work from STATE.md |
 
 ## Workflow
 
@@ -90,10 +91,11 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 
 ```
 1. /setup           -> Index project patterns (run once)
-2. /discovery-plan  -> Gather requirements for a feature
-3. /create-plan     -> Create structured implementation plan
-4. /execute-plan    -> Execute the plan phase by phase
-5. /review-code     -> Review changes before committing
+2. /brainstorm      -> (Optional) Explore and crystallize a vague idea
+3. /discovery-plan  -> Gather requirements for a feature
+4. /create-plan     -> Create structured implementation plan
+5. /execute-plan    -> Execute the plan phase by phase
+6. /review-code     -> Review changes before committing
 ```
 
 ### Autopilot Mode
@@ -113,9 +115,80 @@ You: "Add dark mode support"
 
 Autopilot classifies every input and only triggers the full flow for feature requests (complexity 3+). Questions, trivial tasks, and slash commands are handled normally.
 
-**Mandatory checkpoints** — even in autopilot, the flow always pauses for:
+**Mandatory checkpoints** -- even in autopilot, the flow always pauses for:
 - **Discovery Q&A**: You answer requirements questions
 - **Plan approval**: You review and approve the plan before execution
+
+## Core Features
+
+### Wave-Based Parallel Execution
+
+Independent phases run in parallel within waves, with dependency-aware grouping:
+
+```
+Wave 1 (parallel): Phase 1: Types, Phase 2: Utilities
+Wave 2 (sequential): Phase 3: API Integration (depends on 1+2)
+Wave 3 (parallel): Phase 4: Config, Phase 5: UI Components
+Wave 4 (sequential): Phase 6: Tests (always last)
+```
+
+Plans support a `**Dependencies**:` field per phase. Topological sort assigns wave numbers automatically. Phases without dependencies run in Wave 1. Tests always run in their own final wave.
+
+Enable with `/flow wave_execution=true` (default: on).
+
+### Multi-Agent Coordination
+
+During wave execution, parallel phases share a context file (`flow/.wave-context.jsonl`) that enables real-time coordination. Agents share:
+
+- **API contracts** -- endpoint shapes, type interfaces, function signatures
+- **Decisions** -- architecture choices, library selections
+- **Progress** -- task completion status
+
+Before each task, sub-agents receive shared context from sibling phases -- preventing broken contracts and duplicate decisions. Post-wave processing includes contract conflict detection: same API name with different signatures triggers user intervention.
+
+### Phase Isolation
+
+Each phase runs in an isolated sub-agent with a clean context window. The sub-agent receives only the context it needs (phase spec, files modified so far, patterns, design context) and returns a structured JSON summary. This eliminates context rot -- phase 7 has the same quality as phase 1.
+
+Disable with `/flow phase_isolation=false`.
+
+### Per-Task Verification
+
+Plan tasks can include `<verify>` tags with shell commands. After completing each task, the sub-agent runs verification automatically. On failure, a debug sub-agent (haiku) diagnoses the root cause and the implementation agent applies repairs (up to `max_verify_retries` attempts, default: 2).
+
+### Atomic Commits Per Task
+
+When `commit=true`, each individual task within a phase gets its own git commit (not per phase). Format: `feat(phase-N.task-M): description`. Enables `git bisect`, independent reverts, and clearer git history.
+
+### Auto-PR Creation
+
+When `pr=true`, after execution completes (build+test pass), plan-flow automatically creates a feature branch and opens a PR via `gh pr create` with an auto-generated title and summary.
+
+### Model Routing
+
+By default, all phases use the most capable model from the active provider. Enable cost-based routing with `/flow model_routing=true` to auto-select models per phase based on complexity:
+
+| Complexity | Tier | Model |
+|-----------|------|-------|
+| 0-3 | Fast | haiku |
+| 4-5 | Standard | sonnet |
+| 6-10 | Powerful | opus |
+
+### Design Awareness
+
+Discovery asks whether features involve UI work. If confirmed, captures structured design tokens (colors, typography, spacing) into a Design Context section. During execution, tokens are auto-injected into UI phase prompts. Includes 6 built-in design personalities.
+
+### Pattern Capture
+
+During skill execution, the LLM silently buffers coding patterns and anti-patterns. At the end, captured patterns are presented for approval and written to `.claude/rules/core/allowed-patterns.md` or `forbidden-patterns.md`.
+
+### Session Resumability (STATE.md)
+
+`flow/STATE.md` tracks decisions, blockers, current position, and active phase. If a session is interrupted, `/resume-work` rebuilds full context from stored files and continues from where you left off.
+
+### Deterministic State Script
+
+Config and state parsing runs as a Node.js script (`planflow-ai state`) that returns structured JSON -- deterministic logic in code, not prompts. Ensures reliable flowconfig reading, phase calculations, and file existence checks.
 
 ## Flow Configuration (`/flow`)
 
@@ -124,57 +197,42 @@ The `/flow` command is the central configuration hub. All settings use `key=valu
 | Setting | Values | Default | Description |
 |---------|--------|---------|-------------|
 | `autopilot` | `true/false` | `false` | Enable/disable autopilot mode |
-| `commit` | `true/false` | `false` | Auto-commit after each completed phase |
+| `commit` | `true/false` | `false` | Auto-commit after each completed task |
 | `push` | `true/false` | `false` | Auto-push after all phases + build/test pass |
+| `pr` | `true/false` | `false` | Auto-create PR after execution |
 | `branch` | any string | current branch | Target branch for git operations |
+| `wave_execution` | `true/false` | `true` | Dependency-aware parallel phase execution |
+| `phase_isolation` | `true/false` | `true` | Isolated sub-agent per phase |
+| `model_routing` | `true/false` | `false` | Cost-based model selection per phase |
+| `max_verify_retries` | `1-5` | `2` | Max repair attempts per task verification |
 
 ### Examples
 
 ```bash
 /flow autopilot=true                    # Enable autopilot
-/flow commit=true push=true             # Enable git control (works without autopilot)
-/flow autopilot=true commit=true        # Enable both
-/flow branch=development                # Set target branch
+/flow commit=true push=true pr=true     # Full git control with auto-PR
+/flow wave_execution=false              # Disable parallel execution
+/flow phase_isolation=false             # Inline execution (for debugging)
+/flow model_routing=true                # Enable cost-based model routing
 /flow -status                           # Show current config
 /flow -reset                            # Reset everything
 
 # Shorthand: text without key=value enables autopilot and starts flow
 /flow add dark mode support             # autopilot=true + start discovery
-/flow commit=true add user auth         # autopilot=true + git + start discovery
 ```
 
 ### Git Control
 
-When `commit=true`, plan-flow auto-commits after each completed execution phase:
+When `commit=true`, plan-flow auto-commits after each completed task:
 
 ```
-Phase 1: Setup types → git commit "Phase 1: Setup types — user-auth"
-Phase 2: API endpoints → git commit "Phase 2: API endpoints — user-auth"
-Phase 3: Tests → git commit "Phase 3: Tests — user-auth"
-Build + Test pass → git commit "Complete: user-auth — all phases done"
-                  → git push origin development (if push=true)
+feat(phase-1.task-1): Create user types -- user-auth
+feat(phase-1.task-2): Add validation schemas -- user-auth
+feat(phase-2.task-1): Create login endpoint -- user-auth
+...
+Build + Test pass -> git push origin development (if push=true)
+                  -> gh pr create (if pr=true)
 ```
-
-Git control works independently of autopilot — you can use `commit=true` with manual `/execute-plan` runs.
-
-## Project Tasklist
-
-Each project has a `flow/tasklist.md` that tracks work items across sessions. On session start, active tasks are summarized and you can pick one to work on.
-
-Every command automatically updates the tasklist:
-- On start: adds the task to **In Progress**
-- On complete: moves it to **Done** with the date
-- Next step: adds the logical follow-up to **To Do**
-
-### Scheduled Tasks
-
-Tasks can be scheduled for later execution by linking them to the heartbeat daemon:
-
-```
-/flow add to tasklist: implement feature X and execute in 1 hour
-```
-
-This creates a tasklist entry linked to a heartbeat one-shot task via `[[]]` references. Both files cross-reference each other for Obsidian navigation.
 
 ## Heartbeat (Scheduled Automation)
 
@@ -201,13 +259,17 @@ npx planflow-ai heartbeat status   # Show daemon status
 
 The daemon **auto-starts** during `planflow-ai init` if `flow/heartbeat.md` exists.
 
+### Notifications
+
+The daemon sends OS desktop notifications (via node-notifier) for task completions, failures, and blocked tasks. Events are also logged to `flow/log.md` and `flow/.heartbeat-events.jsonl`.
+
 ### One-Shot Tasks
 
-Tasks with `in {N} hours/minutes` schedules run once and auto-disable after execution. These are used for scheduled tasklist items.
+Tasks with `in {N} hours/minutes` schedules run once and auto-disable after execution.
 
 ### Retry on Active Session
 
-If a task fails because a Claude Code session is already active, the daemon retries up to 5 times at 60-second intervals instead of failing permanently.
+If a task fails because a Claude Code session is already active, the daemon retries up to 5 times at 60-second intervals.
 
 ## Code Review
 
@@ -215,25 +277,19 @@ If a task fails because a Claude Code session is already active, the daemon retr
 
 ### Adaptive Depth
 
-Review depth scales automatically based on changeset size:
-
 | Lines Changed | Mode | Behavior |
 |--------------|------|----------|
 | < 50 | Lightweight | Quick-scan for security, logic bugs, and breaking changes only |
-| 50–500 | Standard | Full review with pattern matching and similar implementation search |
+| 50-500 | Standard | Full review with pattern matching and similar implementation search |
 | 500+ | Deep | Multi-pass review with file categorization, executive summary, and multi-agent analysis |
 
 ### Verification Pass
 
-Every finding goes through a second-pass verification that re-reads surrounding context and asks structured questions to classify findings as Confirmed, Likely, or Dismissed. False positives are filtered before output.
-
-### Severity Re-Ranking
-
-Findings are sorted by impact (Critical > Major > Minor > Suggestion), related findings across files are grouped, and an executive summary is added when there are 5+ findings.
+Every finding goes through a second-pass verification that re-reads surrounding context to classify findings as Confirmed, Likely, or Dismissed. False positives are filtered before output.
 
 ### Multi-Agent Parallel Review
 
-In Deep mode (500+ lines), the review is split into 4 specialized subagents running in parallel:
+In Deep mode (500+ lines), 4 specialized subagents run in parallel:
 
 | Agent | Focus | Model |
 |-------|-------|-------|
@@ -241,8 +297,6 @@ In Deep mode (500+ lines), the review is split into 4 specialized subagents runn
 | Logic & Bugs | Edge cases, null handling, race conditions | sonnet |
 | Performance | N+1 queries, memory leaks, blocking I/O | sonnet |
 | Pattern Compliance | Forbidden/allowed patterns, naming consistency | haiku |
-
-The coordinator merges results, deduplicates overlapping findings, then runs verification and re-ranking.
 
 ## Complexity Scoring
 
@@ -256,64 +310,57 @@ Every plan phase has a complexity score (0-10):
 | 7-8 | High | Complex, multiple considerations |
 | 9-10 | Very High | Significant complexity/risk |
 
-## Directory Structure
+## Discovery Sub-Agents
 
-All artifacts are stored in `flow/`:
+During `/discovery-plan`, three parallel haiku sub-agents explore the codebase simultaneously (similar features, API/data patterns, schema/types). Returns condensed findings merged into a Codebase Analysis section.
+
+## Project Brain and Knowledge Graph
+
+All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `planflow-ai init` creates a project directory in the vault with symlinks for brain subdirectories.
+
+Features:
+- `flow/brain/features/` -- Feature history and context with `[[wiki-links]]`
+- `flow/brain/errors/` -- Reusable error patterns
+- `flow/ledger.md` -- Persistent project learning journal
+- `flow/memory.md` -- Last 7 days of completed work
+- `flow/.scratchpad.md` -- Ephemeral per-session notes
+
+Open `~/plan-flow/brain/` as an Obsidian vault to browse all projects in one graph.
+
+## Directory Structure
 
 ```
 flow/
-├── archive/           # Completed/abandoned plans
-├── brain/             # Automatic knowledge capture (Obsidian-compatible)
-│   ├── index.md       # Brain index (loaded at session start)
-│   ├── features/      # Feature history and context
-│   └── errors/        # Reusable error patterns
-├── contracts/         # Integration contracts
-├── discovery/         # Discovery documents
-├── plans/             # Active implementation plans
-├── references/        # Reference materials
-├── resources/         # Valuable artifacts captured during skill execution
-├── reviewed-code/     # Code review documents
-├── reviewed-pr/       # PR review documents
-├── tasklist.md        # Project task list (updated in real-time during execution)
-├── memory.md          # Persistent artifact tracker (completed work)
-├── heartbeat.md       # Scheduled task definitions for the heartbeat daemon
-├── log.md             # Heartbeat event log
-├── ledger.md          # Persistent project learning journal
-├── .flowconfig        # Central config file (autopilot, git control, settings)
-└── .gitcontrol        # Git control settings (backward compat)
+├── archive/              # Completed/abandoned plans
+├── brain/                # Automatic knowledge capture (Obsidian-compatible)
+│   ├── index.md          # Brain index
+│   ├── features/         # Feature history and context
+│   └── errors/           # Reusable error patterns
+├── brainstorms/          # Brainstorm exploration documents
+├── contracts/            # Integration contracts
+├── discovery/            # Discovery documents
+├── plans/                # Active implementation plans
+├── references/           # Reference materials
+├── resources/            # Valuable artifacts from skill execution
+├── reviewed-code/        # Code review documents
+├── reviewed-pr/          # PR review documents
+├── tasklist.md           # Project task list
+├── memory.md             # Persistent artifact tracker
+├── heartbeat.md          # Scheduled task definitions
+├── log.md                # Heartbeat event log
+├── ledger.md             # Project learning journal
+├── STATE.md              # Execution state for session resumability
+├── .flowconfig           # Central config file
+├── .wave-context.jsonl   # Shared context for multi-agent coordination
+├── .heartbeat-events.jsonl  # Notification event stream
+└── .heartbeat-state.json    # Session read position tracking
 ```
-
-## Session Start Behaviors
-
-When a session starts, plan-flow automatically loads context from your project:
-
-- **Tasklist** (`flow/tasklist.md`) — Presents active tasks and lets you pick one to work on
-- **Memory** (`flow/memory.md`) — Loads the last 7 days of completed work so context is never lost
-- **Brain** (`flow/brain/index.md`) — Internalizes active features and recent error patterns
-- **Ledger** (`flow/ledger.md`) — Internalizes project-specific lessons learned
-- **Autopilot** (`flow/.flowconfig`) — If `autopilot: true`, activates automatic workflow orchestration
-
-## Intelligent Learn Skill
-
-The `/learn` skill supports step-by-step teaching. When you run `/learn about <topic>`, it creates a structured curriculum stored as a brain `.md` file. Each step requires your confirmation before progressing, and confirmed steps become learned patterns.
-
-Commands also recommend `/learn` automatically when:
-- New dependencies are added during execution
-- Non-trivial errors are resolved (3+ attempts)
-- The user corrects the approach
-- A new technology or pattern is introduced
-
-## Central Obsidian Vault
-
-All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `planflow-ai init` creates a project directory in the vault with symlinks for brain subdirectories and the tasklist. A global tasklist at `~/plan-flow/brain/tasklist.md` aggregates task counts across all projects.
-
-Open `~/plan-flow/brain/` as an Obsidian vault to browse all projects in one graph.
 
 ## Requirements
 
 - Node.js 18+
-- `git` - For version control
-- `gh` - GitHub CLI (for PR reviews)
+- `git` -- For version control
+- `gh` -- GitHub CLI (for PR reviews and auto-PR)
 
 ## Development
 
