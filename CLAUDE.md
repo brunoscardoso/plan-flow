@@ -96,6 +96,16 @@ Entry types: `contract` (API shapes, interfaces), `decision` (architecture choic
 
 Activates automatically during multi-phase waves. No configuration needed. See `.claude/resources/core/shared-context.md` for full rules.
 
+### Brain Index (SQLite)
+
+All plan-flow markdown files are indexed in a SQLite database (`flow/.brain.db`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
+
+**Indexed**: `.claude/resources/`, `.claude/rules/`, `flow/brain/`, `flow/plans/`, `flow/discovery/`, `CLAUDE.md`
+
+**Query**: `planflow-ai state-query "topic" --scope resources --limit 5` returns top-k relevant chunks as JSON.
+
+**Lifecycle**: Built on `planflow-ai init` (async background), kept updated by chokidar file watcher. If deleted, rebuilds from markdown — zero data loss.
+
 ### Per-Task Verification
 
 Tasks in plan phases can include optional `<verify>` sections with targeted verification commands (e.g., `npx tsc --noEmit <file>`, `npx jest <test-file>`). After completing each task, the verification command runs immediately. If verification fails, a debug sub-agent (haiku) diagnoses the failure and a repair loop applies fixes with up to N retries before escalating to the user.
@@ -199,6 +209,7 @@ flow/
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 ├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
+├── .brain.db          # SQLite brain index (FTS5 + vector embeddings)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -366,6 +377,7 @@ flow/
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 ├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
+├── .brain.db          # SQLite brain index (FTS5 + vector embeddings)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -400,6 +412,16 @@ During wave execution, parallel phases share a context file (`flow/.wave-context
 Entry types: `contract` (API shapes, interfaces), `decision` (architecture choices), `progress` (task status). Post-wave processing includes contract conflict detection — same API name with different signatures triggers user intervention.
 
 Activates automatically during multi-phase waves. No configuration needed. See `.claude/resources/core/shared-context.md` for full rules.
+
+## Brain Index (SQLite)
+
+All plan-flow markdown files are indexed in a SQLite database (`flow/.brain.db`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
+
+**Indexed**: `.claude/resources/`, `.claude/rules/`, `flow/brain/`, `flow/plans/`, `flow/discovery/`, `CLAUDE.md`
+
+**Query**: `planflow-ai state-query "topic" --scope resources --limit 5` returns top-k relevant chunks as JSON.
+
+**Lifecycle**: Built on `planflow-ai init` (async background), kept updated by chokidar file watcher. If deleted, rebuilds from markdown — zero data loss.
 
 ## Per-Task Verification
 

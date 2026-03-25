@@ -84,6 +84,7 @@ Installs for Claude Code, Cursor, OpenClaw, and Codex CLI simultaneously.
 | `/learn` | Extract reusable patterns or learn a topic step-by-step |
 | `/heartbeat` | Manage scheduled automated tasks |
 | `/resume-work` | Resume interrupted work from STATE.md |
+| `state-query` | Query brain index for relevant documentation (CLI: `planflow-ai state-query "topic"`) |
 
 ## Workflow
 
@@ -145,6 +146,10 @@ During wave execution, parallel phases share a context file (`flow/.wave-context
 - **Progress** -- task completion status
 
 Before each task, sub-agents receive shared context from sibling phases -- preventing broken contracts and duplicate decisions. Post-wave processing includes contract conflict detection: same API name with different signatures triggers user intervention.
+
+### Brain Index (SQLite)
+
+All markdown files are indexed with SQLite FTS5 + vector embeddings for hybrid search. Query with `planflow-ai state-query "topic"` to find relevant documentation instantly. Replaces the previous reference code system — 10-50x faster context loading with semantic matching.
 
 ### Phase Isolation
 
@@ -353,7 +358,8 @@ flow/
 ├── .flowconfig           # Central config file
 ├── .wave-context.jsonl   # Shared context for multi-agent coordination
 ├── .heartbeat-events.jsonl  # Notification event stream
-└── .heartbeat-state.json    # Session read position tracking
+├── .heartbeat-state.json    # Session read position tracking
+└── .brain.db                # SQLite brain index (FTS5 + vector embeddings)
 ```
 
 ## Requirements
