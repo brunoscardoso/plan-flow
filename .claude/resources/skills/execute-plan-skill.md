@@ -317,9 +317,28 @@ After ALL phases in the wave are approved, proceed to parallel spawning.
 Launch all approved wave phases simultaneously as independent Agent sub-agents:
 
 1. **Prepare context for each phase**: Use the phase-isolation context template (see `.claude/resources/core/phase-isolation.md`). Key addition for wave execution: the `Files Modified in Previous Phases` section includes files from ALL completed waves (1 through N-1), not just the immediately preceding phase.
-2. **No cross-phase awareness**: Sub-agents within the same wave do NOT know about each other. They receive no information about sibling phases.
+2. **Inject shared context from sibling phases** (multi-phase waves only):
+   - Skip this step for single-phase waves (no siblings to share with)
+   - Read `flow/.wave-context.jsonl` (create it if it doesn't exist yet — see wave lifecycle below)
+   - Filter entries: include only entries from OTHER phases in the current wave (not the agent's own phase). Also include entries from all previous waves.
+   - If there are matching entries, add an inline section in the sub-agent prompt after the phase spec:
+     ```
+     ## Shared Context from Sibling Phases
+
+     The following context entries were published by other phases. Use them to align on shared contracts, types, and architectural decisions.
+
+     - [phase N] (type: contract) name: UserAPI, signature: GET /users → { id, name, email }
+     - [phase N] (type: type_definition) name: UserRecord, fields: { id: string, name: string }
+     - [phase N] (type: decision) summary: Using Redis for session caching
+     ```
+   - If no matching entries exist, omit the section entirely
 3. **Spawn all in parallel**: Launch all wave phases simultaneously using Agent sub-agents with their respective model tiers.
 4. **Wait for all to complete**: All sub-agents must return before post-wave processing.
+
+**Wave context lifecycle**:
+- **Create** `flow/.wave-context.jsonl` at wave start (before first spawn in Step 4b), if it does not already exist. Start with an empty file.
+- Context entries **accumulate across all waves** — the file is NOT cleared between waves. Later waves benefit from contracts and decisions published by earlier waves.
+- **Delete** `flow/.wave-context.jsonl` after execution completes (Step 7, after build/test verification).
 
 ##### 4c. Wave Coordinator — Post-Wave Processing
 
@@ -327,24 +346,55 @@ After all sub-agents in the wave return, process results **sequentially in phase
 
 1. **Collect JSON returns**: Gather the structured JSON summary from each sub-agent
 2. **Validate JSON**: Parse each return, check for required fields (status, phase, summary, files_created, files_modified)
-3. **Detect file conflicts**: Check for `files_modified` overlap between phases in this wave:
+3. **Collect context entries**: For each phase's JSON return, check for a `context_entries` array:
+   - If `context_entries` is present and non-empty, append each entry to `flow/.wave-context.jsonl` (one JSON object per line)
+   - If `context_entries` is absent or empty, treat as empty array — no entries to append
+   - Entry format: `{"phase": N, "type": "contract|type_definition|decision", "name": "...", "signature": "...", "fields": "...", "summary": "..."}`
+   - These entries become available to phases in subsequent waves via Step 4b
+4. **Detect file conflicts**: Check for `files_modified` overlap between phases in this wave:
    - For each pair of phases (A, B) in the wave: compute `overlap = A.files_modified ∩ B.files_modified`
    - If overlap is not empty → file conflict detected
-4. **Handle file conflicts** (if any):
+5. **Handle file conflicts** (if any):
    - Present the conflicting files and which phases modified them
    - Offer options:
      - **(1) Accept as-is**: Last writer wins (the phase with the higher number committed last)
      - **(2) Re-run conflicting phases sequentially**: Re-execute only the conflicting phases in order
      - **(3) Stop execution**: Halt for manual resolution
    - File conflicts do NOT affect non-conflicting phases — their results are preserved
-5. **Process each phase** (in phase number order):
+6. **Detect contract conflicts**: For each pair of phases (A, B) in the wave, check their `context_entries` for contract entries with the same `name` but different `signature` or `fields`:
+   - Compare all entries where `type` is `contract` or `type_definition`
+   - If same `name` but different `signature`/`fields` → contract conflict detected
+   - Present conflicts and offer resolution (see Contract Conflicts below)
+   - Contract conflicts do NOT affect non-conflicting phases — their results are preserved
+7. **Process each phase** (in phase number order):
    - Check `status` field: `success` → continue; `failure` → present errors, ask retry/skip/stop; `partial` → present deviations, ask user
    - Update plan file (mark tasks `[x]`)
    - Accumulate `files_created` and `files_modified` into running list
    - Buffer `patterns_captured` entries to `flow/resources/pending-patterns.md`
    - Git commit if enabled (sequential, one commit **per task** in phase/task order — see `.claude/resources/core/atomic-commits.md`). For each phase (in phase number order), iterate `tasks_completed` and commit: `git add -A && git commit -m "feat(phase-N.task-M): <desc> — <feature>"`
    - Log `decisions` in phase completion message
-6. **Report wave completion**: Present summary of all phases in this wave, including task verification stats:
+
+##### Contract Conflicts
+
+If contract conflicts are detected (same API name, different signatures):
+
+1. Present both versions:
+   ```
+   Warning: Contract conflict detected:
+   **API**: GET /users
+
+   Phase 1 signature: GET /users → { id: string, name: string }
+   Phase 3 signature: GET /users → { id: string, name: string, email: string }
+
+   Options:
+   1. Use Phase 1's version
+   2. Use Phase 3's version
+   3. Stop execution for manual resolution
+   ```
+2. Apply the chosen version: update the corresponding entry in `flow/.wave-context.jsonl` so subsequent waves see the resolved contract
+3. Contract conflicts do NOT affect non-conflicting phases — only the conflicting contract entries need resolution
+
+8. **Report wave completion**: Present summary of all phases in this wave, including task verification stats:
    - For each phase in the wave that returned `task_verifications`, include pass/fail counts and repairs applied
    - Wave completion report template:
      ```
@@ -572,18 +622,20 @@ This allows users to quickly jump to the PR from notifications without needing t
 
 After ALL phases are complete (including Tests phase):
 
-1. **Run final verification**:
+1. **Clean up shared context**: If `flow/.wave-context.jsonl` exists, delete it. This file is ephemeral and should not persist after execution completes.
+
+2. **Run final verification**:
 
 ```bash
 npm run build && npm run test
 ```
 
-2. **Handle failures**:
+3. **Handle failures**:
    - If build fails: Fix the issue, re-run verification
    - If tests fail: Fix the issue, re-run verification
    - Only proceed after everything passes
 
-3. **Present summary** of completed work, including model routing and wave execution info if enabled:
+4. **Present summary** of completed work, including model routing and wave execution info if enabled:
 
 **Sequential mode summary**:
 
@@ -616,6 +668,7 @@ npm run build && npm run test
 - Waves executed: 4
 - Parallel phases: 2 (in Wave 1)
 - File conflicts: 0
+- Contract conflicts: 0
 - Failed phases: 0
 - Estimated speedup: ~20%
 
@@ -625,9 +678,9 @@ npm run build && npm run test
 **PR**: https://github.com/owner/repo/pull/123
 ```
 
-4. **List all key changes** made
+5. **List all key changes** made
 
-5. **Ask if the plan should be archived**:
+6. **Ask if the plan should be archived**:
 
 ```bash
 mv flow/plans/plan_feature_name_v1.md flow/archive/
@@ -672,13 +725,17 @@ Wave 1: Phase 1 + Phase 2 (parallel, no dependencies)
 |   +-- Get user approval
 |
 +-- EXECUTION PHASE (parallel):
-|   +-- Spawn Agent: Phase 1 (model: haiku)  ──┐
-|   +-- Spawn Agent: Phase 2 (model: haiku)  ──┤ (running simultaneously)
-|   +-- Wait for all to return               ──┘
+|   +-- Create flow/.wave-context.jsonl (if not exists)
+|   +-- Read shared context from sibling phases (if multi-phase wave)
+|   +-- Spawn Agent: Phase 1 (model: haiku, + shared context)  ──┐
+|   +-- Spawn Agent: Phase 2 (model: haiku, + shared context)  ──┤ (running simultaneously)
+|   +-- Wait for all to return                                  ──┘
 |
 +-- POST-WAVE PROCESSING (sequential):
 |   +-- Collect JSON returns
+|   +-- Collect context_entries → append to .wave-context.jsonl
 |   +-- Check for file conflicts
+|   +-- Check for contract conflicts (same name, different signature)
 |   +-- Process Phase 1 result → update plan → git commit per task
 |   +-- Process Phase 2 result → update plan → git commit per task
 |   +-- Report wave completion
@@ -782,6 +839,9 @@ If the user wants to stop execution:
 | **Deterministic commits**    | Git commits happen per-task in phase/task order after wave completes: `feat(phase-N.task-M): <desc> — <feature>` |
 | **Failures are isolated**    | One failed phase does not cancel sibling phases in the same wave |
 | **File conflicts presented** | Never silently resolve file conflicts, always ask the user  |
+| **Shared context injected**  | Multi-phase waves inject sibling context entries; single-phase waves skip |
+| **Contract conflicts detected** | Same API name with different signatures triggers user resolution |
+| **Wave context is ephemeral** | `.wave-context.jsonl` accumulates across waves, deleted after execution completes |
 
 ---
 
@@ -796,4 +856,5 @@ If the user wants to stop execution:
 | `.claude/resources/core/per-task-verification.md` | Per-task verification system and debug sub-agents |
 | `.claude/resources/tools/plan-mode-tool.md` | Plan mode switching instructions |
 | `flow/plans/`                               | Input plan documents             |
+| `flow/.wave-context.jsonl`                  | Ephemeral shared context between wave phases (deleted after execution) |
 | `flow/archive/`                             | Completed plans destination      |
