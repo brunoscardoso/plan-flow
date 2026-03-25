@@ -120,63 +120,6 @@ review-pr https://github.com/org/repo/pull/123
 review-pr https://dev.azure.com/org/project/_git/repo/pullrequest/456
 ```
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/review-pr.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for PR Review
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/skills/_index.md` | To understand review workflow |
-| `resources/tools/_index.md` | For authentication tool |
-| `resources/patterns/_index.md` | For review patterns |
-| `resources/core/_index.md` | For allowed/forbidden patterns |
-
-### Reference Codes for PR Review
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-PR-1 | Purpose and restrictions | Understanding allowed actions |
-| SKL-PR-2 | Authenticate for PR access | Setting up authentication |
-| SKL-PR-3 | Fetch PR info + determine depth | Getting PR data and review mode |
-| SKL-PR-5 | Analyze + verify + re-rank | Processing findings |
-| SKL-PR-6 | Generate review document | Creating the output file |
-| SKL-PR-7 | Output template | Review document structure |
-| SKL-PR-8 | Fix complexity scoring | Severity and complexity details |
-| SKL-PR-9 | Link format (GitHub/Azure DevOps) | Platform-specific link formats |
-| TLS-AUTH-1 | Auth tool configuration | Setting up authentication |
-| TLS-AUTH-2 | Authentication workflow | Authenticating to platform |
-| PTN-PR-1 | PR review patterns | Creating review output |
-| COR-AP-1 | Allowed patterns overview | Checking pattern compliance |
-| COR-FP-1 | Forbidden patterns overview | Identifying anti-patterns |
-| COR-MA-1 | Multi-agent subagent definitions | Deep mode parallel review setup |
-| COR-MA-2 | Coordinator dedup and merge | Deep mode result processing |
-| COR-SR-1 | Severity re-ranking algorithm | Ordering findings by impact |
-| COR-SR-2 | Finding grouping rules | Grouping related findings |
-| COR-AD-1 | Adaptive depth size detection | Determining review mode |
-| COR-AD-2 | Lightweight review mode | Changeset < 50 lines |
-| COR-AD-3 | Deep review mode | Changeset 500+ lines |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/tools/_index.md`
-2. **Expand auth first**: Load TLS-AUTH-* codes for authentication
-3. **Then expand review patterns**: Load PTN-PR-* codes for review structure
-4. **Don't expand everything**: Only load patterns relevant to the PR being reviewed
-
----
-
 ## Related Resources
 
 | Resource                       | Purpose                                |

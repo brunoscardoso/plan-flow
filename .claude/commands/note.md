@@ -208,32 +208,6 @@ Brain entry captured!
 +------------------------------------------+
 ```
 
----
-
-## Context Optimization
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/note.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Reference Codes for Brain
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-BR-1 | Brain skill restrictions | Understanding allowed actions |
-| SKL-BR-2 | Brain skill workflow | Processing entries |
-| SKL-BR-3 | Output format and validation | Formatting output |
-| PTN-BR-1 | Directory structure and naming | Creating brain files |
-| PTN-BR-2 | Wiki-link patterns | Creating cross-references |
-| PTN-BR-3 | Feature status lifecycle | Updating feature entries |
-| COR-BR-1 | Session start behavior | Understanding brain loading |
-| COR-BR-2 | File templates | Creating new brain files |
-| COR-BR-3 | Index management caps | Enforcing index limits |
-
----
-
 ## Related Resources
 
 | Resource                    | Purpose                           |

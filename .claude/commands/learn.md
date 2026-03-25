@@ -471,25 +471,6 @@ Teach step by step (adaptive: skip / deep dive / tangent / rephrase)
 Save to ~/plan-flow/brain/learns/ → Auto-index LRN-* codes → Link to project
 ```
 
----
-
-## Context Optimization
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/learn.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Reference Codes for Learn
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-LRN-1 | Purpose, restrictions, and extraction criteria | Understanding what to extract |
-| SKL-LRN-2 | Workflow, output format, and validation | Processing and saving patterns |
-
----
-
 ## Brain Capture
 
 <!-- brain-capture

@@ -193,47 +193,6 @@ The user will read the `.md` file themselves and decide when to proceed.
 4. Present contract summary
 5. User reviews and proceeds to `/discovery-plan`
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/create-contract.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for Contract Creation
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/patterns/_index.md` | To find contract patterns |
-| `resources/skills/_index.md` | To understand skill workflow |
-| `resources/tools/_index.md` | When using interactive questions |
-
-### Reference Codes for Contract Creation
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| PTN-CON-1 | Contract document structure | Creating new contract |
-| PTN-CON-2 | Endpoint documentation format | Documenting API endpoints |
-| SKL-CON-1 | Contract skill workflow | Understanding full process |
-| TLS-IQ-2 | How to switch to Plan mode | Before asking questions |
-| TLS-IQ-3 | How to ask questions | When gathering scope info |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
-2. **Identify needed codes**: Based on current step, identify which codes are relevant
-3. **Expand as needed**: Use the Read tool with specific line ranges from the index
-4. **Don't expand everything**: Only load content required for the current step
-
----
-
 ## Related Resources
 
 | Resource                       | Purpose                                |

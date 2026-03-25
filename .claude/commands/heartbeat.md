@@ -93,19 +93,6 @@ RELATED COMMANDS:
 1. Read `flow/heartbeat.md`
 2. Display all tasks with their schedule, status, and description
 
----
-
-## Context Optimization
-
-### Reference Codes for Heartbeat
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| COR-HB-1 | Heartbeat file format and schedule syntax | Creating or editing heartbeat tasks |
-| COR-HB-2 | Daemon architecture and CLI commands | Starting/stopping the daemon |
-
----
-
 ## Brain Capture
 
 <!-- brain-capture

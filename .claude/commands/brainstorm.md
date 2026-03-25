@@ -179,25 +179,6 @@ After the skill completes:
 +------------------------------------------+
 ```
 
----
-
-## Context Optimization
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/brainstorm.md`)
-2. **Expand on-demand**: Load skill file when entering conversational loop
-
-### Reference Codes for Brainstorm
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-BS-1 | Brainstorm skill restrictions and inputs | Understanding allowed actions |
-| SKL-BS-2 | Conversational loop and tracking | During the brainstorm |
-| SKL-BS-3 | End detection, summary, and output | When wrapping up |
-
----
-
 ## Related Resources
 
 | Resource | Purpose |

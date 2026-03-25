@@ -126,60 +126,6 @@ review-code --scope staged
 review-code src/services/userService.ts
 ```
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/review-code.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for Code Review
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/skills/_index.md` | To understand review workflow |
-| `resources/patterns/_index.md` | For review patterns and templates |
-| `resources/core/_index.md` | For allowed/forbidden patterns reference |
-
-### Reference Codes for Code Review
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-REV-1 | Purpose and restrictions | Understanding allowed actions |
-| SKL-REV-2 | Identify changed files | Starting the review |
-| SKL-REV-3 | Determine review depth | Adaptive depth selection |
-| SKL-REV-5 | Find similar implementations | Searching for comparable code |
-| SKL-REV-7 | Pattern conflicts + verify + re-rank | Processing findings |
-| SKL-REV-8 | Generate review document | Creating the output file |
-| SKL-REV-9 | Severity and conflict resolution | Severity levels and resolution options |
-| PTN-REV-1 | Review document structure | Creating review output |
-| COR-AP-1 | Allowed patterns overview | Checking pattern compliance |
-| COR-FP-1 | Forbidden patterns overview | Identifying anti-patterns |
-| COR-MA-1 | Multi-agent subagent definitions | Deep mode parallel review setup |
-| COR-MA-2 | Coordinator dedup and merge | Deep mode result processing |
-| COR-SR-1 | Severity re-ranking algorithm | Ordering findings by impact |
-| COR-SR-2 | Finding grouping rules | Grouping related findings |
-| COR-AD-1 | Adaptive depth size detection | Determining review mode |
-| COR-AD-2 | Lightweight review mode | Changeset < 50 lines |
-| COR-AD-3 | Deep review mode | Changeset 500+ lines |
-| COR-CG-1 | Compaction guide | Load when compacting mid-review |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/patterns/_index.md`
-2. **Identify needed codes**: Based on detected language/framework, expand relevant patterns
-3. **Expand as needed**: Use the Read tool with specific line ranges from the index
-4. **Don't expand everything**: Only load patterns relevant to the files being reviewed
-
----
-
 ## Related Resources
 
 | Resource                       | Purpose                                |

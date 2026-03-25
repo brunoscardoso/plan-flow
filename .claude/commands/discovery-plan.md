@@ -248,58 +248,6 @@ The user will read the `.md` file themselves and decide when to proceed.
 6. User reviews and requests refinements (if any)
 7. User invokes `/create-plan` when ready
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/discovery-plan.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for Discovery
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/patterns/_index.md` | To find discovery templates and patterns |
-| `resources/skills/_index.md` | To understand skill workflow |
-| `resources/tools/_index.md` | When using interactive questions |
-
-### Reference Codes for Discovery
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| PTN-DIS-1 | Discovery document structure | Creating new discovery doc |
-| PTN-DIS-2 | Requirements gathering example | Need example format |
-| PTN-DIST-1 | Discovery template | Creating output file |
-| SKL-DIS-1 | Discovery skill workflow | Understanding full process |
-| TLS-IQ-2 | How to switch to Plan mode | Before asking questions |
-| TLS-IQ-3 | How to ask questions | When gathering requirements |
-| COR-CG-1 | Compaction guide | Load when compacting mid-discovery |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/skills/_index.md`
-2. **Identify needed codes**: Based on current step, identify which codes are relevant
-3. **Expand as needed**: Use the Read tool with specific line ranges from the index
-4. **Don't expand everything**: Only load content required for the current step
-
-**Example expansion**:
-```
-# To get the discovery template
-Read: resources/patterns/discovery-templates.md (lines from PTN-DIST-1)
-
-# To understand question workflow
-Read: resources/tools/interactive-questions-tool.md (lines from TLS-IQ-3)
-```
-
----
-
 ## Related Resources
 
 | Resource                       | Purpose                                |

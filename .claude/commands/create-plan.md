@@ -221,47 +221,6 @@ The user will read the `.md` file themselves and decide when to proceed.
 5. Present plan summary
 6. User reviews and proceeds to `/execute-plan`
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/create-plan.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for Plan Creation
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/patterns/_index.md` | To find plan patterns and templates |
-| `resources/skills/_index.md` | To understand skill workflow |
-| `resources/core/_index.md` | For complexity scoring reference |
-
-### Reference Codes for Plan Creation
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| PTN-PLN-1 | Plan document structure | Creating new plan |
-| PTN-PLN-2 | Phase organization | Structuring phases |
-| PTN-PLNT-1 | Plan template | Creating output file |
-| SKL-PLN-1 | Create plan skill workflow | Understanding full process |
-| COR-CS-1 | Complexity scoring table | Assigning complexity scores |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/patterns/_index.md` and `resources/core/_index.md`
-2. **Identify needed codes**: Based on current step, identify which codes are relevant
-3. **Expand as needed**: Use the Read tool with specific line ranges from the index
-4. **Don't expand everything**: Only load content required for the current step
-
----
-
 ## Related Resources
 
 | Resource                    | Purpose                           |

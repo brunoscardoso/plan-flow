@@ -199,50 +199,6 @@ All metrics (Lines, Branches, Functions, Statements) meet the target.
 3. Invoke write-tests skill
 4. Present final coverage summary
 
----
-
-## Context Optimization
-
-This command uses hierarchical context loading to reduce context consumption. Instead of loading full files, load indexes first and expand specific sections on-demand.
-
-### Recommended Loading Order
-
-1. **Always load first**: This command file (`commands/write-tests.md`)
-2. **Load indexes**: Load `_index.md` files for relevant folders
-3. **Expand on-demand**: Use reference codes to load specific sections when needed
-
-### Index Files for Writing Tests
-
-| Index | When to Load |
-|-------|--------------|
-| `resources/skills/_index.md` | To understand test writing workflow |
-| `resources/patterns/_index.md` | For testing patterns |
-| `resources/tools/_index.md` | For testing tool commands |
-
-### Reference Codes for Writing Tests
-
-| Code | Description | When to Expand |
-|------|-------------|----------------|
-| SKL-TEST-1 | Write tests skill workflow | Understanding full process |
-| PTN-JEST-1 | Jest test structure | Writing Jest tests |
-| PTN-JEST-2 | Jest mocking patterns | When mocking is needed |
-| PTN-PYTEST-1 | Pytest test structure | Writing Pytest tests |
-| PTN-PYTEST-2 | Pytest fixtures | When fixtures are needed |
-| TLS-JEST-1 | Jest commands | Running Jest tests |
-| TLS-PYTEST-1 | Pytest commands | Running Pytest tests |
-
-### Expansion Instructions
-
-When executing this command:
-
-1. **Start with indexes**: Read `resources/skills/_index.md` and `resources/patterns/_index.md`
-2. **Detect framework first**: Determine Jest or Pytest before expanding patterns
-3. **Expand framework-specific**: Only load PTN-JEST-* or PTN-PYTEST-*, not both
-4. **Expand tool commands**: Load TLS-JEST-* or TLS-PYTEST-* for running tests
-5. **Don't expand everything**: Only load patterns relevant to detected framework
-
----
-
 ## Related Resources
 
 | Resource                  | Purpose                         |
