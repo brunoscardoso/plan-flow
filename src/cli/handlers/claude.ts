@@ -209,6 +209,26 @@ export async function initClaude(
     }
   }
 
+  // 3b. Migrate v2 → v3: remove _index.md files and reference-expansion-tool.md
+  //     In v2, context loading used _index.md files with reference codes.
+  //     In v3, context loading uses planflow-brain SQLite hybrid search.
+  //     Remove the old index files — they are no longer shipped or used.
+  const deprecatedFiles = [
+    join(target, '.claude', 'resources', 'core', '_index.md'),
+    join(target, '.claude', 'resources', 'skills', '_index.md'),
+    join(target, '.claude', 'resources', 'patterns', '_index.md'),
+    join(target, '.claude', 'resources', 'languages', '_index.md'),
+    join(target, '.claude', 'resources', 'tools', '_index.md'),
+    join(target, '.claude', 'resources', 'tools', 'reference-expansion-tool.md'),
+  ];
+
+  for (const filePath of deprecatedFiles) {
+    if (existsSync(filePath)) {
+      removeFile(filePath);
+      log.warn(`Removed deprecated ${filePath.replace(target + '/', '')}`);
+    }
+  }
+
   // 4. Copy .claude/resources/ (on-demand reference files)
   const resourcesSrc = join(packageRoot, '.claude', 'resources');
   const resourcesDest = join(target, '.claude', 'resources');

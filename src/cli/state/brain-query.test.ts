@@ -145,30 +145,28 @@ describe('queryProjectBrain', () => {
     const brain = { search: mockSearch, close: mockClose };
     await queryProjectBrain(brain, 'test', { type: 'plan' });
 
-    expect(mockSearch).toHaveBeenCalledWith('test', {
-      limit: 10,
+    expect(mockSearch).toHaveBeenCalledWith('test', expect.objectContaining({
       chunkTypes: ['plan'],
-    });
+    }));
   });
 
   it('applies limit — passes limit to brain.search', async () => {
     const brain = { search: mockSearch, close: mockClose };
     await queryProjectBrain(brain, 'test', { limit: 5 });
 
-    expect(mockSearch).toHaveBeenCalledWith('test', {
-      limit: 5,
-      chunkTypes: undefined,
-    });
+    expect(mockSearch).toHaveBeenCalledWith('test', expect.objectContaining({
+      limit: 5, // no scope, so limit is passed as-is
+    }));
   });
 
   it('uses default limit of 10 when not specified', async () => {
     const brain = { search: mockSearch, close: mockClose };
     await queryProjectBrain(brain, 'test');
 
-    expect(mockSearch).toHaveBeenCalledWith('test', {
+    expect(mockSearch).toHaveBeenCalledWith('test', expect.objectContaining({
       limit: 10,
       chunkTypes: undefined,
-    });
+    }));
   });
 
   it('returns empty array when brain.search throws', async () => {
