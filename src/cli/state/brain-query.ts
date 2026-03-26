@@ -95,7 +95,19 @@ export async function queryProjectBrain(
   try {
     // When scope filtering, request more results so post-filter has enough
     const searchLimit = hasScope ? limit * 5 : limit;
-    const raw: any[] = await brain.search(query, { limit: searchLimit, chunkTypes });
+    const raw: any[] = await brain.search(query, {
+      limit: searchLimit,
+      chunkTypes,
+      // Exclude archived plans/discovery (they're historical noise)
+      excludePaths: ['flow/archive/'],
+      // Boost authoritative resource files over general content
+      boostPaths: [
+        { prefix: '.claude/resources/core/', multiplier: 2.0 },
+        { prefix: '.claude/resources/skills/', multiplier: 1.8 },
+        { prefix: '.claude/resources/patterns/', multiplier: 1.5 },
+        { prefix: '.claude/rules/', multiplier: 1.5 },
+      ],
+    });
 
     // Apply scope filtering based on sourceFile prefix
     const filtered = !hasScope
