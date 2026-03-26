@@ -359,7 +359,12 @@ flow/
 ├── .wave-context.jsonl   # Shared context for multi-agent coordination
 ├── .heartbeat-events.jsonl  # Notification event stream
 ├── .heartbeat-state.json    # Session read position tracking
-└── .brain.db                # SQLite brain index (FTS5 + vector embeddings)
+└── .gitcontrol        # Git control settings (backward compat)
+```
+
+### Brain Index Database
+
+The SQLite brain index (`.brain.sqlite`) lives at the **project root** (not inside `flow/`). It's gitignored and rebuildable from markdown files.
 ```
 
 ## Requirements

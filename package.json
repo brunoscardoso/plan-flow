@@ -58,7 +58,9 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^14.0.3",
-    "node-notifier": "^10.0.1",
+    "node-notifier": "^10.0.1"
+  },
+  "optionalDependencies": {
     "planflow-brain": "file:../brain"
   },
   "devDependencies": {

@@ -98,7 +98,7 @@ Activates automatically during multi-phase waves. No configuration needed. See `
 
 ### Brain Index (SQLite)
 
-All plan-flow markdown files are indexed in a SQLite database (`flow/.brain.db`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
+All plan-flow markdown files are indexed in a SQLite database (`.brain.sqlite`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
 
 **Indexed**: `.claude/resources/`, `.claude/rules/`, `flow/brain/`, `flow/plans/`, `flow/discovery/`, `CLAUDE.md`
 
@@ -209,7 +209,6 @@ flow/
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 ├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
-├── .brain.db          # SQLite brain index (FTS5 + vector embeddings)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -377,7 +376,6 @@ flow/
 ├── .gitcontrol        # Git control settings — backward compat (prefer .flowconfig)
 ├── .telegram-poll-state.json  # Telegram polling state (update offset, mode)
 ├── .wave-context.jsonl        # Shared context between parallel phases (temporary, per-wave)
-├── .brain.db          # SQLite brain index (FTS5 + vector embeddings)
 └── STATE.md           # Execution state snapshot for session resumability
 ```
 
@@ -415,7 +413,7 @@ Activates automatically during multi-phase waves. No configuration needed. See `
 
 ## Brain Index (SQLite)
 
-All plan-flow markdown files are indexed in a SQLite database (`flow/.brain.db`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
+All plan-flow markdown files are indexed in a SQLite database (`.brain.sqlite`) using planflow-brain's hybrid search (FTS5 keyword + 384-dim vector embeddings with Reciprocal Rank Fusion). This replaces the previous reference code system for faster, smarter context loading.
 
 **Indexed**: `.claude/resources/`, `.claude/rules/`, `flow/brain/`, `flow/plans/`, `flow/discovery/`, `CLAUDE.md`
 
