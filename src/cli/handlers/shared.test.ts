@@ -236,7 +236,7 @@ describe('vault registration', () => {
     expect(queries).toContain('path:patterns');
     expect(queries).toContain('path:features');
     expect(queries).toContain('path:errors');
-    expect(queries).toContain('path:daily');
+    expect(queries).toContain('path:notes');
     expect(queries).toContain('path:discovery');
     expect(queries).toContain('path:plans');
     expect(queries).toContain('path:contracts');

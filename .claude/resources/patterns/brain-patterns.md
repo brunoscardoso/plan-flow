@@ -14,7 +14,7 @@ flow/brain/                            # Per-project brain
 └── learning/                          # Teaching curricula from /learn about
     └── {topic-kebab}.md
 
-~/plan-flow/brain/daily/               # Global daily logs (cross-project)
+~/plan-flow/brain/notes/               # Notes (cross-project)
 └── {YYYY-MM-DD}.md
 ```
 
@@ -26,7 +26,7 @@ flow/brain/                            # Per-project brain
 |-----------|---------|---------|-----------|
 | Feature | `features/{kebab-case}.md` | `features/contact-enrichment.md` | `[[contact-enrichment]]` |
 | Error | `errors/{kebab-case}.md` | `errors/prisma-connection-pooling.md` | `[[prisma-connection-pooling]]` |
-| Daily | `~/plan-flow/brain/daily/{YYYY-MM-DD}.md` | `daily/2026-03-03.md` | `[[2026-03-03]]` |
+| Notes | `~/plan-flow/brain/notes/{YYYY-MM-DD}.md` | `notes/2026-03-03.md` | `[[2026-03-03]]` |
 
 **Rules**:
 - Always use kebab-case for file names

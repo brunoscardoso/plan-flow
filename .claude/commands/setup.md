@@ -724,7 +724,7 @@ data:
 -->
 ```
 
-Write to `~/plan-flow/brain/daily/YYYY-MM-DD.md` and update `flow/brain/index.md` if this is a new project setup.
+Write to `~/plan-flow/brain/notes/YYYY-MM-DD.md` and update `flow/brain/index.md` if this is a new project setup.
 
 ---
 

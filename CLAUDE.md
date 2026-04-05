@@ -381,7 +381,7 @@ flow/
 
 ## Central Vault
 
-All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, discovery, plans, archive, contracts). Daily session logs live globally at `~/plan-flow/brain/daily/`. Open `~/plan-flow/brain/` as your Obsidian vault to see all projects in one graph with path-based color-coded groups.
+All projects are linked into a central Obsidian vault at `~/plan-flow/brain/`. Each `plan-flow init` creates a project directory in the vault with individual symlinks for each flow subdirectory (features, errors, decisions, discovery, plans, archive, contracts). Notes live globally at `~/plan-flow/brain/notes/`.
 
 ## Model Routing
 

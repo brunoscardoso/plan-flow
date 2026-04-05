@@ -147,13 +147,13 @@ first_seen: {YYYY-MM-DD}
 - Features: [[{feature-name}]]
 ```
 
-### 3. Daily Session Files (`~/plan-flow/brain/daily/{YYYY-MM-DD}.md`)
+### 3. Daily Session Files (`~/plan-flow/brain/notes/{YYYY-MM-DD}.md`)
 
-**When**: Every brain-capture block appends to the daily session file.
+**When**: Every brain-capture block appends to the notes file.
 
-**Location**: `~/plan-flow/brain/daily/` (global, not per-project). One file per day across all projects.
+**Location**: `~/plan-flow/brain/notes/` (global, not per-project). One file per day across all projects.
 
-**If file exists**: Append new entry to the project's section within the daily file.
+**If file exists**: Append new entry to the project's section within the notes file.
 
 **Template**:
 
@@ -228,7 +228,7 @@ All brain files use **kebab-case** names that match their `[[wiki-link]]` refere
 
 - Feature: `flow/brain/features/contact-enrichment.md` → `[[contact-enrichment]]`
 - Error: `flow/brain/errors/prisma-connection-pooling.md` → `[[prisma-connection-pooling]]`
-- Daily: `~/plan-flow/brain/daily/2026-03-03.md` → `[[2026-03-03]]`
+- Daily: `~/plan-flow/brain/notes/2026-03-03.md` → `[[2026-03-03]]`
 
 ---
 
@@ -252,11 +252,11 @@ After processing a brain-capture block, sync relevant entries to the global brai
 | Project-specific patterns | No | Contains project-specific paths, conventions |
 | Error patterns | No | Project-specific, kept in flow/brain/errors/ |
 | Feature history | No | Project-specific |
-| Daily session logs | N/A | Already global at ~/plan-flow/brain/daily/ |
+| Notes | N/A | Already global at ~/plan-flow/brain/notes/ |
 
 ### Sync Process
 
-1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`, `daily/`
+1. Check if `~/plan-flow/brain/` exists. If not, create it with subdirectories: `patterns/`, `projects/`, `notes/`
 2. Update `~/plan-flow/brain/projects/{project-name}.md` with current summary (project name, stack, active feature count, last activity date)
 3. **After `/setup` generates pattern files**: Sync generic patterns (framework, language, library) to `~/plan-flow/brain/patterns/`. See the Global Pattern Sync section below.
 
@@ -321,7 +321,7 @@ The global brain at `~/plan-flow/brain/` is the Obsidian vault root. Each projec
 │   ├── _index.md                                      # Learns index with reference codes
 │   ├── mcp.md
 │   └── docker.md
-├── daily/                                             # Daily session logs (cross-project)
+├── notes/                                             # Notes (cross-project)
 │   ├── 2026-03-05.md
 │   └── 2026-03-06.md
 └── projects/

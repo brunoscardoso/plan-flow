@@ -53,7 +53,7 @@ BRAIN STRUCTURE:
   ├── features/                        # Feature history and context
   └── errors/                          # Reusable error patterns
 
-  ~/plan-flow/brain/daily/             # Global daily logs (cross-project)
+  ~/plan-flow/brain/notes/             # Notes (cross-project)
   └── YYYY-MM-DD.md
 
 RELATED COMMANDS:

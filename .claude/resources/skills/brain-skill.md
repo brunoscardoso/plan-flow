@@ -23,7 +23,7 @@ This skill **only writes to `flow/brain/`**. It does NOT:
 | Read `flow/brain/index.md` | Understand current brain state |
 | Read any `flow/brain/` file | Context for linking |
 | Write to `flow/brain/features/` | Feature-related entries |
-| Write to `~/plan-flow/brain/daily/` | Daily session log entries |
+| Write to `~/plan-flow/brain/notes/` | Daily session log entries |
 | Update `flow/brain/index.md` | Keep index current |
 
 ### Forbidden Actions
@@ -108,7 +108,7 @@ Options:
 ```markdown
 Brain entry captured!
 
-**Written to**: flow/brain/features/{feature}.md (or ~/plan-flow/brain/daily/{date}.md)
+**Written to**: flow/brain/features/{feature}.md (or ~/plan-flow/brain/notes/{date}.md)
 **Links created**: [[feature-1]], [[error-name]]
 **Index updated**: Yes/No
 ```
