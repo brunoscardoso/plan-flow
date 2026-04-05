@@ -250,30 +250,31 @@ describe('vault registration', () => {
     expect(config['collapse-filter']).toBe(true);
   });
 
-  it('should create project directory with individual symlinks', async () => {
+  it('should create project flow/ in brain with single symlink from project', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
 
     const projectName = tempDir.split('/').pop() || '';
     const projectDir = join(vaultDir, 'projects', projectName);
 
-    // Project dir should be a real directory, not a symlink
+    // Project dir should exist in brain
     expect(existsSync(projectDir)).toBe(true);
-    const stat = lstatSync(projectDir);
-    expect(stat.isDirectory()).toBe(true);
-    expect(stat.isSymbolicLink()).toBe(false);
 
-    // Check individual symlinks
-    const expectedLinks = ['features', 'errors', 'discovery', 'plans', 'archive', 'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources'];
-    for (const linkName of expectedLinks) {
-      const linkPath = join(projectDir, linkName);
-      expect(existsSync(linkPath)).toBe(true);
-      const linkStat = lstatSync(linkPath);
-      expect(linkStat.isSymbolicLink()).toBe(true);
+    // Brain should have flow/ as a real directory
+    const brainFlowDir = join(projectDir, 'flow');
+    expect(existsSync(brainFlowDir)).toBe(true);
+    expect(lstatSync(brainFlowDir).isDirectory()).toBe(true);
+
+    // Project flow/ should be a symlink pointing to brain
+    const localFlowPath = join(tempDir, 'flow');
+    expect(lstatSync(localFlowPath).isSymbolicLink()).toBe(true);
+    const symlinkTarget = readlinkSync(localFlowPath, 'utf-8');
+    expect(symlinkTarget).toBe(brainFlowDir);
+
+    // Subdirectories should exist in brain flow/
+    const expectedDirs = ['discovery', 'plans', 'brainstorms', 'archive', 'contracts'];
+    for (const dir of expectedDirs) {
+      expect(existsSync(join(brainFlowDir, dir))).toBe(true);
     }
-
-    // Verify features symlink points to the right place
-    const featuresTarget = readlinkSync(join(projectDir, 'features'), 'utf-8');
-    expect(featuresTarget).toBe(join(resolve(tempDir), 'flow', 'brain', 'features'));
   });
 
   it('should create project index file', async () => {
@@ -299,13 +300,13 @@ describe('vault registration', () => {
     expect(content).toContain(`[[${projectName}]]`);
   });
 
-  it('should skip symlinks on second install', async () => {
+  it('should skip migration on second install when flow/ is already a symlink', async () => {
     await initShared(tempDir, { force: false }, ['claude']);
     const result = await initShared(tempDir, { force: false }, ['claude']);
 
-    const projectName = tempDir.split('/').pop() || '';
-    const featuresLink = join(vaultDir, 'projects', projectName, 'features');
-    expect(result.skipped).toContain(featuresLink);
+    // flow/ should still be a symlink (not recreated)
+    const flowPath = join(tempDir, 'flow');
+    expect(lstatSync(flowPath).isSymbolicLink()).toBe(true);
   });
 
   it('should clean old-format single symlinks during registration', async () => {

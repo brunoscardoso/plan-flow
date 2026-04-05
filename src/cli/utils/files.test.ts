@@ -7,6 +7,7 @@ import {
   writeFileSync,
   existsSync,
   readFileSync,
+  readdirSync,
   rmSync,
   lstatSync,
   readlinkSync,
@@ -23,6 +24,8 @@ import {
   createSymlink,
   readSymlinkTarget,
   getProjectName,
+  isSymlink,
+  moveContents,
 } from './files';
 
 function createTempDir(): string {
@@ -309,5 +312,105 @@ describe('createSymlink and readSymlinkTarget', () => {
     createSymlink(targetDir, linkPath);
 
     expect(existsSync(linkPath)).toBe(true);
+  });
+});
+
+describe('isSymlink', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should return true for symlinks', () => {
+    const targetDir = join(tempDir, 'target');
+    const linkPath = join(tempDir, 'link');
+    mkdirSync(targetDir, { recursive: true });
+    createSymlink(targetDir, linkPath);
+
+    expect(isSymlink(linkPath)).toBe(true);
+  });
+
+  it('should return false for regular directories', () => {
+    const dir = join(tempDir, 'regular');
+    mkdirSync(dir, { recursive: true });
+
+    expect(isSymlink(dir)).toBe(false);
+  });
+
+  it('should return false for non-existent paths', () => {
+    expect(isSymlink(join(tempDir, 'nonexistent'))).toBe(false);
+  });
+});
+
+describe('moveContents', () => {
+  let tempDir: string;
+  let srcDir: string;
+  let destDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    srcDir = join(tempDir, 'src');
+    destDir = join(tempDir, 'dest');
+    mkdirSync(srcDir, { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tempDir);
+  });
+
+  it('should move files and directories', () => {
+    writeFileSync(join(srcDir, 'file1.txt'), 'content1');
+    writeFileSync(join(srcDir, 'file2.txt'), 'content2');
+    mkdirSync(join(srcDir, 'subdir'));
+    writeFileSync(join(srcDir, 'subdir', 'nested.txt'), 'nested');
+
+    moveContents(srcDir, destDir);
+
+    expect(existsSync(join(destDir, 'file1.txt'))).toBe(true);
+    expect(existsSync(join(destDir, 'file2.txt'))).toBe(true);
+    expect(existsSync(join(destDir, 'subdir', 'nested.txt'))).toBe(true);
+
+    // Source should be empty (directory itself remains, but contents moved)
+    const remaining = readdirSync(srcDir);
+    expect(remaining).toHaveLength(0);
+  });
+
+  it('should handle dotfiles', () => {
+    writeFileSync(join(srcDir, '.hidden'), 'secret');
+    writeFileSync(join(srcDir, '.config'), 'settings');
+
+    moveContents(srcDir, destDir);
+
+    expect(existsSync(join(destDir, '.hidden'))).toBe(true);
+    expect(existsSync(join(destDir, '.config'))).toBe(true);
+    expect(readFileSync(join(destDir, '.hidden'), 'utf-8')).toBe('secret');
+  });
+
+  it('should return correct count', () => {
+    writeFileSync(join(srcDir, 'a.txt'), 'a');
+    writeFileSync(join(srcDir, 'b.txt'), 'b');
+    mkdirSync(join(srcDir, 'subdir'));
+    writeFileSync(join(srcDir, 'subdir', 'c.txt'), 'c');
+
+    const result = moveContents(srcDir, destDir);
+
+    // moveContents moves top-level entries: a.txt, b.txt, subdir = 3
+    expect(result.moved).toBe(3);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should preserve file contents', () => {
+    const knownContent = 'Hello, world! Special chars: é à ü 日本語 🎉';
+    writeFileSync(join(srcDir, 'data.txt'), knownContent, 'utf-8');
+
+    moveContents(srcDir, destDir);
+
+    const readBack = readFileSync(join(destDir, 'data.txt'), 'utf-8');
+    expect(readBack).toBe(knownContent);
   });
 });

@@ -250,3 +250,65 @@ export function readSymlinkTarget(linkPath: string): string | null {
 export function getProjectName(target: string): string {
   return basename(resolve(target));
 }
+
+/**
+ * Checks if a path is a symbolic link.
+ * Returns false if the path doesn't exist.
+ */
+export function isSymlink(filePath: string): boolean {
+  try {
+    return lstatSync(filePath).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Moves all files and directories from src INTO dest.
+ * Uses renameSync when possible, falls back to copy+delete for cross-device moves.
+ * Does NOT delete the source directory itself.
+ */
+export function moveContents(
+  src: string,
+  dest: string
+): { moved: number; errors: string[] } {
+  const errors: string[] = [];
+  let moved = 0;
+
+  ensureDir(dest);
+
+  const entries = readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcItem = join(src, entry.name);
+    const destItem = join(dest, entry.name);
+
+    try {
+      renameSync(srcItem, destItem);
+      moved++;
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === 'EXDEV') {
+        try {
+          if (entry.isDirectory()) {
+            copyDir(srcItem, destItem, { force: true });
+            removeDir(srcItem);
+          } else {
+            ensureDir(dirname(destItem));
+            copyFileSync(srcItem, destItem);
+            unlinkSync(srcItem);
+          }
+          moved++;
+        } catch (fallbackErr: unknown) {
+          const msg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+          errors.push(`Failed to move ${entry.name}: ${msg}`);
+        }
+      } else {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Failed to move ${entry.name}: ${msg}`);
+      }
+    }
+  }
+
+  return { moved, errors };
+}

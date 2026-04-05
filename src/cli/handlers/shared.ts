@@ -6,7 +6,7 @@
  */
 
 import { join, resolve } from 'node:path';
-import { existsSync, readFileSync, writeFileSync, readdirSync, lstatSync, unlinkSync, rmSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, lstatSync, unlinkSync, rmSync, rmdirSync, statSync } from 'node:fs';
 import type { CopyOptions, CopyResult, Platform } from '../types.js';
 import {
   ensureDir,
@@ -14,6 +14,8 @@ import {
   getProjectName,
   createSymlink,
   readSymlinkTarget,
+  isSymlink,
+  moveContents,
 } from '../utils/files.js';
 import { askBusinessContext } from '../utils/prompts.js';
 import * as log from '../utils/logger.js';
@@ -178,25 +180,15 @@ const STACK_TO_PATTERN: Record<string, string> = {
 };
 
 /**
- * Symlinks created per project in the vault.
- * Each maps a subdirectory name to its relative path inside the project's flow/ dir.
+ * Old per-subdirectory symlink names that were previously created in the vault project dir.
+ * These are no longer needed since flow/ is now a single symlink to the brain.
+ * Kept here for cleanup of existing installations.
  */
-const VAULT_PROJECT_LINKS: { name: string; subpath: string }[] = [
-  { name: 'features', subpath: 'brain/features' },
-  { name: 'errors', subpath: 'brain/errors' },
-  { name: 'discovery', subpath: 'discovery' },
-  { name: 'plans', subpath: 'plans' },
-  { name: 'archive', subpath: 'archive' },
-  { name: 'contracts', subpath: 'contracts' },
-  { name: 'reviewed-code', subpath: 'reviewed-code' },
-  { name: 'reviewed-pr', subpath: 'reviewed-pr' },
-  { name: 'references', subpath: 'references' },
-  { name: 'resources', subpath: 'resources' },
-  { name: 'tasklist.md', subpath: 'tasklist.md' },
-  { name: 'memory.md', subpath: 'memory.md' },
-  { name: 'heartbeat.md', subpath: 'heartbeat.md' },
-  { name: 'log.md', subpath: 'log.md' },
-  { name: 'ledger.md', subpath: 'ledger.md' },
+const OLD_VAULT_LINKS = [
+  'features', 'errors', 'discovery', 'plans', 'archive',
+  'contracts', 'reviewed-code', 'reviewed-pr', 'references', 'resources',
+  'tasklist.md', 'memory.md', 'heartbeat.md', 'log.md', 'ledger.md',
+  'brainstorms',
 ];
 
 /**
@@ -476,7 +468,6 @@ function registerVault(
   const result: CopyResult = { created: [], skipped: [], updated: [] };
   const vaultDir = getVaultDir();
   const projectName = getProjectName(target);
-  const flowDir = join(resolve(target), 'flow');
   const projectDir = join(vaultDir, 'projects', projectName);
 
   try {
@@ -495,43 +486,18 @@ function registerVault(
     // Create real project directory
     ensureDir(projectDir);
 
-    // Create individual symlinks for each subdirectory (and file links)
-    let createdCount = 0;
-    for (const link of VAULT_PROJECT_LINKS) {
-      const linkPath = join(projectDir, link.name);
-      const linkTarget = join(flowDir, link.subpath);
-
-      // For file symlinks (e.g. tasklist.md), skip if source doesn't exist yet
-      const isFileLink = link.subpath.includes('.');
-      if (isFileLink) {
-        if (!existsSync(linkTarget)) {
-          result.skipped.push(linkPath);
-          continue;
-        }
-      } else {
-        // Ensure the source directory exists in the project
-        ensureDir(linkTarget);
+    // Clean old per-subdirectory symlinks that are no longer needed
+    // (flow/ is now a single symlink from project → brain)
+    let cleanedCount = 0;
+    for (const name of OLD_VAULT_LINKS) {
+      const linkPath = join(projectDir, name);
+      if (isSymlink(linkPath)) {
+        unlinkSync(linkPath);
+        cleanedCount++;
       }
-
-      const existingTarget = readSymlinkTarget(linkPath);
-
-      if (existingTarget !== null) {
-        const resolvedExisting = resolve(projectDir, existingTarget);
-        const resolvedTarget = resolve(linkTarget);
-
-        if (resolvedExisting === resolvedTarget) {
-          result.skipped.push(linkPath);
-        } else if (options.force) {
-          createSymlink(linkTarget, linkPath);
-          result.updated.push(linkPath);
-        } else {
-          result.skipped.push(linkPath);
-        }
-      } else {
-        createSymlink(linkTarget, linkPath);
-        result.created.push(linkPath);
-        createdCount++;
-      }
+    }
+    if (cleanedCount > 0) {
+      log.success(`Cleaned ${cleanedCount} old vault symlink(s) for ${projectName}`);
     }
 
     // Detect matching brain patterns for this project's stack
@@ -578,13 +544,7 @@ function registerVault(
       }
     }
 
-    if (createdCount > 0) {
-      log.success(`Registered vault project: ${projectName} (${createdCount} links)`);
-    } else if (result.updated.length > 0) {
-      log.warn(`Updated vault links for ${projectName}`);
-    } else {
-      log.skip(`Vault links already exist for ${projectName}`);
-    }
+    log.success(`Registered vault project: ${projectName}`);
 
     // Update vault index
     updateVaultIndex(vaultDir, projectName, target);
@@ -2144,24 +2104,85 @@ export async function initShared(
 ): Promise<CopyResult> {
   const result: CopyResult = { created: [], skipped: [], updated: [] };
 
-  // 1. Create flow/ directory structure with .gitkeep files
-  const flowDir = join(target, 'flow');
+  // 1. Create flow/ directory structure in the brain, symlinked from project
+  const projectName = getProjectName(target);
+  const vaultDir = getVaultDir();
+  const brainFlowDir = join(vaultDir, 'projects', projectName, 'flow');
+  const localFlowDir = join(target, 'flow');
 
-  for (const subdir of FLOW_SUBDIRS) {
-    const dir = join(flowDir, subdir);
-    const gitkeep = join(dir, '.gitkeep');
-
-    if (!existsSync(dir)) {
+  if (!existsSync(localFlowDir)) {
+    // Case 1: flow/ doesn't exist (new project) — create in brain and symlink
+    ensureDir(brainFlowDir);
+    for (const subdir of FLOW_SUBDIRS) {
+      const dir = join(brainFlowDir, subdir);
       ensureDir(dir);
-      writeFileSync(gitkeep, '', 'utf-8');
+      writeFileSync(join(dir, '.gitkeep'), '', 'utf-8');
       result.created.push(dir);
       log.success(`Created flow/${subdir}/`);
-    } else if (!existsSync(gitkeep)) {
-      writeFileSync(gitkeep, '', 'utf-8');
-      result.created.push(gitkeep);
+    }
+    createSymlink(brainFlowDir, localFlowDir);
+    log.success(`Created flow/ symlink → brain`);
+  } else if (isSymlink(localFlowDir)) {
+    // Case 2: flow/ is already a symlink (already migrated)
+    const currentTarget = readSymlinkTarget(localFlowDir);
+    const resolvedCurrent = currentTarget ? resolve(localFlowDir, '..', currentTarget) : null;
+    const resolvedExpected = resolve(brainFlowDir);
+
+    if (resolvedCurrent === resolvedExpected) {
+      // Already correct — ensure subdirs exist
+      for (const subdir of FLOW_SUBDIRS) {
+        const dir = join(brainFlowDir, subdir);
+        if (!existsSync(dir)) {
+          ensureDir(dir);
+          writeFileSync(join(dir, '.gitkeep'), '', 'utf-8');
+          result.created.push(dir);
+          log.success(`Created flow/${subdir}/`);
+        } else {
+          result.skipped.push(dir);
+          log.skip(`flow/${subdir}/ already exists`);
+        }
+      }
     } else {
-      result.skipped.push(dir);
-      log.skip(`flow/${subdir}/ already exists`);
+      // Wrong target — update symlink
+      unlinkSync(localFlowDir);
+      ensureDir(brainFlowDir);
+      for (const subdir of FLOW_SUBDIRS) {
+        const dir = join(brainFlowDir, subdir);
+        if (!existsSync(dir)) {
+          ensureDir(dir);
+          writeFileSync(join(dir, '.gitkeep'), '', 'utf-8');
+        }
+      }
+      createSymlink(brainFlowDir, localFlowDir);
+      log.success(`Updated flow/ symlink → brain`);
+    }
+  } else {
+    // Case 3: flow/ is a real directory (needs migration to brain)
+    ensureDir(brainFlowDir);
+    const { moved, errors: moveErrors } = moveContents(localFlowDir, brainFlowDir);
+
+    if (moveErrors.length > 0) {
+      for (const err of moveErrors) {
+        log.warn(`Migration warning: ${err}`);
+      }
+    }
+
+    // Ensure all expected subdirs exist in brain after migration
+    for (const subdir of FLOW_SUBDIRS) {
+      const dir = join(brainFlowDir, subdir);
+      if (!existsSync(dir)) {
+        ensureDir(dir);
+        writeFileSync(join(dir, '.gitkeep'), '', 'utf-8');
+      }
+    }
+
+    const remaining = readdirSync(localFlowDir);
+    if (remaining.length === 0) {
+      rmdirSync(localFlowDir);
+      createSymlink(brainFlowDir, localFlowDir);
+      log.success(`Migrated flow/ to brain (${moved} items moved)`);
+    } else {
+      log.warn(`flow/ migration incomplete, ${remaining.length} files remain`);
     }
   }
 
